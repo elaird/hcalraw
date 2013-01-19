@@ -14,7 +14,8 @@ def setup() :
 
     #define helper classes
     libs = ["DataFormatsFEDRawData"]
-    libPath = "/".join([os.environ["CMSSW_RELEASE_BASE"], "lib", os.environ["SCRAM_ARCH"]])
+    base = os.environ["CMSSW_RELEASE_BASE"] if os.environ["CMSSW_RELEASE_BASE"] else os.environ["CMSSW_BASE"]
+    libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
     r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
     r.gROOT.LoadMacro("helpers.cxx+")
 
@@ -236,11 +237,10 @@ def go(outer = {}, inner = {}, useEvN = False) :
         print "nEvents (%4s): %d"%(inner["label"], len(iMap))
         print "nEvents (both): %d"%(len(filter(lambda x:x!=None,innerEvent.values())))
 
-index = 1
 utca = {"label":"uTCA",
-        "fileName":["../utca.root", "../USC_209150.root"][index],
-        "treeName":["Events", "CMSRAW"][index],
-        "format":["CMS", "HCAL"][index],
+        "fileName":"/afs/cern.ch/user/e/elaird/public/d1_utca/USC_209150.root",
+        "treeName":"CMSRAW",
+        "format":"HCAL",
         "auxBranch":False,
         "fedIds":[989],
         "rawCollection": "FEDRawDataCollection_source__demo",
@@ -253,7 +253,7 @@ utca = {"label":"uTCA",
         }
 
 cms = {"label":"CMS",
-       "fileName":"../cms.root",
+       "fileName":"/afs/cern.ch/user/e/elaird/public/d1_utca/209151_hltSkim.root",
        "treeName":"Events",
        "format": "CMS",
        "auxBranch":True,
