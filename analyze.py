@@ -1,12 +1,16 @@
 #! /usr/bin/env python
 
 import os,struct,ROOT as r
+from graphs import minutes,writePdf
 
 def setup() :
     assert os.environ["CMSSW_VERSION"],"A CMSSW environment is required (known to work with CMSSW_5_3_4)."
 
     #batch mode
     r.gROOT.SetBatch(True)
+
+    #silence TCanvas.Print()
+    r.gErrorIgnoreLevel = 2000
 
     #enable convenient use of CMSSW classes
     r.gSystem.Load("libFWCoreFWLite.so")
@@ -134,11 +138,6 @@ def printRaw(d = {}, aux = {}, htr = False) :
             h = d["uHTR%d"%iUhtr]
             print "%4d %d%d%d%d %7d"%(iUhtr, h["E"], h["P"], h["C"], h["V"], h["nWord16"])
 
-def minutes(orn, bcn) :
-    orbPerSec = 11.1e3
-    sec = (orn+bcn/3564.)/orbPerSec
-    return sec/60.0
-
 def decodedHeader(d = {}, offset = None, bytes = None, bcnDelta = 0) :
     #see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
     b = bytes
@@ -221,7 +220,7 @@ def compare(raw1 = {}, raw2 = {}) :
     #print
     pass
 
-def go(outer = {}, inner = {}, useEvN = False) :
+def go(outer = {}, inner = {}, label = "", useEvN = False) :
     innerEvent = {}
     oMap = eventMap(reverse = False, useEvN = useEvN, **outer)
     if inner :
@@ -232,42 +231,45 @@ def go(outer = {}, inner = {}, useEvN = False) :
                 print "oEvent = %s, ornBcn = %s, iEvent = %s"%(str(oEvent),str(ornBcn),str(innerEvent[oEvent]))
     loop(inner = inner, outer = outer, innerEvent = innerEvent)
 
+    if inner :
+        writePdf(label = label, oLabel = outer["label"], iLabel = inner["label"],
+                 oMap = oMap, iMap = iMap, innerEvent = innerEvent)
+
+    print label
     print "nEvents (%4s): %d"%(outer["label"], len(oMap))
     if inner :
         print "nEvents (%4s): %d"%(inner["label"], len(iMap))
         print "nEvents (both): %d"%(len(filter(lambda x:x!=None,innerEvent.values())))
 
-utca = {"label":"uTCA",
-        "fileName":"/afs/cern.ch/user/e/elaird/public/d1_utca/USC_209150.root",
-        "treeName":"CMSRAW",
-        "format":"HCAL",
-        "auxBranch":False,
-        "fedIds":[989],
-        "rawCollection": "FEDRawDataCollection_source__demo",
+def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvN = False) :
+    utca = {"label":"uTCA",
+            "fileName":utcaFileName, "treeName":"CMSRAW", "format":"HCAL", "auxBranch":False,
+            "fedIds":[989], "rawCollection": "FEDRawDataCollection_source__demo",
+            "bcnDelta":-118, "nEventsMax":None,
+            "printEventMap":False, "printRaw":False,
+            }
 
-        "bcnDelta":-118,
-        "nEventsMax":None,
+    cms = {"label":"CMS",
+           "fileName":cmsFileName, "treeName":"Events", "format": "CMS", "auxBranch":True,
+           "fedIds":range(700,702), "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC",
+           "bcnDelta":0, "nEventsMax":None,
+           "printEventMap":False, "printRaw":False,
+           }
 
-        "printEventMap":False,
-        "printRaw":True,
-        }
-
-cms = {"label":"CMS",
-       "fileName":"/afs/cern.ch/user/e/elaird/public/d1_utca/209151_hltSkim.root",
-       "treeName":"Events",
-       "format": "CMS",
-       "auxBranch":True,
-       "fedIds":range(700,702),
-       "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC",
-
-       "bcnDelta":0,
-       "nEventsMax":None,
-
-       "printEventMap":False,
-       "printRaw":True,
-       }
+    if utcaFileName :
+        if cmsFileName :
+            go(outer = utca, inner = cms, label = label, useEvN = useEvN)
+        else :
+            go(outer = utca, label = label)
+    elif cmsFileName :
+        go(outer = cms, label = label)
+    else :
+        assert False,utcaFileName+" "+cmsFileName
 
 setup()
-
-go(outer = utca, inner = cms)
-#go(outer = cms, inner = utca, useEvN = True)
+if __name__=="__main__" :
+    oneRun(utcaFileName = "/afs/cern.ch/user/e/elaird/public/d1_utca/USC_209150.root",
+           cmsFileName  = "/afs/cern.ch/user/e/elaird/public/d1_utca/209151_hltSkim.root",
+           label = "Run209151",
+           useEvN = False,
+           )
