@@ -238,11 +238,10 @@ def go(outer = {}, inner = {}, label = "", useEvN = False) :
         writePdf(label = label, oLabel = outer["label"], iLabel = inner["label"],
                  oMap = oMap, iMap = iMap, innerEvent = innerEvent)
 
-    print label
-    print "nEvents (%4s): %d"%(outer["label"], len(oMap))
+    s = "%s: %4s = %6d"%(label, outer["label"], len(oMap))
     if inner :
-        print "nEvents (%4s): %d"%(inner["label"], len(iMap))
-        print "nEvents (both): %d"%(len(filter(lambda x:x!=None,innerEvent.values())))
+        s += ", %4s = %6d, both = %6d"%(inner["label"], len(iMap), len(filter(lambda x:x!=None,innerEvent.values())))
+    print s
 
 def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvN = False) :
     utca = {"label":"uTCA",
