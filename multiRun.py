@@ -7,6 +7,9 @@ def opts() :
     parser.add_option("--min", dest = "min", default = None, metavar = "N", help = "specify minimum run number")
     parser.add_option("--max", dest = "max", default = None, metavar = "N", help = "specify maximum run number")
     parser.add_option("--run", dest = "run", default = None, metavar = "N", help = "specify one run number")
+    parser.add_option("--only-utca", dest = "onlyutca", default = False, action = "store_true", help = "ignore uTCA file if present")
+    parser.add_option("--only-cms",  dest = "onlycms",  default = False, action = "store_true", help = "ignore CMS file if present")
+
     options,args = parser.parse_args()
     return options
 
@@ -39,11 +42,12 @@ options = opts()
 import analyze
 
 for run in sorted(uscFiles.keys()) :
-    if options.min and run<int(options.min) : continue
-    if options.max and run>int(options.max) : continue
-    if options.run and run!=int(options.run) : continue
-    if run not in castorFiles : continue
-    analyze.oneRun(utcaFileName = uscFiles[run],
-                   cmsFileName = castorFiles[run] if (run in castorFiles) else "",
-                   label = "Run%d"%run,
-                   )
+    if any([options.min and run<int(options.min),
+            options.max and run>int(options.max),
+            options.run and run!=int(options.run),
+            (not options.onlyutca) and (run not in castorFiles),
+            ]) : continue
+
+    analyze.oneRun(utcaFileName = "" if options.onlycms  else uscFiles[run],
+                   cmsFileName  = "" if options.onlyutca else castorFiles[run],
+                   label = "Run%d"%run, useEvN = False)
