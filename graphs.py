@@ -33,7 +33,7 @@ def writePdf(label = "", oLabel = "", iLabel = "",
     outer = oMap.values()
     inner = iMap.keys()
     gr = graph(categories(outer = outer, inner = inner))
-    null = r.TH2D("null", "%s;time (minutes)"%label,
+    null = r.TH2D("null", "%s;time (minutes)"%label.replace("Run2", "Run 2"),
                   1, 0.0, 1.1*minutes(*max(outer+inner)),
                   3, 0.5, 3.5)
 
