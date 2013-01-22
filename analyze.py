@@ -23,16 +23,21 @@ def setup() :
     r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
     r.gROOT.LoadMacro("helpers.cxx+")
 
+def nEvents(tree, nMax) :
+    nEntries = tree.GetEntries()
+    return min(nEntries, nMax) if nMax!=None else nEntries
+
 #this function builds a dictionary, mapping TTree entry to (orn, bcn) or to (orn, bcn, evn)
 def eventMap(fileName = "", treeName = "", format = "", auxBranch = False, reverse = None,
-             fedIds = [], bcnDelta = None, rawCollection = None, useEvN = False, **_) :
+             fedIds = [], bcnDelta = None, rawCollection = None, useEvN = False, nEventsMax = None, **_) :
     assert fileName
     assert treeName
 
     d = {}
     f = r.TFile(fileName)
     tree = f.Get(treeName)
-    for iEvent in range(tree.GetEntries()) :
+
+    for iEvent in range(nEvents(tree, nEventsMax)) :
         orn = bcn = evn = None
 
         if format=="CMS" :
@@ -78,9 +83,7 @@ def loop(inner = {}, outer = {}, innerEvent = {}) :
     f = r.TFile(outer["fileName"])
     tree = f.Get(outer["treeName"])
 
-    nEntries = tree.GetEntries()
-    nOuterEvent = min(nEntries, outer["nEventsMax"]) if outer["nEventsMax"]!=None else nEntries
-    for iOuterEvent in range(nOuterEvent) :
+    for iOuterEvent in range(nEvents(tree, outer["nEventsMax"])) :
         nb = tree.GetEntry(iOuterEvent)
         if nb<=0 : continue
         if outer["printRaw"] or (inner and inner["printRaw"]) :
