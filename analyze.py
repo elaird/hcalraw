@@ -268,8 +268,8 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvN = False) :
 
 setup()
 if __name__=="__main__" :
-    oneRun(utcaFileName = "/afs/cern.ch/user/e/elaird/public/d1_utca/USC_209150.root",
-           cmsFileName  = "/afs/cern.ch/user/e/elaird/public/d1_utca/209151_hltSkim.root",
+    oneRun(utcaFileName = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/usc/USC_209150.root",
+           cmsFileName  = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/castor/209151.HLTSkim.root",
            label = "Run209151",
            useEvN = False,
            )
