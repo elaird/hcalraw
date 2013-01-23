@@ -50,4 +50,5 @@ for run in sorted(uscFiles.keys()) :
 
     analyze.oneRun(utcaFileName = "" if options.onlycms  else uscFiles[run],
                    cmsFileName  = "" if options.onlyutca else castorFiles[run],
-                   label = "Run%d"%run, useEvN = False, filterEvN = options.filterevn)
+                   label = "Run%d"%run, useEvn = False,
+                   filterEvn = options.filterevn, ornTolerance = 1)
