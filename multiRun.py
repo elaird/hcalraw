@@ -9,6 +9,7 @@ def opts() :
     parser.add_option("--run", dest = "run", default = None, metavar = "N", help = "specify one run number")
     parser.add_option("--only-utca", dest = "onlyutca", default = False, action = "store_true", help = "ignore uTCA file if present")
     parser.add_option("--only-cms",  dest = "onlycms",  default = False, action = "store_true", help = "ignore CMS file if present")
+    parser.add_option("--filter-evn",dest = "filterevn",default = False, action = "store_true", help = "consider only events with EvN&0x1fff == 0")
 
     options,args = parser.parse_args()
     return options
@@ -28,7 +29,6 @@ def rootFiles(directory = "", mode = "") :
         if mode=="castor":
             fields = item.split(".")
             if len(fields)<3 : continue
-            if fields[1]=="A" : continue
             run = fields[0]
 
         d[int(run)] = "%s/%s"%(directory2, item)
@@ -50,4 +50,4 @@ for run in sorted(uscFiles.keys()) :
 
     analyze.oneRun(utcaFileName = "" if options.onlycms  else uscFiles[run],
                    cmsFileName  = "" if options.onlyutca else castorFiles[run],
-                   label = "Run%d"%run, useEvN = False)
+                   label = "Run%d"%run, useEvN = False, filterEvN = options.filterevn)
