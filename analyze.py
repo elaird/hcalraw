@@ -239,7 +239,7 @@ def eventToEvent(mapF = {}, mapB = {}, useEvn = False, ornTolerance = None) :
                 out[oEvent] = mapB[ornEvn2] #fixme: check for multiple matches
     return out
 
-def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, ornTolerance = 0) :
+def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, ornTolerance = None) :
     innerEvent = {}
     deltaOrn = {}
     oMapF,oMapB = eventMaps(useEvn = useEvn, filterEvn = filterEvn, **outer)
@@ -260,7 +260,7 @@ def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, or
         s += ", %4s = %6d, both = %6d"%(inner["label"], len(iMapB), len(filter(lambda x:x!=None,innerEvent.values())))
     print s
 
-def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filterEvn = False) :
+def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filterEvn = False, ornTolerance = 0) :
     utca = {"label":"uTCA",
             "fileName":utcaFileName, "treeName":"CMSRAW", "format":"HCAL", "auxBranch":False,
             "fedIds":[989], "rawCollection": "FEDRawDataCollection_source__demo",
@@ -278,7 +278,8 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filt
 
     if utcaFileName :
         if cmsFileName :
-            go(outer = utca, inner = cms, label = label, useEvn = useEvn, filterEvn = filterEvn)
+            go(outer = utca, inner = cms, label = label, useEvn = useEvn,
+               filterEvn = filterEvn, ornTolerance = ornTolerance)
         else :
             go(outer = utca, label = label)
     elif cmsFileName :
@@ -293,4 +294,5 @@ if __name__=="__main__" :
            label = "Run209151",
            useEvn = False,
            filterEvn = False,
+           ornTolerance = 0,
            )
