@@ -252,9 +252,8 @@ def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, or
     loop(inner = inner, outer = outer, innerEvent = innerEvent)
 
     if inner :
-        pass
-        #writePdf(label = label, oLabel = outer["label"], iLabel = inner["label"],
-        #         innerEvent = innerEvent, outerEvent)
+        writePdf(label = label, oLabel = outer["label"], iLabel = inner["label"],
+                 oMapF = oMapF, iMapF = iMapF, innerEvent = innerEvent)
 
     s = "%s: %4s = %6d"%(label, outer["label"], len(oMapF))
     if inner :
@@ -273,7 +272,7 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filt
            "fileName":cmsFileName, "treeName":"Events", "format": "CMS", "auxBranch":True,
            "fedIds":range(700,702), "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC",
 
-           "bcnDelta":0, "nEventsMax":100,
+           "bcnDelta":0, "nEventsMax":None,
            "printEventMap":False, "printRaw":False,
            }
 
