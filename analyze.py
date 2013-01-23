@@ -29,9 +29,12 @@ def nEvents(tree, nMax) :
 
 #this function builds a dictionary, mapping TTree entry to (orn, bcn) or to (orn, bcn, evn)
 def eventMap(fileName = "", treeName = "", format = "", auxBranch = False, reverse = None,
-             fedIds = [], bcnDelta = None, rawCollection = None, useEvN = False, nEventsMax = None, **_) :
+             fedIds = [], bcnDelta = None, rawCollection = None, nEventsMax = None,
+             useEvN = False, filterEvN = False, **_) :
     assert fileName
     assert treeName
+    if filterEvN :
+        useEvN = True
 
     d = {}
     f = r.TFile(fileName)
@@ -67,6 +70,9 @@ def eventMap(fileName = "", treeName = "", format = "", auxBranch = False, rever
                 evn = raw["EvN"]
 
         t = (orn, bcn, evn) if useEvN else (orn, bcn)
+        if filterEvN and evn&0x1fff :
+            continue
+
         if reverse :
             d[t] = iEvent
         else :
@@ -223,11 +229,11 @@ def compare(raw1 = {}, raw2 = {}) :
     #print
     pass
 
-def go(outer = {}, inner = {}, label = "", useEvN = False) :
+def go(outer = {}, inner = {}, label = "", useEvN = False, filterEvN = False) :
     innerEvent = {}
-    oMap = eventMap(reverse = False, useEvN = useEvN, **outer)
+    oMap = eventMap(reverse = False, useEvN = useEvN, filterEvN = filterEvN, **outer)
     if inner :
-        iMap = eventMap(reverse = True, useEvN = useEvN, **inner)
+        iMap = eventMap(reverse = True, useEvN = useEvN, filterEvN = filterEvN, **inner)
         for oEvent,ornBcn in oMap.iteritems() :
             innerEvent[oEvent] = iMap[ornBcn] if ornBcn in iMap else None
             if outer["printEventMap"] or inner["printEventMap"] :
@@ -243,7 +249,7 @@ def go(outer = {}, inner = {}, label = "", useEvN = False) :
         s += ", %4s = %6d, both = %6d"%(inner["label"], len(iMap), len(filter(lambda x:x!=None,innerEvent.values())))
     print s
 
-def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvN = False) :
+def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvN = False, filterEvN = False) :
     utca = {"label":"uTCA",
             "fileName":utcaFileName, "treeName":"CMSRAW", "format":"HCAL", "auxBranch":False,
             "fedIds":[989], "rawCollection": "FEDRawDataCollection_source__demo",
@@ -260,7 +266,7 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvN = False) :
 
     if utcaFileName :
         if cmsFileName :
-            go(outer = utca, inner = cms, label = label, useEvN = useEvN)
+            go(outer = utca, inner = cms, label = label, useEvN = useEvN, filterEvN = filterEvN)
         else :
             go(outer = utca, label = label)
     elif cmsFileName :
@@ -274,4 +280,5 @@ if __name__=="__main__" :
            cmsFileName  = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/castor/209151.HLTSkim.root",
            label = "Run209151",
            useEvN = False,
+           filterEvN = False,
            )
