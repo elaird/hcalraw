@@ -37,17 +37,19 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
     canvas = r.TCanvas()
     canvas.Print(pdf+"[")
 
-    pad0  = r.TPad("pad0",  "pad0", 0.1, 0.95, 0.9, 1.0)
-    pad10 = r.TPad("pad10", "pad1", 0.1, 0.75, 0.9, 0.95)
-    pad11 = r.TPad("pad11", "pad1", 0.1, 0.55, 0.9, 0.75)
-    pad20 = r.TPad("pad20", "pad2", 0.1, 0.0, 0.5, 0.4)
-    pad21 = r.TPad("pad21", "pad3", 0.5, 0.0, 0.9, 0.4)
+    pad0  = r.TPad("pad0",  "pad0",  0.1, 0.95, 0.9, 1.0)
+    pad10 = r.TPad("pad10", "pad10", 0.1, 0.75, 0.9, 0.95)
+    pad11 = r.TPad("pad11", "pad11", 0.1, 0.55, 0.9, 0.75)
+    pad20 = r.TPad("pad20", "pad20", 0.0, 0.0, 0.3, 0.3)
+    pad21 = r.TPad("pad21", "pad21", 0.3, 0.0, 0.6, 0.3)
+    pad22 = r.TPad("pad22", "pad22", 0.6, 0.0, 0.9, 0.3)
 
     pad0.Draw()
     pad10.Draw()
     pad11.Draw()
     pad20.Draw()
     pad21.Draw()
+    pad22.Draw()
 
     for label in labels :
         f = r.TFile("root/%s.root"%label)
@@ -85,17 +87,24 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
 
         pad20.cd()
         adjustPad(logY = True)
-        h2 = f.Get("deltaOrN")
-        if h2 :
-            h2.Draw("hist")
-            stylize(h2)
+        h0 = f.Get("deltaOrN")
+        if h0 :
+            h0.Draw("hist")
+            stylize(h0)
 
         pad21.cd()
         adjustPad(logY = True)
-        h3 = f.Get("deltaBcN")
-        if h3 :
-            h3.Draw("hist")
-            stylize(h3)
+        h1 = f.Get("deltaBcN")
+        if h1 :
+            h1.Draw("hist")
+            stylize(h1)
+
+        pad22.cd()
+        adjustPad(logY = True)
+        h2 = f.Get("deltaEvN")
+        if h2 :
+            h2.Draw("hist")
+            stylize(h2)
 
         canvas.Print(pdf)
         f.Close()
