@@ -7,9 +7,9 @@ def labelAxis(h = None, labels = {}) :
         yaxis.SetBinLabel(iBin, label)
     yaxis.SetLabelSize(2.0*yaxis.GetLabelSize())
 
-def xMax(graph = None, iPoint = 40) :
+def xMax(graph = None, iPoint = None) :
     N = graph.GetN()
-    iPoint = min(iPoint, N-1)
+    iPoint = min(iPoint, N-1) if iPoint!=None else N-1
     x = r.Double()
     y = r.Double()
     graph.GetPoint(iPoint, x, y)
@@ -37,15 +37,17 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
     canvas = r.TCanvas()
     canvas.Print(pdf+"[")
 
-    pad0 = r.TPad("pad0", "pad0", 0.1, 0.9, 0.9, 1.0)
-    pad1 = r.TPad("pad1", "pad1", 0.1, 0.7, 0.9, 0.9)
-    pad2 = r.TPad("pad2", "pad2", 0.1, 0.1, 0.5, 0.5)
-    pad3 = r.TPad("pad3", "pad3", 0.5, 0.1, 0.9, 0.5)
+    pad0  = r.TPad("pad0",  "pad0", 0.1, 0.95, 0.9, 1.0)
+    pad10 = r.TPad("pad10", "pad1", 0.1, 0.75, 0.9, 0.95)
+    pad11 = r.TPad("pad11", "pad1", 0.1, 0.55, 0.9, 0.75)
+    pad20 = r.TPad("pad20", "pad2", 0.1, 0.0, 0.5, 0.4)
+    pad21 = r.TPad("pad21", "pad3", 0.5, 0.0, 0.9, 0.4)
 
     pad0.Draw()
-    pad1.Draw()
-    pad2.Draw()
-    pad3.Draw()
+    pad10.Draw()
+    pad11.Draw()
+    pad20.Draw()
+    pad21.Draw()
 
     for label in labels :
         f = r.TFile("root/%s.root"%label)
@@ -55,33 +57,40 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
         text = r.TText(0.5, 0.5, label.replace("Run2", "Run 2"))
         text.SetNDC()
         text.SetTextAlign(22)
-        text.SetTextSize(10.0*text.GetTextSize())
+        text.SetTextSize(20.0*text.GetTextSize())
         text.Draw()
 
-        #category graph
-        pad1.cd()
-        adjustPad()
-
+        #category graphs
         graph = f.Get("category_vs_time")
-        null = r.TH2D("null", ";time (minutes)", 1, 0.0, 1.1*xMax(graph), 3, 0.5, 3.5)
-        null.Draw()
-        magnify(null, factor = 3.0)
-
-        t = graph.GetTitle().split("_")
-        labelAxis(null, labels = {1:t[0], 2:t[1], 3:t[2]})
         graph.SetMarkerStyle(20)
         graph.SetMarkerColor(r.gStyle.GetHistLineColor())
         graph.SetMarkerSize(0.5*graph.GetMarkerSize())
+        t = graph.GetTitle().split("_")
+
+        pad10.cd()
+        adjustPad()
+        null = r.TH2D("null", ";time (minutes)", 1, 0.0, xMax(graph), 3, 0.5, 3.5)
+        null.Draw()
+        magnify(null, factor = 3.0)
+        labelAxis(null, labels = {1:t[0], 2:t[1], 3:t[2]})
         graph.Draw("psame")
 
-        pad2.cd()
+        pad11.cd()
+        adjustPad()
+        null2 = r.TH2D("null2", ";[first 40 events] time (minutes)", 1, 0.0, xMax(graph, 40), 3, 0.5, 3.5)
+        null2.Draw()
+        magnify(null2, factor = 3.0)
+        labelAxis(null2, labels = {1:t[0], 2:t[1], 3:t[2]})
+        graph.Draw("psame")
+
+        pad20.cd()
         adjustPad(logY = True)
         h2 = f.Get("deltaOrN")
         if h2 :
             h2.Draw("hist")
             stylize(h2)
 
-        pad3.cd()
+        pad21.cd()
         adjustPad(logY = True)
         h3 = f.Get("deltaBcN")
         if h3 :
