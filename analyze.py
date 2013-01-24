@@ -226,7 +226,7 @@ def wordsOneChunk(tree = None, fedId = None) :
     return r.CDFChunk2(chunk).chunk() #wrapper class creates std::vector<ULong64_t>
 
 def bcnLabel(delta = 0) :
-    out = "BCN"
+    out = "BcN"
     if delta<0 :
         out += " - %d"%abs(delta)
     elif delta>0 :
