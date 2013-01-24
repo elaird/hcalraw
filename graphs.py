@@ -15,6 +15,24 @@ def xMax(graph = None, iPoint = 40) :
     graph.GetPoint(iPoint, x, y)
     return float(x)
 
+def magnify(h, factor = 1.0) :
+    for axis in [h.GetXaxis(), h.GetYaxis()] :
+        axis.SetLabelSize(factor*axis.GetLabelSize())
+        axis.SetTitleSize(factor*axis.GetTitleSize())
+
+def adjustPad(pad = r.gPad, logY = False) :
+    r.gPad.SetLeftMargin(0.25)
+    r.gPad.SetBottomMargin(0.25)
+    r.gPad.SetTickx()
+    r.gPad.SetTicky()
+    if logY : r.gPad.SetLogy()
+
+def stylize(h) :
+    h.SetStats(False)
+    h.SetMinimum(0.5)
+    magnify(h, factor = 2.0)
+    h.SetLineWidth(2)
+
 def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
     canvas = r.TCanvas()
     canvas.Print(pdf+"[")
@@ -42,17 +60,12 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
 
         #category graph
         pad1.cd()
-        r.gPad.SetLeftMargin(0.25)
-        r.gPad.SetBottomMargin(0.25)
-        r.gPad.SetTickx()
-        r.gPad.SetTicky()
+        adjustPad()
 
         graph = f.Get("category_vs_time")
         null = r.TH2D("null", ";time (minutes)", 1, 0.0, 1.1*xMax(graph), 3, 0.5, 3.5)
         null.Draw()
-        for axis in [null.GetXaxis(), null.GetYaxis()] :
-            axis.SetLabelSize(3.0*axis.GetLabelSize())
-            axis.SetTitleSize(3.0*axis.GetTitleSize())
+        magnify(null, factor = 3.0)
 
         t = graph.GetTitle().split("_")
         labelAxis(null, labels = {1:t[0], 2:t[1], 3:t[2]})
@@ -62,20 +75,18 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
         graph.Draw("psame")
 
         pad2.cd()
+        adjustPad(logY = True)
         h2 = f.Get("deltaOrN")
         if h2 :
-            h2.SetStats(False)
             h2.Draw("hist")
-            h2.SetMinimum(0.5)
-            r.gPad.SetLogy()
+            stylize(h2)
 
         pad3.cd()
+        adjustPad(logY = True)
         h3 = f.Get("deltaBcN")
         if h3 :
-            h3.SetStats(False)
             h3.Draw("hist")
-            h3.SetMinimum(0.5)
-            r.gPad.SetLogy()
+            stylize(h3)
 
         canvas.Print(pdf)
         f.Close()
