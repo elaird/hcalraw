@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
-import os,struct,ROOT as r
-from graphs import minutes,writePdf
+import os,struct,autoBook,ROOT as r
 
 def setup() :
     assert os.environ["CMSSW_VERSION"],"A CMSSW environment is required (known to work with CMSSW_5_3_4)."
@@ -78,7 +77,7 @@ def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
     f.Close()
     return forward,backward
 
-def loop(inner = {}, outer = {}, innerEvent = {}) :
+def loop(inner = {}, outer = {}, innerEvent = {}, book = {}) :
     if inner :
         fI = r.TFile(inner["fileName"])
         treeI = fI.Get(inner["treeName"])
@@ -100,9 +99,9 @@ def loop(inner = {}, outer = {}, innerEvent = {}) :
             nb = treeI.GetEntry(iInnerEvent)
             if nb<=0 : continue
             rawInner = collectedRaw(tree = treeI, specs = inner)
-            compare(raw, rawInner)
+            compare(raw, rawInner, book = book)
         else :
-            continue
+            compare(raw, book = book)
 
     f.Close()
     if inner :
@@ -220,11 +219,38 @@ def wordsOneChunk(tree = None, fedId = None) :
     chunk = getattr(tree, "Chunk%d"%fedId) #CDF data type
     return r.CDFChunk2(chunk).chunk() #wrapper class creates std::vector<ULong64_t>
 
-def compare(raw1 = {}, raw2 = {}) :
-    #print raw1
-    #print raw2
-    #print
-    pass
+def compare(raw1 = {}, raw2 = {}, book = {}) :
+    d1 = raw1[989]
+    d2 = raw2[700]
+    book.fill(d1["OrN"]-d2["OrN"], "deltaOrn", 11, -5.5, 5.5)
+    book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 2*3564+1, -3564.5, 3564.5)
+
+def minutes(orn) :
+    orbPerSec = 11.1e3
+    return orn/orbPerSec/60.0
+
+def categories(oMap = {}, iMap = {}, innerEvent = {}) :
+    d = {}
+    for oEvent,ornEvn in oMap.iteritems() :
+        orn = ornEvn[0]
+        if oEvent in innerEvent and innerEvent[oEvent]!=None :
+            d[orn] = 3
+        else :
+            d[orn] = 2
+
+    iEvents = innerEvent.values()
+    for iEvent,ornEvn in iMap.iteritems() :
+        if iEvent in iEvents : continue
+        orn = ornEvn[0]
+        d[orn] = 1
+
+    return d
+
+def graph(d = {}) :
+    gr = r.TGraph()
+    for i,key in enumerate(sorted(d.keys())) :
+        gr.SetPoint(i, minutes(key), d[key])
+    return gr
 
 def eventToEvent(mapF = {}, mapB = {}, useEvn = False, ornTolerance = None) :
     deltaOrnRange = range(-ornTolerance, 1+ornTolerance)
@@ -243,17 +269,30 @@ def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, or
     innerEvent = {}
     deltaOrn = {}
     oMapF,oMapB = eventMaps(useEvn = useEvn, filterEvn = filterEvn, **outer)
+    iMapF = iMapB = {}
+
     if inner :
         iMapF,iMapB = eventMaps(useEvn = useEvn, filterEvn = filterEvn, **inner)
         innerEvent = eventToEvent(oMapF, iMapB, ornTolerance = ornTolerance)
-        outerEvent = eventToEvent(iMapF, oMapB, ornTolerance = ornTolerance)
         if outer["printEventMap"] or inner["printEventMap"] :
             print "oEvent = %s, ornEvn = %s, iEvent = %s"%(str(oEvent),str(ornEvn),str(innerEvent[oEvent]))
-    loop(inner = inner, outer = outer, innerEvent = innerEvent)
 
-    if inner :
-        writePdf(label = label, oLabel = outer["label"], iLabel = inner["label"],
-                 oMapF = oMapF, iMapF = iMapF, innerEvent = innerEvent)
+    book = autoBook.autoBook("book")
+    loop(inner = inner, outer = outer, innerEvent = innerEvent, book = book)
+
+    #write results to a ROOT file
+    f = r.TFile(label+".root", "RECREATE")
+    gr = graph(categories(oMap = oMapF, iMap = iMapF, innerEvent = innerEvent))
+    nBoth = len(filter(lambda x:x!=None,innerEvent.values()))
+
+    gr.SetName("category_vs_time")
+    gr.SetTitle("only %s (%d)_only %s (%d)_%s (%d)"%(inner["label"], len(iMapF)-nBoth,
+                                                     outer["label"], len(oMapF)-nBoth,
+                                                     "both", nBoth))
+    gr.Write()
+    for key,h in book.iteritems() :
+        h.Write()
+    f.Close()
 
     s = "%s: %4s = %6d"%(label, outer["label"], len(oMapF))
     if inner :
