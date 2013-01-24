@@ -3,7 +3,7 @@
 import os,struct,autoBook,ROOT as r
 
 def setup() :
-    assert os.environ["CMSSW_VERSION"],"A CMSSW environment is required (known to work with CMSSW_5_3_4)."
+    assert os.environ["CMSSW_VERSION"],"A CMSSW environment is required (known to work with CMSSW_5_3_7)."
 
     #batch mode
     r.gROOT.SetBatch(True)
