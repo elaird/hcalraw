@@ -113,35 +113,37 @@ def collectedRaw(tree = None, specs = {}) :
         if specs["format"]=="CMS" :
             rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
             raw[fedId] = unpackedHeader(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True)
-            size = rawThisFed.size()
+            raw[fedId]["nBytesSW"] = rawThisFed.size()
+            raw[fedId]["fedIdSW"] = fedId
         elif specs["format"]=="HCAL" :
             rawThisFed = wordsOneChunk(tree, fedId)
             raw[fedId] = unpackedHeader(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False)
-            size = rawThisFed.size()*8
+            raw[fedId]["nBytesSW"] = rawThisFed.size()*8
+            raw[fedId]["fedIdSW"] = fedId
 
-    raw[None] = {"label":specs["label"],
+    raw[None] = {"print":specs["printRaw"],
+                 "label":specs["label"],
                  "bcnDelta":specs["bcnDelta"],
-                 "iEvent":tree.GetReadEntry(),
+                 "iEntry":tree.GetReadEntry(),
                  }
-
-    if specs["printRaw"] :
-        iEvent = tree.GetReadEntry()
-        print "%4s iEvent 0x%08x (%d)"%(specs["label"], iEvent, iEvent)
-        print "FEDid     EvN          OrN       BcN   minutes nBytesSW"
-        for fedId,data in raw.iteritems() :
-            if fedId==None : continue
-            printRaw(data, aux = {"fedId":fedId, "size":size})
-        print
     return raw
 
-def printRaw(d = {}, aux = {}, htr = False) :
-    m = minutes(d["OrN"], d["BcN"])
+def printRaw(d = {}) :
+    aux = d[None]
+    print "%4s iEntry 0x%08x (%d)"%(aux["label"], aux["iEntry"], aux["iEntry"])
+    print "FEDid     EvN          OrN       BcN   minutes nBytesSW"
+    for fedId,data in d.iteritems() :
+        if fedId==None : continue
+        printRawOneFed(data)
+    print
+
+def printRawOneFed(d = {}, htr = False) :
     print "   ".join([" %3d"%d["FEDid"],
                       "0x%07x"%d["EvN"],
                       "0x%08x"%d["OrN"],
                       "%4d"%d["BcN"],
-                      "%7.3f"%m,
-                      "%4d"%aux["size"],
+                      "%7.3f"%minutes(d["OrN"]),
+                      "%4d"%d["nBytesSW"],
                       ])
     if htr :
         print "uHTR EPCV nWord16"
@@ -234,12 +236,16 @@ def bcnLabel(delta = 0) :
     return out
 
 def compare(raw1 = {}, raw2 = {}, book = {}) :
-    d1 = raw1[989]
-    d2 = raw2[700]
-    bcnXTitle = "FED 989 %s - FED 700 %s"%(bcnLabel(raw1[None]["bcnDelta"]), bcnLabel(raw2[None]["bcnDelta"]))
-    book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED 989 OrN - FED 700 OrN;Events / bin")
-    book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 11, -5.5, 5.5, title = ";%s;Events / bin"%bcnXTitle)
-    book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED 989 EvN - FED 700 EvN;Events / bin")
+    if raw1 and raw1[None]["print"] : printRaw(raw1)
+    if raw2 and raw2[None]["print"] : printRaw(raw2)
+
+    if raw2 :
+        d1 = raw1[989]
+        d2 = raw2[700]
+        bcnXTitle = "FED 989 %s - FED 700 %s"%(bcnLabel(raw1[None]["bcnDelta"]), bcnLabel(raw2[None]["bcnDelta"]))
+        book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED 989 OrN - FED 700 OrN;Events / bin")
+        book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 11, -5.5, 5.5, title = ";%s;Events / bin"%bcnXTitle)
+        book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED 989 EvN - FED 700 EvN;Events / bin")
 
 def minutes(orn) :
     orbPerSec = 11.1e3
@@ -302,10 +308,13 @@ def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, or
     nBoth = len(filter(lambda x:x!=None,innerEvent.values()))
 
     gr.SetName("category_vs_time")
-    gr.SetTitle("only %s (%d)_only %s (%d)_%s (%d)"%(inner["label"], len(iMapF)-nBoth,
-                                                     outer["label"], len(oMapF)-nBoth,
-                                                     "both", nBoth))
+    labels = ["only %s (%d)"%(inner["label"], len(iMapF)-nBoth) if inner else "",
+              "only %s (%d)"%(outer["label"], len(oMapF)-nBoth) if outer else "",
+              "both (%d)"%nBoth if inner else "",
+              ]
+    gr.SetTitle("_".join(labels))
     gr.Write()
+
     for key,h in book.iteritems() :
         h.Write()
     f.Close()
