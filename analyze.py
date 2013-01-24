@@ -35,7 +35,7 @@ def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
 
     forward = {}
     backward = {}
-    f = r.TFile(fileName)
+    f = r.TFile.Open(fileName)
     tree = f.Get(treeName)
 
     for iEvent in range(nEvents(tree, nEventsMax)) :
@@ -79,10 +79,10 @@ def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
 
 def loop(inner = {}, outer = {}, innerEvent = {}, book = {}) :
     if inner :
-        fI = r.TFile(inner["fileName"])
+        fI = r.TFile.Open(inner["fileName"])
         treeI = fI.Get(inner["treeName"])
 
-    f = r.TFile(outer["fileName"])
+    f = r.TFile.Open(outer["fileName"])
     tree = f.Get(outer["treeName"])
 
     for iOuterEvent in range(nEvents(tree, outer["nEventsMax"])) :
@@ -119,11 +119,17 @@ def collectedRaw(tree = None, specs = {}) :
             raw[fedId] = unpackedHeader(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False)
             size = rawThisFed.size()*8
 
+    raw[None] = {"label":specs["label"],
+                 "bcnDelta":specs["bcnDelta"],
+                 "iEvent":tree.GetReadEntry(),
+                 }
+
     if specs["printRaw"] :
         iEvent = tree.GetReadEntry()
         print "%4s iEvent 0x%08x (%d)"%(specs["label"], iEvent, iEvent)
         print "FEDid     EvN          OrN       BcN   minutes nBytesSW"
         for fedId,data in raw.iteritems() :
+            if fedId==None : continue
             printRaw(data, aux = {"fedId":fedId, "size":size})
         print
     return raw
@@ -219,11 +225,20 @@ def wordsOneChunk(tree = None, fedId = None) :
     chunk = getattr(tree, "Chunk%d"%fedId) #CDF data type
     return r.CDFChunk2(chunk).chunk() #wrapper class creates std::vector<ULong64_t>
 
+def bcnLabel(delta = 0) :
+    out = "BCN"
+    if delta<0 :
+        out += " - %d"%abs(delta)
+    elif delta>0 :
+        out += " + %d"%abs(delta)
+    return out
+
 def compare(raw1 = {}, raw2 = {}, book = {}) :
     d1 = raw1[989]
     d2 = raw2[700]
+    bcnXTitle = "FED 989 %s - FED 700 %s"%(bcnLabel(raw1[None]["bcnDelta"]), bcnLabel(raw2[None]["bcnDelta"]))
     book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED 989 OrN - FED 700 OrN;Events / bin")
-    book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 11, -5.5, 5.5, title = ";FED 989 BcN - FED 700 BcN;Events / bin")
+    book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 11, -5.5, 5.5, title = ";%s;Events / bin"%bcnXTitle)
     book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED 989 EvN - FED 700 EvN;Events / bin")
 
 def minutes(orn) :
