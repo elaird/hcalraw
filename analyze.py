@@ -222,8 +222,8 @@ def wordsOneChunk(tree = None, fedId = None) :
 def compare(raw1 = {}, raw2 = {}, book = {}) :
     d1 = raw1[989]
     d2 = raw2[700]
-    book.fill(d1["OrN"]-d2["OrN"], "deltaOrn", 11, -5.5, 5.5)
-    book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 2*3564+1, -3564.5, 3564.5)
+    book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";#DeltaOrN;Events / bin")
+    book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 11, -5.5, 5.5, title = ";#DeltaBcN;Events / bin")
 
 def minutes(orn) :
     orbPerSec = 11.1e3
