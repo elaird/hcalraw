@@ -39,8 +39,9 @@ uscFiles    = rootFiles(directory, mode = "usc")
 castorFiles = rootFiles(directory, mode = "castor")
 
 options = opts()
-import analyze
+import analyze,graphs
 
+labels = []
 for run in sorted(uscFiles.keys()) :
     if any([options.min and run<int(options.min),
             options.max and run>int(options.max),
@@ -48,7 +49,11 @@ for run in sorted(uscFiles.keys()) :
             (not options.onlyutca) and (run not in castorFiles),
             ]) : continue
 
+    label = "Run%d"%run
     analyze.oneRun(utcaFileName = "" if options.onlycms  else uscFiles[run],
                    cmsFileName  = "" if options.onlyutca else castorFiles[run],
-                   label = "Run%d"%run, useEvn = False,
+                   label = label, useEvn = False,
                    filterEvn = options.filterevn, ornTolerance = 1)
+    labels.append(label)
+
+graphs.makeSummaryPdf(labels)
