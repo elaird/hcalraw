@@ -224,6 +224,7 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
     d2 = raw2[700]
     book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED 989 OrN - FED 700 OrN;Events / bin")
     book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 11, -5.5, 5.5, title = ";FED 989 BcN - FED 700 BcN;Events / bin")
+    book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED 989 EvN - FED 700 EvN;Events / bin")
 
 def minutes(orn) :
     orbPerSec = 11.1e3
