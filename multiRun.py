@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os,optparse
+import os,optparse,subprocess
 
 def opts() :
     parser = optparse.OptionParser()
@@ -35,6 +35,20 @@ def rootFiles(directory = "", mode = "") :
         d[int(run)] = "%s/%s"%(directory2, item)
     return d
 
+def commandOutput(cmd = "") :
+    return subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE).communicate()[0].split()
+
+def eosFile(run) :
+    #eos not available; list with castor
+    castor = "/castor/cern.ch/cms"
+    eos = "root://eoscms.cern.ch//eos/cms"
+    dir = "%s/store/hidata/HIRun2013/HcalNZS/RAW/v1/000/%03d/%03d/00000/"%(castor, run/1000, run%1000)
+    fileList = commandOutput(cmd = "nsls %s"%dir)
+    if fileList :
+        return dir.replace(castor, eos)+fileList[0]
+    else:
+        return ""
+
 directory = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/"
 uscFiles    = rootFiles(directory, mode = "usc")
 castorFiles = rootFiles(directory, mode = "castor")
@@ -47,14 +61,15 @@ for run in sorted(uscFiles.keys()) :
     if any([options.min and run<int(options.min),
             options.max and run>int(options.max),
             options.run and run!=int(options.run),
-            (not options.onlyutca) and (run not in castorFiles),
+            #(not options.onlyutca) and (run not in castorFiles),
             ]) : continue
     label = "Run%d"%run
     labels.append(label)
     if options.onlysummary : continue
 
     analyze.oneRun(utcaFileName = "" if options.onlycms  else uscFiles[run],
-                   cmsFileName  = "" if options.onlyutca else castorFiles[run],
+                   #cmsFileName  = "" if options.onlyutca else castorFiles[run],
+                   cmsFileName  = "" if options.onlyutca else eosFile(run),
                    label = label, useEvn = False,
                    filterEvn = options.filterevn, ornTolerance = 1)
 
