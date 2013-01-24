@@ -10,6 +10,7 @@ def opts() :
     parser.add_option("--only-utca", dest = "onlyutca", default = False, action = "store_true", help = "ignore uTCA file if present")
     parser.add_option("--only-cms",  dest = "onlycms",  default = False, action = "store_true", help = "ignore CMS file if present")
     parser.add_option("--filter-evn",dest = "filterevn",default = False, action = "store_true", help = "consider only events with EvN&0x1fff == 0")
+    parser.add_option("--only-summary",dest = "onlysummary",default = False, action = "store_true", help = "do not loop; simply make summary plots from existing ROOT files")
 
     options,args = parser.parse_args()
     return options
@@ -48,12 +49,13 @@ for run in sorted(uscFiles.keys()) :
             options.run and run!=int(options.run),
             (not options.onlyutca) and (run not in castorFiles),
             ]) : continue
-
     label = "Run%d"%run
+    labels.append(label)
+    if options.onlysummary : continue
+
     analyze.oneRun(utcaFileName = "" if options.onlycms  else uscFiles[run],
                    cmsFileName  = "" if options.onlyutca else castorFiles[run],
                    label = label, useEvn = False,
                    filterEvn = options.filterevn, ornTolerance = 1)
-    labels.append(label)
 
 graphs.makeSummaryPdf(labels)
