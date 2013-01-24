@@ -51,6 +51,8 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
     pad21.Draw()
     pad22.Draw()
 
+    alsoZoom = False
+
     for label in labels :
         f = r.TFile("root/%s.root"%label)
 
@@ -77,13 +79,14 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
         labelAxis(null, labels = {1:t[0], 2:t[1], 3:t[2]})
         graph.Draw("psame")
 
-        pad11.cd()
-        adjustPad()
-        null2 = r.TH2D("null2", ";[first 40 events] time (minutes)", 1, 0.0, xMax(graph, 40), 3, 0.5, 3.5)
-        null2.Draw()
-        magnify(null2, factor = 3.0)
-        labelAxis(null2, labels = {1:t[0], 2:t[1], 3:t[2]})
-        graph.Draw("psame")
+        if alsoZoom :
+            pad11.cd()
+            adjustPad()
+            null2 = r.TH2D("null2", ";[first 40 events] time (minutes)", 1, 0.0, xMax(graph, 40), 3, 0.5, 3.5)
+            null2.Draw()
+            magnify(null2, factor = 3.0)
+            labelAxis(null2, labels = {1:t[0], 2:t[1], 3:t[2]})
+            graph.Draw("psame")
 
         pad20.cd()
         adjustPad(logY = True)
