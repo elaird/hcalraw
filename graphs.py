@@ -16,7 +16,7 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
     canvas.SetTicky()
 
     for label in labels :
-        f = r.TFile(label+".root")
+        f = r.TFile("root/%s.root"%label)
 
         #category graph
         nBins = 30

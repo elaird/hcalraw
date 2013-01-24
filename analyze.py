@@ -281,7 +281,7 @@ def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, or
     loop(inner = inner, outer = outer, innerEvent = innerEvent, book = book)
 
     #write results to a ROOT file
-    f = r.TFile(label+".root", "RECREATE")
+    f = r.TFile("root/%s.root"%label, "RECREATE")
     gr = graph(categories(oMap = oMapF, iMap = iMapF, innerEvent = innerEvent))
     nBoth = len(filter(lambda x:x!=None,innerEvent.values()))
 
