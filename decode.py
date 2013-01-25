@@ -89,8 +89,11 @@ def payload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
                                                    "ErrF":(w&0xc00)>>10,
                                                    "Flavor":(w&0x7000)>>12,
                                                    "iWord16":iWord16,
+                                                   "QIE":{},
                                                    }
-        #print "i = %d, iWord16 = %d, channelId = %d"%(i,iWord16,d["currentChannelId"])
     else :
-        #print "i = %d, iWord16 = %d, channelId = %d"%(i,iWord16,d["currentChannelId"] if "currentChannelId" in d else -1)
-        pass
+        if "currentChannelId" not in d : return
+        dct = l["channelData"][d["currentChannelId"]]
+        j = iWord16 - dct["iWord16"] - 1
+        dct["QIE"][2*j  ] = word16&0xff
+        dct["QIE"][2*j+1] = (word16&(0xff<<8))>>8
