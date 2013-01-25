@@ -39,7 +39,7 @@ def printRaw(d = {}, hyphens = True) :
         printRawOneFed(data)
     print
 
-def printRawOneFed(d = {}, htrOverview = True, htrBlocks = True, channelData = False) :
+def printRawOneFed(d = {}, htrOverview = True, htrBlocks = True, channelData = True) :
     print "   ".join(["  %3d"%d["FEDid"],
                       " 0x%07x"%d["EvN"],
                       "0x%08x"%d["OrN"],
@@ -85,11 +85,14 @@ def printRawOneFed(d = {}, htrOverview = True, htrBlocks = True, channelData = F
                                   "0x%04x"%p["CRC"],
                                   ])
                 if channelData :
-                    print "ModuleId  Ch  Fl  ErrF CapId0"
+                    print "ModuleId  Ch  Fl  ErrF CapId0  QIE(hex)  0  1  2  3  4  5  6  7  8  9"
                     for channelId,data in p["channelData"].iteritems() :
                         print "   ".join([" 0x%03x"%p["ModuleId"],
                                           "%3d"%channelId,
                                           "%1d"%data["Flavor"],
                                           "%2d"%data["ErrF"],
                                           "  %1d"%data["CapId0"],
-                                          ])
+                                          " "*10,
+                                          ])+\
+                                          " ".join(["%2x"%data["QIE"][iQie] if iQie in data["QIE"] else "  " \
+                                                    for iQie in range(12)])
