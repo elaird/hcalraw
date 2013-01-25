@@ -11,8 +11,12 @@ def bcnLabel(delta = 0) :
     return out
 
 def compare(raw1 = {}, raw2 = {}, book = {}) :
-    if raw1 and raw1[None]["print"] : printRaw(raw1)
-    if raw2 and raw2[None]["print"] : printRaw(raw2)
+    hyphens = True
+    if raw1 and raw1[None]["print"] :
+        printRaw(raw1, hyphens)
+        hyphens = False
+    if raw2 and raw2[None]["print"] :
+        printRaw(raw2, hyphens)
 
     if raw2 :
         d1 = raw1[989]
@@ -23,7 +27,10 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
         book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED 989 EvN - FED 700 EvN;Events / bin")
         book.fill(d1["TTS"], "TTS", 16, -0.5, 15.5, title = ";FED 989 TTS state;Events / bin")
 
-def printRaw(d = {}) :
+def printRaw(d = {}, hyphens = True) :
+    if hyphens :
+        print "-"*78
+
     aux = d[None]
     print "%4s iEntry 0x%08x (%d)"%(aux["label"], aux["iEntry"], aux["iEntry"])
     print " FEDid      EvN          OrN       BcN   minutes     TTS    nBytesHW  nBytesSW"

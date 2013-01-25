@@ -89,8 +89,7 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, htrBlocks = True) :
     for iOuterEvent in range(nEvents(tree, outer["nEventsMax"])) :
         nb = tree.GetEntry(iOuterEvent)
         if nb<=0 : continue
-        if outer["printRaw"] or (inner and inner["printRaw"]) :
-            print "-"*78
+
         raw = collectedRaw(tree = tree, specs = outer, htrBlocks = htrBlocks)
 
         if inner :
