@@ -77,7 +77,7 @@ def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
     f.Close()
     return forward,backward
 
-def loop(inner = {}, outer = {}, innerEvent = {}, book = {}) :
+def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, payload = True) :
     if inner :
         fI = r.TFile.Open(inner["fileName"])
         treeI = fI.Get(inner["treeName"])
@@ -90,7 +90,7 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}) :
         if nb<=0 : continue
         if outer["printRaw"] or (inner and inner["printRaw"]) :
             print "-"*56
-        raw = collectedRaw(tree = tree, specs = outer)
+        raw = collectedRaw(tree = tree, specs = outer, payload = payload)
 
         if inner :
             iInnerEvent = innerEvent[iOuterEvent]
@@ -98,7 +98,7 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}) :
 
             nb = treeI.GetEntry(iInnerEvent)
             if nb<=0 : continue
-            rawInner = collectedRaw(tree = treeI, specs = inner)
+            rawInner = collectedRaw(tree = treeI, specs = inner, payload = payload)
             compare(raw, rawInner, book = book)
         else :
             compare(raw, book = book)
@@ -107,19 +107,21 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}) :
     if inner :
         fI.Close()
 
-def collectedRaw(tree = None, specs = {}) :
+def collectedRaw(tree = None, specs = {}, payload = True) :
     raw = {}
     for fedId in specs["fedIds"] :
         if specs["format"]=="CMS" :
             rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
             raw[fedId] = unpackedHeader(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True)
             raw[fedId]["nBytesSW"] = rawThisFed.size()
-            raw[fedId]["fedIdSW"] = fedId
+            if payload :
+                raw[fedId]["payload"] = unpackedPayload(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True)
         elif specs["format"]=="HCAL" :
             rawThisFed = wordsOneChunk(tree, fedId)
             raw[fedId] = unpackedHeader(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False)
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
-            raw[fedId]["fedIdSW"] = fedId
+            if payload :
+                raw[fedId]["payload"] = unpackedPayload(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False)
 
     raw[None] = {"print":specs["printRaw"],
                  "label":specs["label"],
@@ -137,7 +139,7 @@ def printRaw(d = {}) :
         printRawOneFed(data)
     print
 
-def printRawOneFed(d = {}, htr = False) :
+def printRawOneFed(d = {}, htr = True) :
     print "   ".join([" %3d"%d["FEDid"],
                       "0x%07x"%d["EvN"],
                       "0x%08x"%d["OrN"],
@@ -151,34 +153,38 @@ def printRawOneFed(d = {}, htr = False) :
             h = d["uHTR%d"%iUhtr]
             print "%4d %d%d%d%d %7d"%(iUhtr, h["E"], h["P"], h["C"], h["V"], h["nWord16"])
 
-def decodedHeader(d = {}, offset = None, bytes = None, bcnDelta = 0) :
+        for offset in sorted(d["payload"].keys()) :
+            payload = d["payload"][offset]
+            print "%04d"%offset,payload
+
+def bcn(raw, delta = 0) :
+    if not delta : return raw
+    out = raw + delta
+    if out<0    : out += 3564
+    if out>3563 : out -= 3564
+    return out
+
+def decodeHeader(d = {}, iWord64 = None, word64 = None, bcnDelta = 0) :
     #see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
-    b = bytes
-    if offset==0x00 :
+    b = [((0xff<<8*i) & word64)>>8*i for i in range(8)]
+
+    if iWord64==0 :
         #d["eight"] = 0xf & b[0]
         #d["fov"] = (0xf0 & b[0])/(1<<4)
         d["FEDid"] = (0xf & b[2])*(1<<8) + b[1]
         d["BcN"] = (0xf0 & b[2])/(1<<4) + b[3]*(1<<4)
         d["EvN"] = b[4] + b[5]*(1<<8) + b[6]*(1<<16)
+        d["BcN"] = bcn(d["BcN"], bcnDelta)
         #d["evtTy"] = 0xf & b[7]
         #d["five"] = (0xf0 & b[7])/(1<<4)
 
-        if bcnDelta :
-            bcn = d["BcN"]+bcnDelta
-            if bcn<0    : bcn += 3564
-            if bcn>3563 : bcn -= 3564
-            d["BcN"] = bcn
-
-    if offset==0x08 :
+    if iWord64==1 :
         #d["zero1"] = 0xf & b[0]
         d["OrN"] = (0xf0 & b[0])/(1<<4) + b[1]*(1<<4) + b[2]*(1<<12) + b[3]*(1<<20) + (0xf & b[4])*(1<<28)
 
-    uhtr = {0x18:0,
-            0x20:4,
-            0x28:8,
-            }
-    if offset in uhtr :
-        uhtr0 = uhtr[offset]
+    uhtr = {3:0, 4:4, 5:8}
+    if iWord64 in uhtr :
+        uhtr0 = uhtr[iWord64]
         for i in range(4) :
             key = "uHTR%d"%(uhtr0+i)
             b0 = b[  2*i]
@@ -189,35 +195,72 @@ def decodedHeader(d = {}, offset = None, bytes = None, bcnDelta = 0) :
                       "V":(b1&10)>>3,
                       "nWord16":(b1 & 0xf)*(1<<4) + b0,
                       }
-    return d
 
-def unpacked(fedData = None, iWord64Begin = None, iWord64End = None, chars = None, decode = None, bcnDelta = 0) :
+def decodePayload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
+    #see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
+    w = word16
+
+    if "iWordZero" not in d :
+        d["iWordZero"] = iWord16
+        d[d["iWordZero"]] = {}
+
+    l = d[d["iWordZero"]]
+    i = iWord16 - d["iWordZero"]
+    if i==0 :
+        l["InputID"] = (w&0xf0)/(1<<8)
+        l["EvN"] = w&0xf
+    if i==1 :
+        l["EvN"] += w*(1<<8)
+    if i==3 :
+        l["ModuleId"] = w&0x7ff
+        l["OrN"] = (w&0xf800)>>11
+    if i==4 :
+        l["BcN"] = bcn(w&0xfff, bcnDelta)
+        l["FormatVer"] = (w&0xf000)>>12
+    if i==5 :
+        #l["nWord16"] = w&0x3fff
+        l["nWord16"] = 228
+    if i<=5 : return
+
+    if i==l["nWord16"]-1 :
+        del d["iWordZero"]
+
+def unpacked(fedData = None, iWord64Begin = None, iWord64End = None, chars = None,
+             decodeBy64 = None, decode = None, by = None, bcnDelta = 0) :
     assert chars in [False,True],"Specify whether to unpack by words or chars."
     assert decode,"Specify a function to use to interpret the bytes."
-
+    assert by in [16,64],"Specify every how many bits to call decode."
     #see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
     d = {}
-    fmt = 'B'*8
-    bytes = range(8)
     for iWord64 in range(iWord64Begin, iWord64End) :
         offset = 8*iWord64
         if chars :
-            b = struct.unpack(fmt, "".join([fedData.at(offset+iByte) for iByte in bytes]))
-            #b = [ord(fedData.at(offset+iByte)) for iByte in range(8)] #same result as above line
+            word64 = struct.unpack('Q', "".join([fedData.at(offset+iByte) for iByte in range(8)]))[0]
+            #b = [ord(fedData.at(offset+iByte)) for iByte in range(8)] #like above with 'B'*8 rather than 'Q'
         else :
-            w = fedData.at(iWord64)
-            b = [((0xff<<8*i) & w)>>8*i for i in bytes]
-        decode(d, offset, b, bcnDelta)
+            word64 = fedData.at(iWord64)
+
+        if by==64 :
+            decode(d, iWord64, word64, bcnDelta)
+        elif by==16 :
+            for i in range(4) :
+                word16 = (word64&(0xffff<<16*i))>>16*i
+                decode(d, 4*iWord64+i, word16, bcnDelta)
     return d
 
 def unpackedPayload(fedData = None, bcnDelta = None, chars = None) :
     nWord64 = fedData.size()/(8 if chars else 1)
     return unpacked(fedData = fedData, bcnDelta = bcnDelta, chars = chars,
-                    iWord64Begin = 6, iWord64End = nWord64)
+                    iWord64Begin = 6, iWord64End = nWord64-1, decode = decodePayload, by = 16)
 
 def unpackedHeader(fedData = None, bcnDelta = None, chars = None) :
     return unpacked(fedData = fedData, bcnDelta = bcnDelta, chars = chars,
-                    iWord64Begin = 0, iWord64End = 6, decode = decodedHeader)
+                    iWord64Begin = 0, iWord64End = 6, decode = decodeHeader, by = 64)
+
+def unpackedTrailer(fedData = None, bcnDelta = None, chars = None) :
+    nWord64 = fedData.size()/(8 if chars else 1)
+    return unpacked(fedData = fedData, bcnDelta = bcnDelta, chars = chars,
+                    iWord64Begin = nWord64-1, iWord64End = nWord64, decode = decodeTrailer, by = 64)
 
 def charsOneFed(tree = None, fedId = None, collection = "") :
     FEDRawData = getattr(tree, collection).product().FEDData(fedId) #CMS data type
