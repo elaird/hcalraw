@@ -33,13 +33,13 @@ def printRaw(d = {}, hyphens = True) :
 
     aux = d[None]
     print "%4s iEntry 0x%08x (%d)"%(aux["label"], aux["iEntry"], aux["iEntry"])
-    print " FEDid      EvN          OrN       BcN   minutes     TTS    nBytesHW  nBytesSW"
+    print " FEDid      EvN          OrN       BcN   minutes     TTS    nBytesHW  nBytesSW   CRC16"
     for fedId,data in d.iteritems() :
         if fedId==None : continue
         printRawOneFed(data)
     print
 
-def printRawOneFed(d = {}, htrOverview = True, htrBlocks = False, channelData = False) :
+def printRawOneFed(d = {}, htrOverview = True, htrBlocks = True, channelData = False) :
     print "   ".join(["  %3d"%d["FEDid"],
                       " 0x%07x"%d["EvN"],
                       "0x%08x"%d["OrN"],
@@ -48,6 +48,7 @@ def printRawOneFed(d = {}, htrOverview = True, htrBlocks = False, channelData = 
                       "   %1x"%d["TTS"],
                       "    %4d"%(d["nWord64"]*8),
                       "   %4d"%d["nBytesSW"],
+                      " 0x%04x"%d["CRC16"],
                       ])
     if htrOverview :
         hyphens = "   "+("-"*68)
@@ -70,16 +71,18 @@ def printRawOneFed(d = {}, htrOverview = True, htrBlocks = False, channelData = 
         if offsets :
             for iOffset,offset in enumerate(sorted(offsets)) :
                 if channelData or not iOffset :
-                    print "iWord16     EvN          OrN5      BcN   InputID  ModuleId   nWord16  FormatVer"
+                    print "iWord16     EvN          OrN5      BcN   InputID  ModuleId   nWord16  FormatVer  EvN8     CRC"
                 p = d["htrBlocks"][offset]
                 print "   ".join([" %04d"%offset,
                                   " 0x%07x"%p["EvN"],
-                                  "0x%08x"%p["OrN"],
+                                  "0x%08x"%p["OrN5"],
                                   "%4d"%p["BcN"],
                                   "  0x%02x"%p["InputID"],
                                   "  0x%03x"%p["ModuleId"],
                                   " %5d"%p["nWord16"],
                                   "    0x%01x"%p["FormatVer"],
+                                  "  0x%02x"%p["EvN8"],
+                                  "0x%04x"%p["CRC"],
                                   ])
                 if channelData :
                     print "ModuleId  Ch  Fl  ErrF CapId0"
