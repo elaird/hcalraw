@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
-import os,struct,autoBook,ROOT as r
+import os,struct,ROOT as r
+import autoBook,compare,decode
 
 def setup() :
     assert os.environ["CMSSW_VERSION"],"A CMSSW environment is required (known to work with CMSSW_5_3_7)."
@@ -99,9 +100,9 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, htrBlocks = True) :
             nb = treeI.GetEntry(iInnerEvent)
             if nb<=0 : continue
             rawInner = collectedRaw(tree = treeI, specs = inner, htrBlocks = htrBlocks)
-            compare(raw, rawInner, book = book)
+            compare.compare(raw, rawInner, book = book)
         else :
-            compare(raw, book = book)
+            compare.compare(raw, book = book)
 
     f.Close()
     if inner :
@@ -132,138 +133,6 @@ def collectedRaw(tree = None, specs = {}, htrBlocks = False) :
                  }
     return raw
 
-def printRaw(d = {}) :
-    aux = d[None]
-    print "%4s iEntry 0x%08x (%d)"%(aux["label"], aux["iEntry"], aux["iEntry"])
-    print " FEDid      EvN          OrN       BcN   minutes     TTS    nBytesHW  nBytesSW"
-    for fedId,data in d.iteritems() :
-        if fedId==None : continue
-        printRawOneFed(data)
-    print
-
-def printRawOneFed(d = {}, htrOverview = True, htrBlocks = True) :
-    print "   ".join(["  %3d"%d["FEDid"],
-                      " 0x%07x"%d["EvN"],
-                      "0x%08x"%d["OrN"],
-                      "%4d"%d["BcN"],
-                      "%7.3f"%minutes(d["OrN"]),
-                      "   %1x"%d["TTS"],
-                      "    %4d"%(d["nWord64"]*8),
-                      "   %4d"%d["nBytesSW"],
-                      ])
-    if htrOverview :
-        hyphens = "   "+("-"*68)
-        print hyphens
-
-        uhtr    = ["  ", "   uHTR"]
-        epcv    = ["  ", "   EPCV"]
-        nWord16 = ["  ", "nWord16"]
-        for iUhtr in range(12) :
-            h = d["uHTR%d"%iUhtr]
-            uhtr.append("%4d"%iUhtr)
-            epcv.append("%d%d%d%d"%(h["E"], h["P"], h["C"], h["V"]))
-            nWord16.append("%4d"%(h["nWord16"]))
-        for line in [uhtr,epcv,nWord16] :
-            print " ".join(line)
-        print hyphens
-
-    if htrBlocks :
-        offsets = d["htrBlocks"].keys()
-        if offsets :
-            print "iWord16     EvN          OrN5      BcN   InputID  ModuleId   nWord16  FormatVer"
-            for offset in sorted(offsets) :
-                p = d["htrBlocks"][offset]
-                print "   ".join([" %04d"%offset,
-                                  " 0x%07x"%p["EvN"],
-                                  "0x%08x"%p["OrN"],
-                                  "%4d"%p["BcN"],
-                                  "  0x%02x"%p["InputID"],
-                                  "  0x%03x"%p["ModuleId"],
-                                  " %5d"%p["nWord16"],
-                                  "    0x%01x"%p["FormatVer"],
-                                  ])
-                #print p["channelData"]
-
-def bcn(raw, delta = 0) :
-    if not delta : return raw
-    out = raw + delta
-    if out<0    : out += 3564
-    if out>3563 : out -= 3564
-    return out
-
-#see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
-def decodeTrailer(d = {}, iWord64 = None, word64 = None, bcnDelta = 0) :
-    d["TTS"] = (word64&0xf)>>2
-    d["nWord64"] = (word64&(0xffffff<<32))>>32
-
-def decodeHeader(d = {}, iWord64 = None, word64 = None, bcnDelta = 0) :
-    b = [((0xff<<8*i) & word64)>>8*i for i in range(8)]
-
-    if iWord64==0 :
-        #d["eight"] = 0xf & b[0]
-        #d["fov"] = (0xf0 & b[0])/(1<<4)
-        d["FEDid"] = (0xf & b[2])*(1<<8) + b[1]
-        d["BcN"] = (0xf0 & b[2])/(1<<4) + b[3]*(1<<4)
-        d["EvN"] = b[4] + b[5]*(1<<8) + b[6]*(1<<16)
-        d["BcN"] = bcn(d["BcN"], bcnDelta)
-        #d["evtTy"] = 0xf & b[7]
-        #d["five"] = (0xf0 & b[7])/(1<<4)
-
-    if iWord64==1 :
-        #d["zero1"] = 0xf & b[0]
-        d["OrN"] = (0xf0 & b[0])/(1<<4) + b[1]*(1<<4) + b[2]*(1<<12) + b[3]*(1<<20) + (0xf & b[4])*(1<<28)
-
-    uhtr = {3:0, 4:4, 5:8}
-    if iWord64 in uhtr :
-        uhtr0 = uhtr[iWord64]
-        for i in range(4) :
-            key = "uHTR%d"%(uhtr0+i)
-            b0 = b[  2*i]
-            b1 = b[1+2*i]
-            d[key] = {"E":(b1&80)>>6,
-                      "P":(b1&40)>>5,
-                      "C":(b1&20)>>4,
-                      "V":(b1&10)>>3,
-                      "nWord16":(b1 & 0xf)*(1<<4) + b0,
-                      }
-
-def decodePayload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
-    #see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
-    w = word16
-
-    if "iWordZero" not in d :
-        d["iWordZero"] = iWord16
-        d[d["iWordZero"]] = {}
-
-    l = d[d["iWordZero"]]
-    i = iWord16 - d["iWordZero"]
-    if i==0 :
-        l["InputID"] = (w&0xf0)/(1<<8)
-        l["EvN"] = w&0xf
-    if i==1 :
-        l["EvN"] += w*(1<<8)
-    if i==3 :
-        l["ModuleId"] = w&0x7ff
-        l["OrN"] = (w&0xf800)>>11
-    if i==4 :
-        l["BcN"] = bcn(w&0xfff, bcnDelta)
-        l["FormatVer"] = (w&0xf000)>>12
-    if i==5 :
-        #l["nWord16"] = w&0x3fff
-        l["nWord16"] = 228
-        l["channelData"] = {}
-    if i<=5 : return
-
-    if w&(1<<15) :
-        channelId = w&0xff
-        #l["channelData"][channelId] = {"Flavor":(w&7000)>>12,
-#                                       }
-    else :
-        pass
-
-    if i==l["nWord16"]-1 :
-        del d["iWordZero"]
-
 def unpacked(fedData = None, iWord64Begin = None, iWord64End = None, chars = None,
              decodeBy64 = None, decode = None, by = None, bcnDelta = 0) :
     assert chars in [False,True],"Specify whether to unpack by words or chars."
@@ -290,16 +159,16 @@ def unpacked(fedData = None, iWord64Begin = None, iWord64End = None, chars = Non
 def unpackedPayload(fedData = None, bcnDelta = None, chars = None) :
     nWord64 = fedData.size()/(8 if chars else 1)
     return unpacked(fedData = fedData, bcnDelta = bcnDelta, chars = chars,
-                    iWord64Begin = 6, iWord64End = nWord64-1, decode = decodePayload, by = 16)
+                    iWord64Begin = 6, iWord64End = nWord64-1, decode = decode.payload, by = 16)
 
 def unpackedHeader(fedData = None, bcnDelta = None, chars = None) :
     return unpacked(fedData = fedData, bcnDelta = bcnDelta, chars = chars,
-                    iWord64Begin = 0, iWord64End = 6, decode = decodeHeader, by = 64)
+                    iWord64Begin = 0, iWord64End = 6, decode = decode.header, by = 64)
 
 def unpackedTrailer(fedData = None, bcnDelta = None, chars = None) :
     nWord64 = fedData.size()/(8 if chars else 1)
     return unpacked(fedData = fedData, bcnDelta = bcnDelta, chars = chars,
-                    iWord64Begin = nWord64-1, iWord64End = nWord64, decode = decodeTrailer, by = 64)
+                    iWord64Begin = nWord64-1, iWord64End = nWord64, decode = decode.trailer, by = 64)
 
 def charsOneFed(tree = None, fedId = None, collection = "") :
     FEDRawData = getattr(tree, collection).product().FEDData(fedId) #CMS data type
@@ -308,31 +177,6 @@ def charsOneFed(tree = None, fedId = None, collection = "") :
 def wordsOneChunk(tree = None, fedId = None) :
     chunk = getattr(tree, "Chunk%d"%fedId) #CDF data type
     return r.CDFChunk2(chunk).chunk() #wrapper class creates std::vector<ULong64_t>
-
-def bcnLabel(delta = 0) :
-    out = "BcN"
-    if delta<0 :
-        out += " - %d"%abs(delta)
-    elif delta>0 :
-        out += " + %d"%abs(delta)
-    return out
-
-def compare(raw1 = {}, raw2 = {}, book = {}) :
-    if raw1 and raw1[None]["print"] : printRaw(raw1)
-    if raw2 and raw2[None]["print"] : printRaw(raw2)
-
-    if raw2 :
-        d1 = raw1[989]
-        d2 = raw2[700]
-        bcnXTitle = "FED 989 %s - FED 700 %s"%(bcnLabel(raw1[None]["bcnDelta"]), bcnLabel(raw2[None]["bcnDelta"]))
-        book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED 989 OrN - FED 700 OrN;Events / bin")
-        book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 11, -5.5, 5.5, title = ";%s;Events / bin"%bcnXTitle)
-        book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED 989 EvN - FED 700 EvN;Events / bin")
-        book.fill(d1["TTS"], "TTS", 16, -0.5, 15.5, title = ";FED 989 TTS state;Events / bin")
-
-def minutes(orn) :
-    orbPerSec = 11.1e3
-    return orn/orbPerSec/60.0
 
 def categories(oMap = {}, iMap = {}, innerEvent = {}) :
     d = {}
@@ -354,7 +198,7 @@ def categories(oMap = {}, iMap = {}, innerEvent = {}) :
 def graph(d = {}) :
     gr = r.TGraph()
     for i,key in enumerate(sorted(d.keys())) :
-        gr.SetPoint(i, minutes(key), d[key])
+        gr.SetPoint(i, compare.minutes(key), d[key])
     return gr
 
 def eventToEvent(mapF = {}, mapB = {}, useEvn = False, ornTolerance = None) :
@@ -411,8 +255,8 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filt
     utca = {"label":"uTCA",
             "fileName":utcaFileName, "treeName":"CMSRAW", "format":"HCAL", "auxBranch":False,
             "fedIds":[989], "rawCollection": "FEDRawDataCollection_source__demo",
-            "bcnDelta":-118, "nEventsMax":2,
-            "printEventMap":False, "printRaw":True,
+            "bcnDelta":-118, "nEventsMax":None,
+            "printEventMap":False, "printRaw":False,
             }
 
     cms = {"label":"CMS",
