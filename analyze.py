@@ -89,7 +89,7 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, htrBlocks = True) :
         nb = tree.GetEntry(iOuterEvent)
         if nb<=0 : continue
         if outer["printRaw"] or (inner and inner["printRaw"]) :
-            print "-"*56
+            print "-"*78
         raw = collectedRaw(tree = tree, specs = outer, htrBlocks = htrBlocks)
 
         if inner :
@@ -135,31 +135,42 @@ def collectedRaw(tree = None, specs = {}, htrBlocks = False) :
 def printRaw(d = {}) :
     aux = d[None]
     print "%4s iEntry 0x%08x (%d)"%(aux["label"], aux["iEntry"], aux["iEntry"])
-    print "FEDid       EvN          OrN       BcN   minutes  TTS  nBytesHW  nBytesSW"
+    print " FEDid      EvN          OrN       BcN   minutes     TTS    nBytesHW  nBytesSW"
     for fedId,data in d.iteritems() :
         if fedId==None : continue
         printRawOneFed(data)
     print
 
-def printRawOneFed(d = {}, htr = True) :
-    print "   ".join([" %3d"%d["FEDid"],
-                      "  0x%07x"%d["EvN"],
+def printRawOneFed(d = {}, htrOverview = True, htrBlocks = True) :
+    print "   ".join(["  %3d"%d["FEDid"],
+                      " 0x%07x"%d["EvN"],
                       "0x%08x"%d["OrN"],
                       "%4d"%d["BcN"],
                       "%7.3f"%minutes(d["OrN"]),
-                      "%1x"%d["TTS"],
-                      "  %4d"%(d["nWord64"]*8),
+                      "   %1x"%d["TTS"],
+                      "    %4d"%(d["nWord64"]*8),
                       "   %4d"%d["nBytesSW"],
                       ])
-    if htr :
-        #print "uHTR EPCV nWord16"
-        #for iUhtr in range(12) :
-        #    h = d["uHTR%d"%iUhtr]
-        #    print "%4d %d%d%d%d %7d"%(iUhtr, h["E"], h["P"], h["C"], h["V"], h["nWord16"])
+    if htrOverview :
+        hyphens = "   "+("-"*68)
+        print hyphens
 
+        uhtr    = ["  ", "   uHTR"]
+        epcv    = ["  ", "   EPCV"]
+        nWord16 = ["  ", "nWord16"]
+        for iUhtr in range(12) :
+            h = d["uHTR%d"%iUhtr]
+            uhtr.append("%4d"%iUhtr)
+            epcv.append("%d%d%d%d"%(h["E"], h["P"], h["C"], h["V"]))
+            nWord16.append("%4d"%(h["nWord16"]))
+        for line in [uhtr,epcv,nWord16] :
+            print " ".join(line)
+        print hyphens
+
+    if htrBlocks :
         offsets = d["htrBlocks"].keys()
         if offsets :
-            print "iWord16     EvN          OrN5      BcN   InputID  ModuleId  nWord16  FormatVer"
+            print "iWord16     EvN          OrN5      BcN   InputID  ModuleId   nWord16  FormatVer"
             for offset in sorted(offsets) :
                 p = d["htrBlocks"][offset]
                 print "   ".join([" %04d"%offset,
@@ -168,10 +179,10 @@ def printRawOneFed(d = {}, htr = True) :
                                   "%4d"%p["BcN"],
                                   "  0x%02x"%p["InputID"],
                                   "  0x%03x"%p["ModuleId"],
-                                  "%5d"%p["nWord16"],
+                                  " %5d"%p["nWord16"],
                                   "    0x%01x"%p["FormatVer"],
                                   ])
-                print p["channelData"]
+                #print p["channelData"]
 
 def bcn(raw, delta = 0) :
     if not delta : return raw
