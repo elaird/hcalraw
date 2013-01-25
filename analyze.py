@@ -77,7 +77,7 @@ def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
     f.Close()
     return forward,backward
 
-def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, payload = True) :
+def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, htrBlocks = True) :
     if inner :
         fI = r.TFile.Open(inner["fileName"])
         treeI = fI.Get(inner["treeName"])
@@ -90,7 +90,7 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, payload = True) :
         if nb<=0 : continue
         if outer["printRaw"] or (inner and inner["printRaw"]) :
             print "-"*56
-        raw = collectedRaw(tree = tree, specs = outer, payload = payload)
+        raw = collectedRaw(tree = tree, specs = outer, htrBlocks = htrBlocks)
 
         if inner :
             iInnerEvent = innerEvent[iOuterEvent]
@@ -98,7 +98,7 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, payload = True) :
 
             nb = treeI.GetEntry(iInnerEvent)
             if nb<=0 : continue
-            rawInner = collectedRaw(tree = treeI, specs = inner, payload = payload)
+            rawInner = collectedRaw(tree = treeI, specs = inner, htrBlocks = htrBlocks)
             compare(raw, rawInner, book = book)
         else :
             compare(raw, book = book)
@@ -107,7 +107,7 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, payload = True) :
     if inner :
         fI.Close()
 
-def collectedRaw(tree = None, specs = {}, payload = False) :
+def collectedRaw(tree = None, specs = {}, htrBlocks = False) :
     raw = {}
     for fedId in specs["fedIds"] :
         if specs["format"]=="CMS" :
@@ -115,15 +115,15 @@ def collectedRaw(tree = None, specs = {}, payload = False) :
             raw[fedId] = unpackedHeader(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True)
             raw[fedId].update(unpackedTrailer(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True))
             raw[fedId]["nBytesSW"] = rawThisFed.size()
-            if payload :
-                raw[fedId]["payload"] = unpackedPayload(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True)
+            raw[fedId]["htrBlocks"] = unpackedPayload(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True) \
+                                      if htrBlocks else {}
         elif specs["format"]=="HCAL" :
             rawThisFed = wordsOneChunk(tree, fedId)
             raw[fedId] = unpackedHeader(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False)
             raw[fedId].update(unpackedTrailer(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False))
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
-            if payload :
-                raw[fedId]["payload"] = unpackedPayload(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False)
+            raw[fedId]["htrBlocks"] = unpackedPayload(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False) \
+                                      if htrBlocks else {}
 
     raw[None] = {"print":specs["printRaw"],
                  "label":specs["label"],
@@ -135,7 +135,7 @@ def collectedRaw(tree = None, specs = {}, payload = False) :
 def printRaw(d = {}) :
     aux = d[None]
     print "%4s iEntry 0x%08x (%d)"%(aux["label"], aux["iEntry"], aux["iEntry"])
-    print "FEDid     EvN          OrN       BcN   minutes  TTS  nBytesHW  nBytesSW"
+    print "FEDid       EvN          OrN       BcN   minutes  TTS  nBytesHW  nBytesSW"
     for fedId,data in d.iteritems() :
         if fedId==None : continue
         printRawOneFed(data)
@@ -143,7 +143,7 @@ def printRaw(d = {}) :
 
 def printRawOneFed(d = {}, htr = True) :
     print "   ".join([" %3d"%d["FEDid"],
-                      "0x%07x"%d["EvN"],
+                      "  0x%07x"%d["EvN"],
                       "0x%08x"%d["OrN"],
                       "%4d"%d["BcN"],
                       "%7.3f"%minutes(d["OrN"]),
@@ -152,14 +152,26 @@ def printRawOneFed(d = {}, htr = True) :
                       "   %4d"%d["nBytesSW"],
                       ])
     if htr :
-        print "uHTR EPCV nWord16"
-        for iUhtr in range(12) :
-            h = d["uHTR%d"%iUhtr]
-            print "%4d %d%d%d%d %7d"%(iUhtr, h["E"], h["P"], h["C"], h["V"], h["nWord16"])
+        #print "uHTR EPCV nWord16"
+        #for iUhtr in range(12) :
+        #    h = d["uHTR%d"%iUhtr]
+        #    print "%4d %d%d%d%d %7d"%(iUhtr, h["E"], h["P"], h["C"], h["V"], h["nWord16"])
 
-        for offset in sorted(d["payload"].keys()) :
-            payload = d["payload"][offset]
-            print "%04d"%offset,payload
+        offsets = d["htrBlocks"].keys()
+        if offsets :
+            print "iWord16     EvN          OrN5      BcN   InputID  ModuleId  nWord16  FormatVer"
+            for offset in sorted(offsets) :
+                p = d["htrBlocks"][offset]
+                print "   ".join([" %04d"%offset,
+                                  " 0x%07x"%p["EvN"],
+                                  "0x%08x"%p["OrN"],
+                                  "%4d"%p["BcN"],
+                                  "  0x%02x"%p["InputID"],
+                                  "  0x%03x"%p["ModuleId"],
+                                  "%5d"%p["nWord16"],
+                                  "    0x%01x"%p["FormatVer"],
+                                  ])
+                print p["channelData"]
 
 def bcn(raw, delta = 0) :
     if not delta : return raw
@@ -228,7 +240,15 @@ def decodePayload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
     if i==5 :
         #l["nWord16"] = w&0x3fff
         l["nWord16"] = 228
+        l["channelData"] = {}
     if i<=5 : return
+
+    if w&(1<<15) :
+        channelId = w&0xff
+        #l["channelData"][channelId] = {"Flavor":(w&7000)>>12,
+#                                       }
+    else :
+        pass
 
     if i==l["nWord16"]-1 :
         del d["iWordZero"]
@@ -297,6 +317,7 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
         book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED 989 OrN - FED 700 OrN;Events / bin")
         book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 11, -5.5, 5.5, title = ";%s;Events / bin"%bcnXTitle)
         book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED 989 EvN - FED 700 EvN;Events / bin")
+        book.fill(d1["TTS"], "TTS", 16, -0.5, 15.5, title = ";FED 989 TTS state;Events / bin")
 
 def minutes(orn) :
     orbPerSec = 11.1e3
@@ -379,8 +400,8 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filt
     utca = {"label":"uTCA",
             "fileName":utcaFileName, "treeName":"CMSRAW", "format":"HCAL", "auxBranch":False,
             "fedIds":[989], "rawCollection": "FEDRawDataCollection_source__demo",
-            "bcnDelta":-118, "nEventsMax":None,
-            "printEventMap":False, "printRaw":False,
+            "bcnDelta":-118, "nEventsMax":2,
+            "printEventMap":False, "printRaw":True,
             }
 
     cms = {"label":"CMS",
