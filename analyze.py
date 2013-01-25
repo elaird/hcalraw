@@ -107,18 +107,20 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, payload = True) :
     if inner :
         fI.Close()
 
-def collectedRaw(tree = None, specs = {}, payload = True) :
+def collectedRaw(tree = None, specs = {}, payload = False) :
     raw = {}
     for fedId in specs["fedIds"] :
         if specs["format"]=="CMS" :
             rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
             raw[fedId] = unpackedHeader(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True)
+            raw[fedId].update(unpackedTrailer(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True))
             raw[fedId]["nBytesSW"] = rawThisFed.size()
             if payload :
                 raw[fedId]["payload"] = unpackedPayload(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True)
         elif specs["format"]=="HCAL" :
             rawThisFed = wordsOneChunk(tree, fedId)
             raw[fedId] = unpackedHeader(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False)
+            raw[fedId].update(unpackedTrailer(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False))
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
             if payload :
                 raw[fedId]["payload"] = unpackedPayload(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False)
@@ -133,7 +135,7 @@ def collectedRaw(tree = None, specs = {}, payload = True) :
 def printRaw(d = {}) :
     aux = d[None]
     print "%4s iEntry 0x%08x (%d)"%(aux["label"], aux["iEntry"], aux["iEntry"])
-    print "FEDid     EvN          OrN       BcN   minutes nBytesSW"
+    print "FEDid     EvN          OrN       BcN   minutes  TTS  nBytesHW  nBytesSW"
     for fedId,data in d.iteritems() :
         if fedId==None : continue
         printRawOneFed(data)
@@ -145,7 +147,9 @@ def printRawOneFed(d = {}, htr = True) :
                       "0x%08x"%d["OrN"],
                       "%4d"%d["BcN"],
                       "%7.3f"%minutes(d["OrN"]),
-                      "%4d"%d["nBytesSW"],
+                      "%1x"%d["TTS"],
+                      "  %4d"%(d["nWord64"]*8),
+                      "   %4d"%d["nBytesSW"],
                       ])
     if htr :
         print "uHTR EPCV nWord16"
@@ -164,8 +168,12 @@ def bcn(raw, delta = 0) :
     if out>3563 : out -= 3564
     return out
 
+#see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
+def decodeTrailer(d = {}, iWord64 = None, word64 = None, bcnDelta = 0) :
+    d["TTS"] = (word64&0xf)>>2
+    d["nWord64"] = (word64&(0xffffff<<32))>>32
+
 def decodeHeader(d = {}, iWord64 = None, word64 = None, bcnDelta = 0) :
-    #see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
     b = [((0xff<<8*i) & word64)>>8*i for i in range(8)]
 
     if iWord64==0 :
