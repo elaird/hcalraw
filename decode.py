@@ -69,8 +69,10 @@ def payload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
 
     if w&(1<<15) :
         channelId = w&0xff
-        #l["channelData"][channelId] = {"Flavor":(w&7000)>>12,
-#                                       }
+        l["channelData"][channelId] = {"CapId0":(w&0x300)>>8,
+                                       "ErrF":(w&0xc00)>>10,
+                                       "Flavor":(w&0x7000)>>12,
+                                       }
     else :
         pass
 

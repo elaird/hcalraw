@@ -39,7 +39,7 @@ def printRaw(d = {}, hyphens = True) :
         printRawOneFed(data)
     print
 
-def printRawOneFed(d = {}, htrOverview = True, htrBlocks = True) :
+def printRawOneFed(d = {}, htrOverview = True, htrBlocks = False, channelData = False) :
     print "   ".join(["  %3d"%d["FEDid"],
                       " 0x%07x"%d["EvN"],
                       "0x%08x"%d["OrN"],
@@ -68,8 +68,9 @@ def printRawOneFed(d = {}, htrOverview = True, htrBlocks = True) :
     if htrBlocks :
         offsets = d["htrBlocks"].keys()
         if offsets :
-            print "iWord16     EvN          OrN5      BcN   InputID  ModuleId   nWord16  FormatVer"
-            for offset in sorted(offsets) :
+            for iOffset,offset in enumerate(sorted(offsets)) :
+                if channelData or not iOffset :
+                    print "iWord16     EvN          OrN5      BcN   InputID  ModuleId   nWord16  FormatVer"
                 p = d["htrBlocks"][offset]
                 print "   ".join([" %04d"%offset,
                                   " 0x%07x"%p["EvN"],
@@ -80,4 +81,12 @@ def printRawOneFed(d = {}, htrOverview = True, htrBlocks = True) :
                                   " %5d"%p["nWord16"],
                                   "    0x%01x"%p["FormatVer"],
                                   ])
-                print p["channelData"]
+                if channelData :
+                    print "ModuleId  Ch  Fl  ErrF CapId0"
+                    for channelId,data in p["channelData"].iteritems() :
+                        print "   ".join([" 0x%03x"%p["ModuleId"],
+                                          "%3d"%channelId,
+                                          "%1d"%data["Flavor"],
+                                          "%2d"%data["ErrF"],
+                                          "  %1d"%data["CapId0"],
+                                          ])
