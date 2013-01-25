@@ -9,6 +9,7 @@ def bcn(raw, delta = 0) :
 
 def trailer(d = {}, iWord64 = None, word64 = None, bcnDelta = 0) :
     d["TTS"] = (word64&0xf)>>2
+    d["CRC16"] = (word64&(0xffff<<16))>>16
     d["nWord64"] = (word64&(0xffffff<<32))>>32
 
 def header(d = {}, iWord64 = None, word64 = None, bcnDelta = 0) :
@@ -50,6 +51,8 @@ def payload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
 
     l = d[d["iWordZero"]]
     i = iWord16 - d["iWordZero"]
+
+    #header
     if i==0 :
         l["InputID"] = (w&0xf0)/(1<<8)
         l["EvN"] = w&0xf
@@ -57,7 +60,7 @@ def payload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
         l["EvN"] += w*(1<<8)
     if i==3 :
         l["ModuleId"] = w&0x7ff
-        l["OrN"] = (w&0xf800)>>11
+        l["OrN5"] = (w&0xf800)>>11
     if i==4 :
         l["BcN"] = bcn(w&0xfff, bcnDelta)
         l["FormatVer"] = (w&0xf000)>>12
@@ -65,16 +68,29 @@ def payload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
         #l["nWord16"] = w&0x3fff
         l["nWord16"] = 228
         l["channelData"] = {}
-    if i<=5 : return
+    if i<=5 :
+        return
 
-    if w&(1<<15) :
-        channelId = w&0xff
-        l["channelData"][channelId] = {"CapId0":(w&0x300)>>8,
-                                       "ErrF":(w&0xc00)>>10,
-                                       "Flavor":(w&0x7000)>>12,
-                                       }
-    else :
-        pass
-
-    if i==l["nWord16"]-1 :
+    #trailer
+    if i==l["nWord16"]-2 :
+        l["CRC"] = w
+        return
+    elif i==l["nWord16"]-1 :
         del d["iWordZero"]
+        del d["currentChannelId"]
+        l["EvN8"] = w>>8
+        l["DTCErrors"] = w&0xff
+        return
+
+    #data
+    if w&(1<<15) :
+        d["currentChannelId"] = w&0xff
+        l["channelData"][d["currentChannelId"]] = {"CapId0":(w&0x300)>>8,
+                                                   "ErrF":(w&0xc00)>>10,
+                                                   "Flavor":(w&0x7000)>>12,
+                                                   "iWord16":iWord16,
+                                                   }
+        #print "i = %d, iWord16 = %d, channelId = %d"%(i,iWord16,d["currentChannelId"])
+    else :
+        #print "i = %d, iWord16 = %d, channelId = %d"%(i,iWord16,d["currentChannelId"] if "currentChannelId" in d else -1)
+        pass
