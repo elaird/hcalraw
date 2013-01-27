@@ -49,8 +49,8 @@ def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
                 bcn = tree.EventAuxiliary.bunchCrossing()
             else :
                 tree.GetEntry(iEvent)
-                raw = unpackedHeader(fedData = charsOneFed(tree = tree, fedId = fedIds[0], collection = rawCollection),
-                                     bcnDelta = bcnDelta, chars = True)
+                raw = unpacked(fedData = charsOneFed(tree = tree, fedId = fedIds[0], collection = rawCollection),
+                               bcnDelta = bcnDelta, chars = True, skipHtrBlocks = True, skipTrailer = True)
                 orn = raw["OrN"]
                 bcn = raw["BcN"]
                 evn = raw["EvN"]
@@ -62,8 +62,8 @@ def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
                 bcn = tree.CDFEventInfo.getBunchNumber()
             else :
                 tree.GetEntry(iEvent)
-                raw = unpackedHeader(fedData = wordsOneChunk(tree = tree, fedId = fedIds[0]),
-                                     bcnDelta = bcnDelta, chars = False)
+                raw = unpacked(fedData = wordsOneChunk(tree = tree, fedId = fedIds[0]),
+                               bcnDelta = bcnDelta, chars = False, skipHtrBlocks = True, skipTrailer = True)
                 orn = raw["OrN"]
                 bcn = raw["BcN"]
                 evn = raw["EvN"]
@@ -78,7 +78,7 @@ def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
     f.Close()
     return forward,backward
 
-def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, htrBlocks = True) :
+def loop(inner = {}, outer = {}, innerEvent = {}, book = {}) :
     if inner :
         fI = r.TFile.Open(inner["fileName"])
         treeI = fI.Get(inner["treeName"])
@@ -90,7 +90,7 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, htrBlocks = True) :
         nb = tree.GetEntry(iOuterEvent)
         if nb<=0 : continue
 
-        raw = collectedRaw(tree = tree, specs = outer, htrBlocks = htrBlocks)
+        raw = collectedRaw(tree = tree, specs = outer)
 
         if inner :
             iInnerEvent = innerEvent[iOuterEvent]
@@ -98,7 +98,7 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, htrBlocks = True) :
 
             nb = treeI.GetEntry(iInnerEvent)
             if nb<=0 : continue
-            rawInner = collectedRaw(tree = treeI, specs = inner, htrBlocks = htrBlocks)
+            rawInner = collectedRaw(tree = treeI, specs = inner)
             compare.compare(raw, rawInner, book = book)
         else :
             compare.compare(raw, book = book)
@@ -107,23 +107,17 @@ def loop(inner = {}, outer = {}, innerEvent = {}, book = {}, htrBlocks = True) :
     if inner :
         fI.Close()
 
-def collectedRaw(tree = None, specs = {}, htrBlocks = False) :
+def collectedRaw(tree = None, specs = {}) :
     raw = {}
     for fedId in specs["fedIds"] :
         if specs["format"]=="CMS" :
             rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
-            raw[fedId] = unpackedHeader(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True)
-            raw[fedId].update(unpackedTrailer(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True))
+            raw[fedId] = unpacked(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True)
             raw[fedId]["nBytesSW"] = rawThisFed.size()
-            raw[fedId]["htrBlocks"] = unpackedPayload(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True) \
-                                      if htrBlocks else {}
         elif specs["format"]=="HCAL" :
             rawThisFed = wordsOneChunk(tree, fedId)
-            raw[fedId] = unpackedHeader(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False)
-            raw[fedId].update(unpackedTrailer(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False))
+            raw[fedId] = unpacked(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False)
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
-            raw[fedId]["htrBlocks"] = unpackedPayload(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False) \
-                                      if htrBlocks else {}
 
     raw[None] = {"print":specs["printRaw"],
                  "label":specs["label"],
@@ -132,42 +126,34 @@ def collectedRaw(tree = None, specs = {}, htrBlocks = False) :
                  }
     return raw
 
-def unpacked(fedData = None, iWord64Begin = None, iWord64End = None, chars = None,
-             decodeBy64 = None, decode = None, by = None, bcnDelta = 0) :
+def unpacked(fedData = None, chars = None, skipHtrBlocks = False, skipTrailer = False, bcnDelta = 0, utca = None) :
     assert chars in [False,True],"Specify whether to unpack by words or chars."
-    assert decode,"Specify a function to use to interpret the bytes."
-    assert by in [16,64],"Specify every how many bits to call decode."
-    #see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
-    d = {}
-    for iWord64 in range(iWord64Begin, iWord64End) :
-        offset = 8*iWord64
+    #assert skipHtrBlocks or (utca in [False,True]),"Specify whether data is uTCA or VME (unless skipping HTR blocks)."
+    #For AMC13, see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
+    #For DCC2, see http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
+    d = {"htrBlocks":{}}
+
+    nWord64 = fedData.size()/(8 if chars else 1)
+    iWordPayload0 = 6# if utca else 12
+    iWords = range(nWord64) if not skipHtrBlocks else range(iWordPayload0)+[nWord64-1]
+    if skipTrailer : iWords.pop()
+    for iWord64 in iWords :
         if chars :
+            offset = 8*iWord64
             word64 = struct.unpack('Q', "".join([fedData.at(offset+iByte) for iByte in range(8)]))[0]
             #b = [ord(fedData.at(offset+iByte)) for iByte in range(8)] #like above with 'B'*8 rather than 'Q'
         else :
             word64 = fedData.at(iWord64)
 
-        if by==64 :
-            decode(d, iWord64, word64, bcnDelta)
-        elif by==16 :
+        if iWord64<iWordPayload0 :
+            decode.header(d, iWord64, word64, bcnDelta)
+        elif iWord64<nWord64-1 :
             for i in range(4) :
                 word16 = (word64&(0xffff<<16*i))>>16*i
-                decode(d, 4*iWord64+i, word16, bcnDelta)
+                decode.payload(d["htrBlocks"], 4*iWord64+i, word16, bcnDelta)
+        else :
+            decode.trailer(d, iWord64, word64, bcnDelta)
     return d
-
-def unpackedPayload(fedData = None, bcnDelta = None, chars = None) :
-    nWord64 = fedData.size()/(8 if chars else 1)
-    return unpacked(fedData = fedData, bcnDelta = bcnDelta, chars = chars,
-                    iWord64Begin = 6, iWord64End = nWord64-1, decode = decode.payload, by = 16)
-
-def unpackedHeader(fedData = None, bcnDelta = None, chars = None) :
-    return unpacked(fedData = fedData, bcnDelta = bcnDelta, chars = chars,
-                    iWord64Begin = 0, iWord64End = 6, decode = decode.header, by = 64)
-
-def unpackedTrailer(fedData = None, bcnDelta = None, chars = None) :
-    nWord64 = fedData.size()/(8 if chars else 1)
-    return unpacked(fedData = fedData, bcnDelta = bcnDelta, chars = chars,
-                    iWord64Begin = nWord64-1, iWord64End = nWord64, decode = decode.trailer, by = 64)
 
 def charsOneFed(tree = None, fedId = None, collection = "") :
     FEDRawData = getattr(tree, collection).product().FEDData(fedId) #CMS data type
@@ -253,15 +239,14 @@ def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, or
 def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filterEvn = False, ornTolerance = 0) :
     utca = {"label":"uTCA",
             "fileName":utcaFileName, "treeName":"CMSRAW", "format":"HCAL", "auxBranch":False,
-            "fedIds":[989], "rawCollection": "FEDRawDataCollection_source__demo",
+            "fedIds":[989], "rawCollection": "FEDRawDataCollection_source__demo", "utca":True,
             "bcnDelta":-118, "nEventsMax":None,
-            "printEventMap":False, "printRaw":False,
+            "printEventMap":False, "printRaw":True,
             }
 
     cms = {"label":"CMS",
            "fileName":cmsFileName, "treeName":"Events", "format": "CMS", "auxBranch":True,
-           "fedIds":range(700,702), "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC",
-
+           "fedIds":range(700,702), "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC", "utca":False,
            "bcnDelta":0, "nEventsMax":None,
            "printEventMap":False, "printRaw":False,
            }
