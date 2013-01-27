@@ -112,11 +112,11 @@ def collectedRaw(tree = None, specs = {}) :
     for fedId in specs["fedIds"] :
         if specs["format"]=="CMS" :
             rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
-            raw[fedId] = unpacked(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True)
+            raw[fedId] = unpacked(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True, utca = specs["utca"])
             raw[fedId]["nBytesSW"] = rawThisFed.size()
         elif specs["format"]=="HCAL" :
             rawThisFed = wordsOneChunk(tree, fedId)
-            raw[fedId] = unpacked(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False)
+            raw[fedId] = unpacked(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False, utca = specs["utca"])
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
 
     raw[None] = {"print":specs["printRaw"],
@@ -128,13 +128,13 @@ def collectedRaw(tree = None, specs = {}) :
 
 def unpacked(fedData = None, chars = None, skipHtrBlocks = False, skipTrailer = False, bcnDelta = 0, utca = None) :
     assert chars in [False,True],"Specify whether to unpack by words or chars."
-    #assert skipHtrBlocks or (utca in [False,True]),"Specify whether data is uTCA or VME (unless skipping HTR blocks)."
+    assert skipHtrBlocks or (utca in [False,True]),"Specify whether data is uTCA or VME (unless skipping HTR blocks)."
     #For AMC13, see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
     #For DCC2, see http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
     d = {"htrBlocks":{}}
 
     nWord64 = fedData.size()/(8 if chars else 1)
-    iWordPayload0 = 6# if utca else 12
+    iWordPayload0 = 6 if utca else 12
     iWords = range(nWord64) if not skipHtrBlocks else range(iWordPayload0)+[nWord64-1]
     if skipTrailer : iWords.pop()
     for iWord64 in iWords :
@@ -146,7 +146,7 @@ def unpacked(fedData = None, chars = None, skipHtrBlocks = False, skipTrailer = 
             word64 = fedData.at(iWord64)
 
         if iWord64<iWordPayload0 :
-            decode.header(d, iWord64, word64, bcnDelta)
+            decode.header(d, iWord64, word64, utca, bcnDelta)
         elif iWord64<nWord64-1 :
             for i in range(4) :
                 word16 = (word64&(0xffff<<16*i))>>16*i
