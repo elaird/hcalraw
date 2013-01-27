@@ -44,6 +44,7 @@ def header(d = {}, iWord64 = None, word64 = None, bcnDelta = 0) :
                       }
 
 def payload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
+#https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
     w = word16
     if "iWordZero" not in d :
         d["iWordZero"] = iWord16
@@ -51,6 +52,7 @@ def payload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
 
     l = d[d["iWordZero"]]
     i = iWord16 - d["iWordZero"]
+    l["iWordQie0"] = 8
 
     #header
     if i==0 :
@@ -65,14 +67,19 @@ def payload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
         l["BcN"] = bcn(w&0xfff, bcnDelta)
         l["FormatVer"] = (w&0xf000)>>12
     if i==5 :
-        #l["nWord16"] = w&0x3fff
-        l["nWord16"] = 228
+        l["nWord16"] = 228 #fixme
+        l["nWord16Tp"] = (w&0xfc)>>3
+        l["nPreSamples"] = (w&0xfc)>>3
         l["channelData"] = {}
-    if i<=5 :
+    if i<l["iWordQie0"] :
         return
 
     #trailer
-    if i==l["nWord16"]-2 :
+    if i==l["nWord16"]-4 :
+        l["nWord16Qie"] = w&0x7ff
+        l["nSamples"] = (w&0xfc00)>>11
+        return
+    if i==l["nWord16"]-3 :
         l["CRC"] = w
         return
     elif i==l["nWord16"]-1 :
