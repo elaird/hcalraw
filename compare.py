@@ -33,40 +33,43 @@ def printRaw(d = {}, hyphens = True) :
 
     aux = d[None]
     print "%4s iEntry 0x%08x (%d)"%(aux["label"], aux["iEntry"], aux["iEntry"])
-    print " FEDid      EvN          OrN       BcN   minutes     TTS    nBytesHW  nBytesSW   CRC16"
+    print " FEDid      EvN          OrN       BcN   minutes    TTS    nBytesHW  nBytesSW   CRC16"
     for fedId,data in d.iteritems() :
         if fedId==None : continue
         printRawOneFed(data)
     print
 
-def printRawOneFed(d = {}, htrOverview = True, htrBlocks = True, channelData = True) :
+def printRawOneFed(d = {}, htrOverview = True, htrHeaders = False, channelData = False) :
     print "   ".join(["  %3d"%d["FEDid"],
                       " 0x%07x"%d["EvN"],
                       "0x%08x"%d["OrN"],
                       "%4d"%d["BcN"],
                       "%7.3f"%minutes(d["OrN"]),
-                      "   %1x"%d["TTS"],
+                      "  %1x"%d["TTS"],
                       "    %4d"%(d["nWord64"]*8),
                       "   %4d"%d["nBytesSW"],
                       " 0x%04x"%d["CRC16"],
                       ])
     if htrOverview :
-        hyphens = "   "+("-"*68)
+        abbr = "uHTR" if "uHTR0" in d else "HTR"
+        hyphens = "   "+("-"*(67 if abbr=="uHTR" else 82))
         print hyphens
 
-        uhtr    = ["  ", "   uHTR"]
+        htr     = ["  ", "   %4s"%abbr]
         epcv    = ["  ", "   EPCV"]
         nWord16 = ["  ", "nWord16"]
-        for iUhtr in range(12) :
-            h = d["uHTR%d"%iUhtr]
-            uhtr.append("%4d"%iUhtr)
+        for iHtr in range(15) :
+            key = "%s%d"%(abbr,iHtr)
+            if key not in d : continue
+            h = d[key]
+            htr.append("%4d"%iHtr)
             epcv.append("%d%d%d%d"%(h["E"], h["P"], h["C"], h["V"]))
             nWord16.append("%4d"%(h["nWord16"]))
-        for line in [uhtr,epcv,nWord16] :
+        for line in [htr,epcv,nWord16] :
             print " ".join(line)
         print hyphens
 
-    if htrBlocks :
+    if htrHeaders :
         offsets = d["htrBlocks"].keys()
         if offsets :
             for iOffset,offset in enumerate(sorted(offsets)) :
