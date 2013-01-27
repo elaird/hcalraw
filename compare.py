@@ -29,7 +29,7 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
 
 def printRaw(d = {}, hyphens = True) :
     if hyphens :
-        print "-"*78
+        print "-"*86
 
     aux = d[None]
     print "%4s iEntry 0x%08x (%d)"%(aux["label"], aux["iEntry"], aux["iEntry"])
@@ -71,19 +71,23 @@ def printRawOneFed(d = {}, htrOverview = True, htrBlocks = True, channelData = T
         if offsets :
             for iOffset,offset in enumerate(sorted(offsets)) :
                 if channelData or not iOffset :
-                    print "iWord16     EvN          OrN5      BcN   InputID  ModuleId   nWord16  FormatVer  EvN8     CRC"
+                    print "iWord16     EvN    OrN5   BcN  InpID  ModuleId  FrmtV  "+\
+                          "nWordTP  nWordQIE  nSamp  nPre  EvN8    CRC"
                 p = d["htrBlocks"][offset]
-                print "   ".join([" %04d"%offset,
-                                  " 0x%07x"%p["EvN"],
-                                  "0x%08x"%p["OrN5"],
-                                  "%4d"%p["BcN"],
-                                  "  0x%02x"%p["InputID"],
-                                  "  0x%03x"%p["ModuleId"],
-                                  " %5d"%p["nWord16"],
-                                  "    0x%01x"%p["FormatVer"],
-                                  "  0x%02x"%p["EvN8"],
-                                  "0x%04x"%p["CRC"],
-                                  ])
+                print "  ".join([" %04d"%offset,
+                                 " 0x%07x"%p["EvN"],
+                                 "0x%02x"%p["OrN5"],
+                                 "%4d"%p["BcN"],
+                                 " 0x%02x"%p["InputID"],
+                                 "  0x%03x"%p["ModuleId"],
+                                 "  0x%01x"%p["FormatVer"],
+                                 "  %3d  "%p["nWord16Tp"],
+                                 "   %3d"%p["nWord16Qie"],
+                                 "    %2d"%p["nSamples"],
+                                 "  %2d"%p["nPreSamples"],
+                                 "  0x%02x"%p["EvN8"],
+                                 "0x%04x"%p["CRC"],
+                                 ])
                 if channelData :
                     print "ModuleId  Ch  Fl  ErrF CapId0  QIE(hex)  0  1  2  3  4  5  6  7  8  9"
                     for channelId,data in p["channelData"].iteritems() :
