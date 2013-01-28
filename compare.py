@@ -33,15 +33,15 @@ def printRaw(d = {}, hyphens = True) :
 
     aux = d[None]
     print "%4s iEntry 0x%08x (%d)"%(aux["label"], aux["iEntry"], aux["iEntry"])
-    print " FEDid      EvN          OrN       BcN   minutes    TTS    nBytesHW  nBytesSW   CRC16"
+    print " FEDid     EvN          OrN       BcN   minutes    TTS    nBytesHW  nBytesSW   CRC16"
     for fedId,data in d.iteritems() :
         if fedId==None : continue
         printRawOneFed(data)
     print
 
-def printRawOneFed(d = {}, htrOverview = True, htrHeaders = False, channelData = False) :
+def printRawOneFed(d = {}, htrOverview = True, htrHeaders = True, channelData = True) :
     print "   ".join(["  %3d"%d["FEDid"],
-                      " 0x%07x"%d["EvN"],
+                      "0x%07x"%d["EvN"],
                       "0x%08x"%d["OrN"],
                       "%4d"%d["BcN"],
                       "%7.3f"%minutes(d["OrN"]),
@@ -77,7 +77,7 @@ def printRawOneFed(d = {}, htrOverview = True, htrHeaders = False, channelData =
                     print "iWord16     EvN    OrN5   BcN  InpID  ModuleId  FrmtV  "+\
                           "nWordTP  nWordQIE  nSamp  nPre  EvN8    CRC"
                 p = d["htrBlocks"][offset]
-                print "  ".join([" %04d"%offset,
+                print "  ".join([" %04d"%p["0Word16"],
                                  " 0x%07x"%p["EvN"],
                                  "0x%02x"%p["OrN5"],
                                  "%4d"%p["BcN"],
