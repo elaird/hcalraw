@@ -149,9 +149,12 @@ def unpacked(fedData = None, chars = None, skipHtrBlocks = False, skipTrailer = 
             decode.header(d, iWord64, word64, utca, bcnDelta)
         elif iWord64<nWord64-1 :
             for i in range(4) :
-                word16 = (word64&(0xffff<<16*i))>>16*i
-                decode.payload(d["htrBlocks"], 4*iWord64+i, word16, bcnDelta)
+                word16 = (word64>>(16*i))&0xffff
+                decode.payload(d["htrBlocks"], iWord16 = 4*iWord64+i, word16 = word16,
+                               word16Counts = d["word16Counts"], utca = utca, bcnDelta = bcnDelta)
         else :
+            if "htrIndex" in d["htrBlocks"] :
+                del d["htrBlocks"]["htrIndex"] #fixme
             decode.trailer(d, iWord64, word64, bcnDelta)
     return d
 
@@ -248,7 +251,7 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filt
            "fileName":cmsFileName, "treeName":"Events", "format": "CMS", "auxBranch":True,
            "fedIds":range(700,702), "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC", "utca":False,
            "bcnDelta":0, "nEventsMax":None,
-           "printEventMap":False, "printRaw":False,
+           "printEventMap":False, "printRaw":True,
            }
 
     if utcaFileName :
