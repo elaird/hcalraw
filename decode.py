@@ -65,8 +65,6 @@ def payload(d = {}, iWord16 = None, word16 = None, word16Counts = [], utca = Non
             d[iHtr] = {"nWord16":word16Counts[iHtr]}
         d["htrIndex"] = 0
 
-    if d["htrIndex"] not in d : return #fixme
-
     l = d[d["htrIndex"]]
     if "0Word16" not in l :
         l["0Word16"] = iWord16
