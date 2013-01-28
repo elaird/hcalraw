@@ -13,16 +13,20 @@ def trailer(d = {}, iWord64 = None, word64 = None, bcnDelta = 0) :
     d["CRC16"] = (word64>>16)&0xffff
     d["nWord64"] = (word64>>32)&0xffffff
 
-def htrDict(w) :
-    return {"nWord16":w&0x3ff,
+def htrDict(w, l = []) :
+    nWord16 = 2*(w&0x3ff)
+    if nWord16 : l.append(nWord16)
+    return {"nWord16":nWord16,
             "E":(w>>15)&1,
             "P":(w>>14)&1,
             "C":(w>>10)&1,
             "V":not ((w>>12)&1 or (w>>13)&1),
             }
 
-def uHtrDict(w) :
-    return {"nWord16":w&0xfff,
+def uHtrDict(w, l = []) :
+    nWord16 = w&0xfff
+    if nWord16 : l.append(nWord16)
+    return {"nWord16":nWord16,
             "E":(w>>15)&1,
             "P":(w>>14)&1,
             "V":(w>>13)&1,
@@ -38,28 +42,36 @@ def header(d = {}, iWord64 = None, word64 = None, utca = None, bcnDelta = 0) :
         d["BcN"] = bcn(d["BcN"], bcnDelta)
     if iWord64==1 :
         d["OrN"] = (w>>4)&0xffffffff
+        d["word16Counts"] = []
 
     if utca :
         if 3<=iWord64<=5 :
             uhtr0 = 4*(iWord64-3)
             for i in range(4) :
-                d["uHTR%d"%(uhtr0+i)] = uHtrDict((w>>(16*i))&0xffff)
+                d["uHTR%d"%(uhtr0+i)] = uHtrDict((w>>(16*i))&0xffff, d["word16Counts"])
     else :
         if 3<=iWord64<=10 :
             j = (iWord64-3)*2
-            d["HTR%d"%j] = htrDict(w)
+            d["HTR%d"%j] = htrDict(w, d["word16Counts"])
             if iWord64!=10 :
-                d["HTR%d"%(j+1)] = htrDict(w>>32)
+                d["HTR%d"%(j+1)] = htrDict(w>>32, d["word16Counts"])
 
-def payload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
-#https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
+def payload(d = {}, iWord16 = None, word16 = None, word16Counts = [], utca = None, bcnDelta = 0) :
+    #https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
+
     w = word16
-    if "iWordZero" not in d :
-        d["iWordZero"] = iWord16
-        d[d["iWordZero"]] = {}
+    if "htrIndex" not in d :
+        for iHtr in range(len(word16Counts)) :
+            d[iHtr] = {"nWord16":word16Counts[iHtr]}
+        d["htrIndex"] = 0
 
-    l = d[d["iWordZero"]]
-    i = iWord16 - d["iWordZero"]
+    if d["htrIndex"] not in d : return #fixme
+
+    l = d[d["htrIndex"]]
+    if "0Word16" not in l :
+        l["0Word16"] = iWord16
+
+    i = iWord16 - l["0Word16"]
     l["iWordQie0"] = 8
 
     #header
@@ -75,8 +87,8 @@ def payload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
         l["BcN"] = bcn(w&0xfff, bcnDelta)
         l["FormatVer"] = (w&0xf000)>>12
     if i==5 :
-        l["nWord16"] = 228 #fixme
         l["nWord16Tp"] = (w&0xfc)>>3
+        if not utca : l["iWordQie0"] += l["nWord16Tp"]
         l["nPreSamples"] = (w&0xfc)>>3
         l["channelData"] = {}
     if i<l["iWordQie0"] :
@@ -91,10 +103,14 @@ def payload(d = {}, iWord16 = None, word16 = None, bcnDelta = 0) :
         l["CRC"] = w
         return
     elif i==l["nWord16"]-1 :
-        del d["iWordZero"]
+        d["htrIndex"] += 1
         del d["currentChannelId"]
         l["EvN8"] = w>>8
         l["DTCErrors"] = w&0xff
+        return
+
+    #skip "extra info"
+    if (not utca) and i>=l["nWord16"]-12 :
         return
 
     #data
