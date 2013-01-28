@@ -114,9 +114,9 @@ def payload(d = {}, iWord16 = None, word16 = None, word16Counts = [], utca = Non
     #data
     if w&(1<<15) :
         d["currentChannelId"] = w&0xff
-        l["channelData"][d["currentChannelId"]] = {"CapId0":(w&0x300)>>8,
-                                                   "ErrF":(w&0xc00)>>10,
-                                                   "Flavor":(w&0x7000)>>12,
+        l["channelData"][d["currentChannelId"]] = {"CapId0":(w>>8)&0x3,
+                                                   "ErrF":(w>>10)&0x3,
+                                                   "Flavor":(w>>12)&0x7,
                                                    "iWord16":iWord16,
                                                    "QIE":{},
                                                    }
@@ -124,5 +124,5 @@ def payload(d = {}, iWord16 = None, word16 = None, word16Counts = [], utca = Non
         if "currentChannelId" not in d : return
         dct = l["channelData"][d["currentChannelId"]]
         j = iWord16 - dct["iWord16"] - 1
-        dct["QIE"][2*j  ] = word16&0xff
-        dct["QIE"][2*j+1] = (word16&(0xff<<8))>>8
+        dct["QIE"][2*j  ] = word16&0x7f
+        dct["QIE"][2*j+1] = (word16>>8)&0x7f
