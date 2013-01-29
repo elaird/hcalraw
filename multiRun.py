@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import os,optparse,subprocess
+import os,optparse,subprocess,cProfile
 
 def opts() :
     parser = optparse.OptionParser()
+    parser.add_option("--profile", dest = "profile", default = False, action = "store_true", help = "profile the run")
     parser.add_option("--min", dest = "min", default = None, metavar = "N", help = "specify minimum run number")
     parser.add_option("--max", dest = "max", default = None, metavar = "N", help = "specify maximum run number")
     parser.add_option("--run", dest = "run", default = None, metavar = "N", help = "specify one run number")
@@ -49,28 +50,35 @@ def eosFile(run) :
     else:
         return ""
 
-directory = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/"
-uscFiles    = rootFiles(directory, mode = "usc")
-castorFiles = rootFiles(directory, mode = "castor")
-
 options = opts()
 import analyze,graphs
 
-labels = []
-for run in sorted(uscFiles.keys()) :
-    if any([options.min and run<int(options.min),
-            options.max and run>int(options.max),
-            options.run and run!=int(options.run),
-            #(not options.onlyutca) and (run not in castorFiles),
-            ]) : continue
-    label = "Run%d"%run
-    labels.append(label)
-    if options.onlysummary : continue
+def go() :
+    directory = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/"
+    uscFiles    = rootFiles(directory, mode = "usc")
+    castorFiles = rootFiles(directory, mode = "castor")
 
-    analyze.oneRun(utcaFileName = "" if options.onlycms  else uscFiles[run],
-                   #cmsFileName  = "" if options.onlyutca else castorFiles[run],
-                   cmsFileName  = "" if options.onlyutca else eosFile(run),
-                   label = label, useEvn = False,
-                   filterEvn = options.filterevn, ornTolerance = 1)
+    labels = []
+    for run in sorted(uscFiles.keys()) :
+        if any([options.min and run<int(options.min),
+                options.max and run>int(options.max),
+                options.run and run!=int(options.run),
+                #(not options.onlyutca) and (run not in castorFiles),
+                ]) : continue
+        label = "Run%d"%run
+        labels.append(label)
+        if options.onlysummary : continue
 
-graphs.makeSummaryPdf(labels)
+        analyze.oneRun(utcaFileName = "" if options.onlycms  else uscFiles[run],
+                       #cmsFileName  = "" if options.onlyutca else castorFiles[run],
+                       cmsFileName  = "" if options.onlyutca else eosFile(run),
+                       label = label, useEvn = False,
+                       filterEvn = options.filterevn, ornTolerance = 1)
+
+    graphs.makeSummaryPdf(labels)
+
+if __name__=="__main__" :
+    if options.profile :
+        cProfile.run("go()", sort = "time")
+    else :
+        go()
