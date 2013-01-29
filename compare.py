@@ -10,6 +10,21 @@ def bcnLabel(delta = 0) :
         out += " + %d"%abs(delta)
     return out
 
+def singleFedPlots(raw = {}, fedId = None, book = {}) :
+    d = raw[fedId]
+    book.fill(d["TTS"], "TTS_%d"%fedId, 16, -0.5, 15.5, title = "FED %d; TTS state;Events / bin"%fedId)
+
+    caps = {0:0, 1:0, 2:0, 3:0}
+    ErrF = {0:0, 1:0, 2:0, 3:0}
+    for block in d["htrBlocks"].values() :
+        for channelId,channelData in block["channelData"].iteritems() :
+            ErrF[channelData["ErrF"]] += 1
+            if not channelData["ErrF"] :
+                caps[channelData["CapId0"]] += 1
+    book.fill(ErrF[0]/(0.0+sum(ErrF.values())), "ErrF0_%d"%fedId, 44, 0.0, 1.1, title = "FED %d;frac. chan. w/ErrF==0"%fedId)
+    book.fill(max(caps.values())/(0.0+sum(caps.values())), "PopCapFrac_%d"%fedId, 44, 0.0, 1.1,
+              title = "FED %d;frac. ErrF=0 chans w/most pop. capId"%fedId)
+
 def compare(raw1 = {}, raw2 = {}, book = {}) :
     hyphens = True
     if raw1 and raw1[None]["print"] :
@@ -20,18 +35,13 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
 
     if raw1 :
         d1 = raw1[989]
-        book.fill(d1["TTS"], "TTS", 16, -0.5, 15.5, title = ";FED 989 TTS state;Events / bin")
-        ErrF = {0:0, 1:0, 2:0, 3:0}
-        for block in d1["htrBlocks"].values() :
-            for channelId,channelData in block["channelData"].iteritems() :
-                ErrF[channelData["ErrF"]] += 1
+        singleFedPlots(raw1, 989, book)
 
-        nChannelsTotal = sum(ErrF.values())
-        for code,nChannels in ErrF.iteritems() :
-            book.fill(nChannels/(0.0+nChannelsTotal), "ErrF%d"%code, 44, 0.0, 1.1, title = ";FED 989 frac. chan. w/ErrF==%d"%code)
+    if raw2 :
+        d2 = raw2[700]
+        singleFedPlots(raw2, 700, book)
 
     if raw1 and raw2 :
-        d2 = raw2[700]
         bcnXTitle = "FED 989 %s - FED 700 %s"%(bcnLabel(raw1[None]["bcnDelta"]), bcnLabel(raw2[None]["bcnDelta"]))
         book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED 989 OrN - FED 700 OrN;Events / bin")
         book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 11, -5.5, 5.5, title = ";%s;Events / bin"%bcnXTitle)
