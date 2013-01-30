@@ -102,7 +102,8 @@ def payload(d = {}, iWord16 = None, word16 = None, word16Counts = [], utca = Non
         return
     elif i==l["nWord16"]-1 :
         d["htrIndex"] += 1
-        del d["currentChannelId"]
+        if "currentChannelId" in d : #this key might be missing in malformed events
+            del d["currentChannelId"]
         l["EvN8"] = w>>8
         l["DTCErrors"] = w&0xff
         return
