@@ -38,11 +38,11 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
     if raw2 and raw2[None]["print"] :
         printRaw(raw2, hyphens)
 
-    if raw1 :
+    if raw1 and (989 in raw1) :
         d1 = raw1[989]
         singleFedPlots(raw1, 989, book)
 
-    if raw2 :
+    if raw2 and (700 in raw2) :
         d2 = raw2[700]
         singleFedPlots(raw2, 700, book)
 
