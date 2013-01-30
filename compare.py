@@ -21,9 +21,14 @@ def singleFedPlots(raw = {}, fedId = None, book = {}) :
             ErrF[channelData["ErrF"]] += 1
             if not channelData["ErrF"] :
                 caps[channelData["CapId0"]] += 1
-    book.fill(ErrF[0]/(0.0+sum(ErrF.values())), "ErrF0_%d"%fedId, 44, 0.0, 1.1, title = "FED %d;frac. chan. w/ErrF==0"%fedId)
-    book.fill(max(caps.values())/(0.0+sum(caps.values())), "PopCapFrac_%d"%fedId, 44, 0.0, 1.1,
-              title = "FED %d;frac. ErrF=0 chans w/most pop. capId"%fedId)
+    errFSum = 0.0+sum(ErrF.values())
+    if errFSum :
+        book.fill(ErrF[0]/errFSum, "ErrF0_%d"%fedId, 44, 0.0, 1.1, title = "FED %d;frac. chan. w/ErrF==0"%fedId)
+
+    capSum = 0.0+sum(caps.values())
+    if capSum :
+        book.fill(max(caps.values())/capSum, "PopCapFrac_%d"%fedId, 44, 0.0, 1.1,
+                  title = "FED %d;frac. ErrF=0 chans w/most pop. capId"%fedId)
 
 def compare(raw1 = {}, raw2 = {}, book = {}) :
     hyphens = True
