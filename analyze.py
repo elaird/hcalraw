@@ -30,7 +30,7 @@ def nEvents(tree, nMax) :
 #this function builds a dictionary, mapping TTree entry to (orn, bcn) or to (orn, bcn, evn)
 def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
               fedIds = [], bcnDelta = None, rawCollection = None, nEventsMax = None,
-              useEvn = False, filterEvn = False, **_) :
+              useEvn = False, filterEvn = False, branchName = "", **_) :
     assert fileName
     assert treeName
 
@@ -62,7 +62,7 @@ def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
                 bcn = tree.CDFEventInfo.getBunchNumber()
             else :
                 tree.GetEntry(iEvent)
-                raw = unpacked(fedData = wordsOneChunk(tree = tree, fedId = fedIds[0]),
+                raw = unpacked(fedData = wordsOneChunk(tree = tree, fedId = fedIds[0], branchName = branchName),
                                bcnDelta = bcnDelta, chars = False, skipHtrBlocks = True, skipTrailer = True)
                 orn = raw["OrN"]
                 bcn = raw["BcN"]
@@ -115,7 +115,7 @@ def collectedRaw(tree = None, specs = {}) :
             raw[fedId] = unpacked(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True, utca = specs["utca"])
             raw[fedId]["nBytesSW"] = rawThisFed.size()
         elif specs["format"]=="HCAL" :
-            rawThisFed = wordsOneChunk(tree, fedId)
+            rawThisFed = wordsOneChunk(tree, fedId, specs["branchName"])
             raw[fedId] = unpacked(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False, utca = specs["utca"])
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
 
@@ -162,8 +162,8 @@ def charsOneFed(tree = None, fedId = None, collection = "") :
     FEDRawData = getattr(tree, collection).product().FEDData(fedId) #CMS data type
     return r.FEDRawData2(FEDRawData).vectorChar() #wrapper class exposes data_ via data()
 
-def wordsOneChunk(tree = None, fedId = None) :
-    chunk = getattr(tree, "Chunk%d"%fedId) #CDF data type
+def wordsOneChunk(tree = None, fedId = None, branchName = "") :
+    chunk = getattr(tree, "%s%d"%(branchName, fedId)) #Common Data Format
     return r.CDFChunk2(chunk).chunk() #wrapper class creates std::vector<ULong64_t>
 
 def categories(oMap = {}, iMap = {}, innerEvent = {}) :
@@ -239,20 +239,22 @@ def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, or
         s += ", %4s = %6d, both = %6d"%(inner["label"], len(iMapB), len(filter(lambda x:x!=None,innerEvent.values())))
     print s
 
-def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filterEvn = False, ornTolerance = 0) :
+def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filterEvn = False, ornTolerance = 0, cmsIsLocal = False) :
     utca = {"label":"uTCA",
             "fileName":utcaFileName, "treeName":"CMSRAW", "format":"HCAL", "auxBranch":False,
-            "fedIds":[989], "rawCollection": "FEDRawDataCollection_source__demo", "utca":True,
+            "fedIds":[989], "rawCollection": "FEDRawDataCollection_source__demo", "utca":True, "branchName":"Chunk",
             "bcnDelta":-118, "nEventsMax":None,
             "printEventMap":False, "printRaw":True,
             }
 
     cms = {"label":"CMS",
            "fileName":cmsFileName, "treeName":"Events", "format": "CMS", "auxBranch":True,
-           "fedIds":range(700,702), "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC", "utca":False,
+           "fedIds":[714,722], "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC", "utca":False,
            "bcnDelta":0, "nEventsMax":None,
            "printEventMap":False, "printRaw":True,
            }
+    if cmsIsLocal :
+        cms.update({"treeName":"CMSRAW", "format":"HCAL", "auxBranch":False, "branchName":"HCAL_DCC"})
 
     if utcaFileName :
         if cmsFileName :
@@ -267,9 +269,18 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filt
 
 setup()
 if __name__=="__main__" :
-    oneRun(utcaFileName = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/usc/USC_209150.root",
-           cmsFileName  = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/castor/209151.HLTSkim.root",
-           label = "Run209151",
+    #oneRun(utcaFileName = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/usc/USC_209150.root",
+    #       cmsFileName  = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/castor/209151.HLTSkim.root",
+    #       label = "Run209151",
+    #       useEvn = False,
+    #       filterEvn = False,
+    #       ornTolerance = 0,
+    #       )
+
+    oneRun(utcaFileName = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/usc/USC_211155.root",
+           cmsFileName = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/usc/USC_211154.root",
+           cmsIsLocal = True,
+           label = "Run211155",
            useEvn = False,
            filterEvn = False,
            ornTolerance = 0,
