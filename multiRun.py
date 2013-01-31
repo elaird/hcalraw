@@ -75,6 +75,8 @@ def go() :
                        label = label, useEvn = False,
                        filterEvn = options.filterevn, ornTolerance = 1)
 
+    if options.onlysummary and options.run:
+        labels = ["Run"+options.run]
     graphs.makeSummaryPdf(labels)
 
 if __name__=="__main__" :
