@@ -11,6 +11,7 @@ def bcnLabel(delta = 0) :
     return out
 
 def singleFedPlots(raw = {}, fedId = None, book = {}) :
+    if fedId==None : return
     d = raw[fedId]
     book.fill(d["TTS"], "TTS_%d"%fedId, 16, -0.5, 15.5, title = "FED %d; TTS state;Events / bin"%fedId)
 
@@ -38,19 +39,22 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
     if raw2 and raw2[None]["print"] :
         printRaw(raw2, hyphens)
 
-    if raw1 and (989 in raw1) :
-        d1 = raw1[989]
-        singleFedPlots(raw1, 989, book)
+    for raw in [raw1, raw2] :
+        for fedId,dct in raw.iteritems() :
+            singleFedPlots(raw, fedId, book)
 
-    if raw2 and (700 in raw2) :
-        d2 = raw2[700]
-        singleFedPlots(raw2, 700, book)
+    fed1 = 989
+    fed2 = 714
 
-    if raw1 and raw2 :
-        bcnXTitle = "FED 989 %s - FED 700 %s"%(bcnLabel(raw1[None]["bcnDelta"]), bcnLabel(raw2[None]["bcnDelta"]))
-        book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED 989 OrN - FED 700 OrN;Events / bin")
+    d1 = raw1.get(fed1, {})
+    d2 = raw2.get(fed2, {})
+
+    if d1 and d2 :
+        bcnXTitle = "FED %d %s - FED %d %s"%(fed1, bcnLabel(raw1[None]["bcnDelta"]),
+                                             fed2, bcnLabel(raw2[None]["bcnDelta"]))
         book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 11, -5.5, 5.5, title = ";%s;Events / bin"%bcnXTitle)
-        book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED 989 EvN - FED 700 EvN;Events / bin")
+        book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED %s OrN - FED %s OrN;Events / bin"%(fed1, fed2))
+        book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED %s EvN - FED %s EvN;Events / bin"%(fed1, fed2))
 
 def printRaw(d = {}, hyphens = True) :
     if hyphens :
