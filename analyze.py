@@ -242,19 +242,23 @@ def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, or
 def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filterEvn = False, ornTolerance = 0, cmsIsLocal = False) :
     utca = {"label":"uTCA",
             "fileName":utcaFileName, "treeName":"CMSRAW", "format":"HCAL", "auxBranch":False,
-            "fedIds":[989], "rawCollection": "FEDRawDataCollection_source__demo", "utca":True, "branchName":"Chunk",
+            "fedIds":[989], "utca":True,
+            "branchName":"Chunk",
             "bcnDelta":-118, "nEventsMax":None,
             "printEventMap":False, "printRaw":True,
             }
 
     cms = {"label":"CMS",
            "fileName":cmsFileName, "treeName":"Events", "format": "CMS", "auxBranch":True,
-           "fedIds":[714,722], "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC", "utca":False,
+           "fedIds":[714,722], "utca":False,
+           "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC",
            "bcnDelta":0, "nEventsMax":None,
            "printEventMap":False, "printRaw":True,
            }
+
     if cmsIsLocal :
         cms.update({"treeName":"CMSRAW", "format":"HCAL", "auxBranch":False, "branchName":"HCAL_DCC"})
+        del cms["rawCollection"]
 
     if utcaFileName :
         if cmsFileName :
