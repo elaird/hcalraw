@@ -76,7 +76,7 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
         keep = []
         for iHisto,name in enumerate(["deltaOrN", "deltaBcN", "deltaEvN",
                                       "ErrF0_989","PopCapFrac_989", "TTS_989",
-                                      "ErrF0_700","PopCapFrac_700", "TTS_700",
+                                      "ErrF0_714","PopCapFrac_714", "TTS_714",
                                       ]) :
             pad2.cd(1+iHisto)
             adjustPad(logY = True)
