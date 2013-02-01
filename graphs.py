@@ -41,7 +41,7 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
     pad0  = r.TPad("pad0",  "pad0",  0.0, 0.95, 1.0, 1.00)
     pad1  = r.TPad("pad1",  "pad1",  0.0, 0.75, 1.0, 0.95)
     pad2  = r.TPad("pad1",  "pad1",  0.0, 0.00, 1.0, 0.75)
-    pad2.Divide(3,3)
+    pad2.Divide(4,3)
 
     pad0.Draw()
     pad1.Draw()
@@ -74,9 +74,9 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
         graph.Draw("psame")
 
         keep = []
-        for iHisto,name in enumerate(["deltaOrN", "deltaBcN", "deltaEvN",
-                                      "ErrF0_989","PopCapFrac_989", "TTS_989",
-                                      "ErrF0_714","PopCapFrac_714", "TTS_714",
+        for iHisto,name in enumerate(["deltaOrN", "ErrF0_989",      "ErrF0_714",      "ErrF0_722",
+                                      "deltaBcN", "PopCapFrac_989", "PopCapFrac_714", "PopCapFrac_722",
+                                      "deltaEvN", "TTS_989",        "TTS_714",        "TTS_722",
                                       ]) :
             pad2.cd(1+iHisto)
             adjustPad(logY = True)
