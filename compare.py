@@ -46,7 +46,7 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
     mapF1,mapB1 = dataMap(raw1)
     mapF2,mapB2 = dataMap(raw2)
     stats = matchStats(mapF1, mapB2)
-    #report(*stats)
+    report(*stats)
 
     #some delta plots
     fed1 = 989
@@ -60,24 +60,24 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
         book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED %s OrN - FED %s OrN;Events / bin"%(fed1, fed2))
         book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED %s EvN - FED %s EvN;Events / bin"%(fed1, fed2))
 
-def compString(a, b, c) :
-    return "%3d %1d %2d"%(a, b&0xf, c)
+def coordString(fedId, moduleId, channelId) :
+    return "%3d %2d %2d"%(fedId, moduleId&0xf, 1+channelId/4)
 
 def report(matched = {}, failed = []) :
     print "MATCHED fibers %d:"%len(matched)
-    print "(fed h ch) --> (fed h ch)"
-    print "-------------------------"
+    print "(fed  h  f) --> (fed  h  f)"
+    print "---------------------------"
     for k in sorted(matched.keys()) :
         fedId,moduleId,channelId = k
-        print "(%s) --> (%s)"%(compString(*k), compString(*matched[k]))
+        print "(%s) --> (%s)"%(coordString(*k), coordString(*matched[k]))
 
     print
     print "FAILED fibers %d:"%len(failed)
     if failed :
-        print "(fed h ch)"
-        print "----------"
+        print "(fed  h ch)"
+        print "-----------"
         for c in sorted(failed) :
-            print "(%s)"%compString(*c)
+            print "(%s)"%coordString(*c)
 
 def matchStats(f = {}, b = {}) :
     matched = {}
