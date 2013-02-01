@@ -119,11 +119,9 @@ def collectedRaw(tree = None, specs = {}) :
             raw[fedId] = unpacked(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False, utca = specs["utca"])
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
 
-    raw[None] = {"print":specs["printRaw"],
-                 "label":specs["label"],
-                 "bcnDelta":specs["bcnDelta"],
-                 "iEntry":tree.GetReadEntry(),
-                 }
+    raw[None] = {"iEntry":tree.GetReadEntry()}
+    for item in ["printRaw", "label", "bcnDelta", "hbheMatchRange", "hfMatchRange"] :
+        raw[None][item] = specs[item]
     return raw
 
 def unpacked(fedData = None, chars = None, skipHtrBlocks = False, skipTrailer = False, bcnDelta = 0, utca = None) :
@@ -244,6 +242,8 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filt
             "fileName":utcaFileName, "treeName":"CMSRAW", "format":"HCAL", "auxBranch":False,
             "fedIds":[989], "utca":True,
             "branchName":"Chunk",
+
+            "hbheMatchRange":range(10), "hfMatchRange":range(1, 10),
             "bcnDelta":-118, "nEventsMax":None,
             "printEventMap":False, "printRaw":True,
             }
@@ -252,6 +252,8 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filt
            "fileName":cmsFileName, "treeName":"Events", "format": "CMS", "auxBranch":True,
            "fedIds":[714,722], "utca":False,
            "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC",
+
+           "hbheMatchRange":range(10), "hfMatchRange":range(9),
            "bcnDelta":0, "nEventsMax":None,
            "printEventMap":False, "printRaw":True,
            }
