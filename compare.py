@@ -33,10 +33,10 @@ def singleFedPlots(raw = {}, fedId = None, book = {}) :
 
 def compare(raw1 = {}, raw2 = {}, book = {}) :
     hyphens = True
-    if raw1 and raw1[None]["print"] :
+    if raw1 and raw1[None]["printRaw"] :
         printRaw(raw1, hyphens)
         hyphens = False
-    if raw2 and raw2[None]["print"] :
+    if raw2 and raw2[None]["printRaw"] :
         printRaw(raw2, hyphens)
 
     for raw in [raw1, raw2] :
@@ -45,7 +45,8 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
 
     mapF1,mapB1 = dataMap(raw1)
     mapF2,mapB2 = dataMap(raw2)
-    report(*matchStats(mapF1, mapB2))
+    stats = matchStats(mapF1, mapB2)
+    #report(*stats)
 
     #some delta plots
     fed1 = 989
@@ -94,13 +95,29 @@ def dataMap(raw = {}) :
 
     for fedId,d in raw.iteritems() :
         if fedId==None : continue
+        if fedId==714 :
+            matchRange = raw[None]["hbheMatchRange"]
+        if fedId==722 :
+            matchRange = raw[None]["hfMatchRange"]
+
         for key,block in d["htrBlocks"].iteritems() :
             moduleId = block["ModuleId"]
+            if fedId==989 :
+                if (moduleId&0xf)<=4 :
+                    matchRange = raw[None]["hbheMatchRange"]
+                else :
+                    matchRange = raw[None]["hfMatchRange"]
+
             for channelId,channelData in block["channelData"].iteritems() :
                 if channelId%4!=1 : continue
-                qie = channelData["QIE"]
                 coords = (fedId, int(moduleId), int(channelId))
-                data = tuple([qie[i] for i in sorted(qie.keys())])
+
+                qie = channelData["QIE"]
+                if len(qie)<len(matchRange) :
+                    #print "skipping bogus channel",coords
+                    continue
+                data = tuple([qie[i] for i in matchRange])
+                #print coords,matchRange,[hex(d) for d in data]
                 forward[coords] = data
                 backward[data] = coords
     return forward,backward
