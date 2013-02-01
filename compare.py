@@ -43,18 +43,67 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
         for fedId,dct in raw.iteritems() :
             singleFedPlots(raw, fedId, book)
 
+    mapF1,mapB1 = dataMap(raw1)
+    mapF2,mapB2 = dataMap(raw2)
+    report(*matchStats(mapF1, mapB2))
+
+    #some delta plots
     fed1 = 989
     fed2 = 714
-
     d1 = raw1.get(fed1, {})
     d2 = raw2.get(fed2, {})
-
     if d1 and d2 :
         bcnXTitle = "FED %d %s - FED %d %s"%(fed1, bcnLabel(raw1[None]["bcnDelta"]),
                                              fed2, bcnLabel(raw2[None]["bcnDelta"]))
         book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 11, -5.5, 5.5, title = ";%s;Events / bin"%bcnXTitle)
         book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED %s OrN - FED %s OrN;Events / bin"%(fed1, fed2))
         book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED %s EvN - FED %s EvN;Events / bin"%(fed1, fed2))
+
+def compString(a, b, c) :
+    return "%3d %1d %2d"%(a, b&0xf, c)
+
+def report(matched = {}, failed = []) :
+    print "MATCHED fibers %d:"%len(matched)
+    print "(fed h ch) --> (fed h ch)"
+    print "-------------------------"
+    for k in sorted(matched.keys()) :
+        fedId,moduleId,channelId = k
+        print "(%s) --> (%s)"%(compString(*k), compString(*matched[k]))
+
+    print
+    print "FAILED fibers %d:"%len(failed)
+    if failed :
+        print "(fed h ch)"
+        print "----------"
+        for c in sorted(failed) :
+            print "(%s)"%compString(*c)
+
+def matchStats(f = {}, b = {}) :
+    matched = {}
+    failed = []
+    for coords,data in f.iteritems() :
+        if data in b :
+            matched[coords] = b[data]
+        else :
+            failed.append(coords)
+    return matched,failed
+
+def dataMap(raw = {}) :
+    forward = {}
+    backward = {}
+
+    for fedId,d in raw.iteritems() :
+        if fedId==None : continue
+        for key,block in d["htrBlocks"].iteritems() :
+            moduleId = block["ModuleId"]
+            for channelId,channelData in block["channelData"].iteritems() :
+                if channelId%4!=1 : continue
+                qie = channelData["QIE"]
+                coords = (fedId, int(moduleId), int(channelId))
+                data = tuple([qie[i] for i in sorted(qie.keys())])
+                forward[coords] = data
+                backward[data] = coords
+    return forward,backward
 
 def printRaw(d = {}, hyphens = True) :
     if hyphens :
@@ -115,6 +164,7 @@ def printHtrData(d = {}, channelData = True) :
 def printHtrChannelData(d = {}, moduleId = 0) :
     print "ModuleId  Ch  Fl  ErrF CapId0  QIE(hex)  0  1  2  3  4  5  6  7  8  9"
     for channelId,data in d.iteritems() :
+        if channelId%4!=1 : continue
         print "   ".join([" 0x%03x"%moduleId,
                           "%3d"%channelId,
                           "%1d"%data["Flavor"],
