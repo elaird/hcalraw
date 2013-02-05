@@ -60,22 +60,32 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
         book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED %s OrN - FED %s OrN;Events / bin"%(fed1, fed2))
         book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED %s EvN - FED %s EvN;Events / bin"%(fed1, fed2))
 
-def coordString(fedId, moduleId, channelId) :
-    return "%3d %2d %2d"%(fedId, moduleId&0xf, 1+channelId/4)
+def coordString(fedId, moduleId, fiber, channel) :
+    return "%3d %2d %2d %2d"%(fedId, moduleId%0xf, fiber, channel)
 
 def report(matched = {}, failed = []) :
     print "MATCHED fibers %d:"%len(matched)
-    print "(fed  h  f) --> (fed  h  f)"
-    print "---------------------------"
+    print "uTCA --> CMS"
+    print "(fed  h  f ch) --> (fed  h  f ch)"
+    print "---------------------------------"
     for k in sorted(matched.keys()) :
-        fedId,moduleId,channelId = k
         print "(%s) --> (%s)"%(coordString(*k), coordString(*matched[k]))
+
+    print
+    print "CMS --> uTCA"
+    print "(fed  h  f ch) --> (fed  h  f ch)"
+    print "---------------------------------"
+    lines = []
+    for k,v in matched.iteritems() :
+        lines.append("(%s) --> (%s)"%(coordString(*v), coordString(*k)))
+    for l in sorted(lines) :
+        print l
 
     print
     print "FAILED fibers %d:"%len(failed)
     if failed :
-        print "(fed  h ch)"
-        print "-----------"
+        print "(fed  h  f ch)"
+        print "--------------"
         for c in sorted(failed) :
             print "(%s)"%coordString(*c)
 
@@ -93,6 +103,7 @@ def dataMap(raw = {}) :
     forward = {}
     backward = {}
 
+    fiberMap = raw[None]["fiberMap"]
     for fedId,d in raw.iteritems() :
         if fedId==None : continue
         if fedId==714 :
@@ -109,9 +120,11 @@ def dataMap(raw = {}) :
                     matchRange = raw[None]["hfMatchRange"]
 
             for channelId,channelData in block["channelData"].iteritems() :
-                if channelId%4!=1 : continue
-                coords = (fedId, int(moduleId), int(channelId))
-
+                channel = channelId%4
+                fiber = 1+channelId/4 #integer division
+                fiber = fiberMap[fiber] if fiber in fiberMap else fiber
+                if channel!=1 : continue
+                coords = (fedId, int(moduleId), fiber, channel)
                 qie = channelData["QIE"]
                 if len(qie)<len(matchRange) :
                     #print "skipping bogus channel",coords
