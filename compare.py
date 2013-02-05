@@ -61,7 +61,7 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
         book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED %s EvN - FED %s EvN;Events / bin"%(fed1, fed2))
 
 def coordString(fedId, moduleId, fiber, channel) :
-    return "%3d %2d %2d %2d"%(fedId, moduleId%0xf, fiber, channel)
+    return "%3d %2d %2d %2d"%(fedId, moduleId, fiber, channel)
 
 def report(matched = {}, failed = []) :
     print "MATCHED fibers %d:"%len(matched)
@@ -112,19 +112,21 @@ def dataMap(raw = {}) :
             matchRange = raw[None]["hfMatchRange"]
 
         for key,block in d["htrBlocks"].iteritems() :
-            moduleId = block["ModuleId"]
             if fedId==989 :
-                if (moduleId&0xf)<=4 :
+                moduleId = block["ModuleId"]&0xf
+                if moduleId<=4 :
                     matchRange = raw[None]["hbheMatchRange"]
                 else :
                     matchRange = raw[None]["hfMatchRange"]
+            else :
+                moduleId = block["ModuleId"]&0x1f
 
             for channelId,channelData in block["channelData"].iteritems() :
                 channel = channelId%4
                 fiber = 1+channelId/4 #integer division
                 fiber = fiberMap[fiber] if fiber in fiberMap else fiber
                 if channel!=1 : continue
-                coords = (fedId, int(moduleId), fiber, channel)
+                coords = (fedId, moduleId, fiber, channel)
                 qie = channelData["QIE"]
                 if len(qie)<len(matchRange) :
                     #print "skipping bogus channel",coords
