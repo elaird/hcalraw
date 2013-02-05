@@ -8,7 +8,7 @@ def bcn(raw, delta = 0) :
     if out>3563 : out -= 3564
     return out
 
-def trailer(d = {}, iWord64 = None, word64 = None, bcnDelta = 0) :
+def trailer(d = {}, iWord64 = None, word64 = None) :
     d["TTS"] = (word64>>4)&0xf
     d["CRC16"] = (word64>>16)&0xffff
     d["nWord64"] = (word64>>32)&0xffffff
