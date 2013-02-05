@@ -120,7 +120,7 @@ def collectedRaw(tree = None, specs = {}) :
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
 
     raw[None] = {"iEntry":tree.GetReadEntry()}
-    for item in ["printRaw", "label", "bcnDelta", "hbheMatchRange", "hfMatchRange"] :
+    for item in ["printRaw", "label", "bcnDelta", "fiberMap", "hbheMatchRange", "hfMatchRange"] :
         raw[None][item] = specs[item]
     return raw
 
@@ -153,7 +153,7 @@ def unpacked(fedData = None, chars = None, skipHtrBlocks = False, skipTrailer = 
         else :
             if "htrIndex" in d["htrBlocks"] :
                 del d["htrBlocks"]["htrIndex"] #fixme
-            decode.trailer(d, iWord64, word64, bcnDelta)
+            decode.trailer(d, iWord64, word64)
     return d
 
 def charsOneFed(tree = None, fedId = None, collection = "") :
@@ -244,8 +244,8 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filt
             "branchName":"Chunk",
 
             "hbheMatchRange":range(10), "hfMatchRange":range(1, 10),
-            "bcnDelta":-118, "nEventsMax":None,
-            "printEventMap":False, "printRaw":True,
+            "bcnDelta":-118, "fiberMap":{1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:9, 8:11, 9:12, 10:10, 11:8, 12:7},
+            "nEventsMax":1, "printEventMap":False, "printRaw":False,
             }
 
     cms = {"label":"CMS",
@@ -254,8 +254,8 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filt
            "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC",
 
            "hbheMatchRange":range(10), "hfMatchRange":range(9),
-           "bcnDelta":0, "nEventsMax":None,
-           "printEventMap":False, "printRaw":True,
+           "bcnDelta":0, "fiberMap":{},
+           "nEventsMax":1, "printEventMap":False, "printRaw":False,
            }
 
     if cmsIsLocal :
