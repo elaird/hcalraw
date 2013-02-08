@@ -1,12 +1,19 @@
 #For AMC13, see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #For DCC2, see http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 
-def bcn(raw, delta = 0) :
-    if not delta : return raw
-    out = raw + delta
-    if out<0    : out += 3564
-    if out>3563 : out -= 3564
-    return out
+def ornBcn(ornIn, bcnIn, bcnDelta = 0) :
+    if not bcnDelta :
+        return ornIn,bcnIn
+
+    orn = ornIn
+    bcn = bcnIn + bcnDelta
+    if bcn<0 :
+        bcn += 3564
+        orn -= 1
+    if bcn>3563 :
+        bcn -= 3564
+        orn += 1
+    return orn,bcn
 
 def trailer(d = {}, iWord64 = None, word64 = None) :
     d["TTS"] = (word64>>4)&0xf
@@ -39,9 +46,9 @@ def header(d = {}, iWord64 = None, word64 = None, utca = None, bcnDelta = 0) :
         d["FEDid"] = (w>>8)&0xfff
         d["BcN"] = (w>>20)&0xfff
         d["EvN"] = (w>>32)&0xffffff
-        d["BcN"] = bcn(d["BcN"], bcnDelta)
     if iWord64==1 :
         d["OrN"] = (w>>4)&0xffffffff
+        d["OrN"],d["BcN"] = ornBcn(d["OrN"], d["BcN"], bcnDelta)
         d["word16Counts"] = []
 
     if utca :
@@ -82,7 +89,7 @@ def payload(d = {}, iWord16 = None, word16 = None, word16Counts = [], utca = Non
         l["ModuleId"] = w&0x7ff
         l["OrN5"] = (w&0xf800)>>11
     if i==4 :
-        l["BcN"] = bcn(w&0xfff, bcnDelta)
+        l["OrN5"],l["BcN"] = ornBcn(l["OrN5"], w&0xfff, bcnDelta)
         l["FormatVer"] = (w&0xf000)>>12
     if i==5 :
         l["nWord16Tp"] = (w&0xfc)>>3
