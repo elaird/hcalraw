@@ -4,13 +4,11 @@ import os,struct,ROOT as r
 import autoBook,compare,decode
 
 def setup() :
-    assert os.environ["CMSSW_VERSION"],"A CMSSW environment is required (known to work with CMSSW_5_3_7)."
+    assert os.environ["CMSSW_VERSION"],\
+           "A CMSSW environment is required (known to work with CMSSW_5_3_7)."
 
-    #batch mode
     r.gROOT.SetBatch(True)
-
-    #silence TCanvas.Print()
-    r.gErrorIgnoreLevel = 2000
+    r.gErrorIgnoreLevel = 2000 #silence TCanvas.Print()
 
     #enable convenient use of CMSSW classes
     r.gSystem.Load("libFWCoreFWLite.so")
@@ -18,7 +16,10 @@ def setup() :
 
     #define helper classes
     libs = ["DataFormatsFEDRawData"]
-    base = os.environ["CMSSW_RELEASE_BASE"] if os.environ["CMSSW_RELEASE_BASE"] else os.environ["CMSSW_BASE"]
+    if os.environ["CMSSW_RELEASE_BASE"] :
+        base = os.environ["CMSSW_RELEASE_BASE"]
+    else :
+        base = os.environ["CMSSW_BASE"]
     libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
     r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
     r.gROOT.LoadMacro("helpers.cxx+")
@@ -27,10 +28,12 @@ def nEvents(tree, nMax) :
     nEntries = tree.GetEntries()
     return min(nEntries, nMax) if nMax!=None else nEntries
 
-#this function builds a dictionary, mapping TTree entry to (orn, bcn) or to (orn, bcn, evn)
-def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
-              fedIds = [], bcnDelta = None, rawCollection = None, nEventsMax = None,
-              useEvn = False, filterEvn = False, branchName = "", **_) :
+#this function returns two dictionaries,
+#one maps TTree entry to either (orn, ) or to (orn, evn)
+#the other maps the reverse
+def eventMaps(fileName="", treeName="", format="", auxBranch=False,
+              fedIds=[], bcnDelta=None, rawCollection=None, nEventsMax=None,
+              useEvn=False, filterEvn=False, branchName="", **_) :
     assert fileName
     assert treeName
 
@@ -49,8 +52,12 @@ def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
                 bcn = tree.EventAuxiliary.bunchCrossing()
             else :
                 tree.GetEntry(iEvent)
-                raw = unpacked(fedData = charsOneFed(tree = tree, fedId = fedIds[0], collection = rawCollection),
-                               bcnDelta = bcnDelta, chars = True, skipHtrBlocks = True, skipTrailer = True)
+                raw = unpacked(fedData = charsOneFed(tree = tree,
+                                                     fedId = fedIds[0],
+                                                     collection = rawCollection
+                                                     ),
+                               bcnDelta = bcnDelta, chars = True,
+                               skipHtrBlocks = True, skipTrailer = True)
                 orn = raw["OrN"]
                 bcn = raw["BcN"]
                 evn = raw["EvN"]
@@ -62,8 +69,12 @@ def eventMaps(fileName = "", treeName = "", format = "", auxBranch = False,
                 bcn = tree.CDFEventInfo.getBunchNumber()
             else :
                 tree.GetEntry(iEvent)
-                raw = unpacked(fedData = wordsOneChunk(tree = tree, fedId = fedIds[0], branchName = branchName),
-                               bcnDelta = bcnDelta, chars = False, skipHtrBlocks = True, skipTrailer = True)
+                raw = unpacked(fedData = wordsOneChunk(tree = tree,
+                                                       fedId = fedIds[0],
+                                                       branchName = branchName
+                                                       ),
+                               bcnDelta = bcnDelta, chars = False,
+                               skipHtrBlocks = True, skipTrailer = True)
                 orn = raw["OrN"]
                 bcn = raw["BcN"]
                 evn = raw["EvN"]
@@ -112,34 +123,51 @@ def collectedRaw(tree = None, specs = {}) :
     for fedId in specs["fedIds"] :
         if specs["format"]=="CMS" :
             rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
-            raw[fedId] = unpacked(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = True, utca = specs["utca"])
+            raw[fedId] = unpacked(fedData = rawThisFed,
+                                  bcnDelta = specs["bcnDelta"],
+                                  chars = True,
+                                  utca = specs["utca"])
             raw[fedId]["nBytesSW"] = rawThisFed.size()
         elif specs["format"]=="HCAL" :
             rawThisFed = wordsOneChunk(tree, fedId, specs["branchName"])
-            raw[fedId] = unpacked(fedData = rawThisFed, bcnDelta = specs["bcnDelta"], chars = False, utca = specs["utca"])
+            raw[fedId] = unpacked(fedData = rawThisFed,
+                                  bcnDelta = specs["bcnDelta"],
+                                  chars = False,
+                                  utca = specs["utca"])
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
 
     raw[None] = {"iEntry":tree.GetReadEntry()}
-    for item in ["printRaw", "label", "bcnDelta", "fiberMap", "hbheMatchRange", "hfMatchRange"] :
+    for item in ["printRaw", "label", "bcnDelta", "fiberMap",
+                 "hbheMatchRange", "hfMatchRange"] :
         raw[None][item] = specs[item]
     return raw
 
-def unpacked(fedData = None, chars = None, skipHtrBlocks = False, skipTrailer = False, bcnDelta = 0, utca = None) :
+#AMC13: http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
+#DCC2: http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
+def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
+             bcnDelta=0, utca=None) :
     assert chars in [False,True],"Specify whether to unpack by words or chars."
-    assert skipHtrBlocks or (utca in [False,True]),"Specify whether data is uTCA or VME (unless skipping HTR blocks)."
-    #For AMC13, see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
-    #For DCC2, see http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
+    assert skipHtrBlocks or (utca in [False,True]),\
+           "Specify whether data is uTCA or VME (unless skipping HTR blocks)."
     d = {"htrBlocks":{}}
 
     nWord64 = fedData.size()/(8 if chars else 1)
     iWordPayload0 = 6 if utca else 12
-    iWords = range(nWord64) if not skipHtrBlocks else range(iWordPayload0)+[nWord64-1]
-    if skipTrailer : iWords.pop()
+
+    if skipHtrBlocks:
+        iWords = range(iWordPayload0)+[nWord64-1]
+    else:
+        iWords = range(nWord64)
+    if skipTrailer:
+        iWords.pop()
+
     for iWord64 in iWords :
         if chars :
             offset = 8*iWord64
-            word64 = struct.unpack('Q', "".join([fedData.at(offset+iByte) for iByte in range(8)]))[0]
-            #b = [ord(fedData.at(offset+iByte)) for iByte in range(8)] #like above with 'B'*8 rather than 'Q'
+            bytes = [fedData.at(offset+iByte) for iByte in range(8)]
+            word64 = struct.unpack('Q',"".join(bytes))[0]
+            #like above with 'B'*8 rather than 'Q':
+            #b = [ord(fedData.at(offset+iByte)) for iByte in range(8)]
         else :
             word64 = fedData.at(iWord64)
 
@@ -148,8 +176,10 @@ def unpacked(fedData = None, chars = None, skipHtrBlocks = False, skipTrailer = 
         elif iWord64<nWord64-1 :
             for i in range(4) :
                 word16 = (word64>>(16*i))&0xffff
-                decode.payload(d["htrBlocks"], iWord16 = 4*iWord64+i, word16 = word16,
-                               word16Counts = d["word16Counts"], utca = utca, bcnDelta = bcnDelta)
+                decode.payload(d["htrBlocks"],
+                               iWord16 = 4*iWord64+i, word16 = word16,
+                               word16Counts = d["word16Counts"],
+                               utca = utca, bcnDelta = bcnDelta)
         else :
             if "htrIndex" in d["htrBlocks"] :
                 del d["htrBlocks"]["htrIndex"] #fixme
@@ -157,12 +187,16 @@ def unpacked(fedData = None, chars = None, skipHtrBlocks = False, skipTrailer = 
     return d
 
 def charsOneFed(tree = None, fedId = None, collection = "") :
-    FEDRawData = getattr(tree, collection).product().FEDData(fedId) #CMS data type
-    return r.FEDRawData2(FEDRawData).vectorChar() #wrapper class exposes data_ via data()
+    #CMS data type
+    FEDRawData = getattr(tree, collection).product().FEDData(fedId)
+    #wrapper class exposes data_ via data()
+    return r.FEDRawData2(FEDRawData).vectorChar()
 
 def wordsOneChunk(tree = None, fedId = None, branchName = "") :
-    chunk = getattr(tree, "%s%d"%(branchName, fedId)) #Common Data Format
-    return r.CDFChunk2(chunk).chunk() #wrapper class creates std::vector<ULong64_t>
+    #Common Data Format
+    chunk = getattr(tree, "%s%d"%(branchName, fedId))
+    #wrapper class creates std::vector<ULong64_t>
+    return r.CDFChunk2(chunk).chunk()
 
 def categories(oMap = {}, iMap = {}, innerEvent = {}) :
     d = {}
@@ -192,7 +226,7 @@ def eventToEvent(mapF = {}, mapB = {}, useEvn = False, ornTolerance = None) :
     out = {}
     for oEvent,ornEvn in mapF.iteritems() :
         out[oEvent] = None
-        #find match s.t. |orn1 - orn2| < ornRequirement
+        #find match s.t. |orn1 - orn2| <= ornTolerance
         orn = ornEvn[0]
         for i in deltaOrnRange :
             ornEvn2 = (orn+i, ornEvn[1]) if useEvn else (orn+i,)
@@ -200,7 +234,8 @@ def eventToEvent(mapF = {}, mapB = {}, useEvn = False, ornTolerance = None) :
                 out[oEvent] = mapB[ornEvn2] #fixme: check for multiple matches
     return out
 
-def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, ornTolerance = None) :
+def go(outer = {}, inner = {}, label = "",
+       useEvn = False, filterEvn = False, ornTolerance = None) :
     innerEvent = {}
     deltaOrn = {}
     oMapF,oMapB = eventMaps(useEvn = useEvn, filterEvn = filterEvn, **outer)
@@ -210,7 +245,10 @@ def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, or
         iMapF,iMapB = eventMaps(useEvn = useEvn, filterEvn = filterEvn, **inner)
         innerEvent = eventToEvent(oMapF, iMapB, ornTolerance = ornTolerance)
         if outer["printEventMap"] or inner["printEventMap"] :
-            print "oEvent = %s, ornEvn = %s, iEvent = %s"%(str(oEvent),str(ornEvn),str(innerEvent[oEvent]))
+            print ", ".join(["oEvent = %s"%str(oEvent),
+                             "ornEvn = %s"%str(ornEvn),
+                             "iEvent = %s"%str(innerEvent[oEvent]),
+                             ])
 
     book = autoBook.autoBook("book")
     loop(inner = inner, outer = outer, innerEvent = innerEvent, book = book)
@@ -221,8 +259,10 @@ def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, or
     nBoth = len(filter(lambda x:x!=None,innerEvent.values()))
 
     gr.SetName("category_vs_time")
-    labels = ["only %s (%d)"%(inner["label"], len(iMapF)-nBoth) if inner else "",
-              "only %s (%d)"%(outer["label"], len(oMapF)-nBoth) if outer else "",
+    labels = ["only %s (%d)"%(inner["label"],
+                              len(iMapF)-nBoth) if inner else "",
+              "only %s (%d)"%(outer["label"],
+                              len(oMapF)-nBoth) if outer else "",
               "both (%d)"%nBoth if inner else "",
               ]
     gr.SetTitle("_".join(labels))
@@ -234,32 +274,39 @@ def go(outer = {}, inner = {}, label = "", useEvn = False, filterEvn = False, or
 
     s = "%s: %4s = %6d"%(label, outer["label"], len(oMapF))
     if inner :
-        s += ", %4s = %6d, both = %6d"%(inner["label"], len(iMapB), len(filter(lambda x:x!=None,innerEvent.values())))
+        s += ", %4s = %6d, both = %6d"%(inner["label"], len(iMapB), nBoth)
     print s
 
-def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filterEvn = False, ornTolerance = 0, cmsIsLocal = False) :
+def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False,
+           filterEvn = False, ornTolerance = 0, cmsIsLocal = False) :
+    d2c = {1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:9, 8:11, 9:12, 10:10, 11:8, 12:7}
     utca = {"label":"uTCA",
-            "fileName":utcaFileName, "treeName":"CMSRAW", "format":"HCAL", "auxBranch":False,
+            "fileName":utcaFileName, "treeName":"CMSRAW",
+            "format":"HCAL", "auxBranch":False,
             "fedIds":[989], "utca":True,
             "branchName":"Chunk",
 
             "hbheMatchRange":range(10), "hfMatchRange":range(1, 10),
-            "bcnDelta":-118, "fiberMap":{1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:9, 8:11, 9:12, 10:10, 11:8, 12:7},
-            "nEventsMax":1, "printEventMap":False, "printRaw":False,
+            "bcnDelta":-118, "fiberMap":d2c,
+            "nEventsMax":None, "printEventMap":False, "printRaw":False,
             }
 
     cms = {"label":"CMS",
-           "fileName":cmsFileName, "treeName":"Events", "format": "CMS", "auxBranch":True,
+           "fileName":cmsFileName, "treeName":"Events",
+           "format": "CMS", "auxBranch":True,
            "fedIds":[714,722], "utca":False,
            "rawCollection":"FEDRawDataCollection_rawDataCollector__LHC",
 
            "hbheMatchRange":range(10), "hfMatchRange":range(9),
            "bcnDelta":0, "fiberMap":{},
-           "nEventsMax":1, "printEventMap":False, "printRaw":False,
+           "nEventsMax":None, "printEventMap":False, "printRaw":False,
            }
 
     if cmsIsLocal :
-        cms.update({"treeName":"CMSRAW", "format":"HCAL", "auxBranch":False, "branchName":"HCAL_DCC"})
+        cms.update({"treeName":"CMSRAW",
+                    "format":"HCAL",
+                    "auxBranch":False,
+                    "branchName":"HCAL_DCC"})
         del cms["rawCollection"]
 
     if utcaFileName :
@@ -275,18 +322,29 @@ def oneRun(utcaFileName = "", cmsFileName = "", label = "", useEvn = False, filt
 
 setup()
 if __name__=="__main__" :
-    #oneRun(utcaFileName = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/usc/USC_209150.root",
-    #       cmsFileName  = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/castor/209151.HLTSkim.root",
+    baseDir = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/"
+
+    #oneRun(utcaFileName = baseDir+"/usc/USC_209150.root",
+    #       cmsFileName  = baseDir+"/castor/209151.HLTSkim.root",
     #       label = "Run209151",
     #       useEvn = False,
     #       filterEvn = False,
     #       ornTolerance = 0,
     #       )
 
-    oneRun(utcaFileName = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/usc/USC_211155.root",
-           cmsFileName = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/usc/USC_211154.root",
+    #oneRun(utcaFileName = baseDir+"/usc/USC_211155.root",
+    #       cmsFileName  = baseDir+"/usc/USC_211154.root",
+    #       cmsIsLocal = True,
+    #       label = "Run211155",
+    #       useEvn = False,
+    #       filterEvn = False,
+    #       ornTolerance = 0,
+    #       )
+
+    oneRun(utcaFileName = baseDir+"/usc/USC_211428.root",
+           cmsFileName  = baseDir+"/usc/USC_211427.root",
            cmsIsLocal = True,
-           label = "Run211155",
+           label = "Run211428",
            useEvn = False,
            filterEvn = False,
            ornTolerance = 0,
