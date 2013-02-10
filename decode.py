@@ -1,5 +1,7 @@
-#For AMC13, see http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
-#For DCC2, see http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
+#AMC13: http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
+#DCC2: http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
+#HTR: https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
+
 
 def ornBcn(ornIn, bcnIn, bcnDelta = 0) :
     if not bcnDelta :
@@ -55,7 +57,8 @@ def header(d = {}, iWord64 = None, word64 = None, utca = None, bcnDelta = 0) :
         if 3<=iWord64<=5 :
             uhtr0 = 4*(iWord64-3)
             for i in range(4) :
-                d["uHTR%d"%(uhtr0+i)] = uHtrDict((w>>(16*i))&0xffff, d["word16Counts"])
+                d["uHTR%d"%(uhtr0+i)] = uHtrDict((w>>(16*i))&0xffff,
+                                                 d["word16Counts"])
     else :
         if 3<=iWord64<=10 :
             j = (iWord64-3)*2
@@ -63,9 +66,8 @@ def header(d = {}, iWord64 = None, word64 = None, utca = None, bcnDelta = 0) :
             if iWord64!=10 :
                 d["HTR%d"%(j+1)] = htrDict(w>>32, d["word16Counts"])
 
-def payload(d = {}, iWord16 = None, word16 = None, word16Counts = [], utca = None, bcnDelta = 0) :
-    #https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
-
+def payload(d = {}, iWord16 = None, word16 = None, word16Counts = [],
+            utca = None, bcnDelta = 0) :
     w = word16
     if "htrIndex" not in d :
         for iHtr in range(len(word16Counts)) :
@@ -109,7 +111,7 @@ def payload(d = {}, iWord16 = None, word16 = None, word16Counts = [], utca = Non
         return
     elif i==l["nWord16"]-1 :
         d["htrIndex"] += 1
-        if "currentChannelId" in d : #this key might be missing in malformed events
+        if "currentChannelId" in d : #check in case event is malformed
             del d["currentChannelId"]
         l["EvN8"] = w>>8
         l["DTCErrors"] = w&0xff
