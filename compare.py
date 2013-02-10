@@ -43,10 +43,10 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
         for fedId,dct in raw.iteritems() :
             singleFedPlots(raw, fedId, book)
 
-    mapF1,mapB1 = dataMap(raw1)
-    mapF2,mapB2 = dataMap(raw2)
-    stats = matchStats(mapF1, mapB2)
-    report(*stats)
+    #mapF1,mapB1 = dataMap(raw1)
+    #mapF2,mapB2 = dataMap(raw2)
+    #stats = matchStats(mapF1, mapB2)
+    #report(*stats)
 
     #some delta plots
     fed1 = 989
