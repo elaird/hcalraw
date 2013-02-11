@@ -1,4 +1,5 @@
-import ROOT as r
+import utils
+r = utils.ROOT()
 
 class autoBook(dict) :
     def __init__(self, arg = None) :

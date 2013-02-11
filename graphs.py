@@ -1,4 +1,5 @@
-import ROOT as r
+import utils
+r = utils.ROOT()
 
 def labelAxis(h = None, labels = {}) :
     h.SetStats(False)
@@ -48,7 +49,7 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
     pad2.Draw()
 
     for label in labels :
-        f = r.TFile("root/%s.root"%label)
+        f = r.TFile("%s/%s.root"%(utils.outputDir(), label))
 
         #label
         pad0.cd()
