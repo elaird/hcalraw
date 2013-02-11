@@ -202,7 +202,15 @@ def charsOneFed(tree = None, fedId = None, collection = "") :
 
 def wordsOneChunk(tree = None, fedId = None, branchName = "") :
     #Common Data Format
-    chunk = getattr(tree, "%s%d"%(branchName, fedId))
+    attr = "%s%d"%(branchName, fedId)
+    try:
+        chunk = getattr(tree, attr)
+    except AttributeError:
+        print "Branch %s not found.  These branches are available:"%attr
+        names = [item.GetName() for item in tree.GetListOfBranches()]
+        for name in sorted(names):
+            print name
+        exit()
     #wrapper class creates std::vector<ULong64_t>
     return r.CDFChunk2(chunk).chunk()
 
