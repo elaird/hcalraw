@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import os,optparse,subprocess,cProfile
+import os,optparse,cProfile
+import utils
 
 def opts() :
     parser = optparse.OptionParser()
@@ -36,15 +37,12 @@ def rootFiles(directory = "", mode = "") :
         d[int(run)] = "%s/%s"%(directory2, item)
     return d
 
-def commandOutput(cmd = "") :
-    return subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE).communicate()[0].split()
-
 def eosFile(run) :
     #eos not available; list with castor
     castor = "/castor/cern.ch/cms"
     eos = "root://eoscms.cern.ch//eos/cms"
     dir = "%s/store/hidata/HIRun2013/HcalNZS/RAW/v1/000/%03d/%03d/00000/"%(castor, run/1000, run%1000)
-    fileList = commandOutput(cmd = "nsls %s"%dir)
+    fileList = utils.commandOutput(cmd = "nsls %s"%dir)
     if fileList :
         return dir.replace(castor, eos)+fileList[0]
     else:
@@ -56,7 +54,10 @@ import analyze,graphs
 def go() :
     directory = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/"
     uscFiles    = rootFiles(directory, mode = "usc")
-    castorFiles = rootFiles(directory, mode = "castor")
+    if options.onlysummary:
+        castorFiles = []
+    else:
+        castorFiles = rootFiles(directory, mode = "castor")
 
     labels = []
     for run in sorted(uscFiles.keys()) :
