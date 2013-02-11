@@ -1,11 +1,9 @@
 #! /usr/bin/env python
 
 import os,struct
-import ROOT as r
-import autoBook,compare,decode,utils
-
-def outputDir() :
-    return "output"
+import utils
+r = utils.ROOT()
+import autoBook,compare,decode
 
 def cmssw() :
     return "CMSSW_VERSION" in os.environ
@@ -14,8 +12,6 @@ def setup() :
     r.gROOT.SetBatch(True)
     r.gErrorIgnoreLevel = 2000 #silence TCanvas.Print()
     r.gROOT.LoadMacro("cpp/cdf.cxx+")
-    if not os.path.exists(outputDir()):
-        os.mkdir(outputDir())
 
     if cmssw() :
         #enable convenient use of CMSSW classes
@@ -270,7 +266,7 @@ def go(outer = {}, inner = {}, label = "",
     loop(inner = inner, outer = outer, innerEvent = innerEvent, book = book)
 
     #write results to a ROOT file
-    f = r.TFile("%s/%s.root"%(outputDir(), label), "RECREATE")
+    f = r.TFile("%s/%s.root"%(utils.outputDir(), label), "RECREATE")
     gr = graph(categories(oMap = oMapF, iMap = iMapF, innerEvent = innerEvent))
     nBoth = len(filter(lambda x:x!=None,innerEvent.values()))
 
