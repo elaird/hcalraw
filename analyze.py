@@ -1,28 +1,33 @@
 #! /usr/bin/env python
 
-import os,struct,ROOT as r
+import os,struct
+import ROOT as r
 import autoBook,compare,decode
 
-def setup() :
-    assert os.environ["CMSSW_VERSION"],\
-           "A CMSSW environment is required (known to work with CMSSW_5_3_7)."
+def cmssw() :
+    return "CMSSW_VERSION" in os.environ
 
+def setup() :
     r.gROOT.SetBatch(True)
     r.gErrorIgnoreLevel = 2000 #silence TCanvas.Print()
+    r.gROOT.LoadMacro("cpp/cdf.cxx+")
+    if not os.path.exists("root"):
+        os.mkdir("root")
 
-    #enable convenient use of CMSSW classes
-    r.gSystem.Load("libFWCoreFWLite.so")
-    r.AutoLibraryLoader.enable()
+    if cmssw() :
+        #enable convenient use of CMSSW classes
+        r.gSystem.Load("libFWCoreFWLite.so")
+        r.AutoLibraryLoader.enable()
 
-    #define helper classes
-    libs = ["DataFormatsFEDRawData"]
-    if os.environ["CMSSW_RELEASE_BASE"] :
-        base = os.environ["CMSSW_RELEASE_BASE"]
-    else :
-        base = os.environ["CMSSW_BASE"]
-    libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
-    r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
-    r.gROOT.LoadMacro("helpers.cxx+")
+        #define helper classes
+        libs = ["DataFormatsFEDRawData"]
+        if os.environ["CMSSW_RELEASE_BASE"] :
+            base = os.environ["CMSSW_RELEASE_BASE"]
+        else :
+            base = os.environ["CMSSW_BASE"]
+        libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
+        r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
+        r.gROOT.LoadMacro("cpp/cms.cxx+")
 
 def nEvents(tree, nMax) :
     nEntries = tree.GetEntries()
