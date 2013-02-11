@@ -22,12 +22,12 @@ def singleFedPlots(raw = {}, fedId = None, book = {}) :
                 caps[channelData["CapId0"]] += 1
     errFSum = 0.0+sum(ErrF.values())
     if errFSum :
-        book.fill(ErrF[0]/errFSum, "ErrF0_%d"%fedId, 44, 0.0, 1.1, title = "FED %d;frac. chan. w/ErrF==0"%fedId)
+        book.fill(ErrF[0]/errFSum, "ErrF0_%d"%fedId, 44, 0.0, 1.1, title = "FED %d;frac. chan. w/ErrF==0;Events / bin"%fedId)
 
     capSum = 0.0+sum(caps.values())
     if capSum :
         book.fill(max(caps.values())/capSum, "PopCapFrac_%d"%fedId, 44, 0.0, 1.1,
-                  title = "FED %d;frac. ErrF=0 chans w/most pop. capId"%fedId)
+                  title = "FED %d;frac. ErrF=0 chans w/most pop. capId;Events / bin"%fedId)
 
 def compare(raw1 = {}, raw2 = {}, book = {}) :
     hyphens = True
