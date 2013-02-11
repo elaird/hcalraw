@@ -28,12 +28,28 @@ def adjustPad(pad = r.gPad, logY = False) :
     r.gPad.SetTicky()
     if logY : r.gPad.SetLogy()
 
-def stylize(h) :
+def stylize(h, color=r.kBlack, style=1, width=1) :
     #r.gStyle.SetOptStat(110010)
     h.SetStats(False)
     h.SetMinimum(0.5)
     magnify(h, factor = 2.0)
-    h.SetLineWidth(2)
+    h.SetLineColor(color)
+    h.SetLineStyle(style)
+    h.SetLineWidth(width)
+
+def legends(legEntries=[]) :
+    out = []
+    dx = 0.8/len(legEntries)
+    x0 = 0.1
+    for iLeg,(h,fed) in enumerate(legEntries):
+        leg = r.TLegend(x0, 0.91, x0+dx, 1.0)
+        x0 += dx
+        leg.SetBorderSize(0)
+        leg.SetFillStyle(0)
+        leg.AddEntry(h, "FED %d"%fed, "l")
+        leg.Draw()
+        out.append(leg)
+    return out
 
 def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
     canvas = r.TCanvas()
@@ -47,6 +63,11 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
     pad0.Draw()
     pad1.Draw()
     pad2.Draw()
+
+    feds = [(714, r.kRed, 1),
+            (722, r.kGreen, 2),
+            (989, r.kBlack, 3),
+            ]
 
     for label in labels :
         f = r.TFile("%s/%s.root"%(utils.outputDir(), label))
@@ -75,17 +96,32 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
         graph.Draw("psame")
 
         keep = []
-        for iHisto,name in enumerate(["deltaOrN", "ErrF0_989",      "ErrF0_714",      "ErrF0_722",
-                                      "deltaBcN", "PopCapFrac_989", "PopCapFrac_714", "PopCapFrac_722",
-                                      "deltaEvN", "TTS_989",        "TTS_714",        "TTS_722",
-                                      ]) :
+        for iHisto,name in enumerate(["deltaOrN", "ErrF0",      "", "",
+                                      "deltaBcN", "PopCapFrac", "", "",
+                                      "deltaEvN", "TTS",        "", ""
+                                      ]):
+            if not name: continue
             pad2.cd(1+iHisto)
             adjustPad(logY = True)
             h = f.Get(name)
-            if h :
+            if h:
                 h.Draw("hist")
                 stylize(h)
                 keep.append(h)
+            else:
+                legEntries = []
+                for iFed,(fed,color,style) in enumerate(feds):
+                    h = f.Get("%s_%d"%(name,fed))
+                    if h:
+                        gopts = "hist"
+                        if iFed: gopts +="same"
+                        h.Draw(gopts)
+                        h.SetTitle("")
+                        legEntries.append((h, fed))
+                        stylize(h, color, style)
+                        keep.append(h)
+
+                keep += legends(legEntries)
 
         canvas.Print(pdf)
         f.Close()
