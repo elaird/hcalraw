@@ -2,7 +2,7 @@
 
 import os,struct
 import ROOT as r
-import autoBook,compare,decode
+import autoBook,compare,decode,utils
 
 def outputDir() :
     return "output"
@@ -234,7 +234,7 @@ def categories(oMap = {}, iMap = {}, innerEvent = {}) :
 def graph(d = {}) :
     gr = r.TGraph()
     for i,key in enumerate(sorted(d.keys())) :
-        gr.SetPoint(i, compare.minutes(key), d[key])
+        gr.SetPoint(i, utils.minutes(key), d[key])
     return gr
 
 def eventToEvent(mapF = {}, mapB = {}, useEvn = False, ornTolerance = None) :
