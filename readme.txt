@@ -59,7 +59,6 @@ TTree cache
 unpack by words in CMS format
 improve storage structure
 clean up unpacking loop
-automate pyROOT setup
 PEP 8
 
 (analysis)
