@@ -41,14 +41,38 @@ def legends(legEntries=[]) :
     out = []
     dx = 0.8/len(legEntries)
     x0 = 0.1
-    for iLeg,(h,fed) in enumerate(legEntries):
+    for iLeg,(h,desc) in enumerate(legEntries):
         leg = r.TLegend(x0, 0.91, x0+dx, 1.0)
         x0 += dx
         leg.SetBorderSize(0)
         leg.SetFillStyle(0)
-        leg.AddEntry(h, "FED %d"%fed, "l")
+        leg.AddEntry(h, desc, "l")
         leg.Draw()
         out.append(leg)
+    return out
+
+def histoLoop(f, lst, func):
+    out = []
+    maxes = []
+    legEntries = []
+    for i,(x,color,style) in enumerate(lst):
+        h = f.Get(func(x))
+        if h:
+            gopts = "hist"
+            if i:
+                gopts +="same"
+            else:
+                h0 = h
+            maxes.append(h.GetMaximum())
+            h.Draw(gopts)
+            stylize(h, color, style)
+            out.append(h)
+
+            legEntries.append((h, h.GetTitle()))
+            h.SetTitle("")
+
+    if maxes: h0.SetMaximum(2.0*max(maxes))
+    out += legends(legEntries)
     return out
 
 def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
@@ -63,11 +87,6 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
     pad0.Draw()
     pad1.Draw()
     pad2.Draw()
-
-    feds = [(714, r.kRed, 1),
-            (722, r.kGreen, 2),
-            (989, r.kBlack, 3),
-            ]
 
     for label in labels :
         f = r.TFile("%s/%s.root"%(utils.outputDir(), label))
@@ -96,9 +115,22 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
         graph.Draw("psame")
 
         keep = []
-        for iHisto,name in enumerate(["deltaOrN", "ErrF0",      "", "",
-                                      "deltaBcN", "PopCapFrac", "", "",
-                                      "deltaEvN", "TTS",        "", ""
+
+        #EvN, OrN, BcN agreement (989 - 714)
+        pad2.cd(1)
+        adjustPad(logY = True)
+
+        keep += histoLoop(f,
+                          [("OrN", r.kBlue, 1),
+                           ("EvN", r.kCyan, 2),
+                           ("BcN", r.kBlack, 3),
+                           ],
+                          lambda x:"delta%s"%x,
+                          )
+
+        for iHisto,name in enumerate(["", "ErrF0", "PopCapFrac", "TTS",
+                                      "", "", "", "",
+                                      "", "", "", "",
                                       ]):
             if not name: continue
             pad2.cd(1+iHisto)
@@ -109,19 +141,13 @@ def makeSummaryPdf(labels = [], pdf = "summary.pdf") :
                 stylize(h)
                 keep.append(h)
             else:
-                legEntries = []
-                for iFed,(fed,color,style) in enumerate(feds):
-                    h = f.Get("%s_%d"%(name,fed))
-                    if h:
-                        gopts = "hist"
-                        if iFed: gopts +="same"
-                        h.Draw(gopts)
-                        h.SetTitle("")
-                        legEntries.append((h, fed))
-                        stylize(h, color, style)
-                        keep.append(h)
-
-                keep += legends(legEntries)
+                keep += histoLoop(f,
+                                  [(714, r.kRed, 1),
+                                   (722, r.kGreen, 2),
+                                   (989, r.kBlack, 3),
+                                   ],
+                                  lambda x:"%s_%d"%(name, x),
+                                  )
 
         canvas.Print(pdf)
         f.Close()
