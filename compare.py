@@ -1,13 +1,5 @@
 import printRaw
 
-def bcnLabel(delta = 0) :
-    out = "BcN"
-    if delta<0 :
-        out += " - %d"%abs(delta)
-    elif delta>0 :
-        out += " + %d"%abs(delta)
-    return out
-
 def singleFedPlots(raw = {}, fedId = None, book = {}) :
     if fedId==None : return
     d = raw[fedId]
@@ -52,11 +44,13 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
     d1 = raw1.get(fed1, {})
     d2 = raw2.get(fed2, {})
     if d1 and d2 :
-        bcnXTitle = "FED %d %s - FED %d %s"%(fed1, bcnLabel(raw1[None]["bcnDelta"]),
-                                             fed2, bcnLabel(raw2[None]["bcnDelta"]))
-        book.fill(d1["BcN"]-d2["BcN"], "deltaBcN", 11, -5.5, 5.5, title = ";%s;Events / bin"%bcnXTitle)
-        book.fill(d1["OrN"]-d2["OrN"], "deltaOrN", 11, -5.5, 5.5, title = ";FED %s OrN - FED %s OrN;Events / bin"%(fed1, fed2))
-        book.fill(d1["EvN"]-d2["EvN"], "deltaEvN", 11, -5.5, 5.5, title = ";FED %s EvN - FED %s EvN;Events / bin"%(fed1, fed2))
+        delta = raw1[None]["bcnDelta"]-raw2[None]["bcnDelta"]
+        for x in ["BcN", "OrN", "EvN"] :
+            title = ";".join([x+("%d"%delta if x=="BcN" else ""),
+                              "FED %s - FED %s"%(fed1, fed2),
+                              "Events / bin",
+                              ])
+            book.fill(d1[x]-d2[x], "delta"+x, 11, -5.5, 5.5, title = title)
 
 def coordString(fedId, moduleId, fiber, channel) :
     return "%3d %2d %2d %2d"%(fedId, moduleId, fiber, channel)
