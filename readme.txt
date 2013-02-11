@@ -46,3 +46,22 @@ decode.py interprets a FED's bytes in an event (called by analyze.unpacked)
 graphs.py reads in output/Runxxx.root, makes plots, and outputs summary.pdf
 printRaw.py dumps to stdout the payload(s) in an event
 utils.py contains helper functions
+
+---------
+| To do |
+---------
+(documentation)
+readme: versions, wget, rst
+
+(technical)
+TChain support
+TTree cache
+unpack by words in CMS format
+improve storage structure
+clean up unpacking loop
+automate pyROOT setup
+PEP 8
+
+(analysis)
+HLT path filter in analyze.py
+electronics map
