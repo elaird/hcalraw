@@ -2,4 +2,5 @@
 *.pyc
 *.d
 *.so
+*.pdf
 output
