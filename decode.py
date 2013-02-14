@@ -87,11 +87,11 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         l["0Word16"] = iWord16
 
     i = iWord16 - l["0Word16"]
-    l["iWordQie0"] = 8
 
     #header
     if i == 0:
         l["EvN"] = w & 0xff
+        l["nWord16Tp"] = 0  # placeholder; overwritten when i=5
     if i == 1:
         l["EvN"] += w << 8
     if i == 3:
@@ -103,10 +103,9 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         l["FormatVer"] = (w >> 12) & 0xf
     if i == 5:
         l["nWord16Tp"] = (w >> 8) & 0xff
-        l["iWordQie0"] += l["nWord16Tp"]  # skip TPs
         l["nPreSamples"] = (w >> 3) & 0x1f
         l["channelData"] = {}
-    if i < l["iWordQie0"]:
+    if i < 8+l["nWord16Tp"]:  # skip TPs
         return
 
     #trailer
