@@ -91,21 +91,20 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
 
     #header
     if i == 0:
-        l["InputID"] = (w & 0xf0)/(1 << 8)
-        l["EvN"] = w & 0xf
+        l["EvN"] = w & 0xff
     if i == 1:
-        l["EvN"] += w*(1 << 8)
+        l["EvN"] += w << 8
     if i == 3:
         l["ModuleId"] = w & 0x7ff
-        l["OrN5"] = (w & 0xf800) >> 11
+        l["OrN5"] = (w >> 11) & 0x1f
     if i == 4:
-        l["OrN5"], l["BcN"] = ornBcn(l["OrN5"], w & 0xfff, bcnDelta)
-        l["FormatVer"] = (w & 0xf000) >> 12
+        l["BcN"] = w & 0xfff
+        l["OrN5"], l["BcN"] = ornBcn(l["OrN5"], l["BcN"], bcnDelta)
+        l["FormatVer"] = (w >> 12) & 0xf
     if i == 5:
-        l["nWord16Tp"] = (w & 0xfc) >> 3
-        if not utca:
-            l["iWordQie0"] += l["nWord16Tp"]
-        l["nPreSamples"] = (w & 0xfc) >> 3
+        l["nWord16Tp"] = (w >> 8) & 0xff
+        l["iWordQie0"] += l["nWord16Tp"]  # skip TPs
+        l["nPreSamples"] = (w >> 3) & 0x1f
         l["channelData"] = {}
     if i < l["iWordQie0"]:
         return
@@ -113,7 +112,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
     #trailer
     if i == l["nWord16"]-4:
         l["nWord16Qie"] = w & 0x7ff
-        l["nSamples"] = (w & 0xfc00) >> 11
+        l["nSamples"] = (w >> 11) & 0x1f
         return
     if i == l["nWord16"]-3:
         l["CRC"] = w
@@ -131,7 +130,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         return
 
     #data
-    if w & (1 << 15):
+    if (w >> 15):
         d["currentChannelId"] = w & 0xff
         l["channelData"][d["currentChannelId"]] = {"CapId0": (w >> 8) & 0x3,
                                                    "ErrF":   (w >> 10) & 0x3,
