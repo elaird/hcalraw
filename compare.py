@@ -1,36 +1,44 @@
 import printRaw
 
-def singleFedPlots(raw = {}, fedId = None, book = {}) :
-    if fedId==None : return
-    d = raw[fedId]
-    book.fill(d["TTS"], "TTS_%d"%fedId, 16, -0.5, 15.5, title = "FED %d; TTS state;Events / bin"%fedId)
 
-    caps = {0:0, 1:0, 2:0, 3:0}
-    ErrF = {0:0, 1:0, 2:0, 3:0}
-    for block in d["htrBlocks"].values() :
-        for channelId,channelData in block["channelData"].iteritems() :
+def singleFedPlots(raw={}, fedId=None, book={}):
+    if fedId is None:
+        return
+    d = raw[fedId]
+    book.fill(d["TTS"], "TTS_%d" % fedId, 16, -0.5, 15.5,
+              title="FED %d; TTS state;Events / bin" % fedId)
+
+    caps = {0: 0, 1: 0, 2: 0, 3: 0}
+    ErrF = {0: 0, 1: 0, 2: 0, 3: 0}
+    for block in d["htrBlocks"].values():
+        for channelId, channelData in block["channelData"].iteritems():
             ErrF[channelData["ErrF"]] += 1
-            if not channelData["ErrF"] :
+            if not channelData["ErrF"]:
                 caps[channelData["CapId0"]] += 1
     errFSum = 0.0+sum(ErrF.values())
-    if errFSum :
-        book.fill(ErrF[0]/errFSum, "ErrF0_%d"%fedId, 44, 0.0, 1.1, title = "FED %d;frac. chan. w/ErrF==0;Events / bin"%fedId)
+    if errFSum:
+        book.fill(ErrF[0]/errFSum, "ErrF0_%d" % fedId, 44, 0.0, 1.1,
+                  title="FED %d;frac. chan. w/ErrF==0;Events / bin" % fedId)
 
     capSum = 0.0+sum(caps.values())
-    if capSum :
-        book.fill(max(caps.values())/capSum, "PopCapFrac_%d"%fedId, 44, 0.0, 1.1,
-                  title = "FED %d;frac. ErrF=0 chans w/most pop. capId;Events / bin"%fedId)
+    if capSum:
+        book.fill(max(caps.values())/capSum, "PopCapFrac_%d" % fedId,
+                  44, 0.0, 1.1,
+                  title=("FED %d" % fedId) +
+                  ";frac. ErrF=0 chans w/most pop. capId;Events / bin"
+                  )
 
-def compare(raw1 = {}, raw2 = {}, book = {}) :
+
+def compare(raw1={}, raw2={}, book={}):
     hyphens = True
-    if raw1 and raw1[None]["printRaw"] :
+    if raw1 and raw1[None]["printRaw"]:
         printRaw.oneEvent(raw1, hyphens)
         hyphens = False
-    if raw2 and raw2[None]["printRaw"] :
+    if raw2 and raw2[None]["printRaw"]:
         printRaw.oneEvent(raw2, hyphens)
 
-    for raw in [raw1, raw2] :
-        for fedId,dct in raw.iteritems() :
+    for raw in [raw1, raw2]:
+        for fedId, dct in raw.iteritems():
             singleFedPlots(raw, fedId, book)
 
     #mapF1,mapB1 = dataMap(raw1)
@@ -43,88 +51,94 @@ def compare(raw1 = {}, raw2 = {}, book = {}) :
     fed2 = 714
     d1 = raw1.get(fed1, {})
     d2 = raw2.get(fed2, {})
-    if d1 and d2 :
+    if d1 and d2:
         delta = raw1[None]["bcnDelta"]-raw2[None]["bcnDelta"]
-        for x in ["BcN", "OrN", "EvN"] :
-            title = ";".join([x+("%d"%delta if x=="BcN" else ""),
-                              "FED %s - FED %s"%(fed1, fed2),
+        for x in ["BcN", "OrN", "EvN"]:
+            title = ";".join([x+("%d" % delta if (x == "BcN") else ""),
+                              "FED %s - FED %s" % (fed1, fed2),
                               "Events / bin",
                               ])
-            book.fill(d1[x]-d2[x], "delta"+x, 11, -5.5, 5.5, title = title)
+            book.fill(d1[x]-d2[x], "delta"+x, 11, -5.5, 5.5, title=title)
 
-def coordString(fedId, moduleId, fiber, channel) :
-    return "%3d %2d %2d %2d"%(fedId, moduleId, fiber, channel)
 
-def report(matched = {}, failed = []) :
-    print "MATCHED fibers %d:"%len(matched)
+def coordString(fedId, moduleId, fiber, channel):
+    return "%3d %2d %2d %2d" % (fedId, moduleId, fiber, channel)
+
+
+def report(matched={}, failed=[]):
+    print "MATCHED fibers %d:" % len(matched)
     print "uTCA --> CMS"
     print "(fed  h  f ch) --> (fed  h  f ch)"
     print "---------------------------------"
-    for k in sorted(matched.keys()) :
-        print "(%s) --> (%s)"%(coordString(*k), coordString(*matched[k]))
+    for k in sorted(matched.keys()):
+        print "(%s) --> (%s)" % (coordString(*k), coordString(*matched[k]))
 
     print
     print "CMS --> uTCA"
     print "(fed  h  f ch) --> (fed  h  f ch)"
     print "---------------------------------"
     lines = []
-    for k,v in matched.iteritems() :
-        lines.append("(%s) --> (%s)"%(coordString(*v), coordString(*k)))
-    for l in sorted(lines) :
+    for k, v in matched.iteritems():
+        lines.append("(%s) --> (%s)" % (coordString(*v), coordString(*k)))
+    for l in sorted(lines):
         print l
 
     print
-    print "FAILED fibers %d:"%len(failed)
-    if failed :
+    print "FAILED fibers %d:" % len(failed)
+    if failed:
         print "(fed  h  f ch)"
         print "--------------"
-        for c in sorted(failed) :
-            print "(%s)"%coordString(*c)
+        for c in sorted(failed):
+            print "(%s)" % coordString(*c)
 
-def matchStats(f = {}, b = {}) :
+
+def matchStats(f={}, b={}):
     matched = {}
     failed = []
-    for coords,data in f.iteritems() :
-        if data in b :
+    for coords, data in f.iteritems():
+        if data in b:
             matched[coords] = b[data]
-        else :
+        else:
             failed.append(coords)
-    return matched,failed
+    return matched, failed
 
-def dataMap(raw = {}) :
+
+def dataMap(raw={}):
     forward = {}
     backward = {}
 
     fiberMap = raw[None]["fiberMap"]
-    for fedId,d in raw.iteritems() :
-        if fedId==None : continue
-        if fedId==714 :
+    for fedId, d in raw.iteritems():
+        if fedId is None:
+            continue
+        if fedId == 714:
             matchRange = raw[None]["hbheMatchRange"]
-        if fedId==722 :
+        if fedId == 722:
             matchRange = raw[None]["hfMatchRange"]
 
-        for key,block in d["htrBlocks"].iteritems() :
-            if fedId==989 :
-                moduleId = block["ModuleId"]&0xf
-                if moduleId<=4 :
+        for key, block in d["htrBlocks"].iteritems():
+            if fedId == 989:
+                moduleId = block["ModuleId"] & 0xf
+                if moduleId <= 4:
                     matchRange = raw[None]["hbheMatchRange"]
-                else :
+                else:
                     matchRange = raw[None]["hfMatchRange"]
-            else :
-                moduleId = block["ModuleId"]&0x1f
+            else:
+                moduleId = block["ModuleId"] & 0x1f
 
-            for channelId,channelData in block["channelData"].iteritems() :
-                channel = channelId%4
-                fiber = 1+channelId/4 #integer division
+            for channelId, channelData in block["channelData"].iteritems():
+                channel = channelId % 4
+                fiber = 1+channelId/4  # integer division
                 fiber = fiberMap[fiber] if fiber in fiberMap else fiber
-                if channel!=1 : continue
+                if channel != 1:
+                    continue
                 coords = (fedId, moduleId, fiber, channel)
                 qie = channelData["QIE"]
-                if len(qie)<len(matchRange) :
+                if len(qie) < len(matchRange):
                     #print "skipping bogus channel",coords
                     continue
                 data = tuple([qie[i] for i in matchRange])
                 #print coords,matchRange,[hex(d) for d in data]
                 forward[coords] = data
                 backward[data] = coords
-    return forward,backward
+    return forward, backward
