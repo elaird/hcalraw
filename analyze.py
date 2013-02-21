@@ -9,16 +9,12 @@ import compare
 import decode
 
 
-def cmssw():
-    return "CMSSW_VERSION" in os.environ
-
-
 def setup():
     r.gROOT.SetBatch(True)
     r.gErrorIgnoreLevel = 2000  # silence TCanvas.Print()
     r.gROOT.LoadMacro("cpp/cdf.cxx+")
 
-    if cmssw():
+    if utils.cmssw():
         #enable convenient use of CMSSW classes
         r.gSystem.Load("libFWCoreFWLite.so")
         r.AutoLibraryLoader.enable()
