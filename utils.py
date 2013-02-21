@@ -3,6 +3,10 @@ import subprocess
 import sys
 
 
+def cmssw():
+    return "CMSSW_VERSION" in os.environ
+
+
 def outputDir(directoryName="output"):
     if not os.path.exists(directoryName):
         os.mkdir(directoryName)
@@ -25,7 +29,7 @@ def bail():
     url = "http://root.cern.ch/drupal/content"
     url += "/how-use-use-python-pyroot-interpreter"
 
-    print "Could not find ROOT.py"
+    print "Could not find ROOT.py nor CppyyROOT.py"
     print "See", url
     exit()
 
@@ -39,12 +43,21 @@ def findROOT():
 
 
 def ROOT():
+    moduleNames = ["ROOT"]
+    if not cmssw():
+        moduleNames.insert(0, "CppyyROOT")
+
+    for moduleName in moduleNames:
+        try:
+            exec("import %s as r"%moduleName)
+            print "Using",moduleName
+            return r
+        except ImportError:
+            continue
+
+    findROOT()
     try:
         import ROOT as r
+        return r
     except ImportError:
-        try:
-            findROOT()
-            import ROOT as r
-        except ImportError:
-            bail()
-    return r
+        bail()
