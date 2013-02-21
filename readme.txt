@@ -21,17 +21,18 @@ git clone git@github.com:elaird/hcal.git
 git clone git://github.com/elaird/hcal.git
 
 #if you have neither:
-wget foobar.zip
+wget https://github.com/elaird/hcal/archive/master.zip
 
 cd hcal/utca
-source env.sh #see below
+source env-cmssw.sh #see below
 ./analyze.py
 
 ---------
 | Files |
 ---------
-env.sh sets up a CMSSW environment (needed to analyze CMS data);
-       it requires AFS; it is not needed to analyze HCAL test-stand data.
+env-cmssw.sh sets up a CMSSW environment (needed to analyze CMS data);
+       it requires AFS; it is not needed to analyze HCAL test-stand
+       data.
 
 cpp/CDF*.h are copied from CMSSW (IORawData/HcalTBInputService/src)
 cpp/cdf.cxx defines a helper class for reading data from HCAL local DAQ
@@ -50,10 +51,8 @@ utils.py contains helper functions
 ---------
 | To do |
 ---------
-(documentation)
-readme: versions, wget, rst
-
 (technical)
+readme: versions, rst
 TChain support
 TTree cache
 unpack by words in CMS format
