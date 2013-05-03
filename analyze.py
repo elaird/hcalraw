@@ -163,8 +163,8 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
         "Specify whether to unpack by words or chars."
     assert skipHtrBlocks or (utca in [False, True]), \
         "Specify whether data is uTCA or VME (unless skipping HTR blocks)."
-    amc13Header = {}
-    amc13Trailer = {}
+    header = {}
+    trailer = {}
     htrBlocks = {}
 
     nWord64 = fedData.size()/(8 if chars else 1)
@@ -188,23 +188,30 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
             word64 = fedData.at(iWord64)
 
         if iWord64 < iWordPayload0:
-            decode.header(amc13Header, iWord64, word64, utca, bcnDelta)
+            decode.header(header, iWord64, word64, utca, bcnDelta)
         elif iWord64 < nWord64-1:
             for i in range(4):
                 word16 = (word64 >> (16*i)) & 0xffff
-                decode.payload(htrBlocks,
-                               iWord16=4*iWord64+i, word16=word16,
-                               word16Counts=amc13Header["word16Counts"],
-                               utca=utca, bcnDelta=bcnDelta)
+                iWord16 = 4*iWord64+i
+                returnCode = decode.payload(htrBlocks,
+                                            iWord16=iWord16, word16=word16,
+                                            word16Counts=header["word16Counts"],
+                                            utca=utca, bcnDelta=bcnDelta)
+                if returnCode is not None:
+                    print " ".join(["ERROR: skipping",
+                                    "FED %d" % header["FEDid"],
+                                    "event %d" % header["EvN"],
+                                    "iWord16 %d" % iWord16,
+                                    ])
         else:
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
-            decode.trailer(amc13Trailer, iWord64, word64)
+            decode.trailer(trailer, iWord64, word64)
 
     # fixme: improve this
     out = {}
-    out.update(amc13Header)
-    out.update(amc13Trailer)
+    out.update(header)
+    out.update(trailer)
     out.update({"htrBlocks": htrBlocks})
     return out
 
@@ -316,7 +323,9 @@ def go(outer={}, inner={}, label="",
     print s
 
 
-def oneRun(utcaFileName="", cmsFileName="", label="", useEvn=False,
+def oneRun(utcaFileName="", utcaFedIds=[989],
+           cmsFileName="", cmsFedIds=[714, 722],
+           label="", useEvn=False,
            filterEvn=False, ornTolerance=0, cmsIsLocal=False, uhtr=False):
 
     d2c = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
@@ -331,18 +340,18 @@ def oneRun(utcaFileName="", cmsFileName="", label="", useEvn=False,
     utca = {"label": "uTCA",
             "fileName": utcaFileName, "treeName": "CMSRAW",
             "format": "HCAL", "auxBranch": False,
-            "fedIds": [989], "utca": True,
+            "fedIds": utcaFedIds, "utca": True,
             "branchName": "Chunk",
 
             "hbheMatchRange": range(10), "hfMatchRange": range(1, 10),
             "bcnDelta": -118, "fiberMap": {} if uhtr else d2c,
-            "nEventsMax": None, "printEventMap": False, "printRaw": True,
+            "nEventsMax": None, "printEventMap": False, "printRaw": False,
             }
 
     cms = {"label": "CMS",
            "fileName": cmsFileName, "treeName": "Events",
            "format":  "CMS", "auxBranch": True,
-           "fedIds": [714, 722], "utca": False,
+           "fedIds": cmsFedIds, "utca": False,
            "rawCollection": "FEDRawDataCollection_rawDataCollector__LHC",
 
            "hbheMatchRange": range(10), "hfMatchRange": range(9),
@@ -397,7 +406,8 @@ if __name__ == "__main__":
     #       )
 
     oneRun(utcaFileName=baseDir+"/904/B904_Integration_000000.uhtr.root",
-           #cmsFileName=baseDir+"/904/B904_Integration_000000.uhtr.root",
+           cmsFileName=baseDir+"/904/B904_Integration_000000.uhtr.root",
+           cmsFedIds=[702],
            cmsIsLocal=True,
            label="Run0",
            useEvn=False,
