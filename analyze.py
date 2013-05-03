@@ -317,7 +317,8 @@ def go(outer={}, inner={}, label="",
 
 
 def oneRun(utcaFileName="", cmsFileName="", label="", useEvn=False,
-           filterEvn=False, ornTolerance=0, cmsIsLocal=False):
+           filterEvn=False, ornTolerance=0, cmsIsLocal=False, uhtr=False):
+
     d2c = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
            7:   9,
            8:  11,
@@ -334,8 +335,8 @@ def oneRun(utcaFileName="", cmsFileName="", label="", useEvn=False,
             "branchName": "Chunk",
 
             "hbheMatchRange": range(10), "hfMatchRange": range(1, 10),
-            "bcnDelta": -118, "fiberMap": d2c,
-            "nEventsMax": None, "printEventMap": False, "printRaw": False,
+            "bcnDelta": -118, "fiberMap": {} if uhtr else d2c,
+            "nEventsMax": None, "printEventMap": False, "printRaw": True,
             }
 
     cms = {"label": "CMS",
@@ -376,7 +377,6 @@ if __name__ == "__main__":
     #       label="Run209151",
     #       useEvn=False,
     #       filterEvn=False,
-    #       ornTolerance=0,
     #       )
 
     # 211155
@@ -386,7 +386,6 @@ if __name__ == "__main__":
     #       label="Run211155",
     #       useEvn=False,
     #       filterEvn=False,
-    #       ornTolerance=0,
     #       )
 
     #oneRun(utcaFileName=baseDir+"/usc/USC_211428.root",
@@ -395,7 +394,6 @@ if __name__ == "__main__":
     #       label="Run211428",
     #       useEvn=False,
     #       filterEvn=False,
-    #       ornTolerance=0,
     #       )
 
     oneRun(utcaFileName=baseDir+"/904/B904_Integration_000000.uhtr.root",
@@ -404,5 +402,6 @@ if __name__ == "__main__":
            label="Run0",
            useEvn=False,
            filterEvn=False,
-           ornTolerance=0,
+           ornTolerance=1,
+           uhtr=True,
            )
