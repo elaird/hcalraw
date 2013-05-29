@@ -95,6 +95,7 @@ def qieString(qieData={}):
 
 def htrChannelData(d={}, moduleId=0):
     print "  ".join(["ModuleId",
+                     "Fi",
                      "Ch",
                      "Fl",
                      "ErrF",
@@ -105,7 +106,8 @@ def htrChannelData(d={}, moduleId=0):
         if channelId % 4 != 1:
             continue
         print "   ".join([" 0x%03x" % moduleId,
-                          "%3d" % channelId,
+                          "%3d" % (channelId/4),
+                          "%1d" % (channelId % 4),
                           "%1d" % data["Flavor"],
                           "%2d" % data["ErrF"],
                           "  %1d" % data["CapId0"],
