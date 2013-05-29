@@ -405,11 +405,22 @@ if __name__ == "__main__":
     #       filterEvn=False,
     #       )
 
-    oneRun(utcaFileName=baseDir+"/904/B904_Integration_000000.uhtr.root",
-           cmsFileName=baseDir+"/904/B904_Integration_000000.uhtr.root",
+    #oneRun(utcaFileName=baseDir+"/904/B904_Integration_000000.uhtr.root",
+    #       cmsFileName=baseDir+"/904/B904_Integration_000000.uhtr.root",
+    #       cmsFedIds=[702],
+    #       cmsIsLocal=True,
+    #       label="Run0",
+    #       useEvn=False,
+    #       filterEvn=False,
+    #       ornTolerance=1,
+    #       uhtr=True,
+    #       )
+
+    oneRun(utcaFileName=baseDir+"/904/B904_Integration_000001.root",
+           cmsFileName=baseDir+"/904/B904_Integration_000001.root",
            cmsFedIds=[702],
            cmsIsLocal=True,
-           label="Run0",
+           label="Run1",
            useEvn=False,
            filterEvn=False,
            ornTolerance=1,
