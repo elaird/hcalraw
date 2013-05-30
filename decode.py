@@ -105,6 +105,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         l["BcN"] = w & 0xfff
         l["OrN5"], l["BcN"] = ornBcn(l["OrN5"], l["BcN"], bcnDelta)
         l["FormatVer"] = (w >> 12) & 0xf
+        assert utca or l["FormatVer"] == 6, "HTR FormatVer %s is not supported." % str(l["FormatVer"])
     if i == 5:
         l["nWord16Tp"] = (w >> 8) & 0xff
         l["nPreSamples"] = (w >> 3) & 0x1f
