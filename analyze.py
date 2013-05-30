@@ -150,7 +150,7 @@ def collectedRaw(tree=None, specs={}):
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
     for item in ["printRaw", "label", "bcnDelta", "fiberMap",
-                 "hbheMatchRange", "hfMatchRange"]:
+                 "hbheMatchRange", "hfMatchRange", "suppressFlavor6"]:
         raw[None][item] = specs[item]
     return raw
 
@@ -345,7 +345,8 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
 
             "hbheMatchRange": range(10), "hfMatchRange": range(1, 10),
             "bcnDelta": -118, "fiberMap": {} if uhtr else d2c,
-            "nEventsMax": None, "printEventMap": False, "printRaw": False,
+            "nEventsMax": None, "printEventMap": False,
+            "printRaw": False, "suppressFlavor6": False,
             }
 
     cms = {"label": "CMS",
@@ -356,7 +357,8 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
 
            "hbheMatchRange": range(10), "hfMatchRange": range(9),
            "bcnDelta": 0, "fiberMap": {},
-           "nEventsMax": None, "printEventMap": False, "printRaw": False,
+           "nEventsMax": None, "printEventMap": False,
+           "printRaw": False, "suppressFlavor6": False,
            }
 
     if cmsIsLocal:
