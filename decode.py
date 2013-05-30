@@ -136,9 +136,12 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
     #data
     if (w >> 15):
         d["currentChannelId"] = w & 0xff
+        flavor = (w >> 12) & 0x7
+        if (not utca) and flavor != 5:
+            print "ERROR: flavor %d (EvN %d) not decoded correctly" % (flavor, l["EvN"])
         l["channelData"][d["currentChannelId"]] = {"CapId0": (w >> 8) & 0x3,
                                                    "ErrF":   (w >> 10) & 0x3,
-                                                   "Flavor": (w >> 12) & 0x7,
+                                                   "Flavor": flavor,
                                                    "iWord16": iWord16,
                                                    "QIE": {},
                                                    }
