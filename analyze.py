@@ -150,7 +150,7 @@ def collectedRaw(tree=None, specs={}):
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
     for item in ["printRaw", "label", "bcnDelta", "fiberMap",
-                 "hbheMatchRange", "hfMatchRange", "suppressFlavor6"]:
+                 "hbheMatchRange", "hfMatchRange", "suppressFlavors"]:
         raw[None][item] = specs[item]
     return raw
 
@@ -346,7 +346,7 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
             "hbheMatchRange": range(10), "hfMatchRange": range(1, 10),
             "bcnDelta": -118, "fiberMap": {} if uhtr else d2c,
             "nEventsMax": None, "printEventMap": False,
-            "printRaw": False, "suppressFlavor6": False,
+            "printRaw": False, "suppressFlavors": [],
             }
 
     cms = {"label": "CMS",
@@ -358,7 +358,7 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
            "hbheMatchRange": range(10), "hfMatchRange": range(9),
            "bcnDelta": 0, "fiberMap": {},
            "nEventsMax": None, "printEventMap": False,
-           "printRaw": False, "suppressFlavor6": False,
+           "printRaw": False, "suppressFlavors": [6],
            }
 
     if cmsIsLocal:
@@ -418,11 +418,11 @@ if __name__ == "__main__":
     #       uhtr=True,
     #       )
 
-    oneRun(utcaFileName=baseDir+"/904/B904_Integration_000001.root",
-           cmsFileName=baseDir+"/904/B904_Integration_000001.root",
+    oneRun(utcaFileName=baseDir+"/904/B904_Integration_000007.root",
+           cmsFileName=baseDir+"/904/B904_Integration_000007.root",
            cmsFedIds=[702],
            cmsIsLocal=True,
-           label="Run1",
+           label="Run7",
            useEvn=False,
            filterEvn=False,
            ornTolerance=1,
