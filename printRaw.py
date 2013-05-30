@@ -22,7 +22,7 @@ def oneEvent(d={}, hyphens=True):
     for fedId, data in d.iteritems():
         if fedId is None:
             continue
-        oneFed(data, suppressFlavor6=aux["suppressFlavor6"])
+        oneFed(data, suppressFlavors=aux["suppressFlavors"])
     print
 
 
@@ -47,7 +47,7 @@ def htrOverview(d={}):
     print hyphens
 
 
-def htrData(d={}, channelData=True, suppressFlavor6=False):
+def htrData(d={}, channelData=True, suppressFlavors=[]):
     offsets = d["htrBlocks"].keys()
     if offsets:
         for iOffset, offset in enumerate(sorted(offsets)):
@@ -84,8 +84,8 @@ def htrData(d={}, channelData=True, suppressFlavor6=False):
                        )
             if channelData:
                 out += htrChannelData(p["channelData"], p["ModuleId"],
-                                      suppressFlavor6=suppressFlavor6)
-            if (not suppressFlavor6) or len(out) >= 4:
+                                      suppressFlavors=suppressFlavors)
+            if (not suppressFlavors) or len(out) >= 4:
                 print "\n".join(out)
 
 
@@ -99,7 +99,7 @@ def qieString(qieData={}):
     return " ".join(l)
 
 
-def htrChannelData(d={}, moduleId=0, suppressFlavor6=False):
+def htrChannelData(d={}, moduleId=0, suppressFlavors=[]):
     out = []
     out.append("  ".join(["ModuleId",
                           "Fi",
@@ -113,7 +113,7 @@ def htrChannelData(d={}, moduleId=0, suppressFlavor6=False):
     for channelId, data in d.iteritems():
         if channelId % 4 != 1:
             continue
-        if suppressFlavor6 and data["Flavor"] == 6:
+        if data["Flavor"] in suppressFlavors:
             continue
         out.append("   ".join([" 0x%03x" % moduleId,
                                "%3d" % (channelId/4),
@@ -127,7 +127,7 @@ def htrChannelData(d={}, moduleId=0, suppressFlavor6=False):
     return out
 
 
-def oneFed(d={}, overview=True, headers=True, channelData=True, suppressFlavor6=False):
+def oneFed(d={}, overview=True, headers=True, channelData=True, suppressFlavors=[]):
     print "   ".join(["  %3d" % d["FEDid"],
                       "0x%07x" % d["EvN"],
                       "0x%08x" % d["OrN"],
@@ -142,4 +142,4 @@ def oneFed(d={}, overview=True, headers=True, channelData=True, suppressFlavor6=
         htrOverview(d)
 
     if headers:
-        htrData(d, channelData=channelData, suppressFlavor6=suppressFlavor6)
+        htrData(d, channelData=channelData, suppressFlavors=suppressFlavors)
