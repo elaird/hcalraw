@@ -31,10 +31,10 @@ def singleFedPlots(raw={}, fedId=None, book={}):
 
 def compare(raw1={}, raw2={}, book={}):
     hyphens = True
-    if raw1 and raw1[None]["printRaw"]:
+    if raw1 and raw1[None]["printFiberChannels"]:
         printRaw.oneEvent(raw1, hyphens)
         hyphens = False
-    if raw2 and raw2[None]["printRaw"]:
+    if raw2 and raw2[None]["printFiberChannels"]:
         printRaw.oneEvent(raw2, hyphens)
 
     for raw in [raw1, raw2]:
