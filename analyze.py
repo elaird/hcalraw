@@ -345,8 +345,8 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
 
             "hbheMatchRange": range(10), "hfMatchRange": range(1, 10),
             "bcnDelta": -118, "fiberMap": {} if uhtr else d2c,
-            "nEventsMax": None, "printEventMap": False,
-            "printRaw": False, "suppressFlavors": [],
+            "nEventsMax": 3, "printEventMap": False,
+            "printRaw": True, "suppressFlavors": [],
             }
 
     cms = {"label": "CMS",
@@ -357,8 +357,8 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
 
            "hbheMatchRange": range(10), "hfMatchRange": range(9),
            "bcnDelta": 0, "fiberMap": {},
-           "nEventsMax": None, "printEventMap": False,
-           "printRaw": False, "suppressFlavors": [6],
+           "nEventsMax": 3, "printEventMap": False,
+           "printRaw": True, "suppressFlavors": [6],
            }
 
     if cmsIsLocal:
@@ -407,22 +407,13 @@ if __name__ == "__main__":
     #       filterEvn=False,
     #       )
 
-    #oneRun(utcaFileName=baseDir+"/904/B904_Integration_000000.uhtr.root",
-    #       cmsFileName=baseDir+"/904/B904_Integration_000000.uhtr.root",
-    #       cmsFedIds=[702],
-    #       cmsIsLocal=True,
-    #       label="Run0",
-    #       useEvn=False,
-    #       filterEvn=False,
-    #       ornTolerance=1,
-    #       uhtr=True,
-    #       )
-
-    oneRun(utcaFileName=baseDir+"/904/B904_Integration_000007.root",
-           cmsFileName=baseDir+"/904/B904_Integration_000007.root",
+    run = 11
+    fileName = baseDir+"/904/B904_Integration_%06d.root" % run
+    oneRun(utcaFileName=fileName,
+           cmsFileName=fileName,
            cmsFedIds=[702],
            cmsIsLocal=True,
-           label="Run7",
+           label="Run%d" % run,
            useEvn=False,
            filterEvn=False,
            ornTolerance=1,
