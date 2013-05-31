@@ -49,8 +49,9 @@ def ROOT():
 
     for moduleName in moduleNames:
         try:
-            exec("import %s as r"%moduleName)
-            print "Using",moduleName
+            exec("import %s as r" % moduleName)
+            if moduleName != "ROOT":
+                print "Using", moduleName
             return r
         except ImportError:
             continue
