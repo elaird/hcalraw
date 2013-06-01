@@ -135,6 +135,8 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
 
     #data
     if (w >> 15):
+        if "currentChannelId" in d:
+            del d["currentChannelId"]
         flavor = (w >> 12) & 0x7
         if flavor in skipFlavors:
             return
