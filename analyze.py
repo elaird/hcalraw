@@ -138,19 +138,23 @@ def collectedRaw(tree=None, specs={}):
             raw[fedId] = unpacked(fedData=rawThisFed,
                                   bcnDelta=specs["bcnDelta"],
                                   chars=True,
-                                  utca=specs["utca"])
+                                  utca=specs["utca"],
+                                  skipFlavors=specs["skipFlavors"],
+                                  )
             raw[fedId]["nBytesSW"] = rawThisFed.size()
         elif specs["format"] == "HCAL":
             rawThisFed = wordsOneChunk(tree, fedId, specs["branchName"])
             raw[fedId] = unpacked(fedData=rawThisFed,
                                   bcnDelta=specs["bcnDelta"],
                                   chars=False,
-                                  utca=specs["utca"])
+                                  utca=specs["utca"],
+                                  skipFlavors=specs["skipFlavors"],
+                                  )
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
     for item in ["printFiberChannels", "label", "bcnDelta", "fiberMap",
-                 "hbheMatchRange", "hfMatchRange", "suppressFlavors"]:
+                 "hbheMatchRange", "hfMatchRange", "skipFlavors"]:
         raw[None][item] = specs[item]
     return raw
 
@@ -158,7 +162,7 @@ def collectedRaw(tree=None, specs={}):
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
-             bcnDelta=0, utca=None):
+             bcnDelta=0, utca=None, skipFlavors=[]):
     assert chars in [False, True], \
         "Specify whether to unpack by words or chars."
     assert skipHtrBlocks or (utca in [False, True]), \
@@ -196,9 +200,10 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
                 returnCode = decode.payload(htrBlocks,
                                             iWord16=iWord16, word16=word16,
                                             word16Counts=header["word16Counts"],
-                                            utca=utca, bcnDelta=bcnDelta)
+                                            utca=utca, bcnDelta=bcnDelta,
+                                            skipFlavors=skipFlavors)
                 if returnCode is not None:
-                    print " ".join(["ERROR: skipping",
+                    print " ".join(["WARNING: skipping",
                                     "FED %d" % header["FEDid"],
                                     "event %d" % header["EvN"],
                                     "iWord16 %d" % iWord16,
@@ -346,7 +351,7 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
             "hbheMatchRange": range(10), "hfMatchRange": range(1, 10),
             "bcnDelta": -118, "fiberMap": {} if uhtr else d2c,
             "nEventsMax": 3, "printEventMap": False,
-            "printFiberChannels": [1,0,2], "suppressFlavors": [],
+            "printFiberChannels": [1,0,2], "skipFlavors": [4],
             }
 
     cms = {"label": "CMS",
@@ -358,7 +363,7 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
            "hbheMatchRange": range(10), "hfMatchRange": range(9),
            "bcnDelta": 0, "fiberMap": {},
            "nEventsMax": 3, "printEventMap": False,
-           "printFiberChannels": [1,2,0], "suppressFlavors": [6],
+           "printFiberChannels": [1,2,0], "skipFlavors": [6],
            }
 
     if cmsIsLocal:
