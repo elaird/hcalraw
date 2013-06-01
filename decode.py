@@ -75,7 +75,7 @@ def header(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, bcnDelta=0):
+            utca=None, bcnDelta=0, skipFlavors=[]):
     w = word16
     if "htrIndex" not in d:
         for iHtr in range(len(word16Counts)):
@@ -135,10 +135,13 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
 
     #data
     if (w >> 15):
-        d["currentChannelId"] = w & 0xff
         flavor = (w >> 12) & 0x7
-        #if (not utca) and flavor != 5:
-        #    print "ERROR: flavor %d (EvN %d) not decoded correctly" % (flavor, l["EvN"])
+        if flavor in skipFlavors:
+            return
+        if flavor != 5:
+            print "WARNING: skipping flavor %d (EvN %d, iWord16 %d)." % (flavor, l["EvN"], iWord16)
+            return
+        d["currentChannelId"] = w & 0xff
         l["channelData"][d["currentChannelId"]] = {"CapId0": (w >> 8) & 0x3,
                                                    "ErrF":   (w >> 10) & 0x3,
                                                    "Flavor": flavor,
