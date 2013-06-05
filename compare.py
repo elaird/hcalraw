@@ -53,18 +53,19 @@ def compare(raw1={}, raw2={}, book={}):
     book.fill(len(failed),   "FailedFibers", 24, -0.5, 23.5, title=";no. non-matched fibers;events / bin")
 
     #some delta plots
-    fed1 = 989
-    fed2 = 714
-    d1 = raw1.get(fed1, {})
-    d2 = raw2.get(fed2, {})
-    if d1 and d2:
-        delta = raw1[None]["bcnDelta"]-raw2[None]["bcnDelta"]
-        for x in ["BcN", "OrN", "EvN"]:
-            title = ";".join([x+("%d" % delta if (x == "BcN") else ""),
-                              "FED %s - FED %s" % (fed1, fed2),
-                              "Events / bin",
+    noGood = [[], [None]]
+    if raw1.keys() in noGood or raw2.keys() in noGood:
+        return
+    fed1 = filter(lambda x: x is not None, raw1.keys())[0]
+    fed2 = filter(lambda x: x is not None, raw2.keys())[0]
+
+    delta = raw1[None]["bcnDelta"]-raw2[None]["bcnDelta"]
+    for x in ["BcN", "OrN", "EvN"]:
+        title = ";".join([x+("%d" % delta if (x == "BcN") else ""),
+                          "FED %s - FED %s" % (fed1, fed2),
+                          "Events / bin",
                               ])
-            book.fill(d1[x]-d2[x], "delta"+x, 11, -5.5, 5.5, title=title)
+        book.fill(raw1[fed1][x] - raw2[fed2][x], "delta"+x, 11, -5.5, 5.5, title=title)
 
 
 def coordString(fedId, moduleId, fiber, channel):
