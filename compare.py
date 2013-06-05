@@ -41,10 +41,10 @@ def compare(raw1={}, raw2={}, book={}):
         for fedId, dct in raw.iteritems():
             singleFedPlots(raw, fedId, book)
 
-    #mapF1,mapB1 = dataMap(raw1)
-    #mapF2,mapB2 = dataMap(raw2)
-    #stats = matchStats(mapF1, mapB2)
-    #report(*stats)
+    mapF1, mapB1 = dataMap(raw1)
+    mapF2, mapB2 = dataMap(raw2)
+    stats = matchStats(mapF1, mapB2)
+    report(*stats)
 
     #some delta plots
     fed1 = 989
@@ -111,18 +111,13 @@ def dataMap(raw={}):
     for fedId, d in raw.iteritems():
         if fedId is None:
             continue
-        if fedId == 714:
-            matchRange = raw[None]["hbheMatchRange"]
-        if fedId == 722:
-            matchRange = raw[None]["hfMatchRange"]
 
+        matchRange = raw[None]["matchRange"][fedId]
         for key, block in d["htrBlocks"].iteritems():
-            if fedId == 989:
+            if fedId >= 900: # FIXME: check uTCA
                 moduleId = block["ModuleId"] & 0xf
-                if moduleId <= 4:
-                    matchRange = raw[None]["hbheMatchRange"]
-                else:
-                    matchRange = raw[None]["hfMatchRange"]
+                if fedId == 989 and moduleId >= 5:  # FIXME: hack for HF timing (Jan. slice-test)
+                    matchRange = raw[None]["matchRange"][990]
             else:
                 moduleId = block["ModuleId"] & 0x1f
 
