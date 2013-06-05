@@ -154,7 +154,7 @@ def collectedRaw(tree=None, specs={}):
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
     for item in ["printFiberChannels", "label", "bcnDelta", "fiberMap",
-                 "hbheMatchRange", "hfMatchRange", "skipFlavors"]:
+                 "matchRange", "skipFlavors"]:
         raw[None][item] = specs[item]
     return raw
 
@@ -348,7 +348,11 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
             "fedIds": utcaFedIds, "utca": True,
             "branchName": "Chunk",
 
-            "hbheMatchRange": range(10), "hfMatchRange": range(1, 10),
+            "matchRange": {930: range(10),    # B904
+                           931: range(10),    # B904
+                           989: range(10),    # Jan. slice-test
+                           990: range(1, 10), # Jan. slice-test (HF)
+                           },
             "bcnDelta": -118, "fiberMap": {} if uhtr else d2c,
             "nEventsMax": 3, "printEventMap": False,
             "printFiberChannels": [1], "skipFlavors": [4],
@@ -360,7 +364,10 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
            "fedIds": cmsFedIds, "utca": False,
            "rawCollection": "FEDRawDataCollection_rawDataCollector__LHC",
 
-           "hbheMatchRange": range(10), "hfMatchRange": range(9),
+           "matchRange": {702: range(10), # B904
+                          714: range(10), # Jan. slice-test
+                          722: range(9),  # Jan. slice-test
+                          },
            "bcnDelta": 0, "fiberMap": {},
            "nEventsMax": 3, "printEventMap": False,
            "printFiberChannels": [1], "skipFlavors": [6],
