@@ -354,8 +354,8 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
                            990: range(1, 10), # Jan. slice-test (HF)
                            },
             "bcnDelta": -118, "fiberMap": {} if uhtr else d2c,
-            "nEventsMax": 3, "printEventMap": False,
-            "printFiberChannels": [1], "skipFlavors": [4],
+            "nEventsMax": None, "printEventMap": False,
+            "printFiberChannels": [], "skipFlavors": [4],
             }
 
     cms = {"label": "CMS",
@@ -369,8 +369,8 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
                           722: range(9),  # Jan. slice-test
                           },
            "bcnDelta": 0, "fiberMap": {},
-           "nEventsMax": 3, "printEventMap": False,
-           "printFiberChannels": [1], "skipFlavors": [6],
+           "nEventsMax": None, "printEventMap": False,
+           "printFiberChannels": [], "skipFlavors": [6, 7],
            }
 
     if cmsIsLocal:
@@ -391,6 +391,21 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
     else:
         assert False, utcaFileName+" "+cmsFileName
 
+def printHisto(label=""):
+    f = r.TFile("%s/%s.root" % (utils.outputDir(), label))
+    h = f.Get("MatchedFibers")
+    for iBinX in range(0, 2+h.GetNbinsX()):
+        x = h.GetBinCenter(iBinX)
+        c = h.GetBinContent(iBinX)
+        msg = "%d matched fibers: %d events" % (x, c)
+        if c:
+            if iBinX == 0:
+                msg = "<=" + msg
+            if iBinX == 1+h.GetNbinsX():
+                msg = ">=" + msg
+            print msg
+    f.Close()
+
 setup()
 if __name__ == "__main__":
     baseDir = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/"
@@ -403,10 +418,11 @@ if __name__ == "__main__":
     #       )
 
     # 211155
+    #label = "Run211155"
     #oneRun(utcaFileName=baseDir+"/usc/USC_211155.root",
     #       cmsFileName=baseDir+"/usc/USC_211154.root",
     #       cmsIsLocal=True,
-    #       label="Run211155",
+    #       label=label,
     #       useEvn=False,
     #       filterEvn=False,
     #       )
@@ -420,15 +436,18 @@ if __name__ == "__main__":
     #       )
 
     run = 23
+    label = "Run%d" % run
     fileName = baseDir+"/904/B904_Integration_%06d.root" % run
     oneRun(utcaFileName=fileName,
            utcaFedIds=[931],
            cmsFileName=fileName,
            cmsFedIds=[702],
            cmsIsLocal=True,
-           label="Run%d" % run,
+           label=label,
            useEvn=False,
            filterEvn=False,
            ornTolerance=1,
            uhtr=True,
            )
+
+    printHisto(label)
