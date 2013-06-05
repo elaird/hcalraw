@@ -43,8 +43,14 @@ def compare(raw1={}, raw2={}, book={}):
 
     mapF1, mapB1 = dataMap(raw1)
     mapF2, mapB2 = dataMap(raw2)
-    stats = matchStats(mapF1, mapB2)
-    report(*stats)
+    matched, failed = matchStats(mapF1, mapB2)
+
+    if failed:
+        reportMatched(matched)
+        reportFailed(failed)
+
+    book.fill(len(matched), "MatchedFibers", 24, -0.5, 23.5, title=";no. matched fibers;events / bin")
+    book.fill(len(failed),   "FailedFibers", 24, -0.5, 23.5, title=";no. non-matched fibers;events / bin")
 
     #some delta plots
     fed1 = 989
@@ -65,7 +71,7 @@ def coordString(fedId, moduleId, fiber, channel):
     return "%3d %2d %2d %2d" % (fedId, moduleId, fiber, channel)
 
 
-def report(matched={}, failed=[]):
+def reportMatched(matched={}):
     print "MATCHED fibers %d:" % len(matched)
     print "uTCA --> CMS"
     print "(fed  h  f ch) --> (fed  h  f ch)"
@@ -82,8 +88,9 @@ def report(matched={}, failed=[]):
         lines.append("(%s) --> (%s)" % (coordString(*v), coordString(*k)))
     for l in sorted(lines):
         print l
-
     print
+
+def reportFailed(failed=[]):
     print "FAILED fibers %d:" % len(failed)
     if failed:
         print "(fed  h  f ch)"
@@ -126,6 +133,8 @@ def dataMap(raw={}):
                 fiber = 1+channelId/4  # integer division
                 fiber = fiberMap[fiber] if fiber in fiberMap else fiber
                 if channel != 1:
+                    continue
+                if channelData["ErrF"] & 0x2:
                     continue
                 coords = (fedId, moduleId, fiber, channel)
                 qie = channelData["QIE"]
