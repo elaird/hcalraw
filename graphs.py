@@ -46,7 +46,7 @@ def stylize(h, color=r.kBlack, style=1, width=1):
 
 def legends(legEntries=[]):
     out = []
-    dx = 0.8/len(legEntries)
+    dx = 0.8/max(1, len(legEntries))
     x0 = 0.1
     for iLeg, (h, desc) in enumerate(legEntries):
         leg = r.TLegend(x0, 0.91, x0+dx, 1.0)
@@ -157,9 +157,11 @@ def makeSummaryPdf(labels=[], pdf="summary.pdf"):
                 keep.append(h)
             else:
                 keep += histoLoop(f,
-                                  [(714, r.kRed, 1),
-                                   (722, r.kGreen, 2),
-                                   (989, r.kBlack, 3),
+                                  [#(714, r.kRed, 1),
+                                   #(722, r.kGreen, 2),
+                                   #(989, r.kBlack, 3),
+                                   (702, r.kGreen, 2),
+                                   (931, r.kBlack, 3),
                                    ],
                                   lambda x: "%s_%d" % (name, x),
                                   )
