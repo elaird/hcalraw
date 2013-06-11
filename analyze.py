@@ -101,9 +101,11 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
     if inner:
         fI = r.TFile.Open(inner["fileName"])
         treeI = fI.Get(inner["treeName"])
+        assert treeI, inner["treeName"]
 
     f = r.TFile.Open(outer["fileName"])
     tree = f.Get(outer["treeName"])
+    assert tree, outer["treeName"]
 
     for iOuterEvent in range(nEvents(tree, outer["nEventsMax"])):
         nb = tree.GetEntry(iOuterEvent)
@@ -120,6 +122,7 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
             nb = treeI.GetEntry(iInnerEvent)
             if nb <= 0:
                 continue
+
             rawInner = collectedRaw(tree=treeI, specs=inner)
             compare.compare(raw, rawInner, book=book)
         else:
@@ -285,7 +288,7 @@ def eventToEvent(mapF={}, mapB={}, useEvn=False, ornTolerance=None):
 
 
 def go(outer={}, inner={}, label="",
-       useEvn=False, filterEvn=False, ornTolerance=None):
+       useEvn=False, filterEvn=False, ornTolerance=None, printEventMap=False):
     innerEvent = {}
     deltaOrn = {}
     oMapF, oMapB = eventMaps(useEvn=useEvn, filterEvn=filterEvn, **outer)
@@ -294,11 +297,12 @@ def go(outer={}, inner={}, label="",
     if inner:
         iMapF, iMapB = eventMaps(useEvn=useEvn, filterEvn=filterEvn, **inner)
         innerEvent = eventToEvent(oMapF, iMapB, ornTolerance=ornTolerance)
-        if outer["printEventMap"] or inner["printEventMap"]:
-            print ", ".join(["oEvent = %s" % str(oEvent),
-                             "ornEvn = %s" % str(ornEvn),
-                             "iEvent = %s" % str(innerEvent[oEvent]),
-                             ])
+        if printEventMap:
+            for oEvent, iEvent in sorted(innerEvent.iteritems()):
+                print ", ".join(["oEvent = %s" % str(oEvent),
+                                 "oOrnEvn = %s" % str(oMapF[oEvent]),
+                                 "iEvent = %s" % str(iEvent),
+                                 ])
 
     book = autoBook.autoBook("book")
     loop(inner=inner, outer=outer, innerEvent=innerEvent, book=book)
@@ -330,8 +334,8 @@ def go(outer={}, inner={}, label="",
 
 def oneRun(utcaFileName="", utcaFedIds=[989],
            cmsFileName="", cmsFedIds=[714, 722],
-           label="", useEvn=False,
-           filterEvn=False, ornTolerance=0, cmsIsLocal=False, uhtr=False):
+           label="", useEvn=False, filterEvn=False, ornTolerance=0,
+           cmsIsLocal=False, uhtr=False, printEventMap=False):
 
     d2c = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
            7:   9,
@@ -354,7 +358,7 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
                            990: range(1, 10), # Jan. slice-test (HF)
                            },
             "bcnDelta": -118, "fiberMap": {} if uhtr else d2c,
-            "nEventsMax": None, "printEventMap": False,
+            "nEventsMax": None,
             "printFiberChannels": [], "skipFlavors": [4],
             }
 
@@ -369,7 +373,7 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
                           722: range(9),  # Jan. slice-test
                           },
            "bcnDelta": 0, "fiberMap": {},
-           "nEventsMax": None, "printEventMap": False,
+           "nEventsMax": None,
            "printFiberChannels": [], "skipFlavors": [6, 7],
            }
 
@@ -383,7 +387,7 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
     if utcaFileName:
         if cmsFileName:
             go(outer=utca, inner=cms, label=label, useEvn=useEvn,
-               filterEvn=filterEvn, ornTolerance=ornTolerance)
+               filterEvn=filterEvn, ornTolerance=ornTolerance, printEventMap=printEventMap)
         else:
             go(outer=utca, label=label)
     elif cmsFileName:
@@ -391,9 +395,12 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
     else:
         assert False, utcaFileName+" "+cmsFileName
 
-def printHisto(label=""):
+def printHisto(label="", histoName="MatchedFibers"):
     f = r.TFile("%s/%s.root" % (utils.outputDir(), label))
-    h = f.Get("MatchedFibers")
+    h = f.Get(histoName)
+    if not h:
+        print "ERROR: histogram %s not found." % histoName
+        return
     for iBinX in range(0, 2+h.GetNbinsX()):
         x = h.GetBinCenter(iBinX)
         c = h.GetBinContent(iBinX)
@@ -448,6 +455,9 @@ if __name__ == "__main__":
            filterEvn=False,
            ornTolerance=1,
            uhtr=True,
+           printEventMap=False,
            )
 
     printHisto(label)
+    #import graphs
+    #graphs.makeSummaryPdf(labels=[label])
