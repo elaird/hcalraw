@@ -115,7 +115,9 @@ def dataMap(raw={}):
     forward = {}
     backward = {}
 
-    fiberMap = raw[None]["fiberMap"]
+    if raw:
+        fiberMap = raw[None]["fiberMap"]
+
     for fedId, d in raw.iteritems():
         if fedId is None:
             continue
