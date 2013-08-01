@@ -25,7 +25,7 @@ wget https://github.com/elaird/hcalraw/archive/master.zip
 
 cd hcalraw
 source env-cmssw.sh #see below
-./analyze.py
+./oneRun.py --run=42
 
 ---------
 | Files |
@@ -40,8 +40,10 @@ cpp/cms.cxx defines a helper class for reading data from the CMS DAQ
 
 autoBook.py is copied from github.com/elaird/supy/__autoBook__.py
 analyze.py loops over .root file(s) for one run and produces output/Runxxx.root
+configuration.py holds some settings that are used by analyze.py
 cmsswUnpack.py is not needed, but could be executed with cmsRun
 multiRun.py calls analyze.py (once per run) and produces summary.pdf
+oneRun.py calls analyze.py and has various hard-coded paths, fedIds, etc.
 compare.py compares the payloads within two .root files for a given event
 decode.py interprets a FED's bytes in an event (called by analyze.unpacked)
 graphs.py reads in output/Runxxx.root, makes plots, and outputs summary.pdf
