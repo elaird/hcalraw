@@ -12,7 +12,7 @@ When analyzing files written by the CMS DAQ, CMSSW (>=z) is also required.
 ---------------
 | Quick Start |
 ---------------
-ssh lxplus.cern.ch #or some other host
+ssh lxplus5.cern.ch #or some other host
 
 #if you have git and a github account:
 git clone git@github.com:elaird/hcalraw.git
@@ -23,7 +23,7 @@ git clone git://github.com/elaird/hcalraw.git
 #if you have neither:
 wget https://github.com/elaird/hcalraw/archive/master.zip
 
-cd hcal/utca
+cd hcalraw
 source env-cmssw.sh #see below
 ./analyze.py
 
