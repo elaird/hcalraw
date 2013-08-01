@@ -9,11 +9,16 @@ def opts():
     parser = optparse.OptionParser()
     parser.add_option("--run", dest="run", default=None,
                       metavar="N",
-                      help="specify one run number")
+                      help="run number")
     parser.add_option("--dir", dest="dir", default="/afs/cern.ch/user/e/elaird/work/public/d1_utca/",
-                      help="specify directory in which ROOT files sit")
+                      help="directory in which ROOT files sit")
 
     options, args = parser.parse_args()
+    try:
+        int(options.run)
+    except TypeError:
+        parser.print_help()
+        exit()
     return options
 
 options = opts()
