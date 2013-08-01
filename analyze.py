@@ -1,11 +1,10 @@
-#! /usr/bin/env python
-
 import os
 import struct
 import utils
 r = utils.ROOT()
 import autoBook
 import compare
+import configuration
 import decode
 
 
@@ -28,6 +27,9 @@ def setup():
         libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
         r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
         r.gROOT.LoadMacro("cpp/cms.cxx+")
+
+
+setup()
 
 
 def nEvents(tree, nMax):
@@ -337,52 +339,15 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
            label="", useEvn=False, filterEvn=False, ornTolerance=0,
            cmsIsLocal=False, uhtr=False, printEventMap=False):
 
-    d2c = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-           7:   9,
-           8:  11,
-           9:  12,
-           10: 10,
-           11:  8,
-           12:  7,
-           }
+    cms = configuration.cms(local=cmsIsLocal)
+    cms.update({"fileName": cmsFileName,
+                "fedIds": cmsFedIds,
+                })
 
-    utca = {"label": "uTCA",
-            "fileName": utcaFileName, "treeName": "CMSRAW",
-            "format": "HCAL", "auxBranch": False,
-            "fedIds": utcaFedIds, "utca": True,
-            "branchName": "Chunk",
-
-            "matchRange": {930: range(10),    # B904
-                           931: range(10),    # B904
-                           989: range(10),    # Jan. slice-test
-                           990: range(1, 10), # Jan. slice-test (HF)
-                           },
-            "bcnDelta": -118, "fiberMap": {} if uhtr else d2c,
-            "nEventsMax": None,
-            "printFiberChannels": [], "skipFlavors": [4],
-            }
-
-    cms = {"label": "CMS",
-           "fileName": cmsFileName, "treeName": "Events",
-           "format":  "CMS", "auxBranch": True,
-           "fedIds": cmsFedIds, "utca": False,
-           "rawCollection": "FEDRawDataCollection_rawDataCollector__LHC",
-
-           "matchRange": {702: range(10), # B904
-                          714: range(10), # Jan. slice-test
-                          722: range(9),  # Jan. slice-test
-                          },
-           "bcnDelta": 0, "fiberMap": {},
-           "nEventsMax": None,
-           "printFiberChannels": [], "skipFlavors": [6, 7],
-           }
-
-    if cmsIsLocal:
-        cms.update({"treeName": "CMSRAW",
-                    "format": "HCAL",
-                    "auxBranch": False,
-                    "branchName": "HCAL_DCC"})
-        del cms["rawCollection"]
+    utca = configuration.utca(uhtr=uhtr)
+    utca.update({"fileName": utcaFileName,
+                "fedIds": utcaFedIds,
+                })
 
     if utcaFileName:
         if cmsFileName:
@@ -394,6 +359,7 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
         go(outer=cms, label=label)
     else:
         assert False, utcaFileName+" "+cmsFileName
+
 
 def printHisto(label="", histoName="MatchedFibers"):
     f = r.TFile("%s/%s.root" % (utils.outputDir(), label))
@@ -412,52 +378,3 @@ def printHisto(label="", histoName="MatchedFibers"):
                 msg = ">=" + msg
             print msg
     f.Close()
-
-setup()
-if __name__ == "__main__":
-    baseDir = "/afs/cern.ch/user/e/elaird/work/public/d1_utca/"
-
-    #oneRun(utcaFileName=baseDir+"/usc/USC_209150.root",
-    #       cmsFileName=baseDir+"/castor/209151.HLTSkim.root",
-    #       label="Run209151",
-    #       useEvn=False,
-    #       filterEvn=False,
-    #       )
-
-    # 211155
-    #label = "Run211155"
-    #oneRun(utcaFileName=baseDir+"/usc/USC_211155.root",
-    #       cmsFileName=baseDir+"/usc/USC_211154.root",
-    #       cmsIsLocal=True,
-    #       label=label,
-    #       useEvn=False,
-    #       filterEvn=False,
-    #       )
-
-    #oneRun(utcaFileName=baseDir+"/usc/USC_211428.root",
-    #       cmsFileName=baseDir+"/usc/USC_211427.root",
-    #       cmsIsLocal=True,
-    #       label="Run211428",
-    #       useEvn=False,
-    #       filterEvn=False,
-    #       )
-
-    run = 23
-    label = "Run%d" % run
-    fileName = baseDir+"/904/B904_Integration_%06d.root" % run
-    oneRun(utcaFileName=fileName,
-           utcaFedIds=[931],
-           cmsFileName=fileName,
-           cmsFedIds=[702],
-           cmsIsLocal=True,
-           label=label,
-           useEvn=False,
-           filterEvn=False,
-           ornTolerance=1,
-           uhtr=True,
-           printEventMap=False,
-           )
-
-    printHisto(label)
-    #import graphs
-    #graphs.makeSummaryPdf(labels=[label])
