@@ -290,7 +290,8 @@ def eventToEvent(mapF={}, mapB={}, useEvn=False, ornTolerance=None):
 
 
 def go(outer={}, inner={}, label="",
-       useEvn=False, filterEvn=False, ornTolerance=None, printEventMap=False):
+       useEvn=False, filterEvn=False, ornTolerance=None,
+       printEventMap=False, identityMap=False):
     innerEvent = {}
     deltaOrn = {}
     oMapF, oMapB = eventMaps(useEvn=useEvn, filterEvn=filterEvn, **outer)
@@ -299,6 +300,9 @@ def go(outer={}, inner={}, label="",
     if inner:
         iMapF, iMapB = eventMaps(useEvn=useEvn, filterEvn=filterEvn, **inner)
         innerEvent = eventToEvent(oMapF, iMapB, ornTolerance=ornTolerance)
+        if identityMap:
+            for key in innerEvent.keys():
+                innerEvent[key] = key
         if printEventMap:
             for oEvent, iEvent in sorted(innerEvent.iteritems()):
                 print ", ".join(["oEvent = %s" % str(oEvent),
@@ -337,7 +341,7 @@ def go(outer={}, inner={}, label="",
 def oneRun(utcaFileName="", utcaFedIds=[989],
            cmsFileName="", cmsFedIds=[714, 722],
            label="", useEvn=False, filterEvn=False, ornTolerance=0,
-           cmsIsLocal=False, uhtr=False, printEventMap=False):
+           cmsIsLocal=False, uhtr=False, printEventMap=False, identityMap=False):
 
     cms = configuration.cms(local=cmsIsLocal)
     cms.update({"fileName": cmsFileName,
@@ -352,7 +356,8 @@ def oneRun(utcaFileName="", utcaFedIds=[989],
     if utcaFileName:
         if cmsFileName:
             go(outer=utca, inner=cms, label=label, useEvn=useEvn,
-               filterEvn=filterEvn, ornTolerance=ornTolerance, printEventMap=printEventMap)
+               filterEvn=filterEvn, ornTolerance=ornTolerance,
+               printEventMap=printEventMap, identityMap=identityMap)
         else:
             go(outer=utca, label=label)
     elif cmsFileName:
