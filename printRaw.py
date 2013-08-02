@@ -22,9 +22,7 @@ def oneEvent(d={}, hyphens=True):
     for fedId, data in d.iteritems():
         if fedId is None:
             continue
-        oneFed(data,
-               fiberChannels=aux["printFiberChannels"],
-               skipFlavors=aux["skipFlavors"])
+        oneFed(data, skip=aux["printSkip"])
     print
 
 
@@ -49,7 +47,7 @@ def htrOverview(d={}):
     print hyphens
 
 
-def htrData(d={}, channelData=True, fiberChannels=[], skipFlavors=[]):
+def htrData(d={}, channelData=True, skip={}):
     offsets = d["htrBlocks"].keys()
     if offsets:
         for iOffset, offset in enumerate(sorted(offsets)):
@@ -85,10 +83,8 @@ def htrData(d={}, channelData=True, fiberChannels=[], skipFlavors=[]):
                                   ])
                        )
             if channelData:
-                out += htrChannelData(p["channelData"], p["ModuleId"],
-                                      fiberChannels=fiberChannels,
-                                      skipFlavors=skipFlavors)
-            if (not skipFlavors) or len(out) >= 4:
+                out += htrChannelData(p["channelData"], p["ModuleId"], skip=skip)
+            if (not skip) or len(out) >= 4:
                 print "\n".join(out)
 
 
@@ -102,7 +98,7 @@ def qieString(qieData={}):
     return " ".join(l)
 
 
-def htrChannelData(d={}, moduleId=0, fiberChannels=[], skipFlavors=[]):
+def htrChannelData(d={}, moduleId=0, skip={}):
     out = []
     out.append("  ".join(["ModuleId",
                           "Fi",
@@ -115,9 +111,9 @@ def htrChannelData(d={}, moduleId=0, fiberChannels=[], skipFlavors=[]):
                )
     for channelId, data in d.iteritems():
         fibCh = channelId % 4
-        if fibCh not in fiberChannels:
+        if fibCh in skip["fibCh"]:
             continue
-        if data["Flavor"] in skipFlavors:
+        if data["ErrF"] in skip["ErrF"]:
             continue
         out.append("   ".join([" 0x%03x" % moduleId,
                                "%3d" % (channelId/4),
@@ -131,9 +127,7 @@ def htrChannelData(d={}, moduleId=0, fiberChannels=[], skipFlavors=[]):
     return out
 
 
-def oneFed(d={}, overview=True, headers=True, channelData=True,
-           fiberChannels=[0, 1, 2],
-           skipFlavors=[]):
+def oneFed(d={}, overview=True, headers=True, channelData=True, skip={}):
     print "   ".join(["  %3d" % d["FEDid"],
                       "0x%07x" % d["EvN"],
                       "0x%08x" % d["OrN"],
@@ -148,7 +142,4 @@ def oneFed(d={}, overview=True, headers=True, channelData=True,
         htrOverview(d)
 
     if headers:
-        htrData(d,
-                channelData=channelData,
-                fiberChannels=fiberChannels,
-                skipFlavors=skipFlavors)
+        htrData(d, channelData=channelData, skip=skip)
