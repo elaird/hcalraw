@@ -29,12 +29,16 @@ def singleFedPlots(raw={}, fedId=None, book={}):
                   )
 
 
+def printIt(raw):
+    return raw and len(raw[None]["printSkip"]["fibCh"]) < 3
+
+
 def compare(raw1={}, raw2={}, book={}):
     hyphens = True
-    if raw1 and raw1[None]["printFiberChannels"]:
+    if printIt(raw1):
         printRaw.oneEvent(raw1, hyphens)
         hyphens = False
-    if raw2 and raw2[None]["printFiberChannels"]:
+    if printIt(raw2):
         printRaw.oneEvent(raw2, hyphens)
 
     for raw in [raw1, raw2]:
