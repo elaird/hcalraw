@@ -17,8 +17,10 @@ def utca(uhtr=False):
             "bcnDelta": -118,
             "fiberMap": {} if uhtr else d2c,
             "nEventsMax": None,
-            "printFiberChannels": [1],
-            "skipFlavors": [4],
+            "printSkip": {"fibCh": [0, 2],
+                          "ErrF": [3],
+                          },
+            "unpackSkipFlavors": [4],
             "matchRange": {930: range(10),    # B904
                            931: range(10),    # B904
                            989: range(10),    # Jan. slice-test
@@ -38,8 +40,9 @@ def cms(local=False):
            "bcnDelta": 0,
            "fiberMap": {},
            "nEventsMax": 3,
-           "printFiberChannels": [1],
-           "skipFlavors": [6, 7],
+           "unpackSkipFlavors": [6, 7],
+           "printSkip": {"fibCh": [0, 2],
+                         "ErrF": [3]},
            }
     if local:
         out.update({"treeName": "CMSRAW",
