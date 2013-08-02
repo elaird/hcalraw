@@ -144,7 +144,7 @@ def collectedRaw(tree=None, specs={}):
                                   bcnDelta=specs["bcnDelta"],
                                   chars=True,
                                   utca=specs["utca"],
-                                  skipFlavors=specs["skipFlavors"],
+                                  skipFlavors=specs["unpackSkipFlavors"],
                                   )
             raw[fedId]["nBytesSW"] = rawThisFed.size()
         elif specs["format"] == "HCAL":
@@ -153,13 +153,12 @@ def collectedRaw(tree=None, specs={}):
                                   bcnDelta=specs["bcnDelta"],
                                   chars=False,
                                   utca=specs["utca"],
-                                  skipFlavors=specs["skipFlavors"],
+                                  skipFlavors=specs["unpackSkipFlavors"],
                                   )
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
-    for item in ["printFiberChannels", "label", "bcnDelta", "fiberMap",
-                 "matchRange", "skipFlavors"]:
+    for item in ["printSkip", "label", "bcnDelta", "fiberMap", "matchRange"]:
         raw[None][item] = specs[item]
     return raw
 
