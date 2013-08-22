@@ -122,6 +122,8 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         l["CRC"] = w
         return
     elif i == l["nWord16"]-1:
+        if not utca:
+            storePatternData(l)
         d["htrIndex"] += 1
         if "currentChannelId" in d:  # check in case event is malformed
             del d["currentChannelId"]
@@ -172,3 +174,76 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
     elif dct["Flavor"] == 6:
         dct["QIE"][j] = word16 & 0x7f
         dct["CapId"][j] = (word16 >> 8) & 0x3
+
+
+def channelId(fiber=None, fibCh=None):
+    return 4*fiber + fibCh
+
+
+def storePatternData(l={}, nFibers=6):
+    if nFibers == 6:
+        offset = 1
+    elif nFibers == 8:
+        offset = 0
+    else:
+        assert False, nFibers
+
+    l["patternData"] = {}
+    d = l["channelData"]
+
+    for iFiberPair in range(nFibers/2):
+        fiber1 = 2*iFiberPair + offset
+        fiber2 = 2*iFiberPair + 1 + offset
+        l["patternData"][fiber1] = []
+
+        for iTs in range(10):  # FIXME: hard-coded 10
+            feWords = []
+            # Tullio says HTR f/w makes no distinction between optical cables 1 and 2
+            for fiber in [fiber1, fiber2]:
+                feWord32 = 0
+                for fibCh in range(3):
+                    key = channelId(fiber, fibCh)
+                    if key in d:
+                        qie = d[key]["QIE"][iTs]
+                        cap = d[key]["CapId"][iTs]
+                        if fibCh == 0:
+                            feWord32 |= qie << 25
+                            feWord32 |= cap << 7
+                        if fibCh == 1:
+                            feWord32 |= qie << 17
+                            feWord32 |= cap << 5
+                        if fibCh == 2:
+                            feWord32 |= qie << 9
+                            feWord32 |= cap << 3
+
+                feWords.append(feWord32)
+                #print "iFiberPair =", iFiberPair, "iTs =", iTs, "qie0 =", hex(qie0), "feWord =", feWord32_1
+            l["patternData"][fiber1].append(patternData(feWords))
+
+
+def patternData(feWords=[]):
+    assert len(feWords) == 2, len(feWords)
+
+    out = {}
+    A0 = 0
+    A1 = 0
+    B0 = 0
+    B1 = 0
+    C0 = 0
+    C1 = 0
+
+    return {"A0": A0,
+            "A1": A1,
+            "B0": B0,
+            "B1": B1,
+            "C0": C0,
+            "C1": C1,
+            }
+
+
+def flipped(raw=None, nBits=7):
+    out = 0
+    for iBit in range(nBits):
+        bit = (raw>>iBit) & 0x1
+        out |= (bit << (nBits - 1 - iBit))
+    return out
