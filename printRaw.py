@@ -83,7 +83,10 @@ def htrData(d={}, channelData=True, skip={}):
                                   ])
                        )
             if channelData:
-                out += htrChannelData(p["channelData"], p["ModuleId"], skip=skip)
+                s = htrChannelData(p["channelData"], p["ModuleId"], skip=skip)
+                out += s
+                if ("patternData" in p) and (len(s) > 1):
+                    out += patternData(p["patternData"], p["ModuleId"])
             if (not skip) or len(out) >= 4:
                 print "\n".join(out)
 
@@ -125,6 +128,29 @@ def htrChannelData(d={}, moduleId=0, skip={}):
                                ])+qieString(data["QIE"])
                    )
     return out
+
+
+def patternData(d={}, moduleId=0):
+    out = []
+    out.append("  ".join(["ModuleId",
+                          "Fibers",
+                          "Pattern",
+                          "0  1  2  3  4  5  6  7  8  9",
+                          ])
+               )
+    for fiber1, lst in d.iteritems():
+        for key in ["A0", "A1", "B0", "B1", "C0", "C1"]:
+            out.append("   ".join([" 0x%03x" % moduleId,
+                                   " %2d,%2d" % (fiber1, 1+fiber1),
+                                   key,
+                                   " "*3,
+                                   ])+patternString(lst, key)
+                       )
+    return out
+
+
+def patternString(patterns=[], key=""):
+    return " ".join(["%2x" % p[key] for p in patterns])
 
 
 def oneFed(d={}, overview=True, headers=True, channelData=True, skip={}):
