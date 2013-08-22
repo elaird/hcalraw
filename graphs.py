@@ -63,6 +63,7 @@ def histoLoop(f, lst, func):
     out = []
     maxes = []
     legEntries = []
+    h0 = None
     for i, (x, color, style) in enumerate(lst):
         h = f.Get(func(x))
         if not h:
@@ -81,7 +82,7 @@ def histoLoop(f, lst, func):
         legEntries.append((h, h.GetTitle()))
         h.SetTitle("")
 
-    if maxes:
+    if maxes and h0:
         h0.SetMaximum(2.0*max(maxes))
     out += legends(legEntries)
     return out
