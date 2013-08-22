@@ -137,23 +137,38 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
     if (w >> 15):
         if "currentChannelId" in d:
             del d["currentChannelId"]
+
         flavor = (w >> 12) & 0x7
         if flavor in skipFlavors:
             return
-        if flavor != 5:
+        elif flavor not in [5, 6]:
             print "WARNING: skipping flavor %d (EvN %d, iWord16 %d)." % (flavor, l["EvN"], iWord16)
             return
+
         d["currentChannelId"] = w & 0xff
-        l["channelData"][d["currentChannelId"]] = {"CapId0": (w >> 8) & 0x3,
-                                                   "ErrF":   (w >> 10) & 0x3,
-                                                   "Flavor": flavor,
+        l["channelData"][d["currentChannelId"]] = {"Flavor": flavor,
+                                                   "CapId0": (word16 >> 8) & 0x3,
+                                                   "ErrF":   (word16 >> 10) & 0x3,
+                                                   "Fiber": d["currentChannelId"] / 4,
+                                                   "FibCh": d["currentChannelId"] % 4,
                                                    "iWord16": iWord16,
                                                    "QIE": {},
+                                                   "CapId": {},
                                                    }
+    elif "currentChannelId" not in d:
+        return
     else:
-        if "currentChannelId" not in d:
-            return
-        dct = l["channelData"][d["currentChannelId"]]
-        j = iWord16 - dct["iWord16"] - 1
+        storeChannelData(dct=l["channelData"][d["currentChannelId"]],
+                         iWord16=iWord16,
+                         word16=word16,
+                         )
+
+
+def storeChannelData(dct={}, iWord16=None, word16=None):
+    j = iWord16 - dct["iWord16"] - 1
+    if dct["Flavor"] == 5:
         dct["QIE"][2*j] = word16 & 0x7f
         dct["QIE"][2*j+1] = (word16 >> 8) & 0x7f
+    elif dct["Flavor"] == 6:
+        dct["QIE"][j] = word16 & 0x7f
+        dct["CapId"][j] = (word16 >> 8) & 0x3
