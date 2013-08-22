@@ -224,20 +224,30 @@ def storePatternData(l={}, nFibers=6):
 def patternData(feWords=[]):
     assert len(feWords) == 2, len(feWords)
 
-    out = {}
-    A0 = 0
-    A1 = 0
-    B0 = 0
-    B1 = 0
-    C0 = 0
-    C1 = 0
+    A0 = (feWords[0] >> 24) & 0xfe
+    A0 |= (feWords[0] >> 7) & 0x1
 
-    return {"A0": A0,
-            "A1": A1,
-            "B0": B0,
-            "B1": B1,
-            "C0": C0,
-            "C1": C1,
+    A1 = (feWords[0] >> 17) & 0x7f
+    A1 |= (feWords[0] >> 1) & 0x80
+
+    B0 = (feWords[0] >> 8) & 0xfe
+    B0 |= (feWords[0] >> 3) & 0x1
+
+    B1 = (feWords[1] >> 8) & 0xfe
+    B1 |= (feWords[0] >> 4) & 0x1
+
+    C0 = (feWords[1] >> 24) & 0xfe
+    C0 |= (feWords[1] >> 7) & 0x1
+
+    C1 = (feWords[1] >> 17) & 0x7f
+    C1 |= (feWords[1] >> 1) & 0x80
+
+    return {"A0": flipped(A0),
+            "A1": flipped(A1),
+            "B0": flipped(B0),
+            "B1": flipped(B1),
+            "C0": flipped(C0),
+            "C1": flipped(C1),
             }
 
 
