@@ -233,8 +233,8 @@ def patternData(feWords=[]):
     B0 = (feWords[0] >> 8) & 0xfe
     B0 |= (feWords[0] >> 3) & 0x1
 
-    B1 = (feWords[1] >> 8) & 0xfe
-    B1 |= (feWords[0] >> 4) & 0x1
+    B1 = (feWords[1] >> 9) & 0xfe
+    B1 |= (feWords[0] << 3) & 0x80
 
     C0 = (feWords[1] >> 24) & 0xfe
     C0 |= (feWords[1] >> 7) & 0x1
@@ -251,7 +251,7 @@ def patternData(feWords=[]):
             }
 
 
-def flipped(raw=None, nBits=7):
+def flipped(raw=None, nBits=8):
     out = 0
     for iBit in range(nBits):
         bit = (raw>>iBit) & 0x1
