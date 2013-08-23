@@ -75,7 +75,7 @@ def header(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, bcnDelta=0, skipFlavors=[]):
+            utca=None, bcnDelta=0, skipFlavors=[], patternMode=False):
     w = word16
     if "htrIndex" not in d:
         for iHtr in range(len(word16Counts)):
@@ -122,7 +122,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         l["CRC"] = w
         return
     elif i == l["nWord16"]-1:
-        if not utca:
+        if patternMode and not utca:
             storePatternData(l)
         d["htrIndex"] += 1
         if "currentChannelId" in d:  # check in case event is malformed
