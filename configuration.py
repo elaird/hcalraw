@@ -40,7 +40,7 @@ def cms(local=False):
            "bcnDelta": 0,
            "fiberMap": {},
            "nEventsMax": 3,
-           "unpackSkipFlavors": [6, 7],
+           "unpackSkipFlavors": [7],
            "printSkip": {"fibCh": [0, 2],
                          "ErrF": [3]},
            }
