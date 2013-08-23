@@ -82,11 +82,14 @@ def htrData(d={}, channelData=True, skip={}):
                                   "0x%04x" % p["CRC"],
                                   ])
                        )
-            if channelData:
-                s = htrChannelData(p["channelData"], p["ModuleId"], skip=skip)
-                out += s
-                if ("patternData" in p) and (len(s) > 1):
-                    out += patternData(p["patternData"], p["ModuleId"])
+
+            patterns = "patternData" in p
+            if channelData or patterns:
+                cd = htrChannelData(p["channelData"], p["ModuleId"], skip=skip)
+            if channelData and not patterns:
+                out += cd
+            if patterns and len(cd) > 1:
+                out += patternData(p["patternData"], p["ModuleId"])
             if (not skip) or len(out) >= 4:
                 print "\n".join(out)
 
@@ -135,22 +138,30 @@ def patternData(d={}, moduleId=0):
     out.append("  ".join(["ModuleId",
                           "Fibers",
                           "Pattern",
-                          "0  1  2  3  4  5  6  7  8  9",
+                          " ".join(["%2d" % i for i in range(20)])
                           ])
                )
     for fiber1, lst in d.iteritems():
-        for key in ["A0", "A1", "B0", "B1", "C0", "C1"]:
+        for key in ["A", "B", "C"]:
             out.append("   ".join([" 0x%03x" % moduleId,
                                    " %2d,%2d" % (fiber1, 1+fiber1),
                                    key,
-                                   " "*3,
+                                   " "*5,
                                    ])+patternString(lst, key)
                        )
     return out
 
 
-def patternString(patterns=[], key=""):
-    return " ".join(["%2x" % p[key] for p in patterns])
+def patternString(patterns=[], key="", ascii=True):
+    l = []
+    for p in patterns:
+        for k in [key+"0", key+"1"]:
+            code = p[k]
+            if ascii and (32 <= code <= 126):
+                l.append("%2s" % chr(code))
+            else:
+                l.append("%2x" % code)
+    return " ".join(l)
 
 
 def oneFed(d={}, overview=True, headers=True, channelData=True, skip={}):
