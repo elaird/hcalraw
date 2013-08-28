@@ -44,7 +44,7 @@ def cms(local=False):
            "unpackSkipFlavors": [7],
            "printSkip": {"fibCh": [0, 2],
                          "ErrF": [3]},
-           "patternMode": True,
+           "patternMode": False,
            }
     if local:
         out.update({"treeName": "CMSRAW",
