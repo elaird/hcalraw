@@ -49,9 +49,9 @@ def compare(raw1={}, raw2={}, book={}):
     mapF2, mapB2 = dataMap(raw2)
     matched, failed = matchStats(mapF1, mapB2)
 
-    if failed:
-        reportMatched(matched)
-        reportFailed(failed)
+    #if failed:
+    #    reportMatched(matched)
+    #    reportFailed(failed)
 
     book.fill(len(matched), "MatchedFibers", 24, -0.5, 23.5, title=";no. matched fibers;events / bin")
     book.fill(len(failed),   "FailedFibers", 24, -0.5, 23.5, title=";no. non-matched fibers;events / bin")
