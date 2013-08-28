@@ -14,13 +14,10 @@ When analyzing files written by the CMS DAQ, CMSSW (>=z) is also required.
 ---------------
 ssh lxplus5.cern.ch #or some other host
 
-#if you have git and a github account:
-git clone git@github.com:elaird/hcalraw.git
-
 #if you have only git:
-git clone git://github.com/elaird/hcalraw.git
+git clone https://github.com/elaird/hcalraw.git
 
-#if you have neither:
+#if not:
 wget https://github.com/elaird/hcalraw/archive/master.zip
 
 cd hcalraw
