@@ -143,8 +143,15 @@ def patternData(d={}, moduleId=0):
                )
     for fiber1, lst in d.iteritems():
         for key in ["A", "B", "C"]:
+            if key == "B":
+                fibers = " %2d,%2d" % (fiber1, 1+fiber1)
+            elif key == "A":
+                fibers = "    %2d" % fiber1
+            elif key == "C":
+                fibers = "    %2d" % (1+fiber1)
+
             out.append("   ".join([" 0x%03x" % moduleId,
-                                   " %2d,%2d" % (fiber1, 1+fiber1),
+                                   fibers,
                                    key,
                                    " "*5,
                                    ])+patternString(lst, key)
