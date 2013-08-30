@@ -21,7 +21,6 @@ def utca(uhtr=False):
                           "ErrF": [3],
                           },
             "unpackSkipFlavors": [4],
-            "patternMode": False,
             "matchRange": {930: range(10),    # B904
                            931: range(10),    # B904
                            989: range(10),    # Jan. slice-test
@@ -44,7 +43,6 @@ def cms(local=False):
            "unpackSkipFlavors": [7],
            "printSkip": {"fibCh": [0, 2],
                          "ErrF": [3]},
-           "patternMode": False,
            }
     if local:
         out.update({"treeName": "CMSRAW",
