@@ -12,6 +12,7 @@ def opts():
                       help="run number")
     parser.add_option("--dir", dest="dir", default="/afs/cern.ch/user/e/elaird/work/public/d1_utca/",
                       help="directory in which ROOT files sit")
+    parser.add_option("--patterns", dest="patterns", default=None, action="store_true", help="interpret QIE data as FE patterns")
 
     options, args = parser.parse_args()
     try:
@@ -73,6 +74,7 @@ if run <= 200000:
                    cmsFileName=fileName,
                    cmsFedIds=[702],
                    cmsIsLocal=True,
+                   cmsPatternMode=options.patterns,
                    label=label,
                    useEvn=False,
                    filterEvn=False,
