@@ -348,17 +348,14 @@ def oneRun(utcaFileName="", utcaFedIds=[989], utcaPatternMode=None,
     cms = configuration.cms(local=cmsIsLocal)
     cms.update({"fileName": cmsFileName,
                 "fedIds": cmsFedIds,
+                "patternMode": cmsPatternMode,
                 })
-    if cmsPatternMode is not None:
-        cms["patternMode"] = cmsPatternMode
 
     utca = configuration.utca(uhtr=uhtr)
     utca.update({"fileName": utcaFileName,
-                "fedIds": utcaFedIds,
-                })
-    if utcaPatternMode is not None:
-        utca["patternMode"] = utcaPatternMode
-
+                 "fedIds": utcaFedIds,
+                 "patternMode": utcaPatternMode,
+                 })
 
     if utcaFileName:
         if cmsFileName:
