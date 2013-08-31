@@ -180,7 +180,7 @@ def channelId(fiber=None, fibCh=None):
     return 4*fiber + fibCh
 
 
-def storePatternData(l={}, nFibers=6):
+def storePatternData(l={}, nFibers=6):  # FIXME: hard-coded 6
     if nFibers == 6:
         offset = 1
     elif nFibers == 8:
