@@ -53,7 +53,6 @@ def htrData(d={}, channelData=True, skip={}):
         for iOffset, offset in enumerate(sorted(offsets)):
             p = d["htrBlocks"][offset]
             patterns = "patternData" in p
-
             out = []
             if not patterns:
                 if channelData or not iOffset:
@@ -90,7 +89,7 @@ def htrData(d={}, channelData=True, skip={}):
             if channelData and not patterns:
                 out += cd
             if patterns and len(cd) > 1:
-                out += patternData(p["patternData"], " 0x%03x" % p["ModuleId"])
+                out += patternData(p["patternData"], "%3d %2d" % (d["FEDid"], iOffset))
             if (not skip) or len(out) >= 4:
                 print "\n".join(out)
 
@@ -156,7 +155,7 @@ def patternData(d={}, moduleId=0, slim=True):
                 fibers = "     %2d" % (1 + fiber1)
 
             if slim:
-                out.append("%s  %2d  %s" % (moduleId, 1 + int(fibers), ps))
+                out.append("%s %2d:  %s" % (moduleId, 1 + int(fibers), ps))
             else:
                 out.append("   ".join([moduleId, fibers, "  %s" % key, "  "]) + ps)
     return out
