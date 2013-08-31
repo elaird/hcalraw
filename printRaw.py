@@ -134,34 +134,31 @@ def htrChannelData(d={}, moduleId=0, skip={}):
     return out
 
 
-def patternData(d={}, moduleId=0, slim=False):
-    out = []
-    headers = ""
+def patternData(d={}, moduleId=0, slim=True):
     if slim:
-        keys = ["A", "C"]
-        offset = 1
-        #headers = ["ModuleId", " 1+Fib"]
+        out = [""]
     else:
-        keys = ["A", "B", "C"]
-        offset = 0
         headers = ["ModuleId", "Fibers", "Pattern"]
         chars = " ".join(["%2d" % i for i in range(20)])
-        out.append("  ".join(headers+[chars]))
+        out = ["  ".join(headers+[chars])]
 
     for fiber1, lst in d.iteritems():
-        for key in keys:
+        for key in ["A", "B", "C"]:
+            if slim and key == "B":
+                continue
+
+            ps = patternString(lst, key)
             if key == "B":
                 fibers = "  %2d,%2d" % (fiber1, 1+fiber1)
             elif key == "A":
-                fibers = "     %2d" % (fiber1 + offset)
+                fibers = "     %2d" % (fiber1)
             elif key == "C":
-                fibers = "     %2d" % (1 + fiber1 + offset)
+                fibers = "     %2d" % (1 + fiber1)
 
-            fields = [moduleId, fibers]
-            if not slim:
-                fields += ["  %s   " % key]
-
-            out.append("   ".join(fields)+"  "+patternString(lst, key))
+            if slim:
+                out.append("%s  %2d  %s" % (moduleId, 1 + int(fibers), ps))
+            else:
+                out.append("   ".join([moduleId, fibers, "  %s" % key, "  "]) + ps)
     return out
 
 
