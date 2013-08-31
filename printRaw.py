@@ -89,7 +89,7 @@ def htrData(d={}, channelData=True, skip={}):
             if channelData and not patterns:
                 out += cd
             if patterns and len(cd) > 1:
-                out += patternData(p["patternData"], p["ModuleId"])
+                out += patternData(p["patternData"], " 0x%03x" % p["ModuleId"])
             if (not skip) or len(out) >= 4:
                 print "\n".join(out)
 
@@ -133,29 +133,35 @@ def htrChannelData(d={}, moduleId=0, skip={}):
     return out
 
 
-def patternData(d={}, moduleId=0):
+def patternData(d={}, moduleId=0, slim=False):
     out = []
-    out.append("  ".join(["ModuleId",
-                          "Fibers",
-                          "Pattern",
-                          " ".join(["%2d" % i for i in range(20)])
-                          ])
-               )
-    for fiber1, lst in d.iteritems():
-        for key in ["A", "B", "C"]:
-            if key == "B":
-                fibers = " %2d,%2d" % (fiber1, 1+fiber1)
-            elif key == "A":
-                fibers = "    %2d" % fiber1
-            elif key == "C":
-                fibers = "    %2d" % (1+fiber1)
+    headers = ""
+    if slim:
+        keys = ["A", "C"]
+        offset = 1
+        headers = ["ModuleId", " 1+Fib"]
+    else:
+        keys = ["A", "B", "C"]
+        offset = 0
+        headers = ["ModuleId", "Fibers", "Pattern"]
 
-            out.append("   ".join([" 0x%03x" % moduleId,
-                                   fibers,
-                                   key,
-                                   " "*5,
-                                   ])+patternString(lst, key)
-                       )
+    chars = " ".join(["%2d" % i for i in range(20)])
+    out.append("  ".join(headers+[chars]))
+
+    for fiber1, lst in d.iteritems():
+        for key in keys:
+            if key == "B":
+                fibers = "  %2d,%2d" % (fiber1, 1+fiber1)
+            elif key == "A":
+                fibers = "     %2d" % (fiber1 + offset)
+            elif key == "C":
+                fibers = "     %2d" % (1 + fiber1 + offset)
+
+            fields = [moduleId, fibers]
+            if not slim:
+                fields += ["   %s  " % key]
+
+            out.append("   ".join(fields)+"  "+patternString(lst, key))
     return out
 
 
