@@ -12,20 +12,26 @@ def opts():
                       help="run number")
     parser.add_option("--dir", dest="dir", default="/afs/cern.ch/user/e/elaird/work/public/d1_utca/",
                       help="directory in which ROOT files sit")
+    parser.add_option("--file", dest="file", default="",
+                      help=".root file over which to run")
     parser.add_option("--patterns", dest="patterns", default=False, action="store_true", help="interpret QIE data as FE patterns")
 
     options, args = parser.parse_args()
     try:
-        int(options.run)
+        options.file or int(options.run)
     except TypeError:
         parser.print_help()
         exit()
     return options
 
 options = opts()
-run = int(options.run)
-label = "Run%d" % run
-baseDir = options.dir
+if options.file:
+    run = None
+    label = "latest"
+else:
+    run = int(options.run)
+    label = "Run%d" % run
+    baseDir = options.dir
 
 if run == 209151:
     analyze.oneRun(utcaFileName=baseDir+"/usc/USC_209150.root",
@@ -67,8 +73,11 @@ if run == 212928:
                    )
 
 
-if run <= 200000:
-    fileName = baseDir+"/904/B904_Integration_%06d.root" % run
+if run <= 200000:  # including None
+    if options.file:
+        fileName = options.file
+    else:
+        fileName = baseDir+"/904/B904_Integration_%06d.root" % run
     analyze.oneRun(utcaFileName=fileName,
                    utcaFedIds=[931],
                    cmsFileName=fileName,
