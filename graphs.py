@@ -103,7 +103,8 @@ def makeSummaryPdf(labels=[], pdf="summary.pdf"):
 
     for label in labels:
         f = r.TFile("%s/%s.root" % (utils.outputDir(), label))
-
+        if not f:
+            continue
         #label
         pad0.cd()
         text = r.TText(0.5, 0.5, label.replace("Run2", "Run 2"))
@@ -114,6 +115,9 @@ def makeSummaryPdf(labels=[], pdf="summary.pdf"):
 
         #category graphs
         graph = f.Get("category_vs_time")
+        if not graph:
+            continue
+
         graph.SetMarkerStyle(20)
         graph.SetMarkerColor(r.gStyle.GetHistLineColor())
         graph.SetMarkerSize(0.5*graph.GetMarkerSize())
