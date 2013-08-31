@@ -78,7 +78,7 @@ if run <= 200000:  # including None
         fileName = options.file
     else:
         fileName = baseDir+"/904/B904_Integration_%06d.root" % run
-    analyze.oneRun(utcaFileName=fileName,
+    analyze.oneRun(utcaFileName=fileName if not options.patterns else "",
                    utcaFedIds=[931],
                    cmsFileName=fileName,
                    cmsFedIds=[702],

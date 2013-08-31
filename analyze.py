@@ -358,7 +358,12 @@ def oneRun(utcaFileName="", utcaFedIds=[989], utcaPatternMode=None,
                  "patternMode": utcaPatternMode,
                  })
 
-    report = not (cms["patternMode"] or utca["patternMode"])
+    report = True
+    for d in [cms, utca]:
+        if d["patternMode"]:
+            report = False
+            d["nEventsMax"] = 1
+
     if utcaFileName:
         if cmsFileName:
             go(outer=utca, inner=cms, label=label, useEvn=useEvn,
