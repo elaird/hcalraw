@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
-import optparse
-import analyze
-import graphs
-
 
 def opts():
+    import optparse
     parser = optparse.OptionParser()
     parser.add_option("--run", dest="run", default=None,
                       metavar="N",
@@ -25,6 +22,10 @@ def opts():
     return options
 
 options = opts()
+if not all([x[0] == "_" or x in ["x", "opts", "options"] for x in dir()]):
+    print dir()
+    print "Please put imports after this block, to prevent PyROOT from stealing '--help'."
+
 if options.file:
     run = None
     label = "latest"
@@ -33,6 +34,8 @@ else:
     label = "Run%d" % run
     baseDir = options.dir
 
+
+import analyze
 if run == 209151:
     analyze.oneRun(utcaFileName=baseDir+"/usc/USC_209150.root",
                    cmsFileName=baseDir+"/castor/209151.HLTSkim.root",
@@ -93,5 +96,6 @@ if run <= 200000:  # including None
                    )
 
 if not options.patterns:
+    import graphs
     analyze.printHisto(label)
     graphs.makeSummaryPdf(labels=[label])
