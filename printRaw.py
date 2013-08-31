@@ -51,39 +51,40 @@ def htrData(d={}, channelData=True, skip={}):
     offsets = d["htrBlocks"].keys()
     if offsets:
         for iOffset, offset in enumerate(sorted(offsets)):
-            out = []
-            if channelData or not iOffset:
-                out.append("  ".join(["iWord16",
-                                      "   EvN",
-                                      "  OrN5",
-                                      " BcN",
-                                      "ModuleId",
-                                      "FrmtV",
-                                      "nWordTP",
-                                      "nWordQIE",
-                                      "nSamp",
-                                      "nPre",
-                                      "EvN8",
-                                      "  CRC",
-                                      ])
-                           )
             p = d["htrBlocks"][offset]
-            out.append("  ".join([" %04d" % p["0Word16"],
-                                  " 0x%07x" % p["EvN"],
-                                  "0x%02x" % p["OrN5"],
-                                  "%4d" % p["BcN"],
-                                  "  0x%03x" % p["ModuleId"],
-                                  "  0x%01x" % p["FormatVer"],
-                                  "  %3d  " % p["nWord16Tp"],
-                                  "   %3d" % p["nWord16Qie"],
-                                  "    %2d" % p["nSamples"],
-                                  "  %2d" % p["nPreSamples"],
-                                  "  0x%02x" % p["EvN8"],
-                                  "0x%04x" % p["CRC"],
-                                  ])
-                       )
-
             patterns = "patternData" in p
+
+            out = []
+            if not patterns:
+                if channelData or not iOffset:
+                    out.append("  ".join(["iWord16",
+                                          "   EvN",
+                                          "  OrN5",
+                                          " BcN",
+                                          "ModuleId",
+                                          "FrmtV",
+                                          "nWordTP",
+                                          "nWordQIE",
+                                          "nSamp",
+                                          "nPre",
+                                          "EvN8",
+                                          "  CRC",
+                                          ]))
+
+                out.append("  ".join([" %04d" % p["0Word16"],
+                                      " 0x%07x" % p["EvN"],
+                                      "0x%02x" % p["OrN5"],
+                                      "%4d" % p["BcN"],
+                                      "  0x%03x" % p["ModuleId"],
+                                      "  0x%01x" % p["FormatVer"],
+                                      "  %3d  " % p["nWord16Tp"],
+                                      "   %3d" % p["nWord16Qie"],
+                                      "    %2d" % p["nSamples"],
+                                      "  %2d" % p["nPreSamples"],
+                                      "  0x%02x" % p["EvN8"],
+                                      "0x%04x" % p["CRC"],
+                                      ]))
+
             if channelData or patterns:
                 cd = htrChannelData(p["channelData"], p["ModuleId"], skip=skip)
             if channelData and not patterns:
@@ -139,14 +140,13 @@ def patternData(d={}, moduleId=0, slim=False):
     if slim:
         keys = ["A", "C"]
         offset = 1
-        headers = ["ModuleId", " 1+Fib"]
+        #headers = ["ModuleId", " 1+Fib"]
     else:
         keys = ["A", "B", "C"]
         offset = 0
         headers = ["ModuleId", "Fibers", "Pattern"]
-
-    chars = " ".join(["%2d" % i for i in range(20)])
-    out.append("  ".join(headers+[chars]))
+        chars = " ".join(["%2d" % i for i in range(20)])
+        out.append("  ".join(headers+[chars]))
 
     for fiber1, lst in d.iteritems():
         for key in keys:
@@ -159,7 +159,7 @@ def patternData(d={}, moduleId=0, slim=False):
 
             fields = [moduleId, fibers]
             if not slim:
-                fields += ["   %s  " % key]
+                fields += ["  %s   " % key]
 
             out.append("   ".join(fields)+"  "+patternString(lst, key))
     return out
