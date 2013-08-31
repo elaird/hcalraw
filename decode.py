@@ -75,7 +75,7 @@ def header(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, bcnDelta=0, skipFlavors=[], patternMode=False):
+            utca=None, bcnDelta=0, skipFlavors=[], patternParams={}):
     w = word16
     if "htrIndex" not in d:
         for iHtr in range(len(word16Counts)):
@@ -122,8 +122,8 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         l["CRC"] = w
         return
     elif i == l["nWord16"]-1:
-        if patternMode and not utca:
-            storePatternData(l)
+        if patternParams["enabled"]:
+            storePatternData(l, nFibers=patternParams["nFibers"], nTs=patternParams["nTs"])
         d["htrIndex"] += 1
         if "currentChannelId" in d:  # check in case event is malformed
             del d["currentChannelId"]
@@ -180,7 +180,7 @@ def channelId(fiber=None, fibCh=None):
     return 4*fiber + fibCh
 
 
-def storePatternData(l={}, nFibers=6):  # FIXME: hard-coded 6
+def storePatternData(l={}, nFibers=None, nTs=0):
     if nFibers == 6:
         offset = 1
     elif nFibers == 8:
@@ -196,7 +196,7 @@ def storePatternData(l={}, nFibers=6):  # FIXME: hard-coded 6
         fiber2 = 2*iFiberPair + 1 + offset
         l["patternData"][fiber1] = []
 
-        for iTs in range(10):  # FIXME: hard-coded 10
+        for iTs in range(nTs):
             feWords = []
             # Tullio says HTR f/w makes no distinction between optical cables 1 and 2
             for fiber in [fiber1, fiber2]:
@@ -204,7 +204,12 @@ def storePatternData(l={}, nFibers=6):  # FIXME: hard-coded 6
                 for fibCh in range(3):
                     key = channelId(fiber, fibCh)
                     if key in d:
-                        qie = d[key]["QIE"][iTs]
+                        qies = d[key]["QIE"]
+                        try:
+                            qie = qies[iTs]
+                        except KeyError:
+                            print "ERROR: time slice %d not found:" % iTs, sorted(qies.keys())
+                            exit()
                         if d[key]["CapId"]:
                             cap = d[key]["CapId"][iTs]
                         else:
