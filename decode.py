@@ -208,7 +208,7 @@ def storePatternData(l={}, nFibers=6):
                         if d[key]["CapId"]:
                             cap = d[key]["CapId"][iTs]
                         else:
-                            print "ERROR: Cap-ids per time-slice not found.  Set patternMode=False."
+                            print "ERROR: Cap-ids per time-slice not found.  Run without passing '--patterns'."
                             exit()
                         if fibCh == 0:
                             feWord32 |= qie << 25
