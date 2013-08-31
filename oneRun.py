@@ -8,16 +8,20 @@ def opts():
                       metavar="N",
                       help="run number")
     parser.add_option("--dir", dest="dir", default="/afs/cern.ch/user/e/elaird/work/public/d1_utca/",
-                      help="directory in which ROOT files sit")
+                      help="(can be used with --run)")
     parser.add_option("--file", dest="file", default="",
                       help=".root file over which to run")
     parser.add_option("--patterns", dest="patterns", default=False, action="store_true", help="interpret QIE data as FE patterns")
 
     options, args = parser.parse_args()
+
+    if not (options.file or options.run):
+        parser.print_help()
+        exit()
     try:
         options.file or int(options.run)
-    except TypeError:
-        parser.print_help()
+    except ValueError:
+        print "ERROR: run number '%s' cannot be converted to an int." % options.run
         exit()
     return options
 
@@ -63,7 +67,7 @@ if run == 211428:
                    )
 
 
-if run == 212928:
+if run >= 212928:
     analyze.oneRun(cmsFileName=baseDir+"/USC_%d.root" % run,
                    cmsFedIds=[725],#range(724, 732),
                    cmsIsLocal=True,
