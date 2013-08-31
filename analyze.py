@@ -363,6 +363,7 @@ def oneRun(utcaFileName="", utcaFedIds=[989], utcaPatternMode=None,
         if d["patternMode"]:
             report = False
             d["nEventsMax"] = 1
+            d["printSkip"]["fed"] = True
 
     if utcaFileName:
         if cmsFileName:

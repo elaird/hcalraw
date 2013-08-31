@@ -2,23 +2,27 @@ import utils
 
 
 def oneEvent(d={}, hyphens=True):
-    if hyphens:
+    aux = d[None]
+    more = "fed" not in aux["printSkip"]
+
+    if hyphens and more:
         print "-"*86
 
-    aux = d[None]
-    print "%4s iEntry 0x%08x (%d)" % (aux["label"],
-                                      aux["iEntry"],
-                                      aux["iEntry"])
-    print "   ".join([" FEDid",
-                      "  EvN",
-                      "       OrN",
-                      "    BcN",
-                      "minutes",
-                      " TTS",
-                      " nBytesHW",
-                      "nBytesSW",
-                     "CRC16",
-                      ])
+    if more:
+        print "%4s iEntry 0x%08x (%d)" % (aux["label"],
+                                          aux["iEntry"],
+                                          aux["iEntry"])
+        print "   ".join([" FEDid",
+                          "  EvN",
+                          "       OrN",
+                          "    BcN",
+                          "minutes",
+                          " TTS",
+                          " nBytesHW",
+                          "nBytesSW",
+                          "CRC16",
+                          ])
+
     for fedId, data in d.iteritems():
         if fedId is None:
             continue
@@ -174,18 +178,19 @@ def patternString(patterns=[], key="", ascii=True):
 
 
 def oneFed(d={}, overview=True, headers=True, channelData=True, skip={}):
-    print "   ".join(["  %3d" % d["FEDid"],
-                      "0x%07x" % d["EvN"],
-                      "0x%08x" % d["OrN"],
-                      "%4d" % d["BcN"],
-                      "%7.3f" % utils.minutes(d["OrN"]),
-                      "  %1x" % d["TTS"],
-                      "    %4d" % (d["nWord64"]*8),
-                      "    %4d" % d["nBytesSW"],
-                      " 0x%04x" % d["CRC16"],
-                      ])
-    if overview:
-        htrOverview(d)
+    if "fed" not in skip:
+        print "   ".join(["  %3d" % d["FEDid"],
+                          "0x%07x" % d["EvN"],
+                          "0x%08x" % d["OrN"],
+                          "%4d" % d["BcN"],
+                          "%7.3f" % utils.minutes(d["OrN"]),
+                          "  %1x" % d["TTS"],
+                          "    %4d" % (d["nWord64"]*8),
+                          "    %4d" % d["nBytesSW"],
+                          " 0x%04x" % d["CRC16"],
+                          ])
+        if overview:
+            htrOverview(d)
 
     if headers:
         htrData(d, channelData=channelData, skip=skip)
