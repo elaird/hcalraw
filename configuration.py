@@ -26,7 +26,10 @@ def utca(uhtr=False):
                            989: range(10),    # Jan. slice-test
                            990: range(1, 10), # Jan. slice-test (HF)
                            },
+            "nPatternFibers": 6,
+            "nPatternTs": 10,
             }
+
 
 def cms(local=False):
     matchRange = {}
@@ -43,6 +46,8 @@ def cms(local=False):
            "unpackSkipFlavors": [7],
            "printSkip": {"fibCh": [0, 2],
                          "ErrF": [3]},
+           "nPatternFibers": 6,
+           "nPatternTs": 10,
            }
     if local:
         out.update({"treeName": "CMSRAW",
