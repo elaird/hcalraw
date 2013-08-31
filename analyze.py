@@ -293,7 +293,7 @@ def eventToEvent(mapF={}, mapB={}, useEvn=False, ornTolerance=None):
 
 def go(outer={}, inner={}, label="",
        useEvn=False, filterEvn=False, ornTolerance=None,
-       printEventMap=False, identityMap=False):
+       printEventMap=False, identityMap=False, report=True):
     innerEvent = {}
     deltaOrn = {}
     oMapF, oMapB = eventMaps(useEvn=useEvn, filterEvn=filterEvn, **outer)
@@ -334,10 +334,11 @@ def go(outer={}, inner={}, label="",
         h.Write()
     f.Close()
 
-    s = "%s: %4s = %6d" % (label, outer["label"], len(oMapF))
-    if inner:
-        s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
-    print s
+    if report:
+        s = "%s: %4s = %6d" % (label, outer["label"], len(oMapF))
+        if inner:
+            s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
+        print s
 
 
 def oneRun(utcaFileName="", utcaFedIds=[989], utcaPatternMode=None,
@@ -357,15 +358,17 @@ def oneRun(utcaFileName="", utcaFedIds=[989], utcaPatternMode=None,
                  "patternMode": utcaPatternMode,
                  })
 
+    report = not (cms["patternMode"] or utca["patternMode"])
     if utcaFileName:
         if cmsFileName:
             go(outer=utca, inner=cms, label=label, useEvn=useEvn,
                filterEvn=filterEvn, ornTolerance=ornTolerance,
-               printEventMap=printEventMap, identityMap=identityMap)
+               printEventMap=printEventMap, identityMap=identityMap,
+               report=report)
         else:
-            go(outer=utca, label=label)
+            go(outer=utca, label=label, report=report)
     elif cmsFileName:
-        go(outer=cms, label=label)
+        go(outer=cms, label=label, report=report)
     else:
         assert False, utcaFileName+" "+cmsFileName
 

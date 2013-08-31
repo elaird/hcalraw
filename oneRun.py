@@ -92,5 +92,6 @@ if run <= 200000:  # including None
                    printEventMap=False,
                    )
 
-analyze.printHisto(label)
-graphs.makeSummaryPdf(labels=[label])
+if not options.patterns:
+    analyze.printHisto(label)
+    graphs.makeSummaryPdf(labels=[label])
