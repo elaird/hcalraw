@@ -137,6 +137,13 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
         fI.Close()
 
 
+def patternParams(d={}):
+    return {"enabled": d["patternMode"],
+            "nFibers": d["nPatternFibers"],
+            "nTs": d["nPatternTs"],
+            }
+
+
 def collectedRaw(tree=None, specs={}):
     raw = {}
     for fedId in specs["fedIds"]:
@@ -147,7 +154,7 @@ def collectedRaw(tree=None, specs={}):
                                   chars=True,
                                   utca=specs["utca"],
                                   skipFlavors=specs["unpackSkipFlavors"],
-                                  patternMode=specs["patternMode"],
+                                  patternParams=patternParams(specs),
                                   )
             raw[fedId]["nBytesSW"] = rawThisFed.size()
         elif specs["format"] == "HCAL":
@@ -157,7 +164,7 @@ def collectedRaw(tree=None, specs={}):
                                   chars=False,
                                   utca=specs["utca"],
                                   skipFlavors=specs["unpackSkipFlavors"],
-                                  patternMode=specs["patternMode"],
+                                  patternParams=patternParams(specs),
                                   )
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
 
@@ -170,7 +177,7 @@ def collectedRaw(tree=None, specs={}):
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
-             bcnDelta=0, utca=None, skipFlavors=[], patternMode=False):
+             bcnDelta=0, utca=None, skipFlavors=[], patternParams={}):
     assert chars in [False, True], \
         "Specify whether to unpack by words or chars."
     assert skipHtrBlocks or (utca in [False, True]), \
@@ -210,7 +217,7 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
                                             word16Counts=header["word16Counts"],
                                             utca=utca, bcnDelta=bcnDelta,
                                             skipFlavors=skipFlavors,
-                                            patternMode=patternMode)
+                                            patternParams=patternParams)
                 if returnCode is not None:
                     print " ".join(["WARNING: skipping",
                                     "FED %d" % header["FEDid"],
