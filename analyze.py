@@ -49,6 +49,8 @@ def eventMaps(fileName="", treeName="", format="", auxBranch=False,
     forward = {}
     backward = {}
     f = r.TFile.Open(fileName)
+    if not f:
+        exit()
     tree = f.Get(treeName)
 
     for iEvent in range(nEvents(tree, nEventsMax)):
