@@ -12,6 +12,7 @@ def opts():
     parser.add_option("--file", dest="file", default="",
                       help=".root file over which to run")
     parser.add_option("--patterns", dest="patterns", default=False, action="store_true", help="interpret QIE data as FE patterns")
+    parser.add_option("--nevents", dest="nevents", default="", metavar="N", help="stop after N events")
 
     options, args = parser.parse_args()
 
@@ -23,7 +24,9 @@ def opts():
     except ValueError:
         print "ERROR: run number '%s' cannot be converted to an int." % options.run
         exit()
+
     return options
+
 
 options = opts()
 if not all([x[0] == "_" or x in ["x", "opts", "options"] for x in dir()]):
@@ -38,6 +41,15 @@ else:
     label = "Run%d" % run
     baseDir = options.dir
 
+if options.nevents:
+    try:
+        nEvents = int(options.nevents)
+    except ValueError:
+        print "ERROR: nevents '%s' cannot be converted to an int." % options.nevents
+        exit()
+else:
+    nEvents = None
+
 
 import analyze
 if run == 209151:
@@ -46,6 +58,7 @@ if run == 209151:
                    label=label,
                    useEvn=False,
                    filterEvn=False,
+                   nEvents=nEvents,
                    )
 
 if run == 211155:
@@ -55,6 +68,7 @@ if run == 211155:
                    label=label,
                    useEvn=False,
                    filterEvn=False,
+                   nEvents=nEvents,
                    )
 
 if run == 211428:
@@ -64,6 +78,7 @@ if run == 211428:
                    label=label,
                    useEvn=False,
                    filterEvn=False,
+                   nEvents=nEvents,
                    )
 
 
@@ -77,6 +92,7 @@ if run >= 212928:
                    ornTolerance=1,
                    uhtr=True,
                    printEventMap=False,
+                   nEvents=nEvents,
                    )
 
 
@@ -97,6 +113,7 @@ if run <= 200000:  # including None
                    ornTolerance=1,
                    uhtr=True,
                    printEventMap=False,
+                   nEvents=nEvents,
                    )
 
 if not options.patterns:
