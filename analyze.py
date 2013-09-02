@@ -353,7 +353,8 @@ def go(outer={}, inner={}, label="",
 def oneRun(utcaFileName="", utcaFedIds=[989], utcaPatternMode=None,
            cmsFileName="", cmsFedIds=[714, 722], cmsPatternMode=None,
            label="", useEvn=False, filterEvn=False, ornTolerance=0,
-           cmsIsLocal=False, uhtr=False, printEventMap=False, identityMap=False):
+           cmsIsLocal=False, uhtr=False, printEventMap=False, identityMap=False,
+           nEvents=None):
 
     cms = configuration.cms(local=cmsIsLocal)
     cms.update({"fileName": cmsFileName,
@@ -367,11 +368,14 @@ def oneRun(utcaFileName="", utcaFedIds=[989], utcaPatternMode=None,
                  "patternMode": utcaPatternMode,
                  })
 
+    if nEvents: # override setting in configuration
+        cms["nEventsMax"] = nEvents
+        utca["nEventsMax"] = nEvents
+
     report = True
     for d in [cms, utca]:
         if d["patternMode"]:
             report = False
-            d["nEventsMax"] = 1
             d["printSkip"]["fed"] = True
 
     if utcaFileName:
