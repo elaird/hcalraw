@@ -42,7 +42,7 @@ def cms(local=False):
            "matchRange": matchRange,
            "bcnDelta": 0,
            "fiberMap": {},
-           "nEventsMax": 3,
+           "nEventsMax": None,
            "unpackSkipFlavors": [7],
            "printSkip": {"fibCh": [0, 2],
                          "ErrF": [3]},
