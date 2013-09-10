@@ -22,8 +22,8 @@ wget https://github.com/elaird/hcalraw/archive/master.zip
 
 cd hcalraw
 source env-cmssw.sh #see below
-./oneRun.py --file=data/B904_Integration_000050.root --nevents=3
-./oneRun.py --file=data/B904_Integration_000067.root --patterns --nevents=1
+./oneRun.py --file1=data/B904_Integration_000050.root --feds1=702 --file2=data/B904_Integration_000050.root --feds2=931
+./oneRun.py --file1=data/B904_Integration_000067.root --feds1=702 --patterns --nevents=1
 
 ---------
 | Files |
