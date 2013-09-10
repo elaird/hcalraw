@@ -102,6 +102,16 @@ def eventMaps(s={}):
                 bcn = raw["BcN"]
                 evn = raw["EvN"]
 
+        elif name == "MOL":
+            tree.GetEntry(iEvent)
+            raw = unpacked(fedData=wordsOneBranch(tree=tree,
+                                                  branch=s["branch"],
+                                                  ),
+                           bcnDelta=bcnDelta, chars=False,
+                           skipHtrBlocks=True, skipTrailer=True)
+            orn = raw["OrN"]
+            bcn = raw["BcN"]
+            evn = raw["EvN"]
         else:
             print "ERROR: name %s not found." % name
             exit()
@@ -263,17 +273,21 @@ def charsOneFed(tree=None, fedId=None, collection=""):
 
 def wordsOneChunk(tree=None, fedId=None, branchName=""):
     #Common Data Format
-    attr = "%s%d" % (branchName, fedId)
+    chunk = wordsOneBranch(tree, "%s%d" % (branchName, fedId))
+    #wrapper class creates std::vector<ULong64_t>
+    return r.CDFChunk2(chunk).chunk()
+
+
+def wordsOneBranch(tree=None, branch=""):
     try:
-        chunk = getattr(tree, attr)
+        chunk = getattr(tree, branch)
     except AttributeError:
-        print "Branch %s not found.  These branches are available:" % attr
+        print "Branch %s not found.  These branches are available:" % branch
         names = [item.GetName() for item in tree.GetListOfBranches()]
         for name in sorted(names):
             print name
         exit()
-    #wrapper class creates std::vector<ULong64_t>
-    return r.CDFChunk2(chunk).chunk()
+    return chunk
 
 
 def categories(oMap={}, iMap={}, innerEvent={}):
