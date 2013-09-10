@@ -13,10 +13,7 @@ def labelAxis(h=None, labels={}):
 def xMax(graph=None, iPoint=None):
     N = graph.GetN()
     iPoint = min(iPoint, N-1) if (iPoint is not None) else N-1
-    x = r.Double()
-    y = r.Double()
-    graph.GetPoint(iPoint, x, y)
-    return float(x)
+    return graph.GetX()[iPoint]
 
 
 def magnify(h, factor=1.0):
