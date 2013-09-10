@@ -1,14 +1,15 @@
+import configuration
 import utils
 
 
-def oneEvent(d={}, hyphens=True):
+def oneEvent(d={}):
+    skip = configuration.printSkip()
+    if len(skip["fibCh"]) == 3 or not d:
+        return
+
     aux = d[None]
-    more = "fed" not in aux["printSkip"]
-
-    if hyphens and more:
+    if not aux["patternMode"]:
         print "-"*86
-
-    if more:
         print "%4s iEntry 0x%08x (%d)" % (aux["label"],
                                           aux["iEntry"],
                                           aux["iEntry"])
@@ -26,7 +27,7 @@ def oneEvent(d={}, hyphens=True):
     for fedId, data in d.iteritems():
         if fedId is None:
             continue
-        oneFed(data, skip=aux["printSkip"])
+        oneFed(data, skip=skip);
     print
 
 
