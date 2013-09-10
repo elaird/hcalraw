@@ -27,7 +27,7 @@ def oneEvent(d={}):
     for fedId, data in d.iteritems():
         if fedId is None:
             continue
-        oneFed(data, skip=skip);
+        oneFed(data, skip=skip, skipFed=aux["patternMode"]);
     print
 
 
@@ -178,8 +178,8 @@ def patternString(patterns=[], key="", ascii=True):
     return " ".join(l)
 
 
-def oneFed(d={}, overview=True, headers=True, channelData=True, skip={}):
-    if "fed" not in skip:
+def oneFed(d={}, overview=True, headers=True, channelData=True, skip={}, skipFed=False):
+    if not skipFed:
         print "   ".join(["  %3d" % d["FEDid"],
                           "0x%07x" % d["EvN"],
                           "0x%08x" % d["OrN"],
