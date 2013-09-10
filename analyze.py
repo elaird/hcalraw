@@ -33,6 +33,7 @@ setup()
 
 
 def nEvents(tree, nMax):
+    assert tree
     nEntries = tree.GetEntries()
     return min(nEntries, nMax) if (nMax is not None) else nEntries
 
@@ -40,24 +41,35 @@ def nEvents(tree, nMax):
 #this function returns two dictionaries,
 #one maps TTree entry to either (orn, ) or to (orn, evn)
 #the other maps the reverse
-def eventMaps(fileName="", treeName="", format="", auxBranch=False,
-              fedIds=[], bcnDelta=None, rawCollection=None, nEventsMax=None,
-              useEvn=False, filterEvn=False, branchName="", **_):
+def eventMaps(s={}):
+    fileName = s["fileName"]
+    treeName = s["treeName"]
+    nEventsMax = s["nEventsMax"]
+    fedIds = s["fedIds"]
+    name = s["name"]
     assert fileName
     assert treeName
 
+    useEvn = configuration.useEvn()
+    filterEvn = configuration.filterEvn()
+    bcnDelta = configuration.bcnDelta(fedIds[0])
     forward = {}
     backward = {}
     f = r.TFile.Open(fileName)
-    if not f:
+    if f.IsZombie():
         exit()
+
     tree = f.Get(treeName)
+    if not tree:
+        print "tree %s not found.  These objects are available:" % treeName
+        f.ls()
+        exit()
 
     for iEvent in range(nEvents(tree, nEventsMax)):
         orn = bcn = evn = None
 
-        if format == "CMS":
-            if auxBranch and (not useEvn) and (not filterEvn):
+        if name == "CMS":
+            if s["auxBranch"] and (not useEvn) and (not filterEvn):
                 tree.GetBranch("EventAuxiliary").GetEntry(iEvent)
                 orn = tree.EventAuxiliary.orbitNumber()
                 bcn = tree.EventAuxiliary.bunchCrossing()
@@ -65,7 +77,7 @@ def eventMaps(fileName="", treeName="", format="", auxBranch=False,
                 tree.GetEntry(iEvent)
                 raw = unpacked(fedData=charsOneFed(tree=tree,
                                                    fedId=fedIds[0],
-                                                   collection=rawCollection
+                                                   collection=s["rawCollection"],
                                                    ),
                                bcnDelta=bcnDelta, chars=True,
                                skipHtrBlocks=True, skipTrailer=True)
@@ -73,8 +85,8 @@ def eventMaps(fileName="", treeName="", format="", auxBranch=False,
                 bcn = raw["BcN"]
                 evn = raw["EvN"]
 
-        elif format == "HCAL":
-            if auxBranch and (not useEvn) and (not filterEvn):
+        elif name == "HCAL":
+            if s["auxBranch"] and (not useEvn) and (not filterEvn):
                 tree.GetBranch("CDFEventInfo").GetEntry(iEvent)
                 orn = tree.CDFEventInfo.getOrbitNumber()
                 bcn = tree.CDFEventInfo.getBunchNumber()
@@ -82,13 +94,17 @@ def eventMaps(fileName="", treeName="", format="", auxBranch=False,
                 tree.GetEntry(iEvent)
                 raw = unpacked(fedData=wordsOneChunk(tree=tree,
                                                      fedId=fedIds[0],
-                                                     branchName=branchName
+                                                     branchName=s["branch"],
                                                      ),
                                bcnDelta=bcnDelta, chars=False,
                                skipHtrBlocks=True, skipTrailer=True)
                 orn = raw["OrN"]
                 bcn = raw["BcN"]
                 evn = raw["EvN"]
+
+        else:
+            print "ERROR: name %s not found." % name
+            exit()
 
         t = (orn, evn) if useEvn else (orn, )
         if filterEvn and (evn & 0x1fff):
@@ -137,40 +153,41 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
         fI.Close()
 
 
-def patternParams(d={}):
-    return {"enabled": d["patternMode"],
-            "nFibers": d["nPatternFibers"],
-            "nTs": d["nPatternTs"],
+def patternParams(patternMode=None):
+    return {"enabled": patternMode,
+            "nFibers": configuration.nPatternFibers(),
+            "nTs": configuration.nPatternFibers(),
             }
 
 
 def collectedRaw(tree=None, specs={}):
     raw = {}
     for fedId in specs["fedIds"]:
-        if specs["format"] == "CMS":
+        if specs["name"] == "CMS":
             rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
             raw[fedId] = unpacked(fedData=rawThisFed,
-                                  bcnDelta=specs["bcnDelta"],
+                                  bcnDelta=configuration.bcnDelta(fedId),
                                   chars=True,
-                                  utca=specs["utca"],
-                                  skipFlavors=specs["unpackSkipFlavors"],
-                                  patternParams=patternParams(specs),
+                                  utca=not configuration.isVme(fedId),
+                                  skipFlavors=configuration.unpackSkipFlavors(fedId),
+                                  patternParams=patternParams(specs["patternMode"]),
                                   )
             raw[fedId]["nBytesSW"] = rawThisFed.size()
-        elif specs["format"] == "HCAL":
-            rawThisFed = wordsOneChunk(tree, fedId, specs["branchName"])
+        elif specs["name"] == "HCAL":
+            rawThisFed = wordsOneChunk(tree, fedId, specs["branch"])
             raw[fedId] = unpacked(fedData=rawThisFed,
-                                  bcnDelta=specs["bcnDelta"],
+                                  bcnDelta=configuration.bcnDelta(fedId),
                                   chars=False,
-                                  utca=specs["utca"],
-                                  skipFlavors=specs["unpackSkipFlavors"],
-                                  patternParams=patternParams(specs),
+                                  utca=not configuration.isVme(fedId),
+                                  skipFlavors=configuration.unpackSkipFlavors(fedId),
+                                  patternParams=patternParams(specs["patternMode"]),
                                   )
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
 
-    raw[None] = {"iEntry": tree.GetReadEntry()}
-    for item in ["printSkip", "label", "bcnDelta", "fiberMap", "matchRange"]:
-        raw[None][item] = specs[item]
+    raw[None] = {"iEntry": tree.GetReadEntry(),
+                 "label": specs["label"],
+                 "patternMode": specs["patternMode"],
+                 }
     return raw
 
 
@@ -285,7 +302,10 @@ def graph(d={}):
     return gr
 
 
-def eventToEvent(mapF={}, mapB={}, useEvn=False, ornTolerance=None):
+def eventToEvent(mapF={}, mapB={}):
+    useEvn = configuration.useEvn()
+    ornTolerance = configuration.ornTolerance()
+
     deltaOrnRange = range(-ornTolerance, 1+ornTolerance)
     out = {}
     for oEvent, ornEvn in mapF.iteritems():
@@ -300,21 +320,20 @@ def eventToEvent(mapF={}, mapB={}, useEvn=False, ornTolerance=None):
     return out
 
 
-def go(outer={}, inner={}, label="",
-       useEvn=False, filterEvn=False, ornTolerance=None,
-       printEventMap=False, identityMap=False, report=True):
+def go(outer={}, inner={}, label="", patternMode=None):
     innerEvent = {}
     deltaOrn = {}
-    oMapF, oMapB = eventMaps(useEvn=useEvn, filterEvn=filterEvn, **outer)
+
+    oMapF, oMapB = eventMaps(outer)
     iMapF = iMapB = {}
 
     if inner:
-        iMapF, iMapB = eventMaps(useEvn=useEvn, filterEvn=filterEvn, **inner)
-        innerEvent = eventToEvent(oMapF, iMapB, ornTolerance=ornTolerance)
-        if identityMap:
+        iMapF, iMapB = eventMaps(inner)
+        innerEvent = eventToEvent(oMapF, iMapB)
+        if configuration.identityMap():
             for key in innerEvent.keys():
                 innerEvent[key] = key
-        if printEventMap:
+        if configuration.printEventMap():
             for oEvent, iEvent in sorted(innerEvent.iteritems()):
                 print ", ".join(["oEvent = %s" % str(oEvent),
                                  "oOrnEvn = %s" % str(oMapF[oEvent]),
@@ -343,53 +362,81 @@ def go(outer={}, inner={}, label="",
         h.Write()
     f.Close()
 
-    if report:
+    if not patternMode:
         s = "%s: %4s = %6d" % (label, outer["label"], len(oMapF))
         if inner:
             s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
         print s
 
 
-def oneRun(utcaFileName="", utcaFedIds=[989], utcaPatternMode=None,
-           cmsFileName="", cmsFedIds=[714, 722], cmsPatternMode=None,
-           label="", useEvn=False, filterEvn=False, ornTolerance=0,
-           cmsIsLocal=False, uhtr=False, printEventMap=False, identityMap=False,
-           nEvents=None):
+def fileSpec(fileName="", someFedId=None):
+    f = r.TFile(fileName)
+    if f.IsZombie():
+        exit()
+    treeNames = []
+    for tkey in f.GetListOfKeys():
+        obj = f.Get(tkey.GetName())
+        if obj.ClassName() == "TTree":
+            treeNames.append(obj.GetName())
 
-    cms = configuration.cms(local=cmsIsLocal)
-    cms.update({"fileName": cmsFileName,
-                "fedIds": cmsFedIds,
-                "patternMode": cmsPatternMode,
-                })
+    specs = []
+    for treeName in set(treeNames):  # set accomodate cycles, e.g. CMSRAW;3 CMSRAW;4
+        spec = configuration.format(treeName, someFedId)
+        if spec:
+            specs.append(spec)
 
-    utca = configuration.utca(uhtr=uhtr)
-    utca.update({"fileName": utcaFileName,
-                 "fedIds": utcaFedIds,
-                 "patternMode": utcaPatternMode,
-                 })
-
-    if nEvents: # override setting in configuration
-        cms["nEventsMax"] = nEvents
-        utca["nEventsMax"] = nEvents
-
-    report = True
-    for d in [cms, utca]:
-        if d["patternMode"]:
-            report = False
-            d["printSkip"]["fed"] = True
-
-    if utcaFileName:
-        if cmsFileName:
-            go(outer=utca, inner=cms, label=label, useEvn=useEvn,
-               filterEvn=filterEvn, ornTolerance=ornTolerance,
-               printEventMap=printEventMap, identityMap=identityMap,
-               report=report)
-        else:
-            go(outer=utca, label=label, report=report)
-    elif cmsFileName:
-        go(outer=cms, label=label, report=report)
+    if len(specs) != 1:
+        print "ERROR: found multiple known TTrees in file %s" % fileName
+        print specs
+        exit()
     else:
-        assert False, utcaFileName+" "+cmsFileName
+        return specs[0]
+    f.Close()
+
+
+def checkFeds(feds=[]):
+    if len(set([configuration.isVme(fed) for fed in feds])) != 1:
+        print "ERROR: fed list %s is mixed among uTCA and VME." % str(l)
+        exit()
+
+
+def fedList(s=""):
+    assert s
+    out = [int(x) for x in s.split(",")]
+    checkFeds(out)
+    return out
+
+
+def oneRun(file1="",
+           feds1=[],
+           file2="",
+           feds2=[],
+           patternMode=None,
+           nEvents=None,
+           label="",
+           ):
+
+    feds1 = fedList(feds1)
+    spec1 = fileSpec(file1, feds1[0])
+    spec1.update({"fileName": file1,
+                  "fedIds": feds1,
+                  "nEventsMax": nEvents,
+                  "patternMode": patternMode,
+                  "label": "file1",
+                  })
+
+    if file2 and feds2:
+        feds2 = fedList(feds2)
+        spec2 = fileSpec(file2, feds2[0])
+        spec2.update({"fileName": file2,
+                      "fedIds": feds2,
+                      "nEventsMax": nEvents,
+                      "patternMode": patternMode,
+                      "label": "file2",
+                      })
+        go(outer=spec1, inner=spec2, label=label, patternMode=patternMode)
+    else:
+        go(outer=spec1, label=label, patternMode=patternMode)
 
 
 def printHisto(label="", histoName="MatchedFibers"):
