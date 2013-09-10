@@ -1,3 +1,4 @@
+import configuration
 import printRaw
 
 
@@ -29,17 +30,9 @@ def singleFedPlots(raw={}, fedId=None, book={}):
                   )
 
 
-def printIt(raw):
-    return raw and len(raw[None]["printSkip"]["fibCh"]) < 3
-
-
 def compare(raw1={}, raw2={}, book={}):
-    hyphens = True
-    if printIt(raw1):
-        printRaw.oneEvent(raw1, hyphens)
-        hyphens = False
-    if printIt(raw2):
-        printRaw.oneEvent(raw2, hyphens)
+    printRaw.oneEvent(raw1)
+    printRaw.oneEvent(raw2)
 
     for raw in [raw1, raw2]:
         for fedId, dct in raw.iteritems():
@@ -63,7 +56,7 @@ def compare(raw1={}, raw2={}, book={}):
     fed1 = filter(lambda x: x is not None, raw1.keys())[0]
     fed2 = filter(lambda x: x is not None, raw2.keys())[0]
 
-    delta = raw1[None]["bcnDelta"]-raw2[None]["bcnDelta"]
+    delta = configuration.bcnDelta(fed1) - configuration.bcnDelta(fed2)
     for x in ["BcN", "OrN", "EvN"]:
         title = ";".join([x+("%d" % delta if (x == "BcN") else ""),
                           "FED %s - FED %s" % (fed1, fed2),
@@ -119,19 +112,18 @@ def dataMap(raw={}):
     forward = {}
     backward = {}
 
-    if raw:
-        fiberMap = raw[None]["fiberMap"]
+    fiberMap = configuration.fiberMap()
 
     for fedId, d in raw.iteritems():
         if fedId is None:
             continue
 
-        matchRange = raw[None]["matchRange"][fedId]
+        matchRange = configuration.matchRange(fedId)
         for key, block in d["htrBlocks"].iteritems():
             if fedId >= 900: # FIXME: check uTCA
                 moduleId = block["ModuleId"] & 0xf
                 if fedId == 989 and moduleId >= 5:  # FIXME: hack for HF timing (Jan. slice-test)
-                    matchRange = raw[None]["matchRange"][990]
+                    matchRange = configuration.matchRange(990)
             else:
                 moduleId = block["ModuleId"] & 0x1f
 
