@@ -218,19 +218,19 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
 
     nSkipped64 = 0
     for jWord64 in iWords:
-        if jWord64 in skipWords64:
-            nSkipped64 += 1
-            continue
-        iWord64 = jWord64 - nSkipped64
-
         if chars:
-            offset = 8*iWord64
+            offset = 8*jWord64
             bytes = [fedData.at(offset+iByte) for iByte in range(8)]
             word64 = struct.unpack('Q', "".join(bytes))[0]
             #like above with 'B'*8 rather than 'Q':
             #b = [ord(fedData.at(offset+iByte)) for iByte in range(8)]
         else:
-            word64 = fedData.at(iWord64)
+            word64 = fedData.at(jWord64)
+
+        if jWord64 in skipWords64:
+            nSkipped64 += 1
+            continue
+        iWord64 = jWord64 - nSkipped64
 
         if iWord64 < iWordPayload0:
             decode.header(header, iWord64, word64, utca, bcnDelta)
