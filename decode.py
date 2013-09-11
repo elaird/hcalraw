@@ -3,6 +3,8 @@
 #HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/
 #    RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
 
+import configuration
+
 
 def ornBcn(ornIn, bcnIn, bcnDelta=0):
     if not bcnDelta:
@@ -75,7 +77,7 @@ def header(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, bcnDelta=0, skipFlavors=[], patternParams={}):
+            utca=None, bcnDelta=0, skipFlavors=[], patternMode=False):
     w = word16
     if "htrIndex" not in d:
         for iHtr in range(len(word16Counts)):
@@ -122,8 +124,8 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         l["CRC"] = w
         return
     elif i == l["nWord16"]-1:
-        if patternParams["enabled"]:
-            storePatternData(l, nFibers=patternParams["nFibers"], nTs=patternParams["nTs"])
+        if patternMode:
+            storePatternData(l)
         d["htrIndex"] += 1
         if "currentChannelId" in d:  # check in case event is malformed
             del d["currentChannelId"]
@@ -180,7 +182,10 @@ def channelId(fiber=None, fibCh=None):
     return 4*fiber + fibCh
 
 
-def storePatternData(l={}, nFibers=None, nTs=0):
+def storePatternData(l={}):
+    nFibers = configuration.nPatternFibers()
+    nTs = configuration.nPatternTs()
+
     if nFibers == 6:
         offset = 1
     elif nFibers == 8:

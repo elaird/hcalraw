@@ -163,13 +163,6 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
         fI.Close()
 
 
-def patternParams(patternMode=None):
-    return {"enabled": patternMode,
-            "nFibers": configuration.nPatternFibers(),
-            "nTs": configuration.nPatternFibers(),
-            }
-
-
 def collectedRaw(tree=None, specs={}):
     raw = {}
     for fedId in specs["fedIds"]:
@@ -180,7 +173,7 @@ def collectedRaw(tree=None, specs={}):
                                   chars=True,
                                   utca=not configuration.isVme(fedId),
                                   skipFlavors=configuration.unpackSkipFlavors(fedId),
-                                  patternParams=patternParams(specs["patternMode"]),
+                                  patternMode=specs["patternMode"],
                                   )
             raw[fedId]["nBytesSW"] = rawThisFed.size()
         elif specs["name"] == "HCAL":
@@ -190,7 +183,7 @@ def collectedRaw(tree=None, specs={}):
                                   chars=False,
                                   utca=not configuration.isVme(fedId),
                                   skipFlavors=configuration.unpackSkipFlavors(fedId),
-                                  patternParams=patternParams(specs["patternMode"]),
+                                  patternMode=specs["patternMode"],
                                   )
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
 
@@ -204,7 +197,7 @@ def collectedRaw(tree=None, specs={}):
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
-             skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternParams={}):
+             skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternMode=False):
     assert chars in [False, True], \
         "Specify whether to unpack by words or chars."
     assert skipHtrBlocks or (utca in [False, True]), \
@@ -250,7 +243,7 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
                                             word16Counts=header["word16Counts"],
                                             utca=utca, bcnDelta=bcnDelta,
                                             skipFlavors=skipFlavors,
-                                            patternParams=patternParams)
+                                            patternMode=patternMode)
                 if returnCode is not None:
                     print " ".join(["WARNING: skipping",
                                     "FED %d" % header["FEDid"],
