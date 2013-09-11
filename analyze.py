@@ -417,7 +417,8 @@ def oneRun(file1="",
            label="",
            ):
 
-    assert feds1, feds1
+    assert file1
+    assert feds1
     spec1 = fileSpec(file1, feds1[0])
     spec1.update({"fileName": file1,
                   "fedIds": feds1,
@@ -426,8 +427,8 @@ def oneRun(file1="",
                   "label": "file1",
                   })
 
-    if file2 and feds2:
-        assert feds2, feds2
+    if file2:
+        assert feds2
         spec2 = fileSpec(file2, feds2[0])
         spec2.update({"fileName": file2,
                       "fedIds": feds2,
