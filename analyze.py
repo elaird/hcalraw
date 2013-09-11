@@ -204,7 +204,7 @@ def collectedRaw(tree=None, specs={}):
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
-             bcnDelta=0, utca=None, skipFlavors=[], patternParams={}):
+             skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternParams={}):
     assert chars in [False, True], \
         "Specify whether to unpack by words or chars."
     assert skipHtrBlocks or (utca in [False, True]), \
@@ -223,7 +223,13 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
     if skipTrailer:
         iWords.pop()
 
-    for iWord64 in iWords:
+    nSkipped64 = 0
+    for jWord64 in iWords:
+        if jWord64 in skipWords64:
+            nSkipped64 += 1
+            continue
+        iWord64 = jWord64 - nSkipped64
+
         if chars:
             offset = 8*iWord64
             bytes = [fedData.at(offset+iByte) for iByte in range(8)]
