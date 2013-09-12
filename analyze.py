@@ -188,7 +188,7 @@ def collectedRaw(tree=None, specs={}):
                                   )
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
         elif specs["name"] == "MOL":
-            rawThisFed = wordsOneBranch(tree=tree, branch=specs["branch"])
+            rawThisFed = wordsOneBranch(tree=tree, branch="%s%d" % (specs["branch"], fedId))
             mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
             raw[fedId] = unpacked(fedData=rawThisFed,
                                   bcnDelta=configuration.bcnDelta(fedId),
