@@ -13,6 +13,27 @@ def oneEvent(d={}):
         print "%4s iEntry 0x%08x (%d)" % (aux["label"],
                                           aux["iEntry"],
                                           aux["iEntry"])
+
+        #For MOL block header
+        if 931 in d:
+            print "   "+"-"*67
+            print "   ".join([" FEDid  ",
+                              "EvN ",
+                              "   iBlock",
+                              "  nWord64",
+                              ])
+            if "isMOLheader" in d[931]:
+                i = 0
+                iblock = "Block_0"
+                while iblock in d[931]:
+                    print "   ".join(["  %3d" % d[931][iblock]["FEDid"], 
+                                      "0x%07x" % d[931][iblock]["Trigger"],
+                                      "%5d" % i, 
+                                      "    %5d" % d[931][iblock]["nWord64"]])
+                    i += 1
+                    iblock = "Block_" + str(i)
+            print "   "+"-"*67 
+
         print "   ".join([" FEDid",
                           "  EvN",
                           "       OrN",

@@ -163,13 +163,6 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
         fI.Close()
 
 
-def patternParams(patternMode=None):
-    return {"enabled": patternMode,
-            "nFibers": configuration.nPatternFibers(),
-            "nTs": configuration.nPatternFibers(),
-            }
-
-
 def collectedRaw(tree=None, specs={}):
     raw = {}
     for fedId in specs["fedIds"]:
@@ -180,7 +173,7 @@ def collectedRaw(tree=None, specs={}):
                                   chars=True,
                                   utca=not configuration.isVme(fedId),
                                   skipFlavors=configuration.unpackSkipFlavors(fedId),
-                                  patternParams=patternParams(specs["patternMode"]),
+                                  patternMode=specs["patternMode"],
                                   )
             raw[fedId]["nBytesSW"] = rawThisFed.size()
         elif specs["name"] == "HCAL":
@@ -190,10 +183,19 @@ def collectedRaw(tree=None, specs={}):
                                   chars=False,
                                   utca=not configuration.isVme(fedId),
                                   skipFlavors=configuration.unpackSkipFlavors(fedId),
-                                  patternParams=patternParams(specs["patternMode"]),
+                                  patternMode=specs["patternMode"],
                                   )
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
-
+        elif specs["name"] == "MOL":
+            rawThisFed = wordsOneBranch(tree=tree, branch=specs["branch"])
+            raw[fedId] = MOLunpacked(fedData=rawThisFed,
+                                  bcnDelta=configuration.bcnDelta(fedId),
+                                  chars=False,
+                                  utca=not configuration.isVme(fedId),
+                                  skipFlavors=configuration.unpackSkipFlavors(fedId),
+                                  patternMode=specs["patternMode"],
+                                  )
+            raw[fedId]["nBytesSW"] = rawThisFed.size()*8
     raw[None] = {"iEntry": tree.GetReadEntry(),
                  "label": specs["label"],
                  "patternMode": specs["patternMode"],
@@ -204,7 +206,7 @@ def collectedRaw(tree=None, specs={}):
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
-             bcnDelta=0, utca=None, skipFlavors=[], patternParams={}):
+             skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternMode=False):
     assert chars in [False, True], \
         "Specify whether to unpack by words or chars."
     assert skipHtrBlocks or (utca in [False, True]), \
@@ -223,7 +225,13 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
     if skipTrailer:
         iWords.pop()
 
-    for iWord64 in iWords:
+    nSkipped64 = 0
+    for jWord64 in iWords:
+        if jWord64 in skipWords64:
+            nSkipped64 += 1
+            continue
+        iWord64 = jWord64 - nSkipped64
+
         if chars:
             offset = 8*iWord64
             bytes = [fedData.at(offset+iByte) for iByte in range(8)]
@@ -231,11 +239,11 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
             #like above with 'B'*8 rather than 'Q':
             #b = [ord(fedData.at(offset+iByte)) for iByte in range(8)]
         else:
-            word64 = fedData.at(iWord64)
+            word64 = fedData.at(jWord64)
 
         if iWord64 < iWordPayload0:
             decode.header(header, iWord64, word64, utca, bcnDelta)
-        elif iWord64 < nWord64-1:
+        elif jWord64 < nWord64-1:
             for i in range(4):
                 word16 = (word64 >> (16*i)) & 0xffff
                 iWord16 = 4*iWord64+i
@@ -244,7 +252,7 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
                                             word16Counts=header["word16Counts"],
                                             utca=utca, bcnDelta=bcnDelta,
                                             skipFlavors=skipFlavors,
-                                            patternParams=patternParams)
+                                            patternMode=patternMode)
                 if returnCode is not None:
                     print " ".join(["WARNING: skipping",
                                     "FED %d" % header["FEDid"],
@@ -263,6 +271,37 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
     out.update({"htrBlocks": htrBlocks})
     return out
 
+def MOLunpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
+             bcnDelta=0, utca=None, skipFlavors=[], patternMode=False):
+    assert skipHtrBlocks or (utca in [False, True]), \
+        "Specify whether data is uTCA or VME (unless skipping HTR blocks)."
+    MOLheader = {}
+
+    nWord64 = fedData.size()  
+    iWords = range(nWord64)
+    BlockHeaderList = [] #List for storing block headers
+    
+    for iWord64 in iWords:
+        word64 = fedData.at(iWord64)
+
+        #If it's a new block, the first two lines are the blockheaders
+        if (utils.Swap64(word64) >> 48) & 0xffff ==  0x475A: 
+            decode.MOLheader(MOLheader, utils.Swap64(word64), utils.Swap64(fedData.at(iWord64+1))) #endian flip for block headers
+            BlockHeaderList.append(iWord64)
+            BlockHeaderList.append(iWord64+1)
+        
+        # fixme: improve this
+        out = {}
+        out.update(MOLheader)    
+    
+    #Load Sub-detector Payload with unpacked()
+    outUnpacked = {}
+    outUnpacked = unpacked(fedData=fedData, chars=chars, skipHtrBlocks=skipHtrBlocks, 
+                           skipTrailer=skipTrailer, skipWords64=BlockHeaderList, 
+                           bcnDelta=bcnDelta, utca=utca, skipFlavors=skipFlavors, 
+                           patternMode=patternMode)
+    out.update(outUnpacked)
+    return out
 
 def charsOneFed(tree=None, fedId=None, collection=""):
     #CMS data type
