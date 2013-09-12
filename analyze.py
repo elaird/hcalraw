@@ -104,6 +104,7 @@ def eventMaps(s={}):
                 orn, bcn, evn = coords(raw)
 
         elif name == "MOL":
+            print "FIXME!"
             tree.GetEntry(iEvent)
             raw = unpacked(fedData=wordsOneBranch(tree=tree,
                                                   branch=s["branch"],
@@ -188,13 +189,15 @@ def collectedRaw(tree=None, specs={}):
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
         elif specs["name"] == "MOL":
             rawThisFed = wordsOneBranch(tree=tree, branch=specs["branch"])
-            raw[fedId] = MOLunpacked(fedData=rawThisFed,
+            mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
+            raw[fedId] = unpacked(fedData=rawThisFed,
                                   bcnDelta=configuration.bcnDelta(fedId),
-                                  chars=False,
+                                  chars=False, skipWords64=skipWords64,
                                   utca=not configuration.isVme(fedId),
                                   skipFlavors=configuration.unpackSkipFlavors(fedId),
                                   patternMode=specs["patternMode"],
                                   )
+            raw[fedId]["MOL"] = mol
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
     raw[None] = {"iEntry": tree.GetReadEntry(),
                  "label": specs["label"],
@@ -271,12 +274,9 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
 
 
 #FEROL https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
-def MOLunpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
-             bcnDelta=0, utca=None, skipFlavors=[], patternMode=False):
+def unpackedMolHeader(fedData=None):
     MOLheader = {}
-    out = {}
-
-    BlockHeaderList = [] #List for storing block headers
+    BlockHeaders = [] #List for storing block header word numbers
     
     for iWord64 in range(fedData.size()-1):
         word64 = fedData.at(iWord64)
@@ -284,18 +284,11 @@ def MOLunpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False
         #If it's a new block, the first two lines are the blockheaders
         if word64 & 0xffff ==  0x5A47: 
             decode.MOLheader(MOLheader, utils.Swap64(word64), utils.Swap64(fedData.at(iWord64+1))) #endian flip for block headers
-            BlockHeaderList.append(iWord64)
-            BlockHeaderList.append(iWord64+1)
-            out.update(MOLheader)  
-          
-    #Load Sub-detector Payload with unpacked()
-    outUnpacked = {}
-    outUnpacked = unpacked(fedData=fedData, chars=chars, skipHtrBlocks=skipHtrBlocks, 
-                           skipTrailer=skipTrailer, skipWords64=BlockHeaderList, 
-                           bcnDelta=bcnDelta, utca=utca, skipFlavors=skipFlavors, 
-                           patternMode=patternMode)
-    out.update(outUnpacked)
-    return out
+            BlockHeaders.append(iWord64)
+            BlockHeaders.append(iWord64+1)
+
+    return MOLheader, BlockHeaders
+
 
 def charsOneFed(tree=None, fedId=None, collection=""):
     #CMS data type
