@@ -224,6 +224,7 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
         iWords = range(nWord64)
     if skipTrailer:
         iWords.pop()
+
     nToSkip = len(set(skipWords64))
     nSkipped64 = 0
     for jWord64 in iWords:

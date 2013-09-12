@@ -5,6 +5,7 @@
 
 import configuration
 
+
 def ornBcn(ornIn, bcnIn, bcnDelta=0):
     if not bcnDelta:
         return ornIn, bcnIn
@@ -195,6 +196,10 @@ def channelId(fiber=None, fibCh=None):
 def storePatternData(l={}):
     nFibers = configuration.nPatternFibers()
     nTs = configuration.nPatternTs()
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
     if nFibers == 6:
         offset = 1
     elif nFibers == 8:
