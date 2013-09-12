@@ -78,8 +78,7 @@ def header(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
 def MOLheader(d={}, word64_1=None, word64_2=None):
     w1 = word64_1
     w2 = word64_2
-    iblock = "Block_" + str((w1 >> 32) & 0x7ff)
-    d["isMOLheader"] = 1
+    iblock = (w1 >> 32) & 0x7ff
     d[iblock] = {}
     d[iblock]["isFirstBlock"] = w1 & (1L << 31)
     d[iblock]["isLastBlock"] = w1 & (1L << 30)
