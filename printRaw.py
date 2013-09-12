@@ -14,41 +14,11 @@ def oneEvent(d={}):
                                           aux["iEntry"],
                                           aux["iEntry"])
 
-        #For MOL block header
-        if 931 in d:
-            print "   "+"-"*67
-            print "   ".join([" FEDid  ",
-                              "EvN ",
-                              "   iBlock",
-                              "  nWord64",
-                              ])
-            if "isMOLheader" in d[931]:
-                i = 0
-                iblock = "Block_0"
-                while iblock in d[931]:
-                    print "   ".join(["  %3d" % d[931][iblock]["FEDid"], 
-                                      "0x%07x" % d[931][iblock]["Trigger"],
-                                      "%5d" % i, 
-                                      "    %5d" % d[931][iblock]["nWord64"]])
-                    i += 1
-                    iblock = "Block_" + str(i)
-            print "   "+"-"*67 
-
-        print "   ".join([" FEDid",
-                          "  EvN",
-                          "       OrN",
-                          "    BcN",
-                          "minutes",
-                          " TTS",
-                          " nBytesHW",
-                          "nBytesSW",
-                          "CRC16",
-                          ])
-
     for fedId, data in d.iteritems():
         if fedId is None:
             continue
-        oneFed(data, skip=skip, skipFed=aux["patternMode"]);
+        oneFedMol(data["MOL"])
+        oneFedHcal(data, skip=skip, skipFed=aux["patternMode"]);
     print
 
 
@@ -199,7 +169,18 @@ def patternString(patterns=[], key="", ascii=True):
     return " ".join(l)
 
 
-def oneFed(d={}, overview=True, headers=True, channelData=True, skip={}, skipFed=False):
+def oneFedHcal(d={}, overview=True, headers=True, channelData=True, skip={}, skipFed=False):
+    print "   ".join([" FEDid",
+                      "  EvN",
+                      "       OrN",
+                      "    BcN",
+                      "minutes",
+                      " TTS",
+                      " nBytesHW",
+                      "nBytesSW",
+                      "CRC16",
+                      ])
+
     h = d["header"]
     t = d["trailer"]
     if not skipFed:
@@ -218,3 +199,23 @@ def oneFed(d={}, overview=True, headers=True, channelData=True, skip={}, skipFed
 
     if headers:
         htrData(d, channelData=channelData, skip=skip)
+
+
+def oneFedMol(d):
+    print "   "+"-"*67
+    print "   ".join([" FEDid  ",
+                      "EvN ",
+                      "   iBlock",
+                      "  nWord64",
+                      ])
+    if "isMOLheader" in d:
+        i = 0
+        iblock = "Block_0"
+        while iblock in d:
+            print "   ".join(["  %3d" % d[iblock]["FEDid"],
+                              "0x%07x" % d[iblock]["Trigger"],
+                              "%5d" % i,
+                              "    %5d" % d[iblock]["nWord64"]])
+            i += 1
+            iblock = "Block_" + str(i)
+        print "   "+"-"*67
