@@ -104,11 +104,11 @@ def eventMaps(s={}):
                 orn, bcn, evn = coords(raw)
 
         elif name == "MOL":
-            print "FIXME!"
             tree.GetEntry(iEvent)
-            raw = unpacked(fedData=wordsOneBranch(tree=tree,
-                                                  branch=s["branch"],
-                                                  ),
+            fedId = fedIds[0]
+            rawThisFed = wordsOneBranch(tree=tree, branch="%s%d" % (s["branch"], fedId))
+            mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
+            raw = unpacked(fedData=rawThisFed, skipWords64=skipWords64,
                            bcnDelta=bcnDelta, chars=False,
                            skipHtrBlocks=True, skipTrailer=True)
             orn, bcn, evn = coords(raw)
