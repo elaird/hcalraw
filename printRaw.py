@@ -170,6 +170,7 @@ def patternString(patterns=[], key="", ascii=True):
 
 
 def oneFedHcal(d={}, overview=True, headers=True, channelData=True, skip={}, skipFed=False):
+    print "-"*85
     print "   ".join([" FEDid",
                       "  EvN",
                       "       OrN",
@@ -202,20 +203,16 @@ def oneFedHcal(d={}, overview=True, headers=True, channelData=True, skip={}, ski
 
 
 def oneFedMol(d):
-    print "   "+"-"*67
+    print "--MOL"+("-"*34)
     print "   ".join([" FEDid  ",
                       "EvN ",
                       "   iBlock",
                       "  nWord64",
                       ])
-    if "isMOLheader" in d:
-        i = 0
-        iblock = "Block_0"
-        while iblock in d:
-            print "   ".join(["  %3d" % d[iblock]["FEDid"],
-                              "0x%07x" % d[iblock]["Trigger"],
-                              "%5d" % i,
-                              "    %5d" % d[iblock]["nWord64"]])
-            i += 1
-            iblock = "Block_" + str(i)
-        print "   "+"-"*67
+
+    for iBlock in sorted(d.keys()):
+        value = d[iBlock]
+        print "   ".join(["  %3d" % value["FEDid"],
+                          "0x%07x" % value["Trigger"],
+                          "%5d" % iBlock,
+                          "    %5d" % value["nWord64"]])
