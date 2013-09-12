@@ -79,14 +79,13 @@ def htrData(d={}, channelData=True):
                                       "  0x%02x" % p["EvN8"],
                                       "0x%04x" % p["CRC"],
                                       ]))
-            skip = False  # FIXME
             if channelData or patterns:
                 cd = htrChannelData(p["channelData"], p["ModuleId"])
             if channelData and not patterns:
                 out += cd
             if patterns and len(cd) > 1:
                 out += patternData(p["patternData"], "%3d %2d" % (d["header"]["FEDid"], iOffset))
-            if (not skip) or len(out) >= 4:
+            if len(out) >= 4:
                 print "\n".join(out)
 
 
