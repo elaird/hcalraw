@@ -6,10 +6,12 @@ def nPatternTs():
     return 10
 
 
-def printSkip():
-    return {"fibCh": [0, 2],
-            "ErrF": [3],
-            }
+def printFibCh():
+    return [1]
+
+
+def printSkipErrF():
+    return [3]
 
 
 def unpackSkipFlavors(fedId=None):
