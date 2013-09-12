@@ -115,7 +115,7 @@ def htrData(d={}, channelData=True, skip={}):
             if channelData and not patterns:
                 out += cd
             if patterns and len(cd) > 1:
-                out += patternData(p["patternData"], "%3d %2d" % (d["FEDid"], iOffset))
+                out += patternData(p["patternData"], "%3d %2d" % (d["header"]["FEDid"], iOffset))
             if (not skip) or len(out) >= 4:
                 print "\n".join(out)
 
@@ -200,19 +200,21 @@ def patternString(patterns=[], key="", ascii=True):
 
 
 def oneFed(d={}, overview=True, headers=True, channelData=True, skip={}, skipFed=False):
+    h = d["header"]
+    t = d["trailer"]
     if not skipFed:
-        print "   ".join(["  %3d" % d["FEDid"],
-                          "0x%07x" % d["EvN"],
-                          "0x%08x" % d["OrN"],
-                          "%4d" % d["BcN"],
-                          "%7.3f" % utils.minutes(d["OrN"]),
-                          "  %1x" % d["TTS"],
-                          "    %4d" % (d["nWord64"]*8),
+        print "   ".join(["  %3d" % h["FEDid"],
+                          "0x%07x" % h["EvN"],
+                          "0x%08x" % h["OrN"],
+                          "%4d" % h["BcN"],
+                          "%7.3f" % utils.minutes(h["OrN"]),
+                          "  %1x" % t["TTS"],
+                          "    %4d" % (t["nWord64"]*8),
                           "    %4d" % d["nBytesSW"],
-                          " 0x%04x" % d["CRC16"],
+                          " 0x%04x" % t["CRC16"],
                           ])
         if overview:
-            htrOverview(d)
+            htrOverview(h)
 
     if headers:
         htrData(d, channelData=channelData, skip=skip)
