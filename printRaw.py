@@ -3,8 +3,7 @@ import utils
 
 
 def oneEvent(d={}):
-    skip = configuration.printSkip()
-    if len(skip["fibCh"]) == 3 or not d:
+    if not all([d, configuration.printFibCh()]):
         return
 
     aux = d[None]
@@ -19,7 +18,7 @@ def oneEvent(d={}):
             continue
         if "MOL" in data:
             oneFedMol(data["MOL"])
-        oneFedHcal(data, skip=skip, skipFed=aux["patternMode"]);
+        oneFedHcal(data, skipFed=aux["patternMode"]);
     print
 
 
@@ -44,7 +43,7 @@ def htrOverview(d={}):
     print hyphens
 
 
-def htrData(d={}, channelData=True, skip={}):
+def htrData(d={}, channelData=True):
     offsets = d["htrBlocks"].keys()
     if offsets:
         for iOffset, offset in enumerate(sorted(offsets)):
@@ -80,9 +79,9 @@ def htrData(d={}, channelData=True, skip={}):
                                       "  0x%02x" % p["EvN8"],
                                       "0x%04x" % p["CRC"],
                                       ]))
-
+            skip = False  # FIXME
             if channelData or patterns:
-                cd = htrChannelData(p["channelData"], p["ModuleId"], skip=skip)
+                cd = htrChannelData(p["channelData"], p["ModuleId"])
             if channelData and not patterns:
                 out += cd
             if patterns and len(cd) > 1:
@@ -101,7 +100,7 @@ def qieString(qieData={}):
     return " ".join(l)
 
 
-def htrChannelData(d={}, moduleId=0, skip={}):
+def htrChannelData(d={}, moduleId=0):
     out = []
     out.append("  ".join(["ModuleId",
                           "Fi",
@@ -112,15 +111,16 @@ def htrChannelData(d={}, moduleId=0, skip={}):
                           "QIE(hex)  0  1  2  3  4  5  6  7  8  9",
                           ])
                )
+    fibChs = configuration.printFibCh()
+    skipErrF = configuration.printSkipErrF()
     for channelId, data in d.iteritems():
-        fibCh = channelId % 4
-        if fibCh in skip["fibCh"]:
+        if data["FibCh"] not in fibChs:
             continue
-        if data["ErrF"] in skip["ErrF"]:
+        if data["ErrF"] in skipErrF:
             continue
         out.append("   ".join([" 0x%03x" % moduleId,
-                               "%3d" % (channelId/4),
-                               "%1d" % fibCh,
+                               "%3d" % data["Fiber"],
+                               "%1d" % data["FibCh"],
                                "%1d" % data["Flavor"],
                                "%2d" % data["ErrF"],
                                "  %1d" % data["CapId0"],
@@ -170,7 +170,7 @@ def patternString(patterns=[], key="", ascii=True):
     return " ".join(l)
 
 
-def oneFedHcal(d={}, overview=True, headers=True, channelData=True, skip={}, skipFed=False):
+def oneFedHcal(d={}, overview=True, headers=True, channelData=True, skipFed=False):
     h = d["header"]
     t = d["trailer"]
     if not skipFed:
@@ -199,7 +199,7 @@ def oneFedHcal(d={}, overview=True, headers=True, channelData=True, skip={}, ski
             htrOverview(h)
 
     if headers:
-        htrData(d, channelData=channelData, skip=skip)
+        htrData(d, channelData=channelData)
 
 
 def oneFedMol(d):
