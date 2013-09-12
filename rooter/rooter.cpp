@@ -2,7 +2,7 @@
  * 
  * Syntax: cat input.dat | rooter output.root
  */
-
+#include "TROOT.h"
 #include "TFile.h"
 #include "TTree.h"
 #include <iostream>
@@ -11,8 +11,11 @@ using namespace std;
 
 #define GZ 0x5a47 // FEROL "magic number"
 #define START (1L<<39) // initial block: bit 31 --> 39 (endian flip), as well as zeroes in 42..32
+#define FEDid 931 //Define FEDid to add into the branch name
+#define SaveVecBranch 1 //Switch to choose between storing vector or list 
 
 int main(int argc, char* argv[]) {
+  gROOT->ProcessLine(".L loader.C++"); //Load library for vector<unsigned char> type  
   char* rootfile;
   if (argc == 1) rootfile = "mol.root";
   else rootfile = argv[1];
@@ -22,10 +25,14 @@ int main(int argc, char* argv[]) {
   const int MAX_WORDS = 100000;
 
   uint64_t blob[MAX_WORDS];
+  std::vector<uint64_t> vec(MAX_WORDS);
+  vec.clear();
   int len = 0;
-  tree.Branch("nWord64",&len,"nWord64/I");
-  tree.Branch("words",blob,"words[nWord64]/l");
-
+  if(SaveVecBranch) tree.Branch("vec" + FEDid, "vector<uint64_t>", &vec);
+  else{
+    tree.Branch("nWord64",&len,"nWord64/I");
+    tree.Branch("words",blob,"words[nWord64]/l");
+  }
   uint64_t buf;
   int n = 0; // fragments
   int m = 0; // blocks
@@ -36,7 +43,8 @@ int main(int argc, char* argv[]) {
       if ((buf & 0x80ffff0000L) == START && len) { // if it's a new fragment, fill the tree.
         tree.Fill();
         len = 0;
-        n++;
+	vec.clear();
+	n++;
       }
     }
 
@@ -46,6 +54,7 @@ int main(int argc, char* argv[]) {
     }
 
     blob[len] = buf; // store the read word
+    vec.push_back(buf); // store the word into vector
     len++;
  
     success = fread(&buf,sizeof(buf),1,stdin); // read another word!
