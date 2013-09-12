@@ -120,7 +120,7 @@ def dataMap(raw={}):
 
         matchRange = configuration.matchRange(fedId)
         for key, block in d["htrBlocks"].iteritems():
-            if fedId >= 900: # FIXME: check uTCA
+            if not configuration.isVme(fedId):
                 moduleId = block["ModuleId"] & 0xf
                 if fedId == 989 and moduleId >= 5:  # FIXME: hack for HF timing (Jan. slice-test)
                     matchRange = configuration.matchRange(990)
