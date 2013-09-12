@@ -17,7 +17,8 @@ def oneEvent(d={}):
     for fedId, data in d.iteritems():
         if fedId is None:
             continue
-        oneFedMol(data["MOL"])
+        if "MOL" in data:
+            oneFedMol(data["MOL"])
         oneFedHcal(data, skip=skip, skipFed=aux["patternMode"]);
     print
 
@@ -170,21 +171,20 @@ def patternString(patterns=[], key="", ascii=True):
 
 
 def oneFedHcal(d={}, overview=True, headers=True, channelData=True, skip={}, skipFed=False):
-    print "-"*85
-    print "   ".join([" FEDid",
-                      "  EvN",
-                      "       OrN",
-                      "    BcN",
-                      "minutes",
-                      " TTS",
-                      " nBytesHW",
-                      "nBytesSW",
-                      "CRC16",
-                      ])
-
     h = d["header"]
     t = d["trailer"]
     if not skipFed:
+        print "-"*85
+        print "   ".join([" FEDid",
+                          "  EvN",
+                          "       OrN",
+                          "    BcN",
+                          "minutes",
+                          " TTS",
+                          " nBytesHW",
+                          "nBytesSW",
+                          "CRC16",
+                          ])
         print "   ".join(["  %3d" % h["FEDid"],
                           "0x%07x" % h["EvN"],
                           "0x%08x" % h["OrN"],
