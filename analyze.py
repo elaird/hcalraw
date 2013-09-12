@@ -224,16 +224,11 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
         iWords = range(nWord64)
     if skipTrailer:
         iWords.pop()
-
+    nToSkip = len(set(skipWords64))
     nSkipped64 = 0
     for jWord64 in iWords:
-        if jWord64 in skipWords64:
-            nSkipped64 += 1
-            continue
-        iWord64 = jWord64 - nSkipped64
-
         if chars:
-            offset = 8*iWord64
+            offset = 8*jWord64
             bytes = [fedData.at(offset+iByte) for iByte in range(8)]
             word64 = struct.unpack('Q', "".join(bytes))[0]
             #like above with 'B'*8 rather than 'Q':
@@ -241,9 +236,14 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
         else:
             word64 = fedData.at(jWord64)
 
+        if jWord64 in skipWords64:
+            nSkipped64 += 1
+            continue
+        iWord64 = jWord64 - nSkipped64
+
         if iWord64 < iWordPayload0:
             decode.header(header, iWord64, word64, utca, bcnDelta)
-        elif jWord64 < nWord64-1:
+        elif iWord64 < nWord64 - 1 - nToSkip: 
             for i in range(4):
                 word16 = (word64 >> (16*i)) & 0xffff
                 iWord16 = 4*iWord64+i
@@ -271,29 +271,24 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
     out.update({"htrBlocks": htrBlocks})
     return out
 
+#FEROL https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
 def MOLunpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
              bcnDelta=0, utca=None, skipFlavors=[], patternMode=False):
-    assert skipHtrBlocks or (utca in [False, True]), \
-        "Specify whether data is uTCA or VME (unless skipping HTR blocks)."
     MOLheader = {}
+    out = {}
 
-    nWord64 = fedData.size()  
-    iWords = range(nWord64)
     BlockHeaderList = [] #List for storing block headers
     
-    for iWord64 in iWords:
+    for iWord64 in range(fedData.size()-1):
         word64 = fedData.at(iWord64)
 
         #If it's a new block, the first two lines are the blockheaders
-        if (utils.Swap64(word64) >> 48) & 0xffff ==  0x475A: 
+        if word64 & 0xffff ==  0x5A47: 
             decode.MOLheader(MOLheader, utils.Swap64(word64), utils.Swap64(fedData.at(iWord64+1))) #endian flip for block headers
             BlockHeaderList.append(iWord64)
             BlockHeaderList.append(iWord64+1)
-        
-        # fixme: improve this
-        out = {}
-        out.update(MOLheader)    
-    
+            out.update(MOLheader)  
+          
     #Load Sub-detector Payload with unpacked()
     outUnpacked = {}
     outUnpacked = unpacked(fedData=fedData, chars=chars, skipHtrBlocks=skipHtrBlocks, 
