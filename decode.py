@@ -75,6 +75,16 @@ def header(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
             if iWord64 != 10:
                 d["HTR%d" % (j+1)] = htrDict(w >> 32, d["word16Counts"])
 
+def MOLheader(d={}, word64_1=None, word64_2=None):
+    w1 = word64_1
+    w2 = word64_2
+    iblock = (w1 >> 32) & 0x7ff
+    d[iblock] = {}
+    d[iblock]["isFirstBlock"] = w1 & (1L << 31)
+    d[iblock]["isLastBlock"] = w1 & (1L << 30)
+    d[iblock]["nWord64"] = w1 & 0x3ff
+    d[iblock]["FEDid"] = (w2 >> 32) & 0xfff
+    d[iblock]["Trigger"] = w2 & 0xffffff
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             utca=None, bcnDelta=0, skipFlavors=[], patternMode=False):

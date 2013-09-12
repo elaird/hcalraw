@@ -38,6 +38,11 @@ def nEvents(tree, nMax):
     return min(nEntries, nMax) if (nMax is not None) else nEntries
 
 
+def coords(d):
+    h = d["header"]
+    return h["OrN"], h["BcN"], h["EvN"]
+
+
 #this function returns two dictionaries,
 #one maps TTree entry to either (orn, ) or to (orn, evn)
 #the other maps the reverse
@@ -81,9 +86,7 @@ def eventMaps(s={}):
                                                    ),
                                bcnDelta=bcnDelta, chars=True,
                                skipHtrBlocks=True, skipTrailer=True)
-                orn = raw["OrN"]
-                bcn = raw["BcN"]
-                evn = raw["EvN"]
+                orn, bcn, evn = coords(raw)
 
         elif name == "HCAL":
             if s["auxBranch"] and (not useEvn) and (not filterEvn):
@@ -98,20 +101,18 @@ def eventMaps(s={}):
                                                      ),
                                bcnDelta=bcnDelta, chars=False,
                                skipHtrBlocks=True, skipTrailer=True)
-                orn = raw["OrN"]
-                bcn = raw["BcN"]
-                evn = raw["EvN"]
+                orn, bcn, evn = coords(raw)
 
         elif name == "MOL":
             tree.GetEntry(iEvent)
-            raw = unpacked(fedData=wordsOneBranch(tree=tree,
-                                                  branch=s["branch"],
-                                                  ),
+            fedId = fedIds[0]
+            rawThisFed = wordsOneBranch(tree=tree, branch="%s%d" % (s["branch"], fedId))
+            mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
+            raw = unpacked(fedData=rawThisFed, skipWords64=skipWords64,
                            bcnDelta=bcnDelta, chars=False,
                            skipHtrBlocks=True, skipTrailer=True)
-            orn = raw["OrN"]
-            bcn = raw["BcN"]
-            evn = raw["EvN"]
+            orn, bcn, evn = coords(raw)
+
         else:
             print "ERROR: name %s not found." % name
             exit()
@@ -186,7 +187,18 @@ def collectedRaw(tree=None, specs={}):
                                   patternMode=specs["patternMode"],
                                   )
             raw[fedId]["nBytesSW"] = rawThisFed.size()*8
-
+        elif specs["name"] == "MOL":
+            rawThisFed = wordsOneBranch(tree=tree, branch="%s%d" % (specs["branch"], fedId))
+            mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
+            raw[fedId] = unpacked(fedData=rawThisFed,
+                                  bcnDelta=configuration.bcnDelta(fedId),
+                                  chars=False, skipWords64=skipWords64,
+                                  utca=not configuration.isVme(fedId),
+                                  skipFlavors=configuration.unpackSkipFlavors(fedId),
+                                  patternMode=specs["patternMode"],
+                                  )
+            raw[fedId]["MOL"] = mol
+            raw[fedId]["nBytesSW"] = rawThisFed.size()*8
     raw[None] = {"iEntry": tree.GetReadEntry(),
                  "label": specs["label"],
                  "patternMode": specs["patternMode"],
@@ -216,6 +228,7 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
     if skipTrailer:
         iWords.pop()
 
+    nToSkip = len(set(skipWords64))
     nSkipped64 = 0
     for jWord64 in iWords:
         if chars:
@@ -234,7 +247,7 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
 
         if iWord64 < iWordPayload0:
             decode.header(header, iWord64, word64, utca, bcnDelta)
-        elif iWord64 < nWord64-1:
+        elif iWord64 < nWord64 - 1 - nToSkip: 
             for i in range(4):
                 word16 = (word64 >> (16*i)) & 0xffff
                 iWord16 = 4*iWord64+i
@@ -255,12 +268,26 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
                 del htrBlocks["htrIndex"]  # fixme
             decode.trailer(trailer, iWord64, word64)
 
-    # fixme: improve this
-    out = {}
-    out.update(header)
-    out.update(trailer)
-    out.update({"htrBlocks": htrBlocks})
-    return out
+    return {"header": header,
+            "trailer": trailer,
+            "htrBlocks": htrBlocks}
+
+
+#FEROL https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
+def unpackedMolHeader(fedData=None):
+    MOLheader = {}
+    BlockHeaders = [] #List for storing block header word numbers
+    
+    for iWord64 in range(fedData.size()-1):
+        word64 = fedData.at(iWord64)
+
+        #If it's a new block, the first two lines are the blockheaders
+        if word64 & 0xffff ==  0x5A47: 
+            decode.MOLheader(MOLheader, utils.Swap64(word64), utils.Swap64(fedData.at(iWord64+1))) #endian flip for block headers
+            BlockHeaders.append(iWord64)
+            BlockHeaders.append(iWord64+1)
+
+    return MOLheader, BlockHeaders
 
 
 def charsOneFed(tree=None, fedId=None, collection=""):

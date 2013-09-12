@@ -6,7 +6,7 @@ def singleFedPlots(raw={}, fedId=None, book={}):
     if fedId is None:
         return
     d = raw[fedId]
-    book.fill(d["TTS"], "TTS_%d" % fedId, 16, -0.5, 15.5,
+    book.fill(d["trailer"]["TTS"], "TTS_%d" % fedId, 16, -0.5, 15.5,
               title="FED %d; TTS state;Events / bin" % fedId)
 
     caps = {0: 0, 1: 0, 2: 0, 3: 0}
@@ -62,7 +62,7 @@ def compare(raw1={}, raw2={}, book={}):
                           "FED %s - FED %s" % (fed1, fed2),
                           "Events / bin",
                               ])
-        book.fill(raw1[fed1][x] - raw2[fed2][x], "delta"+x, 11, -5.5, 5.5, title=title)
+        book.fill(raw1[fed1]["header"][x] - raw2[fed2]["header"][x], "delta"+x, 11, -5.5, 5.5, title=title)
 
 
 def coordString(fedId, moduleId, fiber, channel):
@@ -120,7 +120,7 @@ def dataMap(raw={}):
 
         matchRange = configuration.matchRange(fedId)
         for key, block in d["htrBlocks"].iteritems():
-            if fedId >= 900: # FIXME: check uTCA
+            if not configuration.isVme(fedId):
                 moduleId = block["ModuleId"] & 0xf
                 if fedId == 989 and moduleId >= 5:  # FIXME: hack for HF timing (Jan. slice-test)
                     matchRange = configuration.matchRange(990)
