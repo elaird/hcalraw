@@ -38,6 +38,11 @@ def nEvents(tree, nMax):
     return min(nEntries, nMax) if (nMax is not None) else nEntries
 
 
+def coords(d):
+    h = d["header"]
+    return h["OrN"], h["BcN"], h["EvN"]
+
+
 #this function returns two dictionaries,
 #one maps TTree entry to either (orn, ) or to (orn, evn)
 #the other maps the reverse
@@ -81,9 +86,7 @@ def eventMaps(s={}):
                                                    ),
                                bcnDelta=bcnDelta, chars=True,
                                skipHtrBlocks=True, skipTrailer=True)
-                orn = raw["OrN"]
-                bcn = raw["BcN"]
-                evn = raw["EvN"]
+                orn, bcn, evn = coords(raw)
 
         elif name == "HCAL":
             if s["auxBranch"] and (not useEvn) and (not filterEvn):
@@ -98,9 +101,7 @@ def eventMaps(s={}):
                                                      ),
                                bcnDelta=bcnDelta, chars=False,
                                skipHtrBlocks=True, skipTrailer=True)
-                orn = raw["OrN"]
-                bcn = raw["BcN"]
-                evn = raw["EvN"]
+                orn, bcn, evn = coords(raw)
 
         elif name == "MOL":
             tree.GetEntry(iEvent)
@@ -109,9 +110,8 @@ def eventMaps(s={}):
                                                   ),
                            bcnDelta=bcnDelta, chars=False,
                            skipHtrBlocks=True, skipTrailer=True)
-            orn = raw["OrN"]
-            bcn = raw["BcN"]
-            evn = raw["EvN"]
+            orn, bcn, evn = coords(raw)
+
         else:
             print "ERROR: name %s not found." % name
             exit()
@@ -265,12 +265,10 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
                 del htrBlocks["htrIndex"]  # fixme
             decode.trailer(trailer, iWord64, word64)
 
-    # fixme: improve this
-    out = {}
-    out.update(header)
-    out.update(trailer)
-    out.update({"htrBlocks": htrBlocks})
-    return out
+    return {"header": header,
+            "trailer": trailer,
+            "htrBlocks": htrBlocks}
+
 
 #FEROL https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
 def MOLunpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
