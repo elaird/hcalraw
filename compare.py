@@ -6,8 +6,10 @@ def singleFedPlots(raw={}, fedId=None, book={}):
     if fedId is None:
         return
     d = raw[fedId]
-    book.fill(d["trailer"]["TTS"], "TTS_%d" % fedId, 16, -0.5, 15.5,
-              title="FED %d; TTS state;Events / bin" % fedId)
+    t = d["trailer"]
+    if "TTS" in t:
+        book.fill(t["TTS"], "TTS_%d" % fedId, 16, -0.5, 15.5,
+                  title="FED %d; TTS state;Events / bin" % fedId)
 
     caps = {0: 0, 1: 0, 2: 0, 3: 0}
     ErrF = {0: 0, 1: 0, 2: 0, 3: 0}

@@ -84,8 +84,9 @@ def eventMaps(s={}):
                                                    fedId=fedIds[0],
                                                    collection=s["rawCollection"],
                                                    ),
-                               bcnDelta=bcnDelta, chars=True,
-                               skipHtrBlocks=True, skipTrailer=True)
+                               bcnDelta=bcnDelta,
+                               chars=True,
+                               headerOnly=True)
                 orn, bcn, evn = coords(raw)
 
         elif name == "HCAL":
@@ -99,8 +100,9 @@ def eventMaps(s={}):
                                                      fedId=fedIds[0],
                                                      branchName=s["branch"],
                                                      ),
-                               bcnDelta=bcnDelta, chars=False,
-                               skipHtrBlocks=True, skipTrailer=True)
+                               bcnDelta=bcnDelta,
+                               chars=False,
+                               headerOnly=True)
                 orn, bcn, evn = coords(raw)
 
         elif name == "MOL":
@@ -108,9 +110,11 @@ def eventMaps(s={}):
             fedId = fedIds[0]
             rawThisFed = wordsOneBranch(tree=tree, branch="%s%d" % (s["branch"], fedId))
             mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
-            raw = unpacked(fedData=rawThisFed, skipWords64=skipWords64,
-                           bcnDelta=bcnDelta, chars=False,
-                           skipHtrBlocks=True, skipTrailer=True)
+            raw = unpacked(fedData=rawThisFed,
+                           skipWords64=skipWords64,
+                           bcnDelta=bcnDelta,
+                           chars=False,
+                           headerOnly=True)
             orn, bcn, evn = coords(raw)
 
         else:
@@ -208,11 +212,11 @@ def collectedRaw(tree=None, specs={}):
 
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
-def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
+def unpacked(fedData=None, chars=None, headerOnly=False,
              skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternMode=False):
     assert chars in [False, True], \
         "Specify whether to unpack by words or chars."
-    assert skipHtrBlocks or (utca in [False, True]), \
+    assert headerOnly or (utca in [False, True]), \
         "Specify whether data is uTCA or VME (unless skipping HTR blocks)."
     header = {}
     trailer = {}
@@ -221,16 +225,9 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
     nWord64 = fedData.size()/(8 if chars else 1)
     iWordPayload0 = 6 if utca else 12
 
-    if skipHtrBlocks:
-        iWords = range(iWordPayload0)+[nWord64-1]
-    else:
-        iWords = range(nWord64)
-    if skipTrailer:
-        iWords.pop()
-
     nToSkip = len(set(skipWords64))
     nSkipped64 = 0
-    for jWord64 in iWords:
+    for jWord64 in range(nWord64):
         if chars:
             offset = 8*jWord64
             bytes = [fedData.at(offset+iByte) for iByte in range(8)]
@@ -247,6 +244,8 @@ def unpacked(fedData=None, chars=None, skipHtrBlocks=False, skipTrailer=False,
 
         if iWord64 < iWordPayload0:
             decode.header(header, iWord64, word64, utca, bcnDelta)
+        elif headerOnly:
+            break
         elif iWord64 < nWord64 - 1 - nToSkip: 
             for i in range(4):
                 word16 = (word64 >> (16*i)) & 0xffff
