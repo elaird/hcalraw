@@ -2,7 +2,6 @@
  * 
  * Syntax: cat input.dat | rooter output.root
  */
-#include "TROOT.h"
 #include "TFile.h"
 #include "TTree.h"
 #include <iostream>
@@ -15,7 +14,6 @@ using namespace std;
 #define SaveVecBranch 1 //Switch to choose between storing vector or list 
 
 int main(int argc, char* argv[]) {
-  gROOT->ProcessLine(".L loader.C++"); //Load library for vector<unsigned char> type  
   char* rootfile;
   if (argc == 1) rootfile = "mol.root";
   else rootfile = argv[1];
