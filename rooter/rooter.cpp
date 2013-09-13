@@ -4,6 +4,7 @@
  */
 #include "TFile.h"
 #include "TTree.h"
+#include "TROOT.h"
 #include <iostream>
 
 using namespace std;
@@ -11,9 +12,10 @@ using namespace std;
 #define GZ 0x5a47 // FEROL "magic number"
 #define START (1L<<39) // initial block: bit 31 --> 39 (endian flip), as well as zeroes in 42..32
 #define FEDid 931 //Define FEDid to add into the branch name
-#define SaveVecBranch 1 //Switch to choose between storing vector or list 
+#define SaveVecBranch 1 //Switch to choose between storing vector or array 
 
 int main(int argc, char* argv[]) {
+  gROOT->ProcessLine("#include <vector>: #pragma link C++ class vector<uint64_t>+:"); //Load library for vector<uint64_t>
   char* rootfile;
   if (argc == 1) rootfile = "mol.root";
   else rootfile = argv[1];
@@ -26,7 +28,7 @@ int main(int argc, char* argv[]) {
   std::vector<uint64_t> vec(MAX_WORDS);
   vec.clear();
   int len = 0;
-  if(SaveVecBranch) tree.Branch("vec" + FEDid, "vector<uint64_t>", &vec);
+  if(SaveVecBranch) tree.Branch(Form("vec%d",FEDid), &vec);
   else{
     tree.Branch("nWord64",&len,"nWord64/I");
     tree.Branch("words",blob,"words[nWord64]/l");
