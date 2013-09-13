@@ -6,8 +6,7 @@
 #include "TTree.h"
 #include "TROOT.h"
 #include <iostream>
-
-using namespace std;
+#include <stdint.h>
 
 #define GZ 0x5a47 // FEROL "magic number"
 #define START (1L<<39) // initial block: bit 31 --> 39 (endian flip), as well as zeroes in 42..32
@@ -49,7 +48,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (len == MAX_WORDS) {
-      cout << "Too many words in fragment! (" << MAX_WORDS << " 64-bit words)" << endl;
+      std::cout << "Too many words in fragment! (" << MAX_WORDS << " 64-bit words)" << std::endl;
       return 1;
     }
 
@@ -64,6 +63,6 @@ int main(int argc, char* argv[]) {
   tree.Write();
   a.Close();
 
-  cout << n+1 << " fragments in " << m << " blocks." << endl;
+  std::cout << n+1 << " fragments in " << m << " blocks." << std::endl;
   return 0;
 }
