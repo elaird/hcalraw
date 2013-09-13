@@ -30,18 +30,10 @@ def nEvents(s=""):
         return None
 
 
-def checkFeds(feds=[]):
-    import configuration
-    if len(set([configuration.isVme(fed) for fed in feds])) != 1:
-        print "ERROR: fed list %s is mixed among uTCA and VME." % str(l)
-        exit()
-
-
 def fedList(s=""):
     if not s:
         return []
     out = [int(x) for x in s.split(",")]
-    checkFeds(out)
     return out
 
 
