@@ -15,7 +15,7 @@ using namespace std;
 #define SaveVecBranch 1 //Switch to choose between storing vector or array 
 
 int main(int argc, char* argv[]) {
-  gROOT->ProcessLine("#include <vector>: #pragma link C++ class vector<uint64_t>+:"); //Load library for vector<uint64_t>
+  gROOT->ProcessLine("#include <vector>; #pragma link C++ class vector<uint64_t>+;"); //Load dictionary for vector<uint64_t>
   char* rootfile;
   if (argc == 1) rootfile = "mol.root";
   else rootfile = argv[1];
