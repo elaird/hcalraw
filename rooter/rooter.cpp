@@ -12,6 +12,13 @@
 #define START (1L<<39) // initial block: bit 31 --> 39 (endian flip), as well as zeroes in 42..32
 #define FEDid 931 //Define FEDid to add into the branch name
 #define SaveVecBranch 1 //Switch to choose between storing vector or array 
+#define SaveHeader 1//Switch to choose if we want to store the header word into the root file
+
+int DecodeNDataInBlock(uint64_t buf){
+  int nData = (buf>>56);
+  nData += (buf>>40) & 0x300;
+  return nData;
+}
 
 int main(int argc, char* argv[]) {
   gROOT->ProcessLine("#include <vector>; #pragma link C++ class vector<uint64_t>+;"); //Load dictionary for vector<uint64_t>
@@ -34,11 +41,18 @@ int main(int argc, char* argv[]) {
   }
   uint64_t buf;
   int n = 0; // fragments
-  int m = 0; // blocks
+  int iWordInBlock = 0;
+  int nWordsInBlock = 0;
   int success = fread(&buf,sizeof(buf),1,stdin); // read a word!
   while (success) {
+    if(iWordInBlock-2 > nWordsInBlock && nWordsInBlock){
+      std::cout<<"Error::Number of data in block counter error or next block header not found!!!"<<std::endl;
+      return 0;
+    }
+    
     if ((buf & 0xffff) == GZ) { // if it's a new block, increment the block counter
-      m++;
+      iWordInBlock = 0;
+      int nWordsInBlock = DecodeNDataInBlock(buf);
       if ((buf & 0x80ffff0000L) == START && len) { // if it's a new fragment, fill the tree.
         tree.Fill();
         len = 0;
@@ -52,17 +66,17 @@ int main(int argc, char* argv[]) {
       return 1;
     }
 
-    blob[len] = buf; // store the read word
-    vec.push_back(buf); // store the word into vector
-    len++;
- 
+    if(SaveHeader || iWordInBlock > 1){//choose to store the block header
+      blob[len] = buf; // store the read word
+      vec.push_back(buf); // store the word into vector
+      len++;
+    }    
+    iWordInBlock++;
     success = fread(&buf,sizeof(buf),1,stdin); // read another word!
   }
 
   tree.Fill();
   tree.Write();
   a.Close();
-
-  std::cout << n+1 << " fragments in " << m << " blocks." << std::endl;
   return 0;
 }
