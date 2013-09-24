@@ -45,12 +45,11 @@ int main(int argc, char* argv[]) {
   int nWordsInBlock = 0;
   int success = fread(&buf,sizeof(buf),1,stdin); // read a word!
   while (success) {
-    if(iWordInBlock-2 > nWordsInBlock && nWordsInBlock){
-      std::cout<<"Error::Number of data in block counter error or next block header not found!!!"<<std::endl;
-      return 0;
-    }
-    
     if ((buf & 0xffff) == GZ) { // if it's a new block, increment the block counter
+      if(iWordInBlock-2 != nWordsInBlock && nWordsInBlock){
+	std::cout<<"Error::Number of data in block counter error or next block header not found!!!"<<std::endl;
+	return 0;
+      }
       iWordInBlock = 0;
       int nWordsInBlock = DecodeNDataInBlock(buf);
       if ((buf & 0x80ffff0000L) == START && len) { // if it's a new fragment, fill the tree.
