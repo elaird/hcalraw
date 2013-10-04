@@ -433,6 +433,12 @@ def fileSpec(fileName="", someFedId=None):
     f.Close()
 
 
+def checkFedList(feds=[]):
+    if len(set([configuration.isVme(fed) for fed in feds])) != 1:
+        print "ERROR: fed list %s is mixed among uTCA and VME." % str(feds)
+        exit()
+
+
 def oneRun(file1="",
            feds1=[],
            file2="",
@@ -444,6 +450,7 @@ def oneRun(file1="",
 
     assert file1
     assert feds1
+    checkFedList(feds1)
     spec1 = fileSpec(file1, feds1[0])
     spec1.update({"fileName": file1,
                   "fedIds": feds1,
@@ -454,6 +461,7 @@ def oneRun(file1="",
 
     if file2:
         assert feds2
+        checkFedList(feds2)
         spec2 = fileSpec(file2, feds2[0])
         spec2.update({"fileName": file2,
                       "fedIds": feds2,
