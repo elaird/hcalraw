@@ -12,7 +12,7 @@
 #define START (1L<<39) // initial block: bit 31 --> 39 (endian flip), as well as zeroes in 42..32
 #define FEDid 931 //Define FEDid to add into the branch name
 #define SaveVecBranch 1 //Switch to choose between storing vector or array 
-#define SaveHeader 1//Switch to choose if we want to store the header word into the root file
+#define SaveHeader 0//Switch to choose if we want to store the header word into the root file
 
 int DecodeNDataInBlock(uint64_t buf){
   int nData = (buf>>56);
@@ -46,24 +46,24 @@ int main(int argc, char* argv[]) {
   int success = fread(&buf,sizeof(buf),1,stdin); // read a word!
   while (success) {
     if ((buf & 0xffff) == GZ) { // if found GZ
-      if(iWordInBlock-2 != nWordsInBlock && nWordsInBlock)  std::cout<<"Warning::Found GZ in data"<<std::endl;
+      if((iWordInBlock-2 != nWordsInBlock) && nWordsInBlock)  std::cout<<"Warning::Found GZ in data"<<std::endl;
       else{ // If GZ is found in the header, this is a new block
         iWordInBlock = 0;
         nWordsInBlock = DecodeNDataInBlock(buf);
         if ((buf & 0x80ffff0000L) == START && len) { // if it's a new fragment, fill the tree.
           tree.Fill();
           len = 0;
-	      vec.clear();
-	      n++;
+	  vec.clear();
+	  n++;
         }
       }
     }
-
+    
     if (len == MAX_WORDS) {
       std::cout << "Too many words in fragment! (" << MAX_WORDS << " 64-bit words)" << std::endl;
       return 1;
     }
-
+    
     if(SaveHeader || iWordInBlock > 1){//choose to store the block header
       blob[len] = buf; // store the read word
       vec.push_back(buf); // store the word into vector
