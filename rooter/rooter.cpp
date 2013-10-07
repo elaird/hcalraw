@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
       return 1;
     }
     
-    if(SaveHeader || iWordInBlock > 1){//choose to store the block header
+    if(SaveHeader || (iWordInBlock > 1)){//choose to store the block header
       blob[len] = buf; // store the read word
       vec.push_back(buf); // store the word into vector
       len++;
