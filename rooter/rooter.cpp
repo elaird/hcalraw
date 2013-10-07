@@ -45,18 +45,17 @@ int main(int argc, char* argv[]) {
   int nWordsInBlock = 0;
   int success = fread(&buf,sizeof(buf),1,stdin); // read a word!
   while (success) {
-    if ((buf & 0xffff) == GZ) { // if it's a new block, increment the block counter
-      if(iWordInBlock-2 != nWordsInBlock && nWordsInBlock){
-	std::cout<<"Error::Number of data in block counter error or next block header not found!!!"<<std::endl;
-	return 0;
-      }
-      iWordInBlock = 0;
-      int nWordsInBlock = DecodeNDataInBlock(buf);
-      if ((buf & 0x80ffff0000L) == START && len) { // if it's a new fragment, fill the tree.
-        tree.Fill();
-        len = 0;
-	vec.clear();
-	n++;
+    if ((buf & 0xffff) == GZ) { // if found GZ
+      if(iWordInBlock-2 != nWordsInBlock && nWordsInBlock)  std::cout<<"Warning::Found GZ in data"<<std::endl;
+      else{ // If GZ is found in the header, this is a new block
+        iWordInBlock = 0;
+        nWordsInBlock = DecodeNDataInBlock(buf);
+        if ((buf & 0x80ffff0000L) == START && len) { // if it's a new fragment, fill the tree.
+          tree.Fill();
+          len = 0;
+	      vec.clear();
+	      n++;
+        }
       }
     }
 
@@ -73,7 +72,6 @@ int main(int argc, char* argv[]) {
     iWordInBlock++;
     success = fread(&buf,sizeof(buf),1,stdin); // read another word!
   }
-
   tree.Fill();
   tree.Write();
   a.Close();
