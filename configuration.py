@@ -1,5 +1,5 @@
 def nPatternFibers():
-    return 6
+    return 8
 
 
 def nPatternTs():
