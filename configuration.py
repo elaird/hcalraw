@@ -1,3 +1,19 @@
+import re
+
+
+__pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
+
+
+def processed(s=""):
+    match = __pattern.search(s)
+    if match:
+        m = match.group()
+        m = m.replace(" ", "").replace("-", "")
+        return "%s %s %s" % (m[:-2].ljust(6), m[-2], m[-1])
+    else:
+        return ""
+
+
 def nPatternFibers():
     return 8
 
