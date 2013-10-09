@@ -31,6 +31,14 @@ def nEvents(s=""):
 
 
 def fedList(s=""):
+    if s in ["HCAL", "hcal"]:
+        return range(700, 732)
+    if s in ["HBHE", "hbhe"]:
+        return range(700, 718)
+    if s in ["HF", "hf"]:
+        return range(718, 724)
+    if s in ["HO", "ho"]:
+        return range(724, 732)
     if not s:
         return []
     out = [int(x) for x in s.split(",")]
