@@ -223,8 +223,8 @@ def storePatternData(l={}):
                         try:
                             qie = qies[iTs]
                         except KeyError:
-                            print "ERROR: time slice %d not found:" % iTs, sorted(qies.keys())
-                            exit()
+                            #print "WARNING: time slice %d not found:" % iTs, sorted(qies.keys())
+                            continue
                         if d[key]["CapId"]:
                             cap = d[key]["CapId"][iTs]
                         else:
