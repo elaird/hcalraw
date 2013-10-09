@@ -129,7 +129,7 @@ def htrChannelData(d={}, moduleId=0):
     return out
 
 
-def patternData(d={}, moduleId=0, slim=True):
+def patternData(d={}, moduleId=0, slim=True, process=True):
     if slim:
         out = [""]
     else:
@@ -142,7 +142,10 @@ def patternData(d={}, moduleId=0, slim=True):
             if slim and key == "B":
                 continue
 
-            ps = patternString(lst, key)
+            ps = patternString(lst, key, process=process)
+            if process and not ps:
+                continue
+
             if key == "B":
                 fibers = "  %2d,%2d" % (fiber1, 1+fiber1)
             elif key == "A":
@@ -157,7 +160,7 @@ def patternData(d={}, moduleId=0, slim=True):
     return out
 
 
-def patternString(patterns=[], key="", ascii=True):
+def patternString(patterns=[], key="", ascii=True, process=None):
     l = []
     for p in patterns:
         for k in [key+"0", key+"1"]:
@@ -166,7 +169,8 @@ def patternString(patterns=[], key="", ascii=True):
                 l.append("%2s" % chr(code))
             else:
                 l.append("%2x" % code)
-    return " ".join(l)
+    out = " ".join(l)
+    return configuration.processed(out) if process else out
 
 
 def oneFedHcal(d={}, overview=True, headers=True, channelData=True, skipFed=False):
