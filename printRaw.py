@@ -83,9 +83,10 @@ def htrData(d={}, channelData=True):
                 cd = htrChannelData(p["channelData"], p["ModuleId"])
             if channelData and not patterns:
                 out += cd
+                if len(out) >= 4:
+                    print "\n".join(out)
             if patterns and len(cd) > 1:
                 out += patternData(p["patternData"], "%3d %2d" % (d["header"]["FEDid"], iOffset))
-            if len(out) >= 4:
                 print "\n".join(out)
 
 
@@ -170,7 +171,18 @@ def patternString(patterns=[], key="", ascii=True, process=None):
             else:
                 l.append("%2x" % code)
     out = " ".join(l)
-    return configuration.processed(out) if process else out
+
+    processed = configuration.processed(out)
+
+    if process:
+        if processed:
+            return processed
+        elif "-" in out:
+            return out
+        else:
+            return ""
+    else:
+        return out
 
 
 def oneFedHcal(d={}, overview=True, headers=True, channelData=True, skipFed=False):
