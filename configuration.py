@@ -19,7 +19,7 @@ def nPatternFibers():
 
 
 def nPatternTs():
-    return 10
+    return 20
 
 
 def printFibCh():
