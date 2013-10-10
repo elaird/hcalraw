@@ -25,6 +25,7 @@ source env-cmssw.sh #see below
 ./oneRun.py --file1=data/B904_Integration_000050.root --feds1=702 --file2=data/B904_Integration_000050.root --feds2=931
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931
 ./oneRun.py --file1=data/B904_Integration_000067.root --feds1=702 --patterns --nevents=1
+./oneRun.py --file1=data/USC_214784.root --feds1=HCAL --patterns --nevents=1
 
 ---------
 | Files |
