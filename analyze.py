@@ -107,10 +107,7 @@ def eventMaps(s={}):
 
         elif name == "DB":
             tree.GetEntry(iEvent)
-            raw = unpacked(fedData=wordsOneChunk(tree=tree,
-                                                 fedId=fedIds[0],
-                                                 branchName=s["branch"],
-                                                 ),
+            raw = unpacked(fedData=wordsOneBranch(tree=tree, branch="%s%d" % (s["branch"], fedIds[0])),
                            bcnDelta=bcnDelta,
                            nBytesPer=4,
                            headerOnly=True)
@@ -231,7 +228,7 @@ def collectedRaw(tree=None, specs={}):
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
              skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternMode=False):
-    assert nBytesPer in [1, 8], "invalid nBytes per index (%s)." % str(nBytesPer)
+    assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
     assert headerOnly or (utca in [False, True]), \
         "Specify whether data is uTCA or VME (unless skipping HTR blocks)."
     header = {}
@@ -250,7 +247,10 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
             word64 = struct.unpack('Q', "".join(bytes))[0]
             #like above with 'B'*8 rather than 'Q':
             #b = [ord(fedData.at(offset+iByte)) for iByte in range(8)]
-        else:
+        elif nBytesPer == 4:
+            word64 = fedData.at(2*jWord64)
+            word64 += fedData.at(2*jWord64 + 1) << 32
+        elif nBytesPer == 8:
             word64 = fedData.at(jWord64)
 
         if jWord64 in skipWords64:
