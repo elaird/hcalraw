@@ -85,7 +85,7 @@ def eventMaps(s={}):
                                                    collection=s["rawCollection"],
                                                    ),
                                bcnDelta=bcnDelta,
-                               chars=True,
+                               nBytesPer=1,
                                headerOnly=True)
                 orn, bcn, evn = coords(raw)
 
@@ -101,9 +101,20 @@ def eventMaps(s={}):
                                                      branchName=s["branch"],
                                                      ),
                                bcnDelta=bcnDelta,
-                               chars=False,
+                               nBytesPer=8,
                                headerOnly=True)
                 orn, bcn, evn = coords(raw)
+
+        elif name == "DB":
+            tree.GetEntry(iEvent)
+            raw = unpacked(fedData=wordsOneChunk(tree=tree,
+                                                 fedId=fedIds[0],
+                                                 branchName=s["branch"],
+                                                ),
+                           bcnDelta=bcnDelta,
+                           nBytesPer=4,
+                           headerOnly=True)
+            orn, bcn, evn = coords(raw)
 
         elif name == "MOL":
             tree.GetEntry(iEvent)
@@ -113,7 +124,7 @@ def eventMaps(s={}):
             raw = unpacked(fedData=rawThisFed,
                            skipWords64=skipWords64,
                            bcnDelta=bcnDelta,
-                           chars=False,
+                           nBytesPer=8,
                            headerOnly=True)
             orn, bcn, evn = coords(raw)
 
@@ -175,34 +186,40 @@ def collectedRaw(tree=None, specs={}):
             rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
             raw[fedId] = unpacked(fedData=rawThisFed,
                                   bcnDelta=configuration.bcnDelta(fedId),
-                                  chars=True,
+                                  nBytesPer=1,
                                   utca=not configuration.isVme(fedId),
                                   skipFlavors=configuration.unpackSkipFlavors(fedId),
                                   patternMode=specs["patternMode"],
                                   )
-            raw[fedId]["nBytesSW"] = rawThisFed.size()
         elif specs["name"] == "HCAL":
             rawThisFed = wordsOneChunk(tree, fedId, specs["branch"])
             raw[fedId] = unpacked(fedData=rawThisFed,
                                   bcnDelta=configuration.bcnDelta(fedId),
-                                  chars=False,
+                                  nBytesPer=8,
                                   utca=not configuration.isVme(fedId),
                                   skipFlavors=configuration.unpackSkipFlavors(fedId),
                                   patternMode=specs["patternMode"],
                                   )
-            raw[fedId]["nBytesSW"] = rawThisFed.size()*8
+        elif specs["name"] == "DB":
+            rawThisFed = wordsOneBranch(tree=tree, branch="%s%d" % (specs["branch"], fedId))
+            raw[fedId] = unpacked(fedData=rawThisFed,
+                                  bcnDelta=configuration.bcnDelta(fedId),
+                                  nBytesPer=4,
+                                  utca=not configuration.isVme(fedId),
+                                  skipFlavors=configuration.unpackSkipFlavors(fedId),
+                                  patternMode=specs["patternMode"],
+                                  )
         elif specs["name"] == "MOL":
             rawThisFed = wordsOneBranch(tree=tree, branch="%s%d" % (specs["branch"], fedId))
             mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
             raw[fedId] = unpacked(fedData=rawThisFed,
                                   bcnDelta=configuration.bcnDelta(fedId),
-                                  chars=False, skipWords64=skipWords64,
+                                  nBytesPer=8, skipWords64=skipWords64,
                                   utca=not configuration.isVme(fedId),
                                   skipFlavors=configuration.unpackSkipFlavors(fedId),
                                   patternMode=specs["patternMode"],
                                   )
             raw[fedId]["MOL"] = mol
-            raw[fedId]["nBytesSW"] = rawThisFed.size()*8
     raw[None] = {"iEntry": tree.GetReadEntry(),
                  "label": specs["label"],
                  "patternMode": specs["patternMode"],
@@ -212,23 +229,22 @@ def collectedRaw(tree=None, specs={}):
 
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
-def unpacked(fedData=None, chars=None, headerOnly=False,
+def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
              skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternMode=False):
-    assert chars in [False, True], \
-        "Specify whether to unpack by words or chars."
+    assert nBytesPer in [1, 8], "invalid nBytes per index (%s)." % str(nBytesPer)
     assert headerOnly or (utca in [False, True]), \
         "Specify whether data is uTCA or VME (unless skipping HTR blocks)."
     header = {}
     trailer = {}
     htrBlocks = {}
 
-    nWord64 = fedData.size()/(8 if chars else 1)
+    nWord64 = fedData.size()*nBytesPer/8
     iWordPayload0 = 6 if utca else 12
 
     nToSkip = len(set(skipWords64))
     nSkipped64 = 0
     for jWord64 in range(nWord64):
-        if chars:
+        if nBytesPer == 1:
             offset = 8*jWord64
             bytes = [fedData.at(offset+iByte) for iByte in range(8)]
             word64 = struct.unpack('Q', "".join(bytes))[0]
@@ -269,7 +285,9 @@ def unpacked(fedData=None, chars=None, headerOnly=False,
 
     return {"header": header,
             "trailer": trailer,
-            "htrBlocks": htrBlocks}
+            "htrBlocks": htrBlocks,
+            "nBytesSW": 8*nWord64,
+           }
 
 
 #FEROL https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
