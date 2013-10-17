@@ -110,7 +110,7 @@ def eventMaps(s={}):
             raw = unpacked(fedData=wordsOneChunk(tree=tree,
                                                  fedId=fedIds[0],
                                                  branchName=s["branch"],
-                                                ),
+                                                 ),
                            bcnDelta=bcnDelta,
                            nBytesPer=4,
                            headerOnly=True)
@@ -262,7 +262,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
             decode.header(header, iWord64, word64, utca, bcnDelta)
         elif headerOnly:
             break
-        elif iWord64 < nWord64 - 1 - nToSkip: 
+        elif iWord64 < nWord64 - 1 - nToSkip:
             for i in range(4):
                 word16 = (word64 >> (16*i)) & 0xffff
                 iWord16 = 4*iWord64+i
@@ -287,20 +287,20 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
             "trailer": trailer,
             "htrBlocks": htrBlocks,
             "nBytesSW": 8*nWord64,
-           }
+            }
 
 
 #FEROL https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
 def unpackedMolHeader(fedData=None):
     MOLheader = {}
-    BlockHeaders = [] #List for storing block header word numbers
-    
+    BlockHeaders = []  # list for storing block header word numbers
+
     for iWord64 in range(fedData.size()-1):
         word64 = fedData.at(iWord64)
 
         #If it's a new block, the first two lines are the blockheaders
-        if word64 & 0xffff ==  0x5A47: 
-            decode.MOLheader(MOLheader, utils.Swap64(word64), utils.Swap64(fedData.at(iWord64+1))) #endian flip for block headers
+        if word64 & 0xffff == 0x5A47:
+            decode.MOLheader(MOLheader, utils.Swap64(word64), utils.Swap64(fedData.at(iWord64+1)))  # endian flip for block headers
             BlockHeaders.append(iWord64)
             BlockHeaders.append(iWord64+1)
 
