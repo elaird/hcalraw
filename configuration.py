@@ -89,6 +89,11 @@ def format(treeName="", someFedId=None):
                "branch": "vec",
                }
 
+    if treeName == "deadbeeftree":
+        out = {"name": "DB",
+               "branch": "db",
+               }
+
     if treeName == "Events":
         out = {"name": "CMS",
                "auxBranch": True,
