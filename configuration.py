@@ -76,7 +76,7 @@ def isVme(fedId=None):
 
 
 def format(treeName="", someFedId=None):
-    assert someFedId
+    assert someFedId is not None
     out = None
     if treeName == "CMSRAW":
         out = {"name":  "HCAL",
