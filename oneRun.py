@@ -10,6 +10,7 @@ def opts():
     parser.add_option("--feds2", dest="feds2", default="", help="FEDs to use in file2, e.g. 931")
     parser.add_option("--patterns", dest="patterns", default=False, action="store_true", help="interpret QIE data as FE patterns")
     parser.add_option("--nevents", dest="nevents", default="", metavar="N", help="stop after N events")
+    parser.add_option("--dump", dest="dump", default=0, metavar="D", help="dump level: 0, 1, 2, or 3; higher is more verbose")
 
     options, args = parser.parse_args()
 
@@ -19,12 +20,12 @@ def opts():
     return options
 
 
-def nEvents(s=""):
-    if s:
+def integer(value="", tag=""):
+    if value:
         try:
-            return int(s)
+            return int(value)
         except ValueError:
-            print "ERROR: nevents '%s' cannot be converted to an int." % s
+            print "ERROR: %s '%s' cannot be converted to an int." % (tag, value)
             exit()
     else:
         return None
@@ -66,9 +67,10 @@ analyze.oneRun(file1=options.file1,
                feds1=fedList(options.feds1),
                file2=options.file2,
                feds2=fedList(options.feds2),
-               nEvents=nEvents(options.nevents),
+               nEvents=integer(options.nevents, "nevents"),
                patternMode=options.patterns,
                label=label,
+               dump=integer(options.dump, "dump"),
                )
 
 if not options.patterns:
