@@ -7,7 +7,8 @@ def oneEvent(d={}):
         return
 
     aux = d[None]
-    if not aux["patternMode"]:
+    dump = aux["dump"]
+    if (not aux["patternMode"]) and (1 <= dump):
         print "-"*86
         print "%4s iEntry 0x%08x (%d)" % (aux["label"],
                                           aux["iEntry"],
@@ -16,10 +17,11 @@ def oneEvent(d={}):
     for fedId, data in d.iteritems():
         if fedId is None:
             continue
-        if "MOL" in data:
+        if ("MOL" in data) and (1 <= dump):
             oneFedMol(data["MOL"])
-        oneFedHcal(data, skipFed=aux["patternMode"]);
-    print
+        oneFedHcal(data, patternMode=aux["patternMode"], dump=dump)
+    if 1 <= dump:
+        print
 
 
 def htrOverview(d={}):
@@ -43,51 +45,48 @@ def htrOverview(d={}):
     print hyphens
 
 
-def htrData(d={}, channelData=True):
-    offsets = d["htrBlocks"].keys()
-    if offsets:
-        for iOffset, offset in enumerate(sorted(offsets)):
-            p = d["htrBlocks"][offset]
-            patterns = "patternData" in p
-            out = []
-            if not patterns:
-                if channelData or not iOffset:
-                    out.append("  ".join(["iWord16",
-                                          "   EvN",
-                                          "  OrN5",
-                                          " BcN",
-                                          "ModuleId",
-                                          "FrmtV",
-                                          "nWordTP",
-                                          "nWordQIE",
-                                          "nSamp",
-                                          "nPre",
-                                          "EvN8",
-                                          "  CRC",
-                                          ]))
+def oneHtrPatterns(p={}, fedId=None, iOffset=None):
+    cd = htrChannelData(p["channelData"], p["ModuleId"])
+    if len(cd) >= 2:
+        print "\n".join(patternData(p["patternData"], "%3d %2d" % (fedId, iOffset)))
 
-                out.append("  ".join([" %04d" % p["0Word16"],
-                                      " 0x%07x" % p["EvN"],
-                                      "0x%02x" % p["OrN5"],
-                                      "%4d" % p["BcN"],
-                                      "  0x%03x" % p["ModuleId"],
-                                      "  0x%01x" % p["FormatVer"],
-                                      "  %3d  " % p["nWord16Tp"],
-                                      "   %3d" % p["nWord16Qie"],
-                                      "    %2d" % p["nSamples"],
-                                      "  %2d" % p["nPreSamples"],
-                                      "  0x%02x" % p["EvN8"],
-                                      "0x%04x" % p["CRC"],
-                                      ]))
-            if channelData or patterns:
-                cd = htrChannelData(p["channelData"], p["ModuleId"])
-            if channelData and not patterns:
-                out += cd
-                if len(out) >= 4:
-                    print "\n".join(out)
-            if patterns and len(cd) > 1:
-                out += patternData(p["patternData"], "%3d %2d" % (d["header"]["FEDid"], iOffset))
-                print "\n".join(out)
+
+def oneHtr(p={}, iOffset=None, dump=None):
+    out = []
+    if (not iOffset) or (4 <= dump):
+        out.append("  ".join(["iWord16",
+                              "   EvN",
+                              "  OrN5",
+                              " BcN",
+                              "ModuleId",
+                              "FrmtV",
+                              "nWordTP",
+                              "nWordQIE",
+                              "nSamp",
+                              "nPre",
+                              "EvN8",
+                              "  CRC",
+                          ]))
+
+    out.append("  ".join([" %04d" % p["0Word16"],
+                          " 0x%07x" % p["EvN"],
+                          "0x%02x" % p["OrN5"],
+                          "%4d" % p["BcN"],
+                          "  0x%03x" % p["ModuleId"],
+                          "  0x%01x" % p["FormatVer"],
+                          "  %3d  " % p["nWord16Tp"],
+                          "   %3d" % p["nWord16Qie"],
+                          "    %2d" % p["nSamples"],
+                          "  %2d" % p["nPreSamples"],
+                          "  0x%02x" % p["EvN8"],
+                          "0x%04x" % p["CRC"],
+                          ]))
+
+    if 4 <= dump:
+        cd = htrChannelData(p["channelData"], p["ModuleId"])
+        if len(cd) >= 2:
+            out += cd
+    print "\n".join(out)
 
 
 def qieString(qieData={}):
@@ -185,10 +184,10 @@ def patternString(patterns=[], key="", ascii=True, process=None):
         return out
 
 
-def oneFedHcal(d={}, overview=True, headers=True, channelData=True, skipFed=False):
+def oneFedHcal(d={}, patternMode=False, dump=None):
     h = d["header"]
     t = d["trailer"]
-    if not skipFed:
+    if (not patternMode) and (1 <= dump):
         print "-"*85
         print "   ".join([" FEDid",
                           "  EvN",
@@ -211,11 +210,18 @@ def oneFedHcal(d={}, overview=True, headers=True, channelData=True, skipFed=Fals
                           "    %4d" % d["nBytesSW"],
                           (" 0x%04x" % t["CRC16"]) if "CRC16" in t else "   - ",
                           ])
-        if overview:
+        if 2 <= dump:
             htrOverview(h)
 
-    if headers:
-        htrData(d, channelData=channelData)
+    offsets = d["htrBlocks"].keys()
+    if not offsets:
+        return
+    for iOffset, offset in enumerate(sorted(offsets)):
+        p = d["htrBlocks"][offset]
+        if "patternData" in p:
+            oneHtrPatterns(p=p, fedId=d["header"]["FEDid"], iOffset=iOffset)
+        elif 3 <= dump:
+            oneHtr(p=p, iOffset=iOffset, dump=dump)
 
 
 def oneFedMol(d):
