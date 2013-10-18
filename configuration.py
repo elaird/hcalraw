@@ -22,10 +22,6 @@ def nPatternTs():
     return 20
 
 
-def printFibCh():
-    return [1]
-
-
 def printSkipErrF():
     return [3]
 

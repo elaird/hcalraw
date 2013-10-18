@@ -220,6 +220,7 @@ def collectedRaw(tree=None, specs={}):
     raw[None] = {"iEntry": tree.GetReadEntry(),
                  "label": specs["label"],
                  "patternMode": specs["patternMode"],
+                 "dump": specs["dump"],
                  }
     return raw
 
@@ -464,6 +465,7 @@ def oneRun(file1="",
            patternMode=None,
            nEvents=None,
            label="",
+           dump=None,
            ):
 
     assert file1
@@ -474,6 +476,7 @@ def oneRun(file1="",
                   "fedIds": feds1,
                   "nEventsMax": nEvents,
                   "patternMode": patternMode,
+                  "dump": dump,
                   "label": "file1",
                   })
 
@@ -485,6 +488,7 @@ def oneRun(file1="",
                       "fedIds": feds2,
                       "nEventsMax": nEvents,
                       "patternMode": patternMode,
+                      "dump": dump,
                       "label": "file2",
                       })
         go(outer=spec1, inner=spec2, label=label, patternMode=patternMode)
