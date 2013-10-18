@@ -66,7 +66,7 @@ def oneHtr(p={}, iOffset=None, dump=None):
                               "nPre",
                               "EvN8",
                               "  CRC",
-                          ]))
+                              ]))
 
     out.append("  ".join([" %04d" % p["0Word16"],
                           " 0x%07x" % p["EvN"],
