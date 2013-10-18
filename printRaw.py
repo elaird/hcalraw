@@ -3,7 +3,7 @@ import utils
 
 
 def oneEvent(d={}):
-    if not all([d, configuration.printFibCh()]):
+    if None not in d:
         return
 
     aux = d[None]
@@ -46,7 +46,7 @@ def htrOverview(d={}):
 
 
 def oneHtrPatterns(p={}, fedId=None, iOffset=None):
-    cd = htrChannelData(p["channelData"], p["ModuleId"])
+    cd = htrChannelData(p["channelData"], p["ModuleId"], fibChs=[1])
     if len(cd) >= 2:
         print "\n".join(patternData(p["patternData"], "%3d %2d" % (fedId, iOffset)))
 
@@ -83,7 +83,8 @@ def oneHtr(p={}, iOffset=None, dump=None):
                           ]))
 
     if 4 <= dump:
-        cd = htrChannelData(p["channelData"], p["ModuleId"])
+        fibChs = [1] if dump == 4 else [0, 1, 2]
+        cd = htrChannelData(p["channelData"], p["ModuleId"], fibChs=fibChs)
         if len(cd) >= 2:
             out += cd
     print "\n".join(out)
@@ -99,7 +100,7 @@ def qieString(qieData={}):
     return " ".join(l)
 
 
-def htrChannelData(d={}, moduleId=0):
+def htrChannelData(d={}, moduleId=0, fibChs=[]):
     out = []
     out.append("  ".join(["ModuleId",
                           "Fi",
@@ -110,7 +111,6 @@ def htrChannelData(d={}, moduleId=0):
                           "QIE(hex)  0  1  2  3  4  5  6  7  8  9",
                           ])
                )
-    fibChs = configuration.printFibCh()
     skipErrF = configuration.printSkipErrF()
     for channelId, data in d.iteritems():
         if data["FibCh"] not in fibChs:
