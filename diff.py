@@ -1,6 +1,17 @@
 #!/usr/bin/env python
 
+import optparse
 import os
+
+
+def cabled():
+    parser = optparse.OptionParser("usage: %prog dump.out")
+    _, args = parser.parse_args()
+
+    if len(args) != 1:
+        parser.print_help()
+        exit()
+    return args[0]
 
 
 def printList(l=[], s=""):
@@ -27,6 +38,7 @@ def not_installed():
             "HO2P12",
             ]
 
+
 def prepare(refBig="", ref=""):
     ignore = ["", "HB", "HE", "HF"] + not_installed()
     cmd = "cat %s %s > %s" % (refBig, " | grep -v ".join(ignore), ref)
@@ -37,7 +49,8 @@ def diff(ref="", cabled=""):
     cmd = "diff -By --suppress-common-lines %s %s" % (ref, cabled)
     os.system(cmd)
 
+c = cabled()
 printList(not_installed(), "(ignored)")
 ref = "ho.txt"
 prepare(refBig="data/ref.txt", ref=ref)
-diff(ref=ref, cabled="ho_215328.txt")
+diff(ref=ref, cabled=c)
