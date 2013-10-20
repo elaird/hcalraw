@@ -23,7 +23,7 @@ int DecodeNDataInBlock(uint64_t buf){
 int main(int argc, char* argv[]) {
   gROOT->ProcessLine("#include <vector>; #pragma link C++ class vector<uint64_t>+;"); //Load dictionary for vector<uint64_t>
   char* rootfile;
-  if (argc == 1) rootfile = "mol.root";
+  if (argc == 1) strcpy(rootfile, "mol.root");
   else rootfile = argv[1];
   TFile a(rootfile, "RECREATE");
   TTree tree("moltree","");

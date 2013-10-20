@@ -22,10 +22,6 @@ def nPatternTs():
     return 20
 
 
-def printFibCh():
-    return [1]
-
-
 def printSkipErrF():
     return [3]
 
@@ -76,7 +72,7 @@ def isVme(fedId=None):
 
 
 def format(treeName="", someFedId=None):
-    assert someFedId
+    assert someFedId is not None
     out = None
     if treeName == "CMSRAW":
         out = {"name":  "HCAL",
@@ -87,6 +83,11 @@ def format(treeName="", someFedId=None):
     if treeName == "moltree":
         out = {"name": "MOL",
                "branch": "vec",
+               }
+
+    if treeName == "deadbeeftree":
+        out = {"name": "DB",
+               "branch": "db",
                }
 
     if treeName == "Events":
