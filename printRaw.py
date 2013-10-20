@@ -176,7 +176,7 @@ def patternString(patterns=[], key="", ascii=True, process=None):
     if process:
         if processed:
             return processed
-        elif "-" in out:
+        elif out.replace("0", "").replace(" ", ""):
             return out
         else:
             return ""
