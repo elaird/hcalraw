@@ -32,6 +32,27 @@ def singleFedPlots(raw={}, fedId=None, book={}):
                   )
 
 
+def checkHtrModules(fedId=None, htrBlocks={}):
+    crates = []
+    for spigot, block in htrBlocks.iteritems():
+        id = block["ModuleId"]
+        # http://isscvs.cern.ch/cgi-bin/viewcvs-all.cgi/TriDAS/hcal/hcalHW/src/common/hcalHTR.cc?revision=1.88&root=tridas&view=markup
+        # int id=(m_crate<<6)+((m_slot&0x1F)<<1)+((true_for_top)?(1):(0));
+        # fpga->dev->write("HTRsubmodN",id);
+        top = id & 0x1
+        slot = (id >> 1) & 0x1f
+        crate = (id >> 6)
+        crates.append(crate)
+        bad = [(1 - top) != spigot % 2,
+               slot != spigot/2 + (13 if (fedId % 2) else 2),
+               ]
+        if any(bad):
+            fields = (fedId, spigot, crate, slot, "top" if top else "bot")
+            print "ERROR: FED %3d spigot %2d has moduleId decode to crate %2d slot %2d %3s" % fields
+        if len(set(crates)) != 1:
+            print "ERROR: crate labels not constant within DCC:", crates
+
+
 def compare(raw1={}, raw2={}, book={}):
     printRaw.oneEvent(raw1)
     printRaw.oneEvent(raw2)
@@ -39,6 +60,8 @@ def compare(raw1={}, raw2={}, book={}):
     for raw in [raw1, raw2]:
         for fedId, dct in raw.iteritems():
             singleFedPlots(raw, fedId, book)
+            if (fedId is not None) and raw[None]["patternMode"]:
+                checkHtrModules(fedId, raw[fedId]["htrBlocks"])
 
     mapF1, mapB1 = dataMap(raw1)
     mapF2, mapB2 = dataMap(raw2)
@@ -63,7 +86,7 @@ def compare(raw1={}, raw2={}, book={}):
         title = ";".join([x+("%d" % delta if (x == "BcN") else ""),
                           "FED %s - FED %s" % (fed1, fed2),
                           "Events / bin",
-                              ])
+                          ])
         book.fill(raw1[fed1]["header"][x] - raw2[fed2]["header"][x], "delta"+x, 11, -5.5, 5.5, title=title)
 
 
@@ -89,6 +112,7 @@ def reportMatched(matched={}):
     for l in sorted(lines):
         print l
     print
+
 
 def reportFailed(failed=[]):
     print "FAILED fibers %d:" % len(failed)
