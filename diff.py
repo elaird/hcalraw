@@ -4,14 +4,15 @@ import optparse
 import os
 
 
-def cabled():
+def opts():
     parser = optparse.OptionParser("usage: %prog dump.out")
-    _, args = parser.parse_args()
+    parser.add_option("--prune", dest="prune", default="", help="comma-separated list of items to 'grep -v' from reference file")
+    options, args = parser.parse_args()
 
     if len(args) != 1:
         parser.print_help()
         exit()
-    return args[0]
+    return args[0], options.prune.split(",")
 
 
 def printList(l=[], s=""):
@@ -30,7 +31,6 @@ def not_installed():
             "HO1P08",
             "HO1P10",
             "HO1P12",
-            #"HO2M10",
             "HO2P02",
             "HO2P06",
             "HO2P08",
@@ -39,9 +39,8 @@ def not_installed():
             ]
 
 
-def prepare(refBig="", ref=""):
-    ignore = ["", "HB", "HE", "HF"] + not_installed()
-    cmd = "cat %s %s > %s" % (refBig, " | grep -v ".join(ignore), ref)
+def prepare(refBig="", ref="", ignore=[]):
+    cmd = "cat %s %s > %s" % (refBig, " | grep -v ".join([""]+ignore), ref)
     os.system(cmd)
 
 
@@ -49,8 +48,10 @@ def diff(ref="", cabled=""):
     cmd = "diff -By --suppress-common-lines %s %s" % (ref, cabled)
     os.system(cmd)
 
-c = cabled()
-printList(not_installed(), "(ignored)")
-ref = "ho.txt"
-prepare(refBig="data/ref.txt", ref=ref)
-diff(ref=ref, cabled=c)
+cabled, prune = opts()
+ignore = not_installed() + prune
+
+printList(ignore, "(ignored)")
+ref = "ref_pruned.txt"
+prepare(refBig="data/ref.txt", ref=ref, ignore=ignore)
+diff(ref=ref, cabled=cabled)
