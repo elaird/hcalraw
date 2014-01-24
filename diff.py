@@ -23,8 +23,6 @@ def printList(l=[], s=""):
 def not_installed():
     return ["HO002",
             "HO003",
-            "HO006",
-            "HO010",
             "HO011",
             "HO1P02",
             "HO1P06",
