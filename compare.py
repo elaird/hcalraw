@@ -35,6 +35,11 @@ def singleFedPlots(raw={}, fedId=None, book={}):
 def checkHtrModules(fedId=None, htrBlocks={}):
     crates = []
     for spigot, block in htrBlocks.iteritems():
+        expectedTop = 1 - (spigot % 2)
+        expectedSlot = spigot/2 + (13 if (fedId % 2) else 2)
+        if expectedSlot == 19:  # DCC occupies slots 19-20
+            expectedSlot = 21
+
         id = block["ModuleId"]
         # http://isscvs.cern.ch/cgi-bin/viewcvs-all.cgi/TriDAS/hcal/hcalHW/src/common/hcalHTR.cc?revision=1.88&root=tridas&view=markup
         # int id=(m_crate<<6)+((m_slot&0x1F)<<1)+((true_for_top)?(1):(0));
@@ -43,14 +48,15 @@ def checkHtrModules(fedId=None, htrBlocks={}):
         slot = (id >> 1) & 0x1f
         crate = (id >> 6)
         crates.append(crate)
-        bad = [(1 - top) != spigot % 2,
-               slot != spigot/2 + (13 if (fedId % 2) else 2),
+
+        bad = [top != expectedTop,
+               slot != expectedSlot,
                ]
         if any(bad):
-            fields = (fedId, spigot, crate, slot, "top" if top else "bot")
-            print "ERROR: FED %3d spigot %2d has moduleId decode to crate %2d slot %2d %3s" % fields
-        if len(set(crates)) != 1:
-            print "ERROR: crate labels not constant within DCC:", crates
+            fields = (fedId, spigot, crate, slot, "top" if top else "bot", expectedSlot, "top" if expectedTop else "bot")
+            print "ERROR: FED %3d spigot %2d has moduleId decode to crate %2d slot %2d %3s (expected slot %2d %3s)" % fields
+    if len(set(crates)) != 1:
+        print "ERROR: crate labels not constant within DCC:", crates
 
 
 def compare(raw1={}, raw2={}, book={}):
