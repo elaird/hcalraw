@@ -3,8 +3,6 @@ import printRaw
 
 
 def singleFedPlots(raw={}, fedId=None, book={}):
-    if fedId is None:
-        return
     d = raw[fedId]
     t = d["trailer"]
     if "TTS" in t:
@@ -56,7 +54,7 @@ def checkHtrModules(fedId=None, htrBlocks={}):
             fields = (fedId, spigot, crate, slot, "top" if top else "bot", expectedSlot, "top" if expectedTop else "bot")
             print "ERROR: FED %3d spigot %2d has moduleId decode to crate %2d slot %2d %3s (expected slot %2d %3s)" % fields
     if len(set(crates)) != 1:
-        print "ERROR: crate labels not constant within DCC:", crates
+        print "ERROR: FED %s contains modules with crate labels %s." % (str(fedId), str(crates))
 
 
 def compare(raw1={}, raw2={}, book={}):
@@ -65,8 +63,10 @@ def compare(raw1={}, raw2={}, book={}):
 
     for raw in [raw1, raw2]:
         for fedId, dct in raw.iteritems():
+            if fedId is None:
+                continue
             singleFedPlots(raw, fedId, book)
-            if (fedId is not None) and raw[None]["patternMode"]:
+            if (None in raw) and raw[None]["patternMode"]:
                 checkHtrModules(fedId, raw[fedId]["htrBlocks"])
 
     mapF1, mapB1 = dataMap(raw1)
