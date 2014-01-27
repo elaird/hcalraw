@@ -273,17 +273,17 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
                                             utca=utca, bcnDelta=bcnDelta,
                                             skipFlavors=skipFlavors,
                                             patternMode=patternMode)
-                if returnCode is not None:
+                if (returnCode is not None) and (iWord64 != nWord64 - 2 - nToSkip):
                     print " ".join(["WARNING: skipping",
                                     "FED %d" % header["FEDid"],
                                     "event %d" % header["EvN"],
                                     "iWord16 %d" % iWord16,
+                                    "word16 %d" % word16,
                                     ])
         else:
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
             decode.trailer(trailer, iWord64, word64)
-
     return {"header": header,
             "trailer": trailer,
             "htrBlocks": htrBlocks,
