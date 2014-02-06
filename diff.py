@@ -21,9 +21,12 @@ def printList(l=[], s=""):
 
 
 def not_installed():
-    return ["HO002",
-            "HO003",
-            "HO011",
+    return ["HFP01",
+            "HFP02",
+            "HFP03",
+            "HFP04",
+            "HFP05",
+            "HFP06",
             "HO1P02",
             "HO1P06",
             "HO1P08",
