@@ -1,55 +1,90 @@
 #!/usr/bin/env python
 
-import optparse
-import os
+import fileinput
 
 
-def opts():
-    parser = optparse.OptionParser("usage: %prog dump.out")
-    parser.add_option("--prune", dest="prune", default="", help="comma-separated list of items to 'grep -v' from reference file")
-    options, args = parser.parse_args()
-
-    if len(args) != 1:
-        parser.print_help()
-        exit()
-    return args[0], options.prune.split(",")
-
-
-def printList(l=[], s=""):
-    for item in sorted(l):
-        print s, item
+def mapping(file=None):
+    out = {}
+    misc = []
+    for line in file:
+        if ":" in line:
+            be, fe = line.split(":")
+            out[tuple(be.split())] = tuple(fe.split())
+        elif line != "\n":
+            misc.append(line)
+    return out, misc
 
 
-def not_installed():
-    return ["HO002",
-            "HO003",
-            "HO011",
-            "HO1P02",
-            "HO1P06",
-            "HO1P08",
-            "HO1P10",
-            "HO1P12",
-            "HO2P02",
-            "HO2P06",
-            "HO2P08",
-            "HO2P10",
-            "HO2P12",
-            ]
+def diffs(ref={}, cabled={}):
+    missing = {}
+    different = {}
+    for be, fe in sorted(ref.iteritems()):
+        if be not in cabled:
+            missing[be] = fe
+            continue
+
+        if fe != cabled[be]:
+            different[be] = (fe, cabled[be])
+
+    return missing, different
 
 
-def prepare(refBig="", ref="", ignore=[]):
-    cmd = "cat %s %s > %s" % (refBig, " | grep -v ".join([""]+ignore), ref)
-    os.system(cmd)
+def pretty(be, ref):
+    s = "%3s %2s %2s:  " % be
+    s += " %6s %2s %2s" % ref
+    return s
 
 
-def diff(ref="", cabled=""):
-    cmd = "diff -By --suppress-common-lines %s %s" % (ref, cabled)
-    os.system(cmd)
+def report(missing=None, different=None):
+    print "---------------"
+    print "| Differences |"
+    print "---------------"
+    if different:
+        print "DCC SP FI: ref. RBX RM FI  |  cabled"
+        for be, (ref, cabled) in sorted(different.iteritems()):
+            print pretty(be, ref) + "  |  " + " ".join(cabled)
+    else:
+        print "None"
 
-cabled, prune = opts()
-ignore = not_installed() + prune
+    if missing:
+        rbxes = [x[0] for x in missing.values()]
+        header = "| RBXes missing exactly one fiber |"
+        print
+        print "-"*len(header)
+        print header
+        print "-"*len(header)
+        print "DCC SP FI: ref. RBX RM FI"
 
-printList(ignore, "(ignored)")
-ref = "ref_pruned.txt"
-prepare(refBig="data/ref.txt", ref=ref, ignore=ignore)
-diff(ref=ref, cabled=cabled)
+        nSingle = 0
+        for be, ref in sorted(missing.iteritems()):
+            rbx = ref[0]
+            if rbxes.count(rbx) == 1:
+                print pretty(be, ref)
+                rbxes.remove(rbx)
+                nSingle += 1
+        if not nSingle:
+            print "None"
+
+        header = "| RBXes missing at least two fibers |"
+        print
+        print "-"*len(header)
+        print header
+        print "-"*len(header)
+        if rbxes:
+            for rbx in sorted(set(rbxes)):
+                print "%6s (%2d fibers)" % (rbx, rbxes.count(rbx))
+        else:
+            print "None"
+
+
+if __name__ == "__main__":
+    with open("data/ref.txt") as f:
+        ref, refMisc = mapping(f)
+
+    cabled, misc = mapping(fileinput.input())
+
+    assert not refMisc
+    for item in sorted(misc):
+        print item
+
+    report(*diffs(ref, cabled))
