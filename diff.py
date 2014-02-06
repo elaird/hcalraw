@@ -1,17 +1,6 @@
 #!/usr/bin/env python
 
-import optparse
 import fileinput
-
-
-def referenceFileName():
-    parser = optparse.OptionParser("usage: %prog")
-    parser.add_option("--reference-file",
-                      dest="ref",
-                      default="data/ref.txt",
-                      help="(default data/ref.txt)")
-    options, args = parser.parse_args()
-    return options.ref
 
 
 def mapping(file=None):
@@ -91,7 +80,7 @@ def report(missing=None, different=None):
 
 
 if __name__ == "__main__":
-    with open(referenceFileName()) as f:
+    with open("data/ref.txt") as f:
         ref, refMisc = mapping(f)
 
     cabled, misc = mapping(fileinput.input())
