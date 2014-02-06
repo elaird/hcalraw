@@ -9,9 +9,7 @@ def mapping(file=None):
     for line in file:
         if ":" in line:
             be, fe = line.split(":")
-            be = tuple(be.split())
-            fe = fe.split()
-            out[be] = fe
+            out[tuple(be.split())] = tuple(fe.split())
         elif line != "\n":
             misc.append(line)
     return out, misc
@@ -33,7 +31,7 @@ def diffs(ref={}, cabled={}):
 
 def pretty(be, ref):
     s = "%3s %2s %2s:  " % be
-    s += " %6s %2s %2s" % tuple(ref)
+    s += " %6s %2s %2s" % ref
     return s
 
 
