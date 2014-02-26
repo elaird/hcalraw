@@ -18,7 +18,7 @@ def warning(s=''):
 
 
 def msg(s=''):
-    __line('30m', s)
+    __line('0m', s)
 
 
 def green(s=''):
