@@ -53,6 +53,7 @@ compare.py compares the payloads within two .root files for a given event
 decode.py interprets a FED's bytes in an event (called by analyze.unpacked)
 graphs.py reads in output/Runxxx.root, makes plots, and outputs summary.pdf
 printRaw.py dumps to stdout the payload(s) in an event
+printer.py contains a utility class for printing messages
 utils.py contains helper functions
 
 ---------
