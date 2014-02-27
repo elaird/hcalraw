@@ -89,8 +89,8 @@ if options.noColor:
     printer.__color = False
 
 label = "latest"
-patternMode = {"nFibers": options.nPatternFibers,
-               "nTs": options.nPatternTs,
+patternMode = {"nFibers": int(options.nPatternFibers),
+               "nTs": int(options.nPatternTs),
                } if options.patterns else {}
 
 analyze.oneRun(file1=options.file1,
