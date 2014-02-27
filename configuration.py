@@ -35,21 +35,6 @@ def matchRange(fedId=None):
         return range(10)
 
 
-def useEvn():
-    return False
-
-def filterEvn():
-    return False
-
-def ornTolerance():
-    return 0
-
-def printEventMap():
-    return False
-
-def identityMap():
-    return False
-
 def fiberMap():
     #return d2c()
     return {}
