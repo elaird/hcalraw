@@ -10,7 +10,7 @@ def opts():
     parser.add_option("--feds2", dest="feds2", default="", help="FEDs to use in file2, e.g. 931")
     parser.add_option("--patterns", dest="patterns", default=False, action="store_true", help="interpret QIE data as FE patterns")
     parser.add_option("--nevents", dest="nevents", default="", metavar="N", help="stop after N events")
-    parser.add_option("--dump", dest="dump", default=0, metavar="D", help="dump level (0-5; higher is more verbose)")
+    parser.add_option("--dump", dest="dump", default=0, metavar="D", help="dump level (0-6; higher is more verbose)")
     parser.add_option("--no-color", dest="noColor", default=False, action="store_true", help="disable color in stdout")
 
     options, args = parser.parse_args()
