@@ -14,7 +14,7 @@ def error(s=''):
 
 
 def warning(s=''):
-    __line('93m','WARNING: '+s)
+    __line('91m', 'WARNING: '+s)
 
 
 def msg(s=''):
