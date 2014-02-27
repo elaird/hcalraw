@@ -86,7 +86,7 @@ def oneHtr(p={}, iOffset=None, dump=None):
     printer.green("\n".join(out))
     if 4 <= dump:
         kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2]}
-        if dump == 6:
+        if 6 <= dump:
             kargs["skipErrF"] = []
         cd = htrChannelData(p["channelData"], p["ModuleId"], **kargs)
         if len(cd) >= 2:
