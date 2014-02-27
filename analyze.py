@@ -6,6 +6,7 @@ import autoBook
 import compare
 import configuration
 import decode
+import printer
 
 
 def setup():
@@ -66,7 +67,7 @@ def eventMaps(s={}, options={}):
 
     tree = f.Get(treeName)
     if not tree:
-        print "tree %s not found.  These objects are available:" % treeName
+        printer.msg("tree %s not found.  These objects are available:" % treeName)
         f.ls()
         exit()
 
@@ -126,7 +127,7 @@ def eventMaps(s={}, options={}):
             orn, bcn, evn = coords(raw)
 
         else:
-            print "ERROR: name %s not found." % name
+            printer.error("name %s not found." % name)
             exit()
 
         t = (orn, evn) if useEvn else (orn, )
@@ -275,12 +276,12 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
                                             skipFlavors=skipFlavors,
                                             patternMode=patternMode)
                 if (returnCode is not None) and (iWord64 != nWord64 - 2 - nToSkip):
-                    print " ".join(["WARNING: skipping",
+                    printer.warning(" ".join(["skipping",
                                     "FED %d" % header["FEDid"],
                                     "event %d" % header["EvN"],
                                     "iWord16 %d" % iWord16,
                                     "word16 %d" % word16,
-                                    ])
+                                    ]))
         else:
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
@@ -328,10 +329,10 @@ def wordsOneBranch(tree=None, branch=""):
     try:
         chunk = getattr(tree, branch)
     except AttributeError:
-        print "Branch %s not found.  These branches are available:" % branch
+        printer.msg("Branch %s not found.  These branches are available:" % branch)
         names = [item.GetName() for item in tree.GetListOfBranches()]
         for name in sorted(names):
-            print name
+            printer.msg(name)
         exit()
     return chunk
 
@@ -395,10 +396,10 @@ def go(outer={}, inner={}, label="", mapOptions={}, printSummary=None):
                 innerEvent[key] = key
         if mapOptions.get('printEventMap', False):
             for oEvent, iEvent in sorted(innerEvent.iteritems()):
-                print ", ".join(["oEvent = %s" % str(oEvent),
-                                 "oOrnEvn = %s" % str(oMapF[oEvent]),
-                                 "iEvent = %s" % str(iEvent),
-                                 ])
+                printer.msg(", ".join(["oEvent = %s" % str(oEvent),
+                                       "oOrnEvn = %s" % str(oMapF[oEvent]),
+                                       "iEvent = %s" % str(iEvent),
+                                       ]))
 
     book = autoBook.autoBook("book")
     loop(inner=inner, outer=outer, innerEvent=innerEvent, book=book)
@@ -426,7 +427,7 @@ def go(outer={}, inner={}, label="", mapOptions={}, printSummary=None):
         s = "%s: %4s = %6d" % (label, outer["label"], len(oMapF))
         if inner:
             s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
-        print s
+        printer.msg(s)
 
 
 def fileSpec(fileName="", someFedId=None):
@@ -446,8 +447,8 @@ def fileSpec(fileName="", someFedId=None):
             specs.append(spec)
 
     if len(specs) != 1:
-        print "ERROR: found multiple known TTrees in file %s" % fileName
-        print specs
+        printer.error("found multiple known TTrees in file %s" % fileName)
+        printer.msg(str(specs))
         exit()
     else:
         return specs[0]
@@ -456,7 +457,7 @@ def fileSpec(fileName="", someFedId=None):
 
 def checkFedList(feds=[]):
     if len(set([configuration.isVme(fed) for fed in feds])) != 1:
-        print "ERROR: fed list %s is mixed among uTCA and VME." % str(feds)
+        printer.error("fed list %s is mixed among uTCA and VME." % str(feds))
         exit()
 
 
@@ -508,7 +509,7 @@ def printHisto(label="", histoName="MatchedFibers"):
     f = r.TFile("%s/%s.root" % (utils.outputDir(), label))
     h = f.Get(histoName)
     if not h:
-        print "ERROR: histogram %s not found." % histoName
+        printer.error("histogram %s not found." % histoName)
         return
     for iBinX in range(0, 2+h.GetNbinsX()):
         x = h.GetBinCenter(iBinX)
@@ -519,5 +520,5 @@ def printHisto(label="", histoName="MatchedFibers"):
                 msg = "<=" + msg
             if iBinX == 1+h.GetNbinsX():
                 msg = ">=" + msg
-            print msg
+            printer.msg(msg)
     f.Close()
