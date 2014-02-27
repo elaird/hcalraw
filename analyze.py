@@ -228,7 +228,7 @@ def collectedRaw(tree=None, specs={}):
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
-             skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternMode=False):
+             skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternMode={}):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
     assert headerOnly or (utca in [False, True]), \
         "Specify whether data is uTCA or VME (unless skipping HTR blocks)."
@@ -260,6 +260,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
         iWord64 = jWord64 - nSkipped64
 
         if iWord64 < iWordPayload0:
+            #print (header["FEDid"] if "FEDid" in header else " "*3), iWord64, header.keys()
             decode.header(header, iWord64, word64, utca, bcnDelta)
         elif headerOnly:
             break
@@ -284,6 +285,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
             decode.trailer(trailer, iWord64, word64)
+    #print (header["FEDid"] if "FEDid" in header else " "*3), header.keys()
     return {"header": header,
             "trailer": trailer,
             "htrBlocks": htrBlocks,
@@ -462,7 +464,7 @@ def oneRun(file1="",
            feds1=[],
            file2="",
            feds2=[],
-           patternMode=None,
+           patternMode={},
            nEvents=None,
            label="",
            dump=None,
