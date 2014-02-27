@@ -4,7 +4,7 @@
 #    RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
 
 import configuration
-
+import printer
 
 def ornBcn(ornIn, bcnIn, bcnDelta=0):
     if not bcnDelta:
@@ -156,7 +156,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         if flavor in skipFlavors:
             return
         elif flavor not in [5, 6]:
-            print "WARNING: skipping flavor %d (EvN %d, iWord16 %d)." % (flavor, l["EvN"], iWord16)
+            printer.warning("skipping flavor %d (EvN %d, iWord16 %d)." % (flavor, l["EvN"], iWord16))
             return
 
         d["currentChannelId"] = w & 0xff
@@ -223,12 +223,12 @@ def storePatternData(l={}):
                         try:
                             qie = qies[iTs]
                         except KeyError:
-                            #print "WARNING: time slice %d not found:" % iTs, sorted(qies.keys())
+                            #printer.warning("time slice %d not found:" % iTs, sorted(qies.keys()))
                             continue
                         if d[key]["CapId"]:
                             cap = d[key]["CapId"][iTs]
                         else:
-                            print "ERROR: Cap-ids per time-slice not found.  Run without passing '--patterns'."
+                            printer.error("Cap-ids per time-slice not found.  Run without passing '--patterns'.")
                             exit()
                         if fibCh == 0:
                             feWord32 |= qie << 25
