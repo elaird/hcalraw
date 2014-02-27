@@ -120,8 +120,8 @@ patternOptions = {"nFibers": integer(options.nPatternFibers, "npatternfibers"),
                "nTs": integer(options.nPatternTs, "npatternts"),
                } if options.patterns else {}
 
-mapOptions = {}
-for key in ["useEvn", "filterEvn", "ornTolerance", "printEventMap", "identityMap"]:
+mapOptions = {"ornTolerance": integer(options.ornTolerance, "orn-tolerance")}
+for key in ["useEvn", "filterEvn", "printEventMap", "identityMap"]:
     mapOptions[key] = getattr(options, key)
 
 label = "latest"
