@@ -46,7 +46,7 @@ def coords(d):
 #this function returns two dictionaries,
 #one maps TTree entry to either (orn, ) or to (orn, evn)
 #the other maps the reverse
-def eventMaps(s={}):
+def eventMaps(s={}, options={}):
     fileName = s["fileName"]
     treeName = s["treeName"]
     nEventsMax = s["nEventsMax"]
@@ -55,8 +55,8 @@ def eventMaps(s={}):
     assert fileName
     assert treeName
 
-    useEvn = configuration.useEvn()
-    filterEvn = configuration.filterEvn()
+    useEvn = options.get('useEvn', False)
+    filterEvn = options.get('filterEvn', False)
     bcnDelta = configuration.bcnDelta(fedIds[0])
     forward = {}
     backward = {}
@@ -362,9 +362,9 @@ def graph(d={}):
     return gr
 
 
-def eventToEvent(mapF={}, mapB={}):
-    useEvn = configuration.useEvn()
-    ornTolerance = configuration.ornTolerance()
+def eventToEvent(mapF={}, mapB={}, options={}):
+    useEvn = options.get('useEvn', False)
+    ornTolerance = options.get('ornTolerance', 0)
 
     deltaOrnRange = range(-ornTolerance, 1+ornTolerance)
     out = {}
@@ -380,7 +380,7 @@ def eventToEvent(mapF={}, mapB={}):
     return out
 
 
-def go(outer={}, inner={}, label="", patternMode=None):
+def go(outer={}, inner={}, label="", mapOptions={}, printSummary=None):
     innerEvent = {}
     deltaOrn = {}
 
@@ -389,11 +389,11 @@ def go(outer={}, inner={}, label="", patternMode=None):
 
     if inner:
         iMapF, iMapB = eventMaps(inner)
-        innerEvent = eventToEvent(oMapF, iMapB)
-        if configuration.identityMap():
+        innerEvent = eventToEvent(oMapF, iMapB, options=mapOptions)
+        if mapOptions.get('identityMap', False):
             for key in innerEvent.keys():
                 innerEvent[key] = key
-        if configuration.printEventMap():
+        if mapOptions.get('printEventMap', False):
             for oEvent, iEvent in sorted(innerEvent.iteritems()):
                 print ", ".join(["oEvent = %s" % str(oEvent),
                                  "oOrnEvn = %s" % str(oMapF[oEvent]),
@@ -422,7 +422,7 @@ def go(outer={}, inner={}, label="", patternMode=None):
         h.Write()
     f.Close()
 
-    if not patternMode:
+    if printSummary:
         s = "%s: %4s = %6d" % (label, outer["label"], len(oMapF))
         if inner:
             s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
@@ -465,6 +465,7 @@ def oneRun(file1="",
            file2="",
            feds2=[],
            patternMode={},
+           mapOptions={},
            nEvents=None,
            label="",
            dump=None,
@@ -481,6 +482,7 @@ def oneRun(file1="",
                   "dump": dump,
                   "label": "file1",
                   })
+    inner = {}
 
     if file2:
         assert feds2
@@ -493,9 +495,13 @@ def oneRun(file1="",
                       "dump": dump,
                       "label": "file2",
                       })
-        go(outer=spec1, inner=spec2, label=label, patternMode=patternMode)
-    else:
-        go(outer=spec1, label=label, patternMode=patternMode)
+        inner = spec2
+
+    go(outer=spec1,
+       inner=inner,
+       label=label,
+       mapOptions=mapOptions,
+       printSummary=not patternMode)
 
 
 def printHisto(label="", histoName="MatchedFibers"):
