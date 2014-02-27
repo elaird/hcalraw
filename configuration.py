@@ -14,14 +14,6 @@ def processed(s=""):
         return ""
 
 
-def nPatternFibers():
-    return 8
-
-
-def nPatternTs():
-    return 20
-
-
 def unpackSkipFlavors(fedId=None):
     if isVme(fedId):
         return [7]

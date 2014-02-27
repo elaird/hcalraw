@@ -23,8 +23,20 @@ def opts():
                       help=" ".join([d.ljust(60) for d in dump]))
     parser.add_option("--no-color", dest="noColor", default=False, action="store_true", help="disable color in stdout")
 
-    options, args = parser.parse_args()
+    patterns = optparse.OptionGroup(parser, "Options when decoding patterns")
+    patterns.add_option("--npatternfibers",
+                        dest="nPatternFibers",
+                        default=8,
+                        metavar="N",
+                        help="No. of fibers to consider (default is 8).")
+    patterns.add_option("--npatternts",
+                        dest="nPatternTs",
+                        default=20,
+                        metavar="N",
+                        help="No. of time slices to consider (default is 20).")
+    parser.add_option_group(patterns)
 
+    options, args = parser.parse_args()
     if not all([options.file1, options.feds1]):
         parser.print_help()
         exit()
@@ -77,12 +89,16 @@ if options.noColor:
     printer.__color = False
 
 label = "latest"
+patternMode = {"nFibers": options.nPatternFibers,
+               "nTs": options.nPatternTs,
+               } if options.patterns else {}
+
 analyze.oneRun(file1=options.file1,
                feds1=fedList(options.feds1),
                file2=options.file2,
                feds2=fedList(options.feds2),
                nEvents=integer(options.nevents, "nevents"),
-               patternMode=options.patterns,
+               patternMode=patternMode,
                label=label,
                dump=integer(options.dump, "dump"),
                )
