@@ -228,16 +228,16 @@ def oneFedHcal(d={}, patternMode=False, dump=None):
 
 
 def oneFedMol(d):
-    print "--MOL"+("-"*34)
-    print "   ".join([" FEDid  ",
-                      "EvN ",
-                      "   iBlock",
-                      "  nWord64",
-                      ])
+    printer.blue("--MOL"+("-"*34))
+    printer.blue("   ".join([" FEDid  ",
+                             "EvN ",
+                             "   iBlock",
+                             "  nWord64",
+                             ]))
 
     for iBlock in sorted(d.keys()):
         value = d[iBlock]
-        print "   ".join(["  %3d" % value["FEDid"],
-                          "0x%07x" % value["Trigger"],
-                          "%5d" % iBlock,
-                          "    %5d" % value["nWord64"]])
+        printer.blue("   ".join(["  %3d" % value["FEDid"],
+                                 "0x%07x" % value["Trigger"],
+                                 "%5d" % iBlock,
+                                 "    %5d" % value["nWord64"]]))
