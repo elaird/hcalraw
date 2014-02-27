@@ -85,8 +85,10 @@ def oneHtr(p={}, iOffset=None, dump=None):
 
     printer.green("\n".join(out))
     if 4 <= dump:
-        fibChs = [1] if dump == 4 else [0, 1, 2]
-        cd = htrChannelData(p["channelData"], p["ModuleId"], fibChs=fibChs)
+        kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2]}
+        if dump == 6:
+            kargs["skipErrF"] = []
+        cd = htrChannelData(p["channelData"], p["ModuleId"], **kargs)
         if len(cd) >= 2:
             printer.yellow(cd[0])
             printer.msg("\n".join(cd[1:]))
@@ -102,7 +104,7 @@ def qieString(qieData={}):
     return " ".join(l)
 
 
-def htrChannelData(d={}, moduleId=0, fibChs=[]):
+def htrChannelData(d={}, moduleId=0, fibChs=[], skipErrF=[3]):
     out = []
     out.append("  ".join(["ModuleId",
                           "Fi",
@@ -113,7 +115,6 @@ def htrChannelData(d={}, moduleId=0, fibChs=[]):
                           "QIE(hex)  0  1  2  3  4  5  6  7  8  9",
                           ])
                )
-    skipErrF = configuration.printSkipErrF()
     for channelId, data in d.iteritems():
         if data["FibCh"] not in fibChs:
             continue
