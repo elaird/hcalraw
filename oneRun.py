@@ -117,8 +117,8 @@ if options.noColor:
     printer.__color = False
 
 patternOptions = {"nFibers": integer(options.nPatternFibers, "npatternfibers"),
-               "nTs": integer(options.nPatternTs, "npatternts"),
-               } if options.patterns else {}
+                  "nTs": integer(options.nPatternTs, "npatternts"),
+                  } if options.patterns else {}
 
 mapOptions = {"ornTolerance": integer(options.ornTolerance, "orn-tolerance")}
 for key in ["useEvn", "filterEvn", "printEventMap", "identityMap"]:

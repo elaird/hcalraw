@@ -277,11 +277,11 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
                                             patternMode=patternMode)
                 if (returnCode is not None) and (iWord64 != nWord64 - 2 - nToSkip):
                     printer.warning(" ".join(["skipping",
-                                    "FED %d" % header["FEDid"],
-                                    "event %d" % header["EvN"],
-                                    "iWord16 %d" % iWord16,
-                                    "word16 %d" % word16,
-                                    ]))
+                                              "FED %d" % header["FEDid"],
+                                              "event %d" % header["EvN"],
+                                              "iWord16 %d" % iWord16,
+                                              "word16 %d" % word16,
+                                              ]))
         else:
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
