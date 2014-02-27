@@ -135,9 +135,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         return
     elif i == l["nWord16"]-1:
         if patternMode:
-            storePatternData(l,
-                             nFibers=patternMode["nFibers"],
-                             nTs=patternMode["nTs"])
+            storePatternData(l, **patternMode)
         d["htrIndex"] += 1
         if "currentChannelId" in d:  # check in case event is malformed
             del d["currentChannelId"]
