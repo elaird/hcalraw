@@ -14,14 +14,6 @@ def processed(s=""):
         return ""
 
 
-def nPatternFibers():
-    return 8
-
-
-def nPatternTs():
-    return 20
-
-
 def unpackSkipFlavors(fedId=None):
     if isVme(fedId):
         return [7]
@@ -42,21 +34,6 @@ def matchRange(fedId=None):
     else:
         return range(10)
 
-
-def useEvn():
-    return False
-
-def filterEvn():
-    return False
-
-def ornTolerance():
-    return 0
-
-def printEventMap():
-    return False
-
-def identityMap():
-    return False
 
 def fiberMap():
     #return d2c()

@@ -23,8 +23,48 @@ def opts():
                       help=" ".join([d.ljust(60) for d in dump]))
     parser.add_option("--no-color", dest="noColor", default=False, action="store_true", help="disable color in stdout")
 
-    options, args = parser.parse_args()
+    match = optparse.OptionGroup(parser, "Options for matching events across files")
+    match.add_option("--use-evn",
+                     dest="useEvn",
+                     default=False,
+                     action="store_true",
+                     help="Require matching EvN.")
+    match.add_option("--filter-evn",
+                     dest="filterEvn",
+                     default=False,
+                     action="store_true",
+                     help="Consider only EvN with (EvN & 0x1fff) == 0.")
+    match.add_option("--orn-tolerance",
+                     dest="ornTolerance",
+                     default=0,
+                     metavar="N",
+                     help="Consider |OrN1 - OrN2| <= N a match.")
+    match.add_option("--identity-map",
+                     dest="identityMap",
+                     default=False,
+                     action="store_true",
+                     help="Force use of identity map.")
+    match.add_option("--print-event-map",
+                     dest="printEventMap",
+                     default=False,
+                     action="store_true",
+                     help="Print event map to stdout.")
+    parser.add_option_group(match)
 
+    patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
+    patterns.add_option("--npatternfibers",
+                        dest="nPatternFibers",
+                        default=8,
+                        metavar="N",
+                        help="No. of fibers to consider (default is 8).")
+    patterns.add_option("--npatternts",
+                        dest="nPatternTs",
+                        default=20,
+                        metavar="N",
+                        help="No. of time slices to consider (default is 20).")
+    parser.add_option_group(patterns)
+
+    options, args = parser.parse_args()
     if not all([options.file1, options.feds1]):
         parser.print_help()
         exit()
@@ -76,13 +116,22 @@ import printer
 if options.noColor:
     printer.__color = False
 
+patternOptions = {"nFibers": integer(options.nPatternFibers, "npatternfibers"),
+                  "nTs": integer(options.nPatternTs, "npatternts"),
+                  } if options.patterns else {}
+
+mapOptions = {"ornTolerance": integer(options.ornTolerance, "orn-tolerance")}
+for key in ["useEvn", "filterEvn", "printEventMap", "identityMap"]:
+    mapOptions[key] = getattr(options, key)
+
 label = "latest"
 analyze.oneRun(file1=options.file1,
                feds1=fedList(options.feds1),
                file2=options.file2,
                feds2=fedList(options.feds2),
                nEvents=integer(options.nevents, "nevents"),
-               patternMode=options.patterns,
+               patternMode=patternOptions,
+               mapOptions=mapOptions,
                label=label,
                dump=integer(options.dump, "dump"),
                )
