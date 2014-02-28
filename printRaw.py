@@ -52,7 +52,7 @@ def oneHtrPatterns(p={}, fedId=None, iOffset=None):
         printer.msg("\n".join(patternData(p["patternData"], "%3d %2d" % (fedId, iOffset))))
 
 
-def oneHtr(p={}, iOffset=None, dump=None):
+def oneHtr(p={}, iOffset=None, dump=None, utca=None):
     out = []
     if (not iOffset) or (4 <= dump):
         out.append("  ".join(["iWord16",
@@ -94,7 +94,8 @@ def oneHtr(p={}, iOffset=None, dump=None):
             printer.msg("\n".join(cd[1:]))
 
         if 5 <= dump:
-            td = htrTriggerData(p["triggerData"], skipZero=(dump <= 5))
+            f = (uhtrTriggerData if utca else htrTriggerData)
+            td = f(p["triggerData"], skipZero=(dump <= 5))
             if len(td) >= 2:
                 printer.yellow(td[0])
                 printer.msg("\n".join(td[1:]))
@@ -127,6 +128,33 @@ def htrTriggerData(d={}, skipZero=False):
                               "%4s" % soi,
                               " "*4,
                               tp]))
+    return out
+
+
+def uhtrTriggerData(d={}, skipZero=False):
+    out = []
+    out.append("  ".join([" TPid",
+                          "Fl",
+                          "  SofI",
+                          "   OK",
+                          "  TP(hex)",
+                          "    ".join([str(i) for i in range(4)])
+                          ])
+               )
+    for channelId, data in sorted(d.iteritems()):
+        soi = ""
+        ok = ""
+        tp = ""
+        for j in data["SOI"].keys():
+            soi += str(data["SOI"][j])
+            ok += str(data["OK"][j])
+            tp += "%5x" % data["TP"][j]
+        out.append("   ".join([" 0x%02x" % channelId,
+                               "%1d" % data["Flavor"],
+                               "%5s" % soi,
+                               "%5s" % ok,
+                               " "*2,
+                               tp]))
     return out
 
 
@@ -250,7 +278,8 @@ def oneFedHcal(d={}, patternMode=False, dump=None):
         if "patternData" in p:
             oneHtrPatterns(p=p, fedId=d["header"]["FEDid"], iOffset=iOffset)
         elif 3 <= dump:
-            oneHtr(p=p, iOffset=iOffset, dump=dump)
+            oneHtr(p=p, iOffset=iOffset, dump=dump,
+                   utca=not configuration.isVme(h["FEDid"]))
 
 
 def oneFedMol(d):
