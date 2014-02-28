@@ -161,8 +161,6 @@ def dataMap(raw={}):
                 moduleId = block["ModuleId"] & 0x1f
 
             for channelId, channelData in block["channelData"].iteritems():
-                if channelData["Flavor"] == 4:
-                    continue
                 channel = channelData["FibCh"]
                 fiber = 1 + channelData["Fiber"]
                 fiber = fiberMap[fiber] if fiber in fiberMap else fiber
