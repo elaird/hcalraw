@@ -18,7 +18,7 @@ def unpackSkipFlavors(fedId=None):
     if isVme(fedId):
         return [7]
     else:
-        return [4]
+        return [0, 1, 2, 3, 7]
 
 
 def bcnDelta(fedId=None):

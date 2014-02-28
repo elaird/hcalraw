@@ -46,13 +46,18 @@ def htrOverview(d={}):
     printer.cyan(hyphens)
 
 
-def oneHtrPatterns(p={}, fedId=None, iOffset=None):
-    cd = htrChannelData(p["channelData"], p["ModuleId"], fibChs=[1])
+def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
+    cd = htrChannelData(p["channelData"].values(), p["ModuleId"], fibChs=[1])
     if len(cd) >= 2:
-        printer.msg("\n".join(patternData(p["patternData"], "%3d %2d" % (fedId, iOffset))))
+        lines = patternData(p["patternData"],
+                            moduleId="%3d %2d" % (fedId, iOffset),
+                            slim=patternMode["pureFibersOnly"],
+                            process=patternMode["process"],
+                            )
+        print "\n".join(lines)  # skip printer to facilitate diff
 
 
-def oneHtr(p={}, iOffset=None, dump=None):
+def oneHtr(p={}, iOffset=None, dump=None, utca=None):
     out = []
     if (not iOffset) or (4 <= dump):
         out.append("  ".join(["iWord16",
@@ -61,7 +66,7 @@ def oneHtr(p={}, iOffset=None, dump=None):
                               " BcN",
                               "ModuleId",
                               "FrmtV",
-                              "nWordTP",
+                              #"nWordTP",
                               "nWordQIE",
                               "nSamp",
                               "nPre",
@@ -75,7 +80,7 @@ def oneHtr(p={}, iOffset=None, dump=None):
                           "%4d" % p["BcN"],
                           "  0x%03x" % p["ModuleId"],
                           "  0x%01x" % p["FormatVer"],
-                          "  %3d  " % p["nWord16Tp"],
+                          #"  %3d  " % p["nWord16Tp"],
                           "   %3d" % p["nWord16Qie"],
                           "    %2d" % p["nSamples"],
                           "  %2d" % p["nPreSamples"],
@@ -88,10 +93,17 @@ def oneHtr(p={}, iOffset=None, dump=None):
         kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2]}
         if 6 <= dump:
             kargs["skipErrF"] = []
-        cd = htrChannelData(p["channelData"], p["ModuleId"], **kargs)
+        cd = htrChannelData(p["channelData"].values(), p["ModuleId"], **kargs)
         if len(cd) >= 2:
             printer.yellow(cd[0])
             printer.msg("\n".join(cd[1:]))
+
+        if 5 <= dump:
+            f = (uhtrTriggerData if utca else htrTriggerData)
+            td = f(p["triggerData"], skipZero=(dump <= 5))
+            if len(td) >= 2:
+                printer.yellow(td[0])
+                printer.msg("\n".join(td[1:]))
 
 
 def qieString(qieData={}):
@@ -104,7 +116,56 @@ def qieString(qieData={}):
     return " ".join(l)
 
 
-def htrChannelData(d={}, moduleId=0, fibChs=[], skipErrF=[3]):
+def htrTriggerData(d={}, skipZero=False):
+    out = ["  ".join(["  Tag", "Peak", "SofI", "TP(hex)  0   1   2   3"])]
+    for tag, lst in sorted(d.iteritems()):
+        z = ""
+        soi = ""
+        tp = ""
+        if skipZero and not any([dct["TP"] for dct in lst]):
+            continue
+        for dct in lst:
+            z += str(int(dct["Z"]))
+            soi += str(int(dct["SOI"]))
+            tp += " %3x" % dct["TP"]
+        out.append("  ".join([" 0x%02x" % tag,
+                              "%4s" % z,
+                              "%4s" % soi,
+                              " "*4,
+                              tp]))
+    return out
+
+
+def uhtrTriggerData(d={}, skipZero=False):
+    out = []
+    out.append("  ".join([" TPid",
+                          "Fl",
+                          "  SofI",
+                          "   OK",
+                          "  TP(hex)",
+                          "    ".join([str(i) for i in range(4)])
+                          ])
+               )
+    for channelId, data in sorted(d.iteritems()):
+        if skipZero and not any(data["TP"].values()):
+            continue
+        soi = ""
+        ok = ""
+        tp = ""
+        for j in data["SOI"].keys():
+            soi += str(data["SOI"][j])
+            ok += str(data["OK"][j])
+            tp += "%5x" % data["TP"][j]
+        out.append("   ".join([" 0x%02x" % channelId,
+                               "%1d" % data["Flavor"],
+                               "%5s" % soi,
+                               "%5s" % ok,
+                               " "*2,
+                               tp]))
+    return out
+
+
+def htrChannelData(lst=[], moduleId=0, fibChs=[], skipErrF=[3]):
     out = []
     out.append("  ".join(["ModuleId",
                           "Fi",
@@ -115,7 +176,7 @@ def htrChannelData(d={}, moduleId=0, fibChs=[], skipErrF=[3]):
                           "QIE(hex)  0  1  2  3  4  5  6  7  8  9",
                           ])
                )
-    for channelId, data in d.iteritems():
+    for data in lst:
         if data["FibCh"] not in fibChs:
             continue
         if data["ErrF"] in skipErrF:
@@ -132,7 +193,7 @@ def htrChannelData(d={}, moduleId=0, fibChs=[], skipErrF=[3]):
     return out
 
 
-def patternData(d={}, moduleId=0, slim=True, process=True):
+def patternData(d={}, moduleId="", slim=False, process=False):
     if slim:
         out = [""]
     else:
@@ -222,9 +283,13 @@ def oneFedHcal(d={}, patternMode=False, dump=None):
     for iOffset, offset in enumerate(sorted(offsets)):
         p = d["htrBlocks"][offset]
         if "patternData" in p:
-            oneHtrPatterns(p=p, fedId=d["header"]["FEDid"], iOffset=iOffset)
+            oneHtrPatterns(p=p,
+                           patternMode=patternMode,
+                           fedId=d["header"]["FEDid"],
+                           iOffset=iOffset)
         elif 3 <= dump:
-            oneHtr(p=p, iOffset=iOffset, dump=dump)
+            oneHtr(p=p, iOffset=iOffset, dump=dump,
+                   utca=not configuration.isVme(h["FEDid"]))
 
 
 def oneFedMol(d):

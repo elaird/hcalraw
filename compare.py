@@ -13,7 +13,7 @@ def singleFedPlots(raw={}, fedId=None, book={}):
     caps = {0: 0, 1: 0, 2: 0, 3: 0}
     ErrF = {0: 0, 1: 0, 2: 0, 3: 0}
     for block in d["htrBlocks"].values():
-        for channelId, channelData in block["channelData"].iteritems():
+        for channelData in block["channelData"].values():
             ErrF[channelData["ErrF"]] += 1
             if not channelData["ErrF"]:
                 caps[channelData["CapId0"]] += 1
@@ -160,9 +160,9 @@ def dataMap(raw={}):
             else:
                 moduleId = block["ModuleId"] & 0x1f
 
-            for channelId, channelData in block["channelData"].iteritems():
-                channel = channelId % 4
-                fiber = 1+channelId/4  # integer division
+            for channelData in block["channelData"].values():
+                channel = channelData["FibCh"]
+                fiber = 1 + channelData["Fiber"]
                 fiber = fiberMap[fiber] if fiber in fiberMap else fiber
                 if channel != 1:
                     continue

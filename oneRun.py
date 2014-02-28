@@ -4,24 +4,58 @@
 def opts():
     import optparse
     parser = optparse.OptionParser()
-    parser.add_option("--file1", dest="file1", default="", help="REQUIRED: .root file over which to run")
-    parser.add_option("--feds1", dest="feds1", default="", help="REQUIRED: FEDs to use in file1, e.g. 714,722 or e.g. HBHE")
-    parser.add_option("--file2", dest="file2", default="", help=".root file to compare with file1")
-    parser.add_option("--feds2", dest="feds2", default="", help="FEDs to use in file2, e.g. 931")
-    parser.add_option("--patterns", dest="patterns", default=False, action="store_true", help="interpret QIE data as FE patterns")
-    parser.add_option("--nevents", dest="nevents", default="", metavar="N", help="stop after N events")
-    dump = ["dump level (0-6)",
+
+    reqd = optparse.OptionGroup(parser, "REQUIRED")
+    reqd.add_option("--file1",
+                    dest="file1",
+                    default="",
+                    help=".root file over which to run")
+    reqd.add_option("--feds1",
+                    dest="feds1",
+                    default="",
+                    help="FEDs to use in file1, e.g. 714,722 or e.g. HBHE")
+    parser.add_option_group(reqd)
+
+    common = optparse.OptionGroup(parser, "Optional")
+    common.add_option("--file2",
+                      dest="file2",
+                      default="",
+                      help=".root file to compare with file1")
+    common.add_option("--feds2",
+                      dest="feds2",
+                      default="",
+                      help="FEDs to use in file2, e.g. 931")
+    common.add_option("--patterns",
+                      dest="patterns",
+                      default=False,
+                      action="store_true",
+                      help="interpret QIE data as FE patterns")
+    common.add_option("--nevents",
+                      dest="nevents",
+                      default="",
+                      metavar="N",
+                      help="stop after N events")
+
+    dump = ["dump level (0-6), default is 0.",
             "0: only summary (no per-event info)",
             "1: DCC/AMC13 headers",
             "2: (u)HTR summary info",
             "3: (u)HTR headers",
             "4: data (channel=1, fibers with ErrF != 3)",
-            "5: data (any channel, fibers with ErrF != 3)",
-            "6: data (any channel, any ErrF)",
+            "5: data (fibers with ErrF != 3); TPs (> 0)",
+            "6: data (all); TPs (all)",
             ]
-    parser.add_option("--dump", dest="dump", default=0, metavar="D",
+    common.add_option("--dump",
+                      dest="dump",
+                      default=0,
+                      metavar="D",
                       help=" ".join([d.ljust(60) for d in dump]))
-    parser.add_option("--no-color", dest="noColor", default=False, action="store_true", help="disable color in stdout")
+    common.add_option("--no-color",
+                      dest="noColor",
+                      default=False,
+                      action="store_true",
+                      help="disable color in stdout")
+    parser.add_option_group(common)
 
     match = optparse.OptionGroup(parser, "Options for matching events across files")
     match.add_option("--use-evn",
@@ -52,16 +86,26 @@ def opts():
     parser.add_option_group(match)
 
     patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
-    patterns.add_option("--npatternfibers",
-                        dest="nPatternFibers",
-                        default=8,
-                        metavar="N",
-                        help="No. of fibers to consider (default is 8).")
     patterns.add_option("--npatternts",
                         dest="nPatternTs",
                         default=20,
                         metavar="N",
                         help="No. of time slices to consider (default is 20).")
+    patterns.add_option("--rawpatterns",
+                        dest="rawPatterns",
+                        default=False,
+                        action="store_true",
+                        help="Print unprocessed patterns.")
+    patterns.add_option("--patternB",
+                        dest="patternB",
+                        default=False,
+                        action="store_true",
+                        help="Consider patterns mixed across fibers.")
+    patterns.add_option("--npatternfibers",
+                        dest="nPatternFibers",
+                        default=8,
+                        metavar="N",
+                        help="No. of fibers to consider (default is 8).")
     parser.add_option_group(patterns)
 
     options, args = parser.parse_args()
@@ -72,7 +116,7 @@ def opts():
 
 
 def integer(value="", tag=""):
-    if value:
+    if value is not '':
         try:
             return int(value)
         except ValueError:
@@ -118,6 +162,8 @@ if options.noColor:
 
 patternOptions = {"nFibers": integer(options.nPatternFibers, "npatternfibers"),
                   "nTs": integer(options.nPatternTs, "npatternts"),
+                  "pureFibersOnly": not options.patternB,
+                  "process": not options.rawPatterns,
                   } if options.patterns else {}
 
 mapOptions = {"ornTolerance": integer(options.ornTolerance, "orn-tolerance")}

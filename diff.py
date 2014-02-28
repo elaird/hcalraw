@@ -29,9 +29,12 @@ def diffs(ref={}, cabled={}):
     return missing, different
 
 
-def pretty(be, ref):
-    s = "%3s %2s %2s:  " % be
-    s += " %6s %2s %2s" % ref
+def pretty(be=None, fe=None):
+    s = "%3s %2s %2s:  " % be if be else ''
+    try:
+        s += " %6s %2s %2s" % fe
+    except TypeError:
+        s += " ".join(fe)
     return s
 
 
@@ -40,9 +43,9 @@ def report(missing=None, different=None):
     print "| Differences |"
     print "---------------"
     if different:
-        print "DCC SP FI: ref. RBX RM FI  |  cabled"
+        print "DCC SP FI: ref. RBX RM FI  |   cabled"
         for be, (ref, cabled) in sorted(different.iteritems()):
-            print pretty(be, ref) + "  |  " + " ".join(cabled)
+            print pretty(be=be, fe=ref) + "  | " + pretty(fe=cabled)
     else:
         print "None"
 
@@ -59,7 +62,7 @@ def report(missing=None, different=None):
         for be, ref in sorted(missing.iteritems()):
             rbx = ref[0]
             if rbxes.count(rbx) == 1:
-                print pretty(be, ref)
+                print pretty(be=be, fe=ref)
                 rbxes.remove(rbx)
                 nSingle += 1
         if not nSingle:
