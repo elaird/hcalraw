@@ -122,7 +122,17 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         l["nWord16Tp"] = (w >> 8) & 0xff
         l["nPreSamples"] = (w >> 3) & 0x1f
         l["channelData"] = {}
-    if i < 8+l["nWord16Tp"]:  # skip TPs
+        l["triggerData"] = {}
+    if i < 8 + l["nWord16Tp"]:
+        if utca or (i < 8):  # skip various
+            return
+        tag = (w >> 11) & 0x1f
+        if tag not in l["triggerData"]:
+            l["triggerData"][tag] = []
+        l["triggerData"][tag].append({"Z": (w >> 10) & 0x1,
+                                      "SOI": (w >> 9) & 0x1,
+                                      "TP": w & 0x1ff,
+                                      })
         return
 
     #trailer
