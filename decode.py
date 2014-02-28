@@ -232,7 +232,7 @@ def channelId(fiber=None, fibCh=None):
     return 4*fiber + fibCh
 
 
-def storePatternData(l={}, nFibers=None, nTs=None):
+def storePatternData(l={}, nFibers=None, nTs=None, **_):
     if nFibers == 6:
         offset = 1
     elif nFibers == 8:
