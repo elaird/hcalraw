@@ -54,7 +54,7 @@ def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
                             slim=patternMode["pureFibersOnly"],
                             process=patternMode["process"],
                             )
-        printer.msg("\n".join(lines))
+        print "\n".join(lines)  # skip printer to facilitate diff
 
 
 def oneHtr(p={}, iOffset=None, dump=None, utca=None):
