@@ -46,10 +46,15 @@ def htrOverview(d={}):
     printer.cyan(hyphens)
 
 
-def oneHtrPatterns(p={}, fedId=None, iOffset=None):
+def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
     cd = htrChannelData(p["channelData"].values(), p["ModuleId"], fibChs=[1])
     if len(cd) >= 2:
-        printer.msg("\n".join(patternData(p["patternData"], "%3d %2d" % (fedId, iOffset))))
+        lines = patternData(p["patternData"],
+                            moduleId="%3d %2d" % (fedId, iOffset),
+                            slim=patternMode["pureFibersOnly"],
+                            process=patternMode["process"],
+                            )
+        printer.msg("\n".join(lines))
 
 
 def oneHtr(p={}, iOffset=None, dump=None, utca=None):
@@ -188,7 +193,7 @@ def htrChannelData(lst=[], moduleId=0, fibChs=[], skipErrF=[3]):
     return out
 
 
-def patternData(d={}, moduleId=0, slim=True, process=True):
+def patternData(d={}, moduleId="", slim=False, process=False):
     if slim:
         out = [""]
     else:
@@ -278,7 +283,10 @@ def oneFedHcal(d={}, patternMode=False, dump=None):
     for iOffset, offset in enumerate(sorted(offsets)):
         p = d["htrBlocks"][offset]
         if "patternData" in p:
-            oneHtrPatterns(p=p, fedId=d["header"]["FEDid"], iOffset=iOffset)
+            oneHtrPatterns(p=p,
+                           patternMode=patternMode,
+                           fedId=d["header"]["FEDid"],
+                           iOffset=iOffset)
         elif 3 <= dump:
             oneHtr(p=p, iOffset=iOffset, dump=dump,
                    utca=not configuration.isVme(h["FEDid"]))
