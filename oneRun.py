@@ -10,7 +10,18 @@ def opts():
     parser.add_option("--feds2", dest="feds2", default="", help="FEDs to use in file2, e.g. 931")
     parser.add_option("--patterns", dest="patterns", default=False, action="store_true", help="interpret QIE data as FE patterns")
     parser.add_option("--nevents", dest="nevents", default="", metavar="N", help="stop after N events")
-    parser.add_option("--dump", dest="dump", default=0, metavar="D", help="dump level (0-5; higher is more verbose)")
+    dump = ["dump level (0-6)",
+            "0: only summary (no per-event info)",
+            "1: DCC/AMC13 headers",
+            "2: (u)HTR summary info",
+            "3: (u)HTR headers",
+            "4: data (channel=1, fibers with ErrF != 3)",
+            "5: data (any channel, fibers with ErrF != 3)",
+            "6: data (any channel, any ErrF)",
+            ]
+    parser.add_option("--dump", dest="dump", default=0, metavar="D",
+                      help=" ".join([d.ljust(60) for d in dump]))
+    parser.add_option("--no-color", dest="noColor", default=False, action="store_true", help="disable color in stdout")
 
     options, args = parser.parse_args()
 
@@ -25,7 +36,7 @@ def integer(value="", tag=""):
         try:
             return int(value)
         except ValueError:
-            print "ERROR: %s '%s' cannot be converted to an int." % (tag, value)
+            printer.error("%s '%s' cannot be converted to an int." % (tag, value))
             exit()
     else:
         return None
@@ -61,6 +72,9 @@ options = opts()
 checkModules()
 
 import analyze
+import printer
+if options.noColor:
+    printer.__color = False
 
 label = "latest"
 analyze.oneRun(file1=options.file1,

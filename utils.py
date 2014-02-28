@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import printer
 
 
 def cmssw():
@@ -37,8 +38,7 @@ def bail():
     url = "http://root.cern.ch/drupal/content"
     url += "/how-use-use-python-pyroot-interpreter"
 
-    print "Could not find ROOT.py nor CppyyROOT.py"
-    print "See", url
+    printer.error("Could not find ROOT.py nor CppyyROOT.py.  See "+url)
     exit()
 
 
@@ -59,7 +59,7 @@ def ROOT():
         try:
             exec("import %s as r" % moduleName)
             if moduleName != "ROOT":
-                print "Using", moduleName
+                printer.msg("Using "+moduleName)
             return r
         except ImportError:
             continue

@@ -22,10 +22,6 @@ def nPatternTs():
     return 20
 
 
-def printSkipErrF():
-    return [3]
-
-
 def unpackSkipFlavors(fedId=None):
     if isVme(fedId):
         return [7]

@@ -1,4 +1,5 @@
 import configuration
+import printer
 import printRaw
 
 
@@ -52,9 +53,9 @@ def checkHtrModules(fedId=None, htrBlocks={}):
                ]
         if any(bad):
             fields = (fedId, spigot, crate, slot, "top" if top else "bot", expectedSlot, "top" if expectedTop else "bot")
-            print "ERROR: FED %3d spigot %2d has moduleId decode to crate %2d slot %2d %3s (expected slot %2d %3s)" % fields
+            printer.error("FED %3d spigot %2d has moduleId decode to crate %2d slot %2d %3s (expected slot %2d %3s)" % fields)
     if len(set(crates)) != 1:
-        print "ERROR: FED %s contains modules with crate labels %s." % (str(fedId), str(crates))
+        printer.error("FED %s contains modules with crate labels %s." % (str(fedId), str(crates)))
 
 
 def compare(raw1={}, raw2={}, book={}):
