@@ -110,22 +110,33 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
     #header
     if i == 0:
         l["EvN"] = w & 0xff
+        return
     if i == 1:
         l["EvN"] += w << 8
+        return
+    if i == 2:
+        return
     if i == 3:
         l["ModuleId"] = w & 0x7ff
         l["OrN5"] = (w >> 11) & 0x1f
+        return
     if i == 4:
         l["BcN"] = w & 0xfff
         l["OrN5"], l["BcN"] = ornBcn(l["OrN5"], l["BcN"], bcnDelta)
         l["FormatVer"] = (w >> 12) & 0xf
         assert utca or l["FormatVer"] == 6, "HTR FormatVer %s is not supported." % str(l["FormatVer"])
+        return
     if i == 5:
-        l["nWord16Tp"] = (w >> 8) & 0xff
-        l["nPreSamples"] = (w >> 3) & 0x1f
         l["channelData"] = {}
         l["triggerData"] = {}
-    if i < 8:  # skip various
+        if utca:
+            #l["nWord16Payload"] = w & 0x1fff  # !document
+            l["nPreSamples"] = (w >> 3) & 0x1f  # !document
+        else:
+            l["nWord16Tp"] = (w >> 8) & 0xff
+            l["nPreSamples"] = (w >> 3) & 0x1f
+        return
+    if i in [6, 7]:
         return
     if (not utca) and i < 8 + l["nWord16Tp"]:
         tag = (w >> 11) & 0x1f
@@ -138,14 +149,14 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         return
 
     #trailer
-    if i == l["nWord16"]-4:
+    if i == l["nWord16"] - 4:  # !document
         l["nWord16Qie"] = w & 0x7ff
         l["nSamples"] = (w >> 11) & 0x1f
         return
-    if i == l["nWord16"]-3:
+    if i == l["nWord16"] - 3:  # !document (2 for utca)
         l["CRC"] = w
         return
-    elif i == l["nWord16"]-1:
+    elif i == l["nWord16"] - 1:
         if patternMode:
             storePatternData(l, **patternMode)
         d["htrIndex"] += 1
