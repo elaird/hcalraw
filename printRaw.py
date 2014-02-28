@@ -93,6 +93,12 @@ def oneHtr(p={}, iOffset=None, dump=None):
             printer.yellow(cd[0])
             printer.msg("\n".join(cd[1:]))
 
+        if 5 <= dump:
+            td = htrTriggerData(p["triggerData"], skipZero=(dump <= 5))
+            if len(td) >= 2:
+                printer.yellow(td[0])
+                printer.msg("\n".join(td[1:]))
+
 
 def qieString(qieData={}):
     l = []
@@ -102,6 +108,26 @@ def qieString(qieData={}):
         else:
             l.append("  ")
     return " ".join(l)
+
+
+def htrTriggerData(d={}, skipZero=False):
+    out = ["  ".join(["  Tag", "Peak", "SofI", "TP(hex)  0   1   2   3"])]
+    for tag, lst in sorted(d.iteritems()):
+        z = ""
+        soi = ""
+        tp = ""
+        if skipZero and not any([dct["TP"] for dct in lst]):
+            continue
+        for dct in lst:
+            z += str(int(dct["Z"]))
+            soi += str(int(dct["SOI"]))
+            tp += " %3x" % dct["TP"]
+        out.append("  ".join([" 0x%02x" % tag,
+                              "%4s" % z,
+                              "%4s" % soi,
+                              " "*4,
+                              tp]))
+    return out
 
 
 def htrChannelData(d={}, moduleId=0, fibChs=[], skipErrF=[3]):
