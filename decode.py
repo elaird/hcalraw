@@ -200,6 +200,10 @@ def channelInit(iWord16=None, word16=None, flavor=None):
 
     if flavor == 4:
         dataKey = "triggerData"
+        channelHeader.update({"SOI": {},
+                              "OK": {},
+                              "TP": {},
+                              })
     elif flavor in [5, 6]:
         dataKey = "channelData"
         channelHeader.update({"Fiber": channelId / 4,
@@ -213,7 +217,9 @@ def channelInit(iWord16=None, word16=None, flavor=None):
 def storeChannelData(dct={}, iWord16=None, word16=None):
     j = iWord16 - dct["iWord16"] - 1
     if dct["Flavor"] == 4:
-        pass
+        dct["SOI"][j] = (word16 >> 14) & 0x1
+        dct["OK"][j] = (word16 >> 13) & 0x1
+        dct["TP"][j] = word16 & 0x1fff
     elif dct["Flavor"] == 5:
         dct["QIE"][2*j] = word16 & 0x7f
         dct["QIE"][2*j+1] = (word16 >> 8) & 0x7f
