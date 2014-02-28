@@ -180,43 +180,25 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
 def collectedRaw(tree=None, specs={}):
     raw = {}
     for fedId in specs["fedIds"]:
+        kargs = {"utca": not configuration.isVme(fedId),
+                 "bcnDelta": configuration.bcnDelta(fedId),
+                 "skipFlavors": configuration.unpackSkipFlavors(fedId),
+                 "patternMode": specs["patternMode"],
+                 }
         if specs["name"] == "CMS":
             rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
-            raw[fedId] = unpacked(fedData=rawThisFed,
-                                  bcnDelta=configuration.bcnDelta(fedId),
-                                  nBytesPer=1,
-                                  utca=not configuration.isVme(fedId),
-                                  skipFlavors=configuration.unpackSkipFlavors(fedId),
-                                  patternMode=specs["patternMode"],
-                                  )
+            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=1, **kargs)
         elif specs["name"] == "HCAL":
             rawThisFed = wordsOneChunk(tree, fedId, specs["branch"])
-            raw[fedId] = unpacked(fedData=rawThisFed,
-                                  bcnDelta=configuration.bcnDelta(fedId),
-                                  nBytesPer=8,
-                                  utca=not configuration.isVme(fedId),
-                                  skipFlavors=configuration.unpackSkipFlavors(fedId),
-                                  patternMode=specs["patternMode"],
-                                  )
+            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
         elif specs["name"] == "DB":
             rawThisFed = wordsOneBranch(tree=tree, branch="%s%d" % (specs["branch"], fedId))
-            raw[fedId] = unpacked(fedData=rawThisFed,
-                                  bcnDelta=configuration.bcnDelta(fedId),
-                                  nBytesPer=4,
-                                  utca=not configuration.isVme(fedId),
-                                  skipFlavors=configuration.unpackSkipFlavors(fedId),
-                                  patternMode=specs["patternMode"],
-                                  )
+            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=4, **kargs)
         elif specs["name"] == "MOL":
             rawThisFed = wordsOneBranch(tree=tree, branch="%s%d" % (specs["branch"], fedId))
             mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
-            raw[fedId] = unpacked(fedData=rawThisFed,
-                                  bcnDelta=configuration.bcnDelta(fedId),
-                                  nBytesPer=8, skipWords64=skipWords64,
-                                  utca=not configuration.isVme(fedId),
-                                  skipFlavors=configuration.unpackSkipFlavors(fedId),
-                                  patternMode=specs["patternMode"],
-                                  )
+            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8,
+                                  skipWords64=skipWords64, **kargs)
             raw[fedId]["MOL"] = mol
     raw[None] = {"iEntry": tree.GetReadEntry(),
                  "label": specs["label"],
