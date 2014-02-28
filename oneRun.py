@@ -52,16 +52,26 @@ def opts():
     parser.add_option_group(match)
 
     patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
-    patterns.add_option("--npatternfibers",
-                        dest="nPatternFibers",
-                        default=8,
-                        metavar="N",
-                        help="No. of fibers to consider (default is 8).")
     patterns.add_option("--npatternts",
                         dest="nPatternTs",
                         default=20,
                         metavar="N",
                         help="No. of time slices to consider (default is 20).")
+    patterns.add_option("--rawpatterns",
+                        dest="rawPatterns",
+                        default=False,
+                        action="store_true",
+                        help="Print unprocessed patterns.")
+    patterns.add_option("--patternB",
+                        dest="patternB",
+                        default=False,
+                        action="store_true",
+                        help="Consider patterns mixed across fibers.")
+    patterns.add_option("--npatternfibers",
+                        dest="nPatternFibers",
+                        default=8,
+                        metavar="N",
+                        help="No. of fibers to consider (default is 8).")
     parser.add_option_group(patterns)
 
     options, args = parser.parse_args()
@@ -118,6 +128,8 @@ if options.noColor:
 
 patternOptions = {"nFibers": integer(options.nPatternFibers, "npatternfibers"),
                   "nTs": integer(options.nPatternTs, "npatternts"),
+                  "pureFibersOnly": not options.patternB,
+                  "process": not options.rawPatterns,
                   } if options.patterns else {}
 
 mapOptions = {"ornTolerance": integer(options.ornTolerance, "orn-tolerance")}
