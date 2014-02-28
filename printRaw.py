@@ -142,6 +142,8 @@ def uhtrTriggerData(d={}, skipZero=False):
                           ])
                )
     for channelId, data in sorted(d.iteritems()):
+        if skipZero and not any(data["TP"].values()):
+            continue
         soi = ""
         ok = ""
         tp = ""
