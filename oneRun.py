@@ -16,8 +16,8 @@ def opts():
             "2: (u)HTR summary info",
             "3: (u)HTR headers",
             "4: data (channel=1, fibers with ErrF != 3)",
-            "5: data (any channel, fibers with ErrF != 3)",
-            "6: data (any channel, any ErrF)",
+            "5: data (fibers with ErrF != 3); tps (> 0)",
+            "6: data (all); tps (all)",
             ]
     parser.add_option("--dump", dest="dump", default=0, metavar="D",
                       help=" ".join([d.ljust(60) for d in dump]))
