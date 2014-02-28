@@ -110,7 +110,6 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
     #header
     if i == 0:
         l["EvN"] = w & 0xff
-        l["nWord16Tp"] = 0  # placeholder; overwritten when i=5
     if i == 1:
         l["EvN"] += w << 8
     if i == 3:
@@ -126,9 +125,9 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         l["nPreSamples"] = (w >> 3) & 0x1f
         l["channelData"] = {}
         l["triggerData"] = {}
-    if i < 8 + l["nWord16Tp"]:
-        if utca or (i < 8):  # skip various
-            return
+    if i < 8:  # skip various
+        return
+    if (not utca) and i < 8 + l["nWord16Tp"]:
         tag = (w >> 11) & 0x1f
         if tag not in l["triggerData"]:
             l["triggerData"][tag] = []
