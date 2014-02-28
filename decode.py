@@ -6,6 +6,7 @@
 import configuration
 import printer
 
+
 def ornBcn(ornIn, bcnIn, bcnDelta=0):
     if not bcnDelta:
         return ornIn, bcnIn
@@ -75,6 +76,7 @@ def header(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
             if iWord64 != 10:
                 d["HTR%d" % (j+1)] = htrDict(w >> 32, d["word16Counts"])
 
+
 def MOLheader(d={}, word64_1=None, word64_2=None):
     w1 = word64_1
     w2 = word64_2
@@ -85,6 +87,7 @@ def MOLheader(d={}, word64_1=None, word64_2=None):
     d[iblock]["nWord64"] = w1 & 0x3ff
     d[iblock]["FEDid"] = (w2 >> 32) & 0xfff
     d[iblock]["Trigger"] = w2 & 0xffffff
+
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             utca=None, bcnDelta=0, skipFlavors=[], patternMode={}):
@@ -147,10 +150,9 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         if patternMode:
             storePatternData(l, **patternMode)
         d["htrIndex"] += 1
-        if "currentChannelId" in d:  # check in case event is malformed
-            del d["currentChannelId"]
         l["EvN8"] = w >> 8
         l["DTCErrors"] = w & 0xff
+        clearChannel(d)  # in case event is malformed
         return
 
     #skip "extra info"
@@ -159,38 +161,60 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
 
     #data
     if (w >> 15):
-        if "currentChannelId" in d:
-            del d["currentChannelId"]
-
         flavor = (w >> 12) & 0x7
         if flavor in skipFlavors:
-            return
-        elif flavor not in [5, 6]:
-            printer.warning("skipping flavor %d (EvN %d, iWord16 %d)." % (flavor, l["EvN"], iWord16))
-            return
-
-        d["currentChannelId"] = w & 0xff
-        l["channelData"][d["currentChannelId"]] = {"Flavor": flavor,
-                                                   "CapId0": (word16 >> 8) & 0x3,
-                                                   "ErrF":   (word16 >> 10) & 0x3,
-                                                   "Fiber": d["currentChannelId"] / 4,
-                                                   "FibCh": d["currentChannelId"] % 4,
-                                                   "iWord16": iWord16,
-                                                   "QIE": {},
-                                                   "CapId": {},
-                                                   }
-    elif "currentChannelId" not in d:
-        return
-    else:
-        storeChannelData(dct=l["channelData"][d["currentChannelId"]],
+            clearChannel(d)
+        else:
+            dataKey, channelId, channelHeader = channelInit(iWord16=iWord16,
+                                                            word16=word16,
+                                                            flavor=flavor,
+                                                            )
+            if dataKey is None:
+                printer.warning("skipping flavor %d (EvN %d, iWord16 %d)." % (flavor, l["EvN"], iWord16))
+                clearChannel(d)
+            else:
+                d["dataKey"] = dataKey
+                d["channelId"] = channelId
+                l[d["dataKey"]][d["channelId"]] = channelHeader
+    elif "channelId" in d:
+        storeChannelData(dct=l[d["dataKey"]][d["channelId"]],
                          iWord16=iWord16,
                          word16=word16,
                          )
 
 
+def clearChannel(d):
+    for key in ["channelId", "dataKey"]:
+        if key in d:
+            del d[key]
+
+
+def channelInit(iWord16=None, word16=None, flavor=None):
+    dataKey = None
+    channelId = word16 & 0xff
+    channelHeader = {"Flavor": flavor,
+                     "CapId0": (word16 >> 8) & 0x3,
+                     "ErrF":   (word16 >> 10) & 0x3,
+                     "iWord16": iWord16,
+                     }
+
+    if flavor == 4:
+        dataKey = "triggerData"
+    elif flavor in [5, 6]:
+        dataKey = "channelData"
+        channelHeader.update({"Fiber": channelId / 4,
+                              "FibCh": channelId % 4,
+                              "QIE": {},
+                              "CapId": {},
+                              })
+    return dataKey, channelId, channelHeader
+
+
 def storeChannelData(dct={}, iWord16=None, word16=None):
     j = iWord16 - dct["iWord16"] - 1
-    if dct["Flavor"] == 5:
+    if dct["Flavor"] == 4:
+        pass
+    elif dct["Flavor"] == 5:
         dct["QIE"][2*j] = word16 & 0x7f
         dct["QIE"][2*j+1] = (word16 >> 8) & 0x7f
     elif dct["Flavor"] == 6:
@@ -285,6 +309,6 @@ def patternData(feWords=[]):
 def flipped(raw=None, nBits=8):
     out = 0
     for iBit in range(nBits):
-        bit = (raw>>iBit) & 0x1
+        bit = (raw >> iBit) & 0x1
         out |= (bit << (nBits - 1 - iBit))
     return out
