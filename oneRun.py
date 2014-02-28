@@ -42,8 +42,8 @@ def opts():
             "2: (u)HTR summary info",
             "3: (u)HTR headers",
             "4: data (channel=1, fibers with ErrF != 3)",
-            "5: data (fibers with ErrF != 3); tps (> 0)",
-            "6: data (all); tps (all)",
+            "5: data (fibers with ErrF != 3); TPs (> 0)",
+            "6: data (all); TPs (all)",
             ]
     common.add_option("--dump",
                       dest="dump",
