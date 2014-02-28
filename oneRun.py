@@ -72,7 +72,7 @@ def opts():
 
 
 def integer(value="", tag=""):
-    if value:
+    if value is not '':
         try:
             return int(value)
         except ValueError:
