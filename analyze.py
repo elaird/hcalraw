@@ -47,7 +47,7 @@ def coords(d):
 #this function returns two dictionaries,
 #one maps TTree entry to either (orn, ) or to (orn, evn)
 #the other maps the reverse
-def eventMaps(s={}):
+def eventMaps(s={}, options={}):
     fileName = s["fileName"]
     treeName = s["treeName"]
     nEventsMax = s["nEventsMax"]
@@ -56,8 +56,8 @@ def eventMaps(s={}):
     assert fileName
     assert treeName
 
-    useEvn = configuration.useEvn()
-    filterEvn = configuration.filterEvn()
+    useEvn = options.get('useEvn', False)
+    filterEvn = options.get('filterEvn', False)
     bcnDelta = configuration.bcnDelta(fedIds[0])
     forward = {}
     backward = {}
@@ -229,7 +229,7 @@ def collectedRaw(tree=None, specs={}):
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
-             skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternMode=False):
+             skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternMode={}):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
     assert headerOnly or (utca in [False, True]), \
         "Specify whether data is uTCA or VME (unless skipping HTR blocks)."
@@ -261,6 +261,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
         iWord64 = jWord64 - nSkipped64
 
         if iWord64 < iWordPayload0:
+            #print (header["FEDid"] if "FEDid" in header else " "*3), iWord64, header.keys()
             decode.header(header, iWord64, word64, utca, bcnDelta)
         elif headerOnly:
             break
@@ -276,15 +277,16 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
                                             patternMode=patternMode)
                 if (returnCode is not None) and (iWord64 != nWord64 - 2 - nToSkip):
                     printer.warning(" ".join(["skipping",
-                                    "FED %d" % header["FEDid"],
-                                    "event %d" % header["EvN"],
-                                    "iWord16 %d" % iWord16,
-                                    "word16 %d" % word16,
-                                    ]))
+                                              "FED %d" % header["FEDid"],
+                                              "event %d" % header["EvN"],
+                                              "iWord16 %d" % iWord16,
+                                              "word16 %d" % word16,
+                                              ]))
         else:
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
             decode.trailer(trailer, iWord64, word64)
+    #print (header["FEDid"] if "FEDid" in header else " "*3), header.keys()
     return {"header": header,
             "trailer": trailer,
             "htrBlocks": htrBlocks,
@@ -361,9 +363,9 @@ def graph(d={}):
     return gr
 
 
-def eventToEvent(mapF={}, mapB={}):
-    useEvn = configuration.useEvn()
-    ornTolerance = configuration.ornTolerance()
+def eventToEvent(mapF={}, mapB={}, options={}):
+    useEvn = options.get('useEvn', False)
+    ornTolerance = options.get('ornTolerance', 0)
 
     deltaOrnRange = range(-ornTolerance, 1+ornTolerance)
     out = {}
@@ -379,7 +381,7 @@ def eventToEvent(mapF={}, mapB={}):
     return out
 
 
-def go(outer={}, inner={}, label="", patternMode=None):
+def go(outer={}, inner={}, label="", mapOptions={}, printSummary=None):
     innerEvent = {}
     deltaOrn = {}
 
@@ -388,11 +390,11 @@ def go(outer={}, inner={}, label="", patternMode=None):
 
     if inner:
         iMapF, iMapB = eventMaps(inner)
-        innerEvent = eventToEvent(oMapF, iMapB)
-        if configuration.identityMap():
+        innerEvent = eventToEvent(oMapF, iMapB, options=mapOptions)
+        if mapOptions.get('identityMap', False):
             for key in innerEvent.keys():
                 innerEvent[key] = key
-        if configuration.printEventMap():
+        if mapOptions.get('printEventMap', False):
             for oEvent, iEvent in sorted(innerEvent.iteritems()):
                 printer.msg(", ".join(["oEvent = %s" % str(oEvent),
                                        "oOrnEvn = %s" % str(oMapF[oEvent]),
@@ -421,7 +423,7 @@ def go(outer={}, inner={}, label="", patternMode=None):
         h.Write()
     f.Close()
 
-    if not patternMode:
+    if printSummary:
         s = "%s: %4s = %6d" % (label, outer["label"], len(oMapF))
         if inner:
             s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
@@ -463,7 +465,8 @@ def oneRun(file1="",
            feds1=[],
            file2="",
            feds2=[],
-           patternMode=None,
+           patternMode={},
+           mapOptions={},
            nEvents=None,
            label="",
            dump=None,
@@ -480,6 +483,7 @@ def oneRun(file1="",
                   "dump": dump,
                   "label": "file1",
                   })
+    inner = {}
 
     if file2:
         assert feds2
@@ -492,9 +496,13 @@ def oneRun(file1="",
                       "dump": dump,
                       "label": "file2",
                       })
-        go(outer=spec1, inner=spec2, label=label, patternMode=patternMode)
-    else:
-        go(outer=spec1, label=label, patternMode=patternMode)
+        inner = spec2
+
+    go(outer=spec1,
+       inner=inner,
+       label=label,
+       mapOptions=mapOptions,
+       printSummary=not patternMode)
 
 
 def printHisto(label="", histoName="MatchedFibers"):

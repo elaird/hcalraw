@@ -87,7 +87,7 @@ def MOLheader(d={}, word64_1=None, word64_2=None):
     d[iblock]["Trigger"] = w2 & 0xffffff
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, bcnDelta=0, skipFlavors=[], patternMode=False):
+            utca=None, bcnDelta=0, skipFlavors=[], patternMode={}):
     w = word16
     if "htrIndex" not in d:
         for iHtr in range(len(word16Counts)):
@@ -135,7 +135,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         return
     elif i == l["nWord16"]-1:
         if patternMode:
-            storePatternData(l)
+            storePatternData(l, **patternMode)
         d["htrIndex"] += 1
         if "currentChannelId" in d:  # check in case event is malformed
             del d["currentChannelId"]
@@ -192,10 +192,7 @@ def channelId(fiber=None, fibCh=None):
     return 4*fiber + fibCh
 
 
-def storePatternData(l={}):
-    nFibers = configuration.nPatternFibers()
-    nTs = configuration.nPatternTs()
-
+def storePatternData(l={}, nFibers=None, nTs=None):
     if nFibers == 6:
         offset = 1
     elif nFibers == 8:
