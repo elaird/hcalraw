@@ -142,8 +142,6 @@ def htrChannelData(lst=[], moduleId=0, fibChs=[], skipErrF=[3]):
                           ])
                )
     for data in lst:
-        if data["Flavor"] == 4:
-            continue
         if data["FibCh"] not in fibChs:
             continue
         if data["ErrF"] in skipErrF:
