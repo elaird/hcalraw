@@ -47,7 +47,7 @@ def htrOverview(d={}):
 
 
 def oneHtrPatterns(p={}, fedId=None, iOffset=None):
-    cd = htrChannelData(p["channelData"], p["ModuleId"], fibChs=[1])
+    cd = htrChannelData(p["channelData"].values(), p["ModuleId"], fibChs=[1])
     if len(cd) >= 2:
         printer.msg("\n".join(patternData(p["patternData"], "%3d %2d" % (fedId, iOffset))))
 
@@ -88,7 +88,7 @@ def oneHtr(p={}, iOffset=None, dump=None):
         kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2]}
         if 6 <= dump:
             kargs["skipErrF"] = []
-        cd = htrChannelData(p["channelData"], p["ModuleId"], **kargs)
+        cd = htrChannelData(p["channelData"].values(), p["ModuleId"], **kargs)
         if len(cd) >= 2:
             printer.yellow(cd[0])
             printer.msg("\n".join(cd[1:]))
@@ -130,7 +130,7 @@ def htrTriggerData(d={}, skipZero=False):
     return out
 
 
-def htrChannelData(d={}, moduleId=0, fibChs=[], skipErrF=[3]):
+def htrChannelData(lst=[], moduleId=0, fibChs=[], skipErrF=[3]):
     out = []
     out.append("  ".join(["ModuleId",
                           "Fi",
@@ -141,7 +141,9 @@ def htrChannelData(d={}, moduleId=0, fibChs=[], skipErrF=[3]):
                           "QIE(hex)  0  1  2  3  4  5  6  7  8  9",
                           ])
                )
-    for channelId, data in d.iteritems():
+    for data in lst:
+        if data["Flavor"] == 4:
+            continue
         if data["FibCh"] not in fibChs:
             continue
         if data["ErrF"] in skipErrF:
