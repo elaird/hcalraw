@@ -184,6 +184,9 @@ analyze.oneRun(file1=options.file1,
 
 if not options.patterns:
     if options.file2:
-        analyze.printHisto(label)
+        for iChannel in range(3):
+            print "Channel %d:" % iChannel
+            analyze.printHisto(label, histoName="MatchedFibersCh%d" % iChannel)
+            print
     import graphs
     graphs.makeSummaryPdf(labels=[label])
