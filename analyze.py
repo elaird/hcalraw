@@ -484,7 +484,7 @@ def oneRun(file1="",
        inner=inner,
        label=label,
        mapOptions=mapOptions,
-       printSummary=not patternMode)
+       printSummary=(not patternMode) and (file1 != file2))
 
 
 def printHisto(label="", histoName="MatchedFibers"):
