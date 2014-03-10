@@ -58,6 +58,10 @@ def checkHtrModules(fedId=None, htrBlocks={}):
         printer.error("FED %s contains modules with crate labels %s." % (str(fedId), str(crates)))
 
 
+def nPerChannel(lst=[], iChannel=None):
+    return len(filter(lambda x: x[-1] == iChannel, lst))
+
+
 def compare(raw1={}, raw2={}, book={}):
     printRaw.oneEvent(raw1)
     printRaw.oneEvent(raw2)
@@ -78,8 +82,16 @@ def compare(raw1={}, raw2={}, book={}):
     #    reportMatched(matched)
     #    reportFailed(failed)
 
-    book.fill(len(matched), "MatchedFibers", 24, -0.5, 23.5, title=";no. matched fibers;events / bin")
-    book.fill(len(failed),   "FailedFibers", 24, -0.5, 23.5, title=";no. non-matched fibers;events / bin")
+    for iChannel in range(3):
+        title = ";no. matched fibers (ch%d);events / bin" % iChannel
+        nBins = 24
+        bins = (nBins, -0.5, nBins - 0.5)
+        book.fill(nPerChannel(matched.keys(), iChannel),
+                  "MatchedFibersCh%d" % iChannel,
+                  *bins, title=title)
+        book.fill(nPerChannel(failed, iChannel),
+                  "FailedFibersCh%d" % iChannel,
+                  *bins, title=title.replace("matched", "non-matched"))
 
     #some delta plots
     noGood = [[], [None]]
@@ -164,8 +176,6 @@ def dataMap(raw={}):
                 channel = channelData["FibCh"]
                 fiber = 1 + channelData["Fiber"]
                 fiber = fiberMap[fiber] if fiber in fiberMap else fiber
-                if channel != 1:
-                    continue
                 if channelData["ErrF"] & 0x2:
                     continue
                 coords = (fedId, moduleId, fiber, channel)
