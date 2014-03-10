@@ -33,27 +33,24 @@ def singleFedPlots(raw={}, fedId=None, book={}):
 
 def checkHtrModules(fedId=None, htrBlocks={}):
     crates = []
+    if not configuration.isVme(fedId):
+        printer.error("HTR Module check not implemented for uTCA.")
+        return
     for spigot, block in htrBlocks.iteritems():
-        expectedTop = 1 - (spigot % 2)
+        expectedTop = {1: "t", 0: "b"}[1 - (spigot % 2)]
         expectedSlot = spigot/2 + (13 if (fedId % 2) else 2)
         if expectedSlot == 19:  # DCC occupies slots 19-20
             expectedSlot = 21
 
-        id = block["ModuleId"]
-        # http://isscvs.cern.ch/cgi-bin/viewcvs-all.cgi/TriDAS/hcal/hcalHW/src/common/hcalHTR.cc?revision=1.88&root=tridas&view=markup
-        # int id=(m_crate<<6)+((m_slot&0x1F)<<1)+((true_for_top)?(1):(0));
-        # fpga->dev->write("HTRsubmodN",id);
-        top = id & 0x1
-        slot = (id >> 1) & 0x1f
-        crate = (id >> 6)
-        crates.append(crate)
-
-        bad = [top != expectedTop,
-               slot != expectedSlot,
+        crates.append(block["Crate"])
+        bad = [block["Top"] != expectedTop,
+               block["Slot"] != expectedSlot,
                ]
         if any(bad):
-            fields = (fedId, spigot, crate, slot, "top" if top else "bot", expectedSlot, "top" if expectedTop else "bot")
-            printer.error("FED %3d spigot %2d has moduleId decode to crate %2d slot %2d %3s (expected slot %2d %3s)" % fields)
+            fields = (fedId, spigot, block["Crate"],
+                      block["Slot"], block["Top"],
+                      expectedSlot, expectedTop)
+            printer.error("FED %3d spigot %2d has moduleId decode to crate %2d slot %2d%s (expected slot %2d%s)" % fields)
     if len(set(crates)) != 1:
         printer.error("FED %s contains modules with crate labels %s." % (str(fedId), str(crates)))
 
