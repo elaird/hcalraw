@@ -191,7 +191,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
     out = []
     out.append("  ".join(["Crate",
                           "Slot",
-                          "Fi",
+                          " Fi",
                           "Ch",
                           "Fl",
                           "ErrF",
@@ -206,7 +206,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
             continue
         red = (1+data["Fiber"], data["FibCh"]) in nonMatched
         out.append("   ".join(["  %2d" % crate,
-                               "%2d%1s" % (slot, top),
+                               "%3d%1s" % (slot, top),
                                "%2d" % data["Fiber"],
                                "%1d" % data["FibCh"],
                                "%1d" % data["Flavor"],
