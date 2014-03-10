@@ -53,7 +53,11 @@ def htrOverview(d={}):
 
 
 def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
-    cd = htrChannelData(p["channelData"].values(), p["ModuleId"], fibChs=[1])
+    cd = htrChannelData(p["channelData"].values(),
+                        crate=p["Crate"],
+                        slot=p["Slot"],
+                        top=p["Top"],
+                        fibChs=[1])
     if len(cd) >= 2:
         lines = patternData(p["patternData"],
                             moduleId="%3d %2d" % (fedId, iOffset),
@@ -96,11 +100,17 @@ def oneHtr(p={}, iOffset=None, dump=None, utca=None, nonMatched=[]):
 
     printer.green("\n".join(out))
     if 4 <= dump:
+        nonMatchedThisHtr = filter(lambda x: x[0] == p["ModuleId"], nonMatched)
         kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2],
-                 "nonMatched": nonMatched}
+                 "nonMatched": map(lambda x: x[1:], nonMatchedThisHtr),
+                 }
         if 6 <= dump:
             kargs["skipErrF"] = []
-        cd = htrChannelData(p["channelData"].values(), p["ModuleId"], **kargs)
+        cd = htrChannelData(p["channelData"].values(),
+                            crate=p["Crate"],
+                            slot=p["Slot"],
+                            top=p["Top"],
+                            **kargs)
         if len(cd) >= 2:
             printer.yellow(cd[0])
             printer.msg("\n".join(cd[1:]))
@@ -176,9 +186,11 @@ def uhtrTriggerData(d={}, skipZero=False):
     return out
 
 
-def htrChannelData(lst=[], moduleId=0, fibChs=[], skipErrF=[3], nonMatched=[]):
+def htrChannelData(lst=[], crate=0, slot=0, top="",
+                   fibChs=[], skipErrF=[3], nonMatched=[]):
     out = []
-    out.append("  ".join(["ModuleId",
+    out.append("  ".join(["Crate",
+                          "Slot",
                           "Fi",
                           "Ch",
                           "Fl",
@@ -192,9 +204,10 @@ def htrChannelData(lst=[], moduleId=0, fibChs=[], skipErrF=[3], nonMatched=[]):
             continue
         if data["ErrF"] in skipErrF:
             continue
-        red = (moduleId, 1+data["Fiber"], data["FibCh"]) in nonMatched
-        out.append("   ".join([" 0x%03x" % moduleId,
-                               "%3d" % data["Fiber"],
+        red = (1+data["Fiber"], data["FibCh"]) in nonMatched
+        out.append("   ".join(["  %2d" % crate,
+                               "%2d%1s" % (slot, top),
+                               "%2d" % data["Fiber"],
                                "%1d" % data["FibCh"],
                                "%1d" % data["Flavor"],
                                "%2d" % data["ErrF"],
