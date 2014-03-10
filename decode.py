@@ -1,7 +1,6 @@
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
-#HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/
-#    RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
+#HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
 
 import configuration
 import printer
