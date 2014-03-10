@@ -156,21 +156,15 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
         if nb <= 0:
             continue
 
-        raw = collectedRaw(tree=tree, specs=outer)
-
+        kargs = {"raw1": collectedRaw(tree=tree, specs=outer),
+                 "book": book}
         if inner:
             iInnerEvent = innerEvent[iOuterEvent]
-            if iInnerEvent is None:
+            if (iInnerEvent is None) or (treeI.GetEntry(iInnerEvent) <= 0):
                 continue
+            kargs["raw2"] = collectedRaw(tree=treeI, specs=inner)
 
-            nb = treeI.GetEntry(iInnerEvent)
-            if nb <= 0:
-                continue
-
-            rawInner = collectedRaw(tree=treeI, specs=inner)
-            compare.compare(raw, rawInner, book=book)
-        else:
-            compare.compare(raw, book=book)
+        compare.compare(**kargs)
 
     f.Close()
     if inner:
