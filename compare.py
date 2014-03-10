@@ -153,7 +153,7 @@ def matchStats(f={}, b={}):
     return matched, failed
 
 
-def dataMap(raw={}):
+def dataMap(raw={}, skipErrF=[3]):
     forward = {}
     backward = {}
 
@@ -176,7 +176,7 @@ def dataMap(raw={}):
                 channel = channelData["FibCh"]
                 fiber = 1 + channelData["Fiber"]
                 fiber = fiberMap[fiber] if fiber in fiberMap else fiber
-                if channelData["ErrF"] & 0x2:
+                if channelData["ErrF"] in skipErrF:
                     continue
                 coords = (fedId, moduleId, fiber, channel)
                 qie = channelData["QIE"]
