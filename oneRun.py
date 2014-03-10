@@ -112,6 +112,9 @@ def opts():
     if not all([options.file1, options.feds1]):
         parser.print_help()
         exit()
+    if options.feds2 and not options.file2:
+        print "Using --file1 also for --file2"
+        options.file2 = options.file1
     return options
 
 
