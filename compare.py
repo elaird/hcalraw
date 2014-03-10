@@ -63,9 +63,6 @@ def nPerChannel(lst=[], iChannel=None):
 
 
 def compare(raw1={}, raw2={}, book={}):
-    printRaw.oneEvent(raw1)
-    printRaw.oneEvent(raw2)
-
     for raw in [raw1, raw2]:
         for fedId, dct in raw.iteritems():
             if fedId is None:
@@ -76,21 +73,25 @@ def compare(raw1={}, raw2={}, book={}):
 
     mapF1, mapB1 = dataMap(raw1)
     mapF2, mapB2 = dataMap(raw2)
-    matched, failed = matchStats(mapF1, mapB2)
+    matched12, nonMatched12 = matchStats(mapF1, mapB2)
+    matched21, nonMatched21 = matchStats(mapF2, mapB1)
 
-    #if failed:
-    #    reportMatched(matched)
-    #    reportFailed(failed)
+    printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
+    printRaw.oneEvent(raw2, nonMatched=nonMatched21)
+
+    #if nonMatched12:
+    #    reportMatched(matched12)
+    #    reportFailed(nonMatched12)
 
     for iChannel in range(3):
         title = ";no. matched fibers (ch%d);events / bin" % iChannel
         nBins = 24
         bins = (nBins, -0.5, nBins - 0.5)
-        book.fill(nPerChannel(matched.keys(), iChannel),
+        book.fill(nPerChannel(matched12.keys(), iChannel),
                   "MatchedFibersCh%d" % iChannel,
                   *bins, title=title)
-        book.fill(nPerChannel(failed, iChannel),
-                  "FailedFibersCh%d" % iChannel,
+        book.fill(nPerChannel(nonMatched12, iChannel),
+                  "NonMatchedFibersCh%d" % iChannel,
                   *bins, title=title.replace("matched", "non-matched"))
 
     #some delta plots
@@ -165,12 +166,8 @@ def dataMap(raw={}, skipErrF=[3]):
 
         matchRange = configuration.matchRange(fedId)
         for key, block in d["htrBlocks"].iteritems():
-            if not configuration.isVme(fedId):
-                moduleId = block["ModuleId"] & 0xf
-                if fedId == 989 and moduleId >= 5:  # FIXME: hack for HF timing (Jan. slice-test)
-                    matchRange = configuration.matchRange(990)
-            else:
-                moduleId = block["ModuleId"] & 0x1f
+            if fedId == 989 and (block["ModuleId"] & 0xf) >= 5:  # FIXME: hack for HF timing (Jan. slice-test)
+                matchRange = configuration.matchRange(990)
 
             for channelData in block["channelData"].values():
                 channel = channelData["FibCh"]
@@ -178,7 +175,7 @@ def dataMap(raw={}, skipErrF=[3]):
                 fiber = fiberMap[fiber] if fiber in fiberMap else fiber
                 if channelData["ErrF"] in skipErrF:
                     continue
-                coords = (fedId, moduleId, fiber, channel)
+                coords = (fedId, block["ModuleId"], fiber, channel)
                 qie = channelData["QIE"]
                 if len(qie) < len(matchRange):
                     #print "skipping bogus channel",coords
