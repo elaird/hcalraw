@@ -1,6 +1,6 @@
 import re
 
-__shift2 = False
+__shiftFibch2 = False  # overwritten by oneRun.py
 __pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 
 
@@ -33,7 +33,7 @@ def matchRange(fedId=None, slot=None, fibCh=None):
         return range(9)
 
     # 1-TS shift on uHTR fibCh=2 until front f/w B_31
-    if __shift2 and fibCh == 2:
+    if __shiftFibCh2 and fibCh == 2:
         if isVme(fedId):
             return range(1, 10)
         else:
