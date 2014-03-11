@@ -163,7 +163,7 @@ def dataMap(raw={}, skipErrF=[3]):
 
         matchRange = configuration.matchRange(fedId)
         for key, block in d["htrBlocks"].iteritems():
-            if fedId == 989 and (block["ModuleId"] & 0xf) >= 5:  # FIXME: hack for HF timing (Jan. slice-test)
+            if fedId == 989 and block["Slot"] >= 5:  # FIXME: hack for HF timing (Jan. slice-test)
                 matchRange = configuration.matchRange(990)
 
             for channelData in block["channelData"].values():
