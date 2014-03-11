@@ -315,7 +315,7 @@ def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
                            patternMode=patternMode,
                            fedId=d["header"]["FEDid"],
                            iOffset=iOffset)
-        elif 3 <= dump:
+        elif 3 <= dump:  # and 5 <= p["Slot"]:
             oneHtr(p=p, iOffset=iOffset, dump=dump,
                    utca=not configuration.isVme(h["FEDid"]),
                    nonMatched=nonMatched)
