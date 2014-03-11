@@ -3,6 +3,11 @@ import printer
 import utils
 
 
+def reduced(lst=[], value=None):
+    subList = filter(lambda x: x[0] == value, lst)
+    return map(lambda x: x[1:], subList)
+
+
 def oneEvent(d={}, nonMatched=[]):
     if None not in d:
         return
@@ -21,11 +26,10 @@ def oneEvent(d={}, nonMatched=[]):
         if ("MOL" in data) and (1 <= dump):
             oneFedMol(data["MOL"])
 
-        nonMatchedThisFed = filter(lambda x: x[0] == fedId, nonMatched)
         oneFedHcal(data,
                    patternMode=aux["patternMode"],
                    dump=dump,
-                   nonMatched=map(lambda x: x[1:], nonMatchedThisFed),
+                   nonMatched=reduced(nonMatched, fedId),
                    )
     if 1 <= dump:
         print
@@ -100,9 +104,8 @@ def oneHtr(p={}, iOffset=None, dump=None, utca=None, nonMatched=[]):
 
     printer.green("\n".join(out))
     if 4 <= dump:
-        nonMatchedThisHtr = filter(lambda x: x[0] == p["ModuleId"], nonMatched)
         kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2],
-                 "nonMatched": map(lambda x: x[1:], nonMatchedThisHtr),
+                 "nonMatched": reduced(nonMatched, p["ModuleId"]),
                  }
         if 6 <= dump:
             kargs["skipErrF"] = []
