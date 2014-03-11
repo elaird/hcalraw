@@ -1,6 +1,6 @@
 import re
 
-__shiftFibch2 = False  # overwritten by oneRun.py
+__shiftFibCh2 = False  # overwritten by oneRun.py
 __pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 
 
