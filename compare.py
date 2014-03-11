@@ -161,13 +161,10 @@ def dataMap(raw={}, skipErrF=[3]):
         if fedId is None:
             continue
 
-        matchRange = configuration.matchRange(fedId)
         for key, block in d["htrBlocks"].iteritems():
-            if fedId == 989 and block["Slot"] >= 5:  # FIXME: hack for HF timing (Jan. slice-test)
-                matchRange = configuration.matchRange(990)
-
             for channelData in block["channelData"].values():
                 channel = channelData["FibCh"]
+                matchRange = configuration.matchRange(fedId, block["Slot"], channel)
                 fiber = 1 + channelData["Fiber"]
                 fiber = fiberMap[fiber] if fiber in fiberMap else fiber
                 if channelData["ErrF"] in skipErrF:
