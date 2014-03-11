@@ -83,6 +83,11 @@ def opts():
                      default=False,
                      action="store_true",
                      help="Print event map to stdout.")
+    match.add_option("--shiftFibCh2",
+                     dest="shiftFibCh2",
+                     default=False,
+                     action="store_true",
+                     help="Shift fibCh=2 by 1 TS to compensate for uHTR f/w bug.")
     parser.add_option_group(match)
 
     patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
@@ -159,9 +164,13 @@ options = opts()
 checkModules()
 
 import analyze
+import configuration
 import printer
+
+configuration.__shiftFibCh2 = options.shiftFibCh2
 if options.noColor:
     printer.__color = False
+
 
 patternOptions = {"nFibers": integer(options.nPatternFibers, "npatternfibers"),
                   "nTs": integer(options.nPatternTs, "npatternts"),
