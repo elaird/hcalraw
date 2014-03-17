@@ -1,6 +1,6 @@
 import re
 
-
+__shiftFibCh2 = False  # overwritten by oneRun.py
 __pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 
 
@@ -25,14 +25,22 @@ def bcnDelta(fedId=None):
     return 0 if isVme(fedId) else -118
 
 
-def matchRange(fedId=None):
+def matchRange(fedId=None, slot=None, fibCh=None):
     # exceptions for Jan. 2013 slice-test (HF)
-    if fedId == 990:
+    if fedId == 990 or (fedId == 989 and 5 <= slot):
         return range(1, 10)
-    elif fedId == 722:
+    if fedId == 722:
         return range(9)
-    else:
-        return range(10)
+
+    # 1-TS shift on uHTR fibCh=2 until front f/w B_31
+    if __shiftFibCh2 and fibCh == 2:
+        if isVme(fedId):
+            return range(1, 10)
+        else:
+            return range(9)
+
+    # ok
+    return range(10)
 
 
 def fiberMap():

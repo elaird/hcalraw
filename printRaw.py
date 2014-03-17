@@ -3,7 +3,12 @@ import printer
 import utils
 
 
-def oneEvent(d={}):
+def reduced(lst=[], value=None):
+    subList = filter(lambda x: x[0] == value, lst)
+    return map(lambda x: x[1:], subList)
+
+
+def oneEvent(d={}, nonMatched=[]):
     if None not in d:
         return
 
@@ -20,7 +25,12 @@ def oneEvent(d={}):
             continue
         if ("MOL" in data) and (1 <= dump):
             oneFedMol(data["MOL"])
-        oneFedHcal(data, patternMode=aux["patternMode"], dump=dump)
+
+        oneFedHcal(data,
+                   patternMode=aux["patternMode"],
+                   dump=dump,
+                   nonMatched=reduced(nonMatched, fedId),
+                   )
     if 1 <= dump:
         print
 
@@ -47,7 +57,11 @@ def htrOverview(d={}):
 
 
 def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
-    cd = htrChannelData(p["channelData"].values(), p["ModuleId"], fibChs=[1])
+    cd = htrChannelData(p["channelData"].values(),
+                        crate=p["Crate"],
+                        slot=p["Slot"],
+                        top=p["Top"],
+                        fibChs=[1])
     if len(cd) >= 2:
         lines = patternData(p["patternData"],
                             moduleId="%3d %2d" % (fedId, iOffset),
@@ -57,7 +71,7 @@ def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
         print "\n".join(lines)  # skip printer to facilitate diff
 
 
-def oneHtr(p={}, iOffset=None, dump=None, utca=None):
+def oneHtr(p={}, iOffset=None, dump=None, utca=None, nonMatched=[]):
     out = []
     if (not iOffset) or (4 <= dump):
         out.append("  ".join(["iWord16",
@@ -90,10 +104,16 @@ def oneHtr(p={}, iOffset=None, dump=None, utca=None):
 
     printer.green("\n".join(out))
     if 4 <= dump:
-        kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2]}
+        kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2],
+                 "nonMatched": reduced(nonMatched, p["ModuleId"]),
+                 }
         if 6 <= dump:
             kargs["skipErrF"] = []
-        cd = htrChannelData(p["channelData"].values(), p["ModuleId"], **kargs)
+        cd = htrChannelData(p["channelData"].values(),
+                            crate=p["Crate"],
+                            slot=p["Slot"],
+                            top=p["Top"],
+                            **kargs)
         if len(cd) >= 2:
             printer.yellow(cd[0])
             printer.msg("\n".join(cd[1:]))
@@ -106,14 +126,18 @@ def oneHtr(p={}, iOffset=None, dump=None, utca=None):
                 printer.msg("\n".join(td[1:]))
 
 
-def qieString(qieData={}):
+def qieString(qieData={}, red=False):
     l = []
     for iQie in range(12):
         if iQie in qieData:
             l.append("%2x" % qieData[iQie])
         else:
             l.append("  ")
-    return " ".join(l)
+
+    out = " ".join(l)
+    if red:
+        out = '\033[91m' + out + '\033[0m'
+    return out
 
 
 def htrTriggerData(d={}, skipZero=False):
@@ -165,10 +189,12 @@ def uhtrTriggerData(d={}, skipZero=False):
     return out
 
 
-def htrChannelData(lst=[], moduleId=0, fibChs=[], skipErrF=[3]):
+def htrChannelData(lst=[], crate=0, slot=0, top="",
+                   fibChs=[], skipErrF=[3], nonMatched=[]):
     out = []
-    out.append("  ".join(["ModuleId",
-                          "Fi",
+    out.append("  ".join(["Crate",
+                          "Slot",
+                          " Fi",
                           "Ch",
                           "Fl",
                           "ErrF",
@@ -181,14 +207,16 @@ def htrChannelData(lst=[], moduleId=0, fibChs=[], skipErrF=[3]):
             continue
         if data["ErrF"] in skipErrF:
             continue
-        out.append("   ".join([" 0x%03x" % moduleId,
-                               "%3d" % data["Fiber"],
+        red = (1+data["Fiber"], data["FibCh"]) in nonMatched
+        out.append("   ".join(["  %2d" % crate,
+                               "%3d%1s" % (slot, top),
+                               "%2d" % data["Fiber"],
                                "%1d" % data["FibCh"],
                                "%1d" % data["Flavor"],
                                "%2d" % data["ErrF"],
                                "  %1d" % data["CapId0"],
                                " "*11,
-                               ])+qieString(data["QIE"])
+                               ])+qieString(data["QIE"], red=red)
                    )
     return out
 
@@ -248,7 +276,7 @@ def patternString(patterns=[], key="", ascii=True, process=None):
         return out
 
 
-def oneFedHcal(d={}, patternMode=False, dump=None):
+def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
     h = d["header"]
     t = d["trailer"]
     if (not patternMode) and (1 <= dump):
@@ -287,9 +315,10 @@ def oneFedHcal(d={}, patternMode=False, dump=None):
                            patternMode=patternMode,
                            fedId=d["header"]["FEDid"],
                            iOffset=iOffset)
-        elif 3 <= dump:
+        elif 3 <= dump:  # and 5 <= p["Slot"]:
             oneHtr(p=p, iOffset=iOffset, dump=dump,
-                   utca=not configuration.isVme(h["FEDid"]))
+                   utca=not configuration.isVme(h["FEDid"]),
+                   nonMatched=nonMatched)
 
 
 def oneFedMol(d):

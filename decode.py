@@ -1,7 +1,6 @@
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
-#HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/
-#    RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
+#HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
 
 import configuration
 import printer
@@ -117,8 +116,19 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
     if i == 2:
         return
     if i == 3:
-        l["ModuleId"] = w & 0x7ff
         l["OrN5"] = (w >> 11) & 0x1f
+        l["ModuleId"] = w & 0x7ff
+        if utca:
+            l["Crate"] = l["ModuleId"] >> 4
+            l["Slot"] = l["ModuleId"] & 0xf
+            l["Top"] = " "
+        else:
+            # http://isscvs.cern.ch/cgi-bin/viewcvs-all.cgi/TriDAS/hcal/hcalHW/src/common/hcalHTR.cc?revision=1.88
+            # int id=(m_crate<<6)+((m_slot&0x1F)<<1)+((true_for_top)?(1):(0));
+            # fpga->dev->write("HTRsubmodN",id);
+            l["Crate"] = l["ModuleId"] >> 6
+            l["Slot"] = (l["ModuleId"] >> 1) & 0x1f
+            l["Top"] = "t" if (l["ModuleId"] & 0x1) else "b"
         return
     if i == 4:
         l["BcN"] = w & 0xfff

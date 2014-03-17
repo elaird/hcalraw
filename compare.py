@@ -33,35 +33,33 @@ def singleFedPlots(raw={}, fedId=None, book={}):
 
 def checkHtrModules(fedId=None, htrBlocks={}):
     crates = []
+    if not configuration.isVme(fedId):
+        printer.error("HTR Module check not implemented for uTCA.")
+        return
     for spigot, block in htrBlocks.iteritems():
-        expectedTop = 1 - (spigot % 2)
+        expectedTop = {1: "t", 0: "b"}[1 - (spigot % 2)]
         expectedSlot = spigot/2 + (13 if (fedId % 2) else 2)
         if expectedSlot == 19:  # DCC occupies slots 19-20
             expectedSlot = 21
 
-        id = block["ModuleId"]
-        # http://isscvs.cern.ch/cgi-bin/viewcvs-all.cgi/TriDAS/hcal/hcalHW/src/common/hcalHTR.cc?revision=1.88&root=tridas&view=markup
-        # int id=(m_crate<<6)+((m_slot&0x1F)<<1)+((true_for_top)?(1):(0));
-        # fpga->dev->write("HTRsubmodN",id);
-        top = id & 0x1
-        slot = (id >> 1) & 0x1f
-        crate = (id >> 6)
-        crates.append(crate)
-
-        bad = [top != expectedTop,
-               slot != expectedSlot,
+        crates.append(block["Crate"])
+        bad = [block["Top"] != expectedTop,
+               block["Slot"] != expectedSlot,
                ]
         if any(bad):
-            fields = (fedId, spigot, crate, slot, "top" if top else "bot", expectedSlot, "top" if expectedTop else "bot")
-            printer.error("FED %3d spigot %2d has moduleId decode to crate %2d slot %2d %3s (expected slot %2d %3s)" % fields)
+            fields = (fedId, spigot, block["Crate"],
+                      block["Slot"], block["Top"],
+                      expectedSlot, expectedTop)
+            printer.error("FED %3d spigot %2d has moduleId decode to crate %2d slot %2d%s (expected slot %2d%s)" % fields)
     if len(set(crates)) != 1:
         printer.error("FED %s contains modules with crate labels %s." % (str(fedId), str(crates)))
 
 
-def compare(raw1={}, raw2={}, book={}):
-    printRaw.oneEvent(raw1)
-    printRaw.oneEvent(raw2)
+def nPerChannel(lst=[], iChannel=None):
+    return len(filter(lambda x: x[-1] == iChannel, lst))
 
+
+def compare(raw1={}, raw2={}, book={}):
     for raw in [raw1, raw2]:
         for fedId, dct in raw.iteritems():
             if fedId is None:
@@ -72,14 +70,26 @@ def compare(raw1={}, raw2={}, book={}):
 
     mapF1, mapB1 = dataMap(raw1)
     mapF2, mapB2 = dataMap(raw2)
-    matched, failed = matchStats(mapF1, mapB2)
+    matched12, nonMatched12 = matchStats(mapF1, mapB2)
+    matched21, nonMatched21 = matchStats(mapF2, mapB1)
 
-    #if failed:
-    #    reportMatched(matched)
-    #    reportFailed(failed)
+    printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
+    printRaw.oneEvent(raw2, nonMatched=nonMatched21)
 
-    book.fill(len(matched), "MatchedFibers", 24, -0.5, 23.5, title=";no. matched fibers;events / bin")
-    book.fill(len(failed),   "FailedFibers", 24, -0.5, 23.5, title=";no. non-matched fibers;events / bin")
+    #if nonMatched12:
+    #    reportMatched(matched12)
+    #    reportFailed(nonMatched12)
+
+    for iChannel in range(3):
+        title = ";no. matched fibers (ch%d);events / bin" % iChannel
+        nBins = 24
+        bins = (nBins, -0.5, nBins - 0.5)
+        book.fill(nPerChannel(matched12.keys(), iChannel),
+                  "MatchedFibersCh%d" % iChannel,
+                  *bins, title=title)
+        book.fill(nPerChannel(nonMatched12, iChannel),
+                  "NonMatchedFibersCh%d" % iChannel,
+                  *bins, title=title.replace("matched", "non-matched"))
 
     #some delta plots
     noGood = [[], [None]]
@@ -141,7 +151,7 @@ def matchStats(f={}, b={}):
     return matched, failed
 
 
-def dataMap(raw={}):
+def dataMap(raw={}, skipErrF=[3]):
     forward = {}
     backward = {}
 
@@ -151,24 +161,15 @@ def dataMap(raw={}):
         if fedId is None:
             continue
 
-        matchRange = configuration.matchRange(fedId)
         for key, block in d["htrBlocks"].iteritems():
-            if not configuration.isVme(fedId):
-                moduleId = block["ModuleId"] & 0xf
-                if fedId == 989 and moduleId >= 5:  # FIXME: hack for HF timing (Jan. slice-test)
-                    matchRange = configuration.matchRange(990)
-            else:
-                moduleId = block["ModuleId"] & 0x1f
-
             for channelData in block["channelData"].values():
                 channel = channelData["FibCh"]
+                matchRange = configuration.matchRange(fedId, block["Slot"], channel)
                 fiber = 1 + channelData["Fiber"]
                 fiber = fiberMap[fiber] if fiber in fiberMap else fiber
-                if channel != 1:
+                if channelData["ErrF"] in skipErrF:
                     continue
-                if channelData["ErrF"] & 0x2:
-                    continue
-                coords = (fedId, moduleId, fiber, channel)
+                coords = (fedId, block["ModuleId"], fiber, channel)
                 qie = channelData["QIE"]
                 if len(qie) < len(matchRange):
                     #print "skipping bogus channel",coords

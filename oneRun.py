@@ -83,6 +83,11 @@ def opts():
                      default=False,
                      action="store_true",
                      help="Print event map to stdout.")
+    match.add_option("--shiftFibCh2",
+                     dest="shiftFibCh2",
+                     default=False,
+                     action="store_true",
+                     help="Shift fibCh=2 by 1 TS to compensate for uHTR f/w bug.")
     parser.add_option_group(match)
 
     patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
@@ -112,6 +117,9 @@ def opts():
     if not all([options.file1, options.feds1]):
         parser.print_help()
         exit()
+    if options.feds2 and not options.file2:
+        print "Using --file1 also for --file2"
+        options.file2 = options.file1
     return options
 
 
@@ -156,9 +164,13 @@ options = opts()
 checkModules()
 
 import analyze
+import configuration
 import printer
+
+configuration.__shiftFibCh2 = options.shiftFibCh2
 if options.noColor:
     printer.__color = False
+
 
 patternOptions = {"nFibers": integer(options.nPatternFibers, "npatternfibers"),
                   "nTs": integer(options.nPatternTs, "npatternts"),
@@ -184,6 +196,9 @@ analyze.oneRun(file1=options.file1,
 
 if not options.patterns:
     if options.file2:
-        analyze.printHisto(label)
+        for iChannel in range(3):
+            print "Channel %d:" % iChannel
+            analyze.printHisto(label, histoName="MatchedFibersCh%d" % iChannel)
+            print
     import graphs
     graphs.makeSummaryPdf(labels=[label])
