@@ -12,7 +12,15 @@ def singleFedPlots(raw={}, fedId=None, book={}):
 
     caps = {0: 0, 1: 0, 2: 0, 3: 0}
     ErrF = {0: 0, 1: 0, 2: 0, 3: 0}
+
+    msg = "FED %d event %d" % (d["header"]["FEDid"], d["header"]["EvN"])
     for block in d["htrBlocks"].values():
+        if type(block) is not dict:
+            printer.warning("%s block is not dict" % msg)
+            return -1
+        if "channelData" not in block:
+            printer.warning("%s block has no channelData" % msg)
+            return -1
         for channelData in block["channelData"].values():
             ErrF[channelData["ErrF"]] += 1
             if not channelData["ErrF"]:
@@ -64,7 +72,8 @@ def compare(raw1={}, raw2={}, book={}):
         for fedId, dct in raw.iteritems():
             if fedId is None:
                 continue
-            singleFedPlots(raw, fedId, book)
+            if singleFedPlots(raw, fedId, book):
+                return
             if (None in raw) and raw[None]["patternMode"]:
                 checkHtrModules(fedId, raw[fedId]["htrBlocks"])
 
@@ -174,7 +183,7 @@ def dataMap(raw={}, skipErrF=[3]):
                 if len(qie) < len(matchRange):
                     #print "skipping bogus channel",coords
                     continue
-                data = tuple([qie[i] for i in matchRange])
+                data = tuple([qie.get(i) for i in matchRange])
                 #print coords,matchRange,[hex(d) for d in data]
                 forward[coords] = data
                 backward[data] = coords
