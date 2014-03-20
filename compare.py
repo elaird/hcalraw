@@ -13,18 +13,23 @@ def singleFedPlots(raw={}, fedId=None, book={}):
     caps = {0: 0, 1: 0, 2: 0, 3: 0}
     ErrF = {0: 0, 1: 0, 2: 0, 3: 0}
 
+    nBadHtrs = 0
     msg = "FED %d event %d" % (d["header"]["FEDid"], d["header"]["EvN"])
     for block in d["htrBlocks"].values():
         if type(block) is not dict:
             printer.warning("%s block is not dict" % msg)
-            return -1
-        if "channelData" not in block:
+            nBadHtrs += 1
+            continue
+        elif "channelData" not in block:
             printer.warning("%s block has no channelData" % msg)
-            return -1
+            nBadHtrs += 1
+            continue
+
         for channelData in block["channelData"].values():
             ErrF[channelData["ErrF"]] += 1
             if not channelData["ErrF"]:
                 caps[channelData["CapId0"]] += 1
+
     errFSum = 0.0+sum(ErrF.values())
     if errFSum:
         book.fill(ErrF[0]/errFSum, "ErrF0_%d" % fedId, 44, 0.0, 1.1,
@@ -37,6 +42,10 @@ def singleFedPlots(raw={}, fedId=None, book={}):
                   title=("FED %d" % fedId) +
                   ";frac. ErrF=0 chans w/most pop. capId;Events / bin"
                   )
+
+    book.fill(nBadHtrs, "nBadHtrs_%d" % fedId, 16, -0.5, 15.5,
+              title="FED %d; N bad HTRs;Events / bin" % fedId)
+    return nBadHtrs
 
 
 def checkHtrModules(fedId=None, htrBlocks={}):
