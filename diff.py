@@ -3,10 +3,13 @@
 import fileinput
 
 
-def mapping(file=None):
+def mapping(file=None, skip=[]):
     out = {}
     misc = []
     for line in file:
+        if any([item in line for item in skip]):
+            continue
+
         if ":" in line:
             be, fe = line.split(":")
             out[tuple(be.split())] = tuple(fe.split())
@@ -84,7 +87,7 @@ if __name__ == "__main__":
     with open("data/ref.txt") as f:
         ref, refMisc = mapping(f)
 
-    cabled, misc = mapping(fileinput.input())
+    cabled, misc = mapping(fileinput.input(), skip=["Xrd", "TClassTable"])
 
     assert not refMisc
     for item in sorted(misc):
