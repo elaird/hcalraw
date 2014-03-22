@@ -21,7 +21,7 @@ git clone https://github.com/elaird/hcalraw.git
 wget https://github.com/elaird/hcalraw/archive/master.zip
 
 cd hcalraw
-source env-slc5-cmssw.sh  # or another env script
+source env/slc5-cmssw.sh  # or another env script
 ./oneRun.py --file1=data/B904_Integration_000050.root --feds1=702 --file2=data/B904_Integration_000050.root --feds2=931
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931
 ./oneRun.py --file1=data/B904_Integration_000067.root --feds1=702 --patterns --nevents=1
@@ -32,11 +32,11 @@ source env-slc5-cmssw.sh  # or another env script
 ---------
 | Files |
 ---------
-env-slc5-cmssw.sh sets up a CMSSW environment (needed to analyze CMS data);
+env/slc5-cmssw.sh sets up a CMSSW environment (needed to analyze CMS data);
        it requires AFS; it is not needed to analyze HCAL test-stand
        data.
-env-slc5-cpython.sh setups up pyROOT; it requires AFS and SLC5.
-env-slc6-pypy.sh setups up pypyROOT; it requires AFS and SLC6.
+env/slc5-cpython.sh setups up pyROOT; it requires AFS and SLC5.
+env/slc6-pypy.sh setups up pypyROOT; it requires AFS and SLC6.
 
 cpp/CDF*.h are copied from CMSSW (IORawData/HcalTBInputService/src)
 cpp/cdf.cxx defines a helper class for reading data from HCAL local DAQ

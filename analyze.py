@@ -61,6 +61,7 @@ def eventMaps(s={}, options={}):
     bcnDelta = configuration.bcnDelta(fedIds[0])
     forward = {}
     backward = {}
+
     f = r.TFile.Open(fileName)
     if f.IsZombie():
         exit()
@@ -410,7 +411,7 @@ def go(outer={}, inner={}, label="", mapOptions={}, printSummary=None):
 
 
 def fileSpec(fileName="", someFedId=None):
-    f = r.TFile(fileName)
+    f = r.TFile.Open(fileName)
     if f.IsZombie():
         exit()
     treeNames = []
