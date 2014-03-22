@@ -138,8 +138,7 @@ def report(d={}, subject=""):
         os.system(cmd)
 
 
-def go(notify="",
-       baseDir="",
+def go(baseDir="",
        select=lambda x: False, 
        process=lambda inputFile, outputDir, run: {},
        minimumRun=None,
