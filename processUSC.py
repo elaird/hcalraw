@@ -107,6 +107,22 @@ def processFiberId(inputFile="", outputDir="", run=0):
     return commandOutput(cmd)
 
 
+def process_utca(inputFile="", outputDir="", run=0):
+    cmd = " && ".join(["cd ~elaird/hcalraw",
+                       "source env/slc6-cmssw.sh",
+                       "./oneRun.py "
+                       ])
+
+    cmd += " ".join(["--file1='%s'" % inputFile,
+                     "--feds1=929",
+                     "--feds2=721,722",
+                     "--nevents=1",
+                     "--dump=4",
+                     ">& %s/1event.txt" % outputDir,
+                     ])
+    return commandOutput(cmd)
+
+
 def report(d={}, subject=""):
     print subject
     lines = []
@@ -171,3 +187,10 @@ if __name__ == "__main__":
        #minimumRun=217920,
        #maximumRun=217940,
        )
+
+    go(baseDir="%s/public/uTCA" % os.environ["HOME"],
+       select=lambda x: ("/HF/" in x) and ("no_utca" not in x),
+       process=process_utca,
+       minimumRun=219866,
+       )
+
