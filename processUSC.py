@@ -90,7 +90,7 @@ def goodRun(rootFile=""):
 
 
 def processFiberId(inputFile="", outputDir="", run=0):
-    cmd = " && ".join(["cd ~elaird/hcalraw",
+    cmd = " && ".join(["cd ~elaird/public/hcalraw_pro",
                        "source env/slc6-cmssw.sh",
                        "./oneRun.py "
                        ])
