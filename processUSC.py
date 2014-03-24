@@ -147,7 +147,7 @@ def go(baseDir="",
        eosPrefix="root://eoscms.cern.ch",
        eosDir="/eos/cms/store/group/comm_hcal/LS1",
        jobCheck="oneRun",
-       nJobsMax=2,
+       nProcMax=5,
        ):
 
     runListFile = "%s/runlist.txt" % baseDir
@@ -161,10 +161,10 @@ def go(baseDir="",
         if run not in runs:
             continue
 
-        jobs = stdout("ps -ef | grep %s | grep %s" % (os.environ["USER"], jobCheck))
-        if len(jobs) >= (2 + nJobsMax):
-            print "Already at least %d jobs:" % nJobsMax
-            print "\n".join(jobs)
+        processes = stdout("ps -ef | grep %s | grep %s" % (os.environ["USER"], jobCheck))
+        if nProcMax < len(processes):
+            print "Already %d processes:" % len(processes)
+            print "\n".join(processes)
             exit()
 
         runDir, procFlag, doneFlag = prepareDir(baseDir, run)
