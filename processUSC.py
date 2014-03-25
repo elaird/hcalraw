@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import sys
 
 
 def commandOutput(command):
@@ -163,9 +164,9 @@ def go(baseDir="",
 
         processes = stdout("ps -ef | grep %s | grep %s" % (os.environ["USER"], jobCheck))
         if nProcMax < len(processes):
-            print "Already %d processes:" % len(processes)
-            print "\n".join(processes)
-            exit()
+            msg = "Already %d processes:" % len(processes)
+            msg += "\n".join(processes)
+            sys.exit(msg)
 
         runDir, procFlag, doneFlag = prepareDir(baseDir, run)
         if runDir:

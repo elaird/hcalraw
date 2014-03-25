@@ -37,9 +37,7 @@ def Swap64(i64 = ""): #//To flip edianness
 def bail():
     url = "http://root.cern.ch/drupal/content"
     url += "/how-use-use-python-pyroot-interpreter"
-
-    printer.error("Could not find ROOT.py nor CppyyROOT.py.  See "+url)
-    exit()
+    sys.exit("Could not find ROOT.py nor CppyyROOT.py.  See "+url)
 
 
 def findROOT():
