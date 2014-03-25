@@ -412,7 +412,7 @@ def go(outer={}, inner={}, label="", mapOptions={}, printSummary=None):
 
 def fileSpec(fileName="", someFedId=None):
     f = r.TFile.Open(fileName)
-    if f.IsZombie():
+    if (not f) or f.IsZombie():
         exit()
     treeNames = []
     for tkey in f.GetListOfKeys():
