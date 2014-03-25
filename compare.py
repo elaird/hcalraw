@@ -54,19 +54,15 @@ def checkHtrModules(fedId=None, htrBlocks={}):
         printer.error("HTR Module check not implemented for uTCA.")
         return
     for spigot, block in htrBlocks.iteritems():
-        expectedTop = {1: "t", 0: "b"}[1 - (spigot % 2)]
-        expectedSlot = spigot/2 + (13 if (fedId % 2) else 2)
-        if expectedSlot == 19:  # DCC occupies slots 19-20
-            expectedSlot = 21
-
+        expected = configuration.expectedHtr(fedId, spigot)
         crates.append(block["Crate"])
-        bad = [block["Top"] != expectedTop,
-               block["Slot"] != expectedSlot,
+        bad = [block["Top"] != expected["Top"],
+               block["Slot"] != expected["Slot"],
                ]
         if any(bad):
             fields = (fedId, spigot, block["Crate"],
                       block["Slot"], block["Top"],
-                      expectedSlot, expectedTop)
+                      expected["Slot"], expected["Top"])
             printer.error("FED %3d spigot %2d has moduleId decode to crate %2d slot %2d%s (expected slot %2d%s)" % fields)
     if len(set(crates)) != 1:
         printer.error("FED %s contains modules with crate labels %s." % (str(fedId), str(crates)))

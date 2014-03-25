@@ -48,6 +48,14 @@ def fiberMap():
     return {}
 
 
+def expectedHtr(fedId, spigot):
+    slot = spigot/2 + (13 if (fedId % 2) else 2)
+    if slot == 19:  # DCC occupies slots 19-20
+        slot = 21
+    return {"Top": {1: "t", 0: "b"}[1 - (spigot % 2)],
+            "Slot": slot}
+
+
 def isVme(fedId=None):
     return 700 <= fedId <= 731
 
