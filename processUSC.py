@@ -51,7 +51,7 @@ def prepareDir(baseDir="", run=0):
         os.mkdir(thisDir)
 
     procFlag = "%s/processing" % thisDir
-    doneFlag = "%s/processed" % thisDir
+    doneFlag = "%s/.processed" % thisDir
 
     if os.path.exists(procFlag):
         print "Run %d is being processed already." % run
