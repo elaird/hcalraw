@@ -4,7 +4,7 @@
 
 import configuration
 import printer
-
+import sys
 
 def ornBcn(ornIn, bcnIn, bcnDelta=0):
     if not bcnDelta:
@@ -285,8 +285,7 @@ def storePatternData(l={}, nFibers=None, nTs=None, **_):
                         if d[key]["CapId"]:
                             cap = d[key]["CapId"][iTs]
                         else:
-                            printer.error("Cap-ids per time-slice not found.  Run without passing '--patterns'.")
-                            exit()
+                            sys.exit("Cap-ids per time-slice not found.  Run without passing '--patterns'.")
                         if fibCh == 0:
                             feWord32 |= qie << 25
                             feWord32 |= cap << 7
