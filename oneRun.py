@@ -3,6 +3,7 @@
 
 def opts():
     import optparse
+    import sys
     parser = optparse.OptionParser()
 
     reqd = optparse.OptionGroup(parser, "REQUIRED")
@@ -116,7 +117,7 @@ def opts():
     options, args = parser.parse_args()
     if not all([options.file1, options.feds1]):
         parser.print_help()
-        exit()
+        sys.exit()
     if options.feds2 and not options.file2:
         print "Using --file1 also for --file2"
         options.file2 = options.file1
@@ -128,8 +129,7 @@ def integer(value="", tag=""):
         try:
             return int(value)
         except ValueError:
-            printer.error("%s '%s' cannot be converted to an int." % (tag, value))
-            exit()
+            sys.exit("%s '%s' cannot be converted to an int." % (tag, value))
     else:
         return None
 
@@ -166,6 +166,7 @@ checkModules()
 import analyze
 import configuration
 import printer
+import sys
 
 configuration.__shiftFibCh2 = options.shiftFibCh2
 if options.noColor:
