@@ -75,7 +75,7 @@ def printTable(rbxes={}, header="", zero="  "):
             "HFM", "HFP",
             "HO2M", "HO1M", "HO0", "HO1P", "HO2P"]
     nSpaces = 5
-    header = " ".join([" "*nSpaces] + boxes)
+    header = " ".join(["RBX".ljust(nSpaces)] + boxes)
     print header
     print "-" * len(header)
     for det in dets:
