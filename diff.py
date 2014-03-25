@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import configuration
 import fileinput
 
 
@@ -35,7 +36,14 @@ def diffs(ref={}, cabled={}):
 
 
 def pretty(be=None, fe=None):
-    s = "%3s %2s %2s:  " % be if be else ''
+    if be:
+        dcc, sp, fi = be
+        exp = configuration.expectedHtr(int(dcc), int(sp))
+        htr = "%2d%1s" % (exp["Slot"], exp["Top"])
+        s = "%3s %2s(%3s) %2s:  " % (dcc, sp, htr, fi)
+    else:
+        s = ""
+
     try:
         s += " %6s %2s %2s" % fe
     except TypeError:
@@ -92,7 +100,7 @@ def report(missing=None, different=None, same=None):
     print "-"*len(header)
     print header
     print "-"*len(header)
-    print "DCC SP FI: ref. RBX RM FI"
+    print "DCC SP(HTR) FI: ref. RBX RM FI"
     if not nMissing.values().count(1):
         print "None"
 
@@ -106,7 +114,7 @@ def report(missing=None, different=None, same=None):
     print "| Differences |"
     print "---------------"
     if different:
-        print "DCC SP FI: ref. RBX RM FI  |   cabled"
+        print "DCC SP(HTR) FI: ref. RBX RM FI  |   cabled"
         for be, (ref, cabled) in sorted(different.iteritems()):
             print pretty(be=be, fe=ref) + "  | " + pretty(fe=cabled)
     else:
