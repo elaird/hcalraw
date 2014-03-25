@@ -46,16 +46,16 @@ def rootFiles(eosDir=""):
     return stdout(cmd)
 
 
-def prepareDir(baseDir="", run=0):
+def prepareDir(baseDir="", run=0, suffix=""):
     thisDir = "%s/%d" % (baseDir, run)
     if not os.path.exists(thisDir):
         os.mkdir(thisDir)
 
-    procFlag = "%s/processing" % thisDir
-    doneFlag = "%s/.processed" % thisDir
+    procFlag = "%s/processing.%s" % (thisDir, suffix)
+    doneFlag = "%s/.processed.%s" % (thisDir, suffix)
 
     if os.path.exists(procFlag):
-        print "Run %d is being processed already." % run
+        print "Run %d (%s) is being processed already." % (run, suffix)
         return [""]*3
     elif os.path.exists(doneFlag):
         return [""]*3
@@ -90,37 +90,43 @@ def goodRun(rootFile=""):
         return
 
 
-def processFiberId(inputFile="", outputDir="", run=0):
-    cmd = " && ".join(["cd ~elaird/public/hcalraw_pro",
+def oneRun(args=[], outputFile=""):
+    out = " && ".join(["cd ~elaird/public/hcalraw_pro",
                        "source env/slc6-cmssw.sh",
                        "./oneRun.py "
                        ])
+    out += " ".join(args)
+    out += " >& %s" % outputFile
+    return out
 
+
+def processFiberId(inputFile="", outputDir="", run=0):
     outputFile = "%s/cabled.txt" % outputDir
-    cmd += " ".join(["--file1='%s'" % inputFile,
-                     "--feds1=HCAL",
-                     "--patterns",
-                     "--nevents=1",
-                     ">& %s" % outputFile,
-                     ])
+    args = ["--file1='%s'" % inputFile,
+            "--feds1=HCAL",
+            "--patterns",
+            "--nevents=1",
+            ]
+    cmd = oneRun(args, outputFile)
+
     diffFile = "%s/summary.txt" % outputDir
     cmd += " && cat %s | ./diff.py > %s" % (outputFile, diffFile)
     return commandOutput(cmd)
 
 
-def process_utca(inputFile="", outputDir="", run=0):
-    cmd = " && ".join(["cd ~elaird/hcalraw",
-                       "source env/slc6-cmssw.sh",
-                       "./oneRun.py "
-                       ])
+def utcaArgs(inputFile=""):
+    return ["--file1='%s' --feds1=929 --feds2=721,722" % inputFile]
 
-    cmd += " ".join(["--file1='%s'" % inputFile,
-                     "--feds1=929",
-                     "--feds2=721,722",
-                     "--nevents=1",
-                     "--dump=4",
-                     ">& %s/1event.txt" % outputDir,
-                     ])
+
+def dumpOneEvent(inputFile="", outputDir="", run=0):
+    args = utcaArgs(inputFile) + ["--nevents=1 --dump=4"]
+    cmd = oneRun(args, outputFile="%s/1event.txt" % outputDir)
+    return commandOutput(cmd)
+
+
+def compare(inputFile="", outputDir="", run=0):
+    args = utcaArgs(inputFile) + ["--nevents=1000 --identity-map --no-color"]
+    cmd = oneRun(args, outputFile="%s/comparison.txt" % outputDir)
     return commandOutput(cmd)
 
 
@@ -132,7 +138,7 @@ def report(d={}, subject=""):
                   str(value).replace("&&", "&&\n"),
                   "", ""]
 
-    if d.get("stderr"):  # or d.get("returncode"):
+    if d.get("stderr") or d.get("returncode"):
         cmd = "echo '%s' |& mail -s '%s' %s" % ("\n".join(lines),
                                                 subject,
                                                 os.environ["USER"])
@@ -168,13 +174,14 @@ def go(baseDir="",
             msg += "\n".join(processes)
             sys.exit(msg)
 
-        runDir, procFlag, doneFlag = prepareDir(baseDir, run)
+        suffix = process.__name__
+        runDir, procFlag, doneFlag = prepareDir(baseDir, run, suffix=suffix)
         if runDir:
             stdout("touch %s" % procFlag)
             d = process(inputFile="%s/%s/%s" % (eosPrefix, eosDir, rootFile),
                         outputDir=runDir,
                         run=run)
-            report(d, subject='Run %d' % run)
+            report(d, subject='Run %d: %s' % (run, suffix))
             stdout("rm %s" % procFlag)
             stdout("touch %s" % doneFlag)
 
@@ -188,9 +195,9 @@ if __name__ == "__main__":
        #maximumRun=217940,
        )
 
-    go(baseDir="%s/public/uTCA" % os.environ["HOME"],
-       select=lambda x: ("/HF/" in x) and ("no_utca" not in x),
-       process=process_utca,
-       minimumRun=219866,
-       )
-
+    for func in [dumpOneEvent, compare]:
+        go(baseDir="%s/public/uTCA" % os.environ["HOME"],
+           select=lambda x: ("/HF/" in x) and ("no_utca" not in x),
+           process=func,
+           minimumRun=219866,
+           )
