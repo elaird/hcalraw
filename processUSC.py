@@ -90,28 +90,30 @@ def goodRun(rootFile=""):
         return
 
 
+def env():
+    return ["cd ~elaird/public/hcalraw_pro", "source env/slc6-cmssw.sh"]
+
+
 def oneRun(args=[], outputFile=""):
-    out = " && ".join(["cd ~elaird/public/hcalraw_pro",
-                       "source env/slc6-cmssw.sh",
-                       "./oneRun.py "
-                       ])
-    out += " ".join(args)
-    out += " >& %s" % outputFile
+    out = " && ".join(env() + ["./oneRun.py"])
+    out += " %s >& %s" % (" ".join(args), outputFile)
     return out
 
 
-def processFiberId(inputFile="", outputDir="", run=0):
+def dumpFibering(inputFile="", outputDir="", run=0):
     outputFile = "%s/cabled.txt" % outputDir
     args = ["--file1='%s'" % inputFile,
             "--feds1=HCAL",
             "--patterns",
             "--nevents=1",
             ]
-    cmd = oneRun(args, outputFile)
+    return commandOutput(oneRun(args, outputFile))
 
-    diffFile = "%s/summary.txt" % outputDir
-    cmd += " && cat %s | ./diff.py > %s" % (outputFile, diffFile)
-    return commandOutput(cmd)
+
+def compareFibering(inputFile="", outputDir="", run=0):
+    cmd = "cat %s/cabled.txt | ./diff.py > %s/summary.txt" % (outputDir,
+                                                              outputDir)
+    return commandOutput(" && ".join(env() + [cmd]))
 
 
 def utcaArgs(inputFile=""):
@@ -179,9 +181,11 @@ def go(baseDir="",
             d = process(inputFile="%s/%s/%s" % (eosPrefix, eosDir, rootFile),
                         outputDir=runDir,
                         run=run)
-            report(d, subject='Run %d: %s' % (run, suffix))
             stdout("rm %s" % procFlag)
-            stdout("touch %s" % doneFlag)
+
+            report(d, subject='Run %d: %s' % (run, suffix))
+            if not d["returncode"]:
+                stdout("touch %s" % doneFlag)
 
 
 if __name__ == "__main__":
@@ -190,14 +194,13 @@ if __name__ == "__main__":
                    hcalRuns="http://cmshcalweb01.cern.ch/HCALruns.txt",
                    )
 
-    go(baseDir="%s/public/FiberID" % os.environ["HOME"],
-       runListFile=runListFile,
-       select=lambda x: "FiberID" in x,
-       process=processFiberId,
-       minimumRun=214782,
-       #minimumRun=217920,
-       #maximumRun=217940,
-       )
+    for func in [dumpFibering, compareFibering]:
+        go(baseDir="%s/public/FiberID" % os.environ["HOME"],
+           runListFile=runListFile,
+           select=lambda x: "FiberID" in x,
+           process=func,
+           minimumRun=214782,
+           )
 
     for func in [dumpOneEvent, compare]:
         go(baseDir="%s/public/uTCA" % os.environ["HOME"],
