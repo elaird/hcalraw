@@ -1,6 +1,8 @@
 import os
 import struct
+import sys
 import utils
+
 r = utils.ROOT()
 import autoBook
 import compare
@@ -64,13 +66,13 @@ def eventMaps(s={}, options={}):
 
     f = r.TFile.Open(fileName)
     if f.IsZombie():
-        exit()
+        sys.exit()
 
     tree = f.Get(treeName)
     if not tree:
         printer.msg("tree %s not found.  These objects are available:" % treeName)
         f.ls()
-        exit()
+        sys.exit()
 
     for iEvent in range(nEvents(tree, nEventsMax)):
         orn = bcn = evn = None
@@ -128,8 +130,7 @@ def eventMaps(s={}, options={}):
             orn, bcn, evn = coords(raw)
 
         else:
-            printer.error("name %s not found." % name)
-            exit()
+            sys.exit("name %s not found." % name)
 
         t = (orn, evn) if useEvn else (orn, )
         if filterEvn and (evn & 0x1fff):
@@ -310,7 +311,7 @@ def wordsOneBranch(tree=None, branch=""):
         names = [item.GetName() for item in tree.GetListOfBranches()]
         for name in sorted(names):
             printer.msg(name)
-        exit()
+        sys.exit()
     return chunk
 
 
@@ -372,8 +373,7 @@ def go(outer={}, inner={}, label="", mapOptions={}, printSummary=None):
             for key in innerEvent.keys():
                 innerEvent[key] = key
         if set(innerEvent.values()) == set([None]):
-            printer.error("No common events found.  Consider either passing --identity-map or increasing --orn-tolerance.")
-            exit()
+            sys.exit("No common events found.  Consider either passing --identity-map or increasing --orn-tolerance.")
         if mapOptions.get('printEventMap', False):
             for oEvent, iEvent in sorted(innerEvent.iteritems()):
                 printer.msg(", ".join(["oEvent = %s" % str(oEvent),
@@ -413,7 +413,7 @@ def go(outer={}, inner={}, label="", mapOptions={}, printSummary=None):
 def fileSpec(fileName="", someFedId=None):
     f = r.TFile.Open(fileName)
     if (not f) or f.IsZombie():
-        exit()
+        sys.exit()
     treeNames = []
     for tkey in f.GetListOfKeys():
         obj = f.Get(tkey.GetName())
@@ -429,7 +429,7 @@ def fileSpec(fileName="", someFedId=None):
     if len(specs) != 1:
         printer.error("found multiple known TTrees in file %s" % fileName)
         printer.msg(str(specs))
-        exit()
+        sys.exit()
     else:
         return specs[0]
     f.Close()
@@ -437,8 +437,7 @@ def fileSpec(fileName="", someFedId=None):
 
 def checkFedList(feds=[]):
     if len(set([configuration.isVme(fed) for fed in feds])) != 1:
-        printer.error("fed list %s is mixed among uTCA and VME." % str(feds))
-        exit()
+        sys.exit("fed list %s is mixed among uTCA and VME." % str(feds))
 
 
 def oneRun(file1="",
