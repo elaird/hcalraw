@@ -146,19 +146,17 @@ def report(d={}, subject=""):
 
 
 def go(baseDir="",
+       runListFile="",
        select=lambda x: False, 
        process=lambda inputFile, outputDir, run: {},
        minimumRun=None,
        maximumRun=None,
-       hcalRuns="http://cmshcalweb01.cern.ch/HCALruns.txt",
        eosPrefix="root://eoscms.cern.ch",
        eosDir="/eos/cms/store/group/comm_hcal/LS1",
        jobCheck="oneRun",
        nProcMax=5,
        ):
-
-    runListFile = "%s/runlist.txt" % baseDir
-    prepareRunList(dest=runListFile, hcalRuns=hcalRuns)
+    assert runListFile
     runs = filter(lambda x: minimumRun <= x, selectedRuns(select, runListFile))
     if maximumRun:
         runs = filter(lambda x: x <= maximumRun, runs)
@@ -187,7 +185,13 @@ def go(baseDir="",
 
 
 if __name__ == "__main__":
+    runListFile = "%s/public/html/runlist.txt" % os.environ["HOME"]
+    prepareRunList(dest=runListFile,
+                   hcalRuns="http://cmshcalweb01.cern.ch/HCALruns.txt",
+                   )
+
     go(baseDir="%s/public/FiberID" % os.environ["HOME"],
+       runListFile=runListFile,
        select=lambda x: "FiberID" in x,
        process=processFiberId,
        minimumRun=214782,
@@ -197,6 +201,7 @@ if __name__ == "__main__":
 
     for func in [dumpOneEvent, compare]:
         go(baseDir="%s/public/uTCA" % os.environ["HOME"],
+           runListFile=runListFile,
            select=lambda x: ("/HF/" in x) and ("no_utca" not in x),
            process=func,
            minimumRun=219866,
