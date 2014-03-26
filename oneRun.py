@@ -18,14 +18,6 @@ def opts():
     parser.add_option_group(reqd)
 
     common = optparse.OptionGroup(parser, "Optional")
-    common.add_option("--file2",
-                      dest="file2",
-                      default="",
-                      help=".root file to compare with file1")
-    common.add_option("--feds2",
-                      dest="feds2",
-                      default="",
-                      help="FEDs to use in file2, e.g. 931")
     common.add_option("--patterns",
                       dest="patterns",
                       default=False,
@@ -56,9 +48,22 @@ def opts():
                       default=False,
                       action="store_true",
                       help="disable color in stdout")
+    common.add_option("--profile",
+                      dest="profile",
+                      default=False,
+                      action="store_true",
+                      help="profile the run")
     parser.add_option_group(common)
 
     match = optparse.OptionGroup(parser, "Options for matching events across files")
+    match.add_option("--file2",
+                     dest="file2",
+                     default="",
+                     help=".root file to compare with file1")
+    match.add_option("--feds2",
+                     dest="feds2",
+                     default="",
+                     help="FEDs to use in file2, e.g. 931")
     match.add_option("--use-evn",
                      dest="useEvn",
                      default=False,
@@ -160,46 +165,54 @@ def checkModules():
         print "Please put imports after this block, to prevent PyROOT from stealing '--help'."
 
 
-options = opts()
-checkModules()
+if __name__ == "__main__":
+    options = opts()
+    checkModules()
 
-import analyze
-import configuration
-import printer
-import sys
+    import analyze
+    import configuration
+    import printer
+    import sys
+    import cProfile
 
-configuration.__shiftFibCh2 = options.shiftFibCh2
-if options.noColor:
-    printer.__color = False
+    configuration.__shiftFibCh2 = options.shiftFibCh2
+    if options.noColor:
+        printer.__color = False
+
+    patternOptions = {"nFibers": integer(options.nPatternFibers, "npatternfibers"),
+                      "nTs": integer(options.nPatternTs, "npatternts"),
+                      "pureFibersOnly": not options.patternB,
+                      "process": not options.rawPatterns,
+                      } if options.patterns else {}
+
+    mapOptions = {"ornTolerance": integer(options.ornTolerance, "orn-tolerance")}
+    for key in ["useEvn", "filterEvn", "printEventMap", "identityMap"]:
+        mapOptions[key] = getattr(options, key)
+
+    label = "latest"
+    def go():
+        analyze.oneRun(file1=options.file1,
+                       feds1=fedList(options.feds1),
+                       file2=options.file2,
+                       feds2=fedList(options.feds2),
+                       nEvents=integer(options.nevents, "nevents"),
+                       patternMode=patternOptions,
+                       mapOptions=mapOptions,
+                       label=label,
+                       dump=integer(options.dump, "dump"),
+                       )
+
+    if options.profile:
+        cProfile.run("go()", sort="time")
+    else:
+        go()
 
 
-patternOptions = {"nFibers": integer(options.nPatternFibers, "npatternfibers"),
-                  "nTs": integer(options.nPatternTs, "npatternts"),
-                  "pureFibersOnly": not options.patternB,
-                  "process": not options.rawPatterns,
-                  } if options.patterns else {}
-
-mapOptions = {"ornTolerance": integer(options.ornTolerance, "orn-tolerance")}
-for key in ["useEvn", "filterEvn", "printEventMap", "identityMap"]:
-    mapOptions[key] = getattr(options, key)
-
-label = "latest"
-analyze.oneRun(file1=options.file1,
-               feds1=fedList(options.feds1),
-               file2=options.file2,
-               feds2=fedList(options.feds2),
-               nEvents=integer(options.nevents, "nevents"),
-               patternMode=patternOptions,
-               mapOptions=mapOptions,
-               label=label,
-               dump=integer(options.dump, "dump"),
-               )
-
-if not options.patterns:
-    if options.file2:
-        for iChannel in range(3):
-            print "Channel %d:" % iChannel
-            analyze.printHisto(label, histoName="MatchedFibersCh%d" % iChannel)
-            print
-    import graphs
-    graphs.makeSummaryPdf(labels=[label])
+    if not options.patterns:
+        if options.file2:
+            for iChannel in range(3):
+                print "Channel %d:" % iChannel
+                analyze.printHisto(label, histoName="MatchedFibersCh%d" % iChannel)
+                print
+        import graphs
+        graphs.makeSummaryPdf(labels=[label])
