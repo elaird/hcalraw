@@ -1,5 +1,31 @@
+import math
 import utils
 r = utils.ROOT()
+
+
+def combineBinContentAndError(histo, binToContainCombo, binToBeKilled):
+    xflows     = histo.GetBinContent(binToBeKilled)
+    xflowError = histo.GetBinError(binToBeKilled)
+
+    if xflows == 0.0:  # ugly
+        return
+
+    currentContent = histo.GetBinContent(binToContainCombo)
+    currentError   = histo.GetBinError(binToContainCombo)
+
+    histo.SetBinContent(binToBeKilled, 0.0)
+    histo.SetBinContent(binToContainCombo, currentContent+xflows)
+
+    histo.SetBinError(binToBeKilled, 0.0)
+    histo.SetBinError(binToContainCombo, math.sqrt(xflowError**2+currentError**2))
+
+
+def shiftFlows(histo=None):
+    bins = histo.GetNbinsX()
+    entries = histo.GetEntries()
+    combineBinContentAndError(histo, binToContainCombo=1   , binToBeKilled=0     )
+    combineBinContentAndError(histo, binToContainCombo=bins, binToBeKilled=bins+1)
+    histo.SetEntries(entries)
 
 
 def labelAxis(h=None, labels={}):
@@ -72,6 +98,7 @@ def histoLoop(f, lst, func):
         else:
             h0 = h
         maxes.append(h.GetMaximum())
+        shiftFlows(h)
         h.Draw(gopts)
         stylize(h, color, style)
         out.append(h)
@@ -92,7 +119,7 @@ def makeSummaryPdf(labels=[], pdf="summary.pdf"):
     pad0 = r.TPad("pad0", "pad0", 0.0, 0.95, 1.0, 1.00)
     pad1 = r.TPad("pad1", "pad1", 0.0, 0.75, 1.0, 0.95)
     pad2 = r.TPad("pad1", "pad1", 0.0, 0.00, 1.0, 0.75)
-    pad2.Divide(4, 3)
+    pad2.Divide(3, 3)
 
     pad0.Draw()
     pad1.Draw()
@@ -144,9 +171,9 @@ def makeSummaryPdf(labels=[], pdf="summary.pdf"):
                           lambda x: "delta%s" % x,
                           )
 
-        for iHisto, name in enumerate(["", "ErrF0", "PopCapFrac", "TTS",
-                                       "", "", "", "",
-                                       "", "", "", "",
+        for iHisto, name in enumerate(["", "nBadHtrs", "nWord16Skipped",
+                                       "ErrF0", "PopCapFrac", "TTS",
+                                       "MatchedFibersCh0", "MatchedFibersCh1", "MatchedFibersCh2",
                                        ]):
             if not name:
                 continue
@@ -154,6 +181,7 @@ def makeSummaryPdf(labels=[], pdf="summary.pdf"):
             adjustPad(logY=True)
             h = f.Get(name)
             if h:
+                shiftFlows(h)
                 h.Draw("hist")
                 stylize(h)
                 keep.append(h)
@@ -162,8 +190,13 @@ def makeSummaryPdf(labels=[], pdf="summary.pdf"):
                                   [#(714, r.kRed, 1),
                                    #(722, r.kGreen, 2),
                                    #(989, r.kBlack, 3),
-                                   (702, r.kGreen, 2),
-                                   (931, r.kBlack, 3),
+
+                                   #(702, r.kGreen, 2),
+                                   #(931, r.kBlack, 3),
+
+                                   (929, r.kGreen, 2),
+                                   (721, r.kRed, 1),
+                                   (722, r.kBlack, 3),
                                    ],
                                   lambda x: "%s_%d" % (name, x),
                                   )
