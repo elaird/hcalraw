@@ -5,6 +5,10 @@ import printRaw
 
 def singleFedPlots(raw={}, fedId=None, book={}):
     d = raw[fedId]
+
+    book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 16, -0.5, 15.5,
+                title="FED %d; nWord16 skipped during unpacking;Events / bin" % fedId)
+
     t = d["trailer"]
     if "TTS" in t:
         book.fill(t["TTS"], "TTS_%d" % fedId, 16, -0.5, 15.5,
