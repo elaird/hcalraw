@@ -217,6 +217,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
 
     nWord64 = fedData.size()*nBytesPer/8
     iWordPayload0 = 6 if utca else 12
+    nWord16Skipped = 0
 
     nToSkip = len(set(skipWords64))
     nSkipped64 = 0
@@ -253,13 +254,15 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
                                             utca=utca, bcnDelta=bcnDelta,
                                             skipFlavors=skipFlavors,
                                             patternMode=patternMode)
-                if (returnCode is not None) and (iWord64 != nWord64 - 2 - nToSkip):
-                    printer.warning(" ".join(["skipping",
-                                              "FED %d" % header["FEDid"],
-                                              "event %d" % header["EvN"],
-                                              "iWord16 %d" % iWord16,
-                                              "word16 %d" % word16,
-                                              ]))
+                if returnCode is not None:
+                    nWord16Skipped += 1
+                    if (iWord64 != nWord64 - 2 - nToSkip):
+                        printer.warning(" ".join(["skipping",
+                                                  "FED %d" % header["FEDid"],
+                                                  "event %d" % header["EvN"],
+                                                  "iWord16 %d" % iWord16,
+                                                  "word16 %d" % word16,
+                                                  ]))
         else:
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
@@ -269,6 +272,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
             "trailer": trailer,
             "htrBlocks": htrBlocks,
             "nBytesSW": 8*nWord64,
+            "nWord16Skipped": nWord16Skipped,
             }
 
 
