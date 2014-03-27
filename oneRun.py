@@ -43,6 +43,11 @@ def opts():
                       default=0,
                       metavar="D",
                       help=" ".join([d.ljust(60) for d in dump]))
+    common.add_option("--no-warn-skip16",
+                      dest="noWarnSkip16",
+                      default=False,
+                      action="store_true",
+                      help="disable warning when unpacker skips 16-bit words")
     common.add_option("--no-color",
                       dest="noColor",
                       default=False,
@@ -204,6 +209,7 @@ if __name__ == "__main__":
                        mapOptions=mapOptions,
                        label=options.label,
                        dump=integer(options.dump, "dump"),
+                       warnSkip16=not options.noWarnSkip16,
                        )
 
     if options.profile:

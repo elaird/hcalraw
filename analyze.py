@@ -180,6 +180,7 @@ def collectedRaw(tree=None, specs={}):
                  "bcnDelta": configuration.bcnDelta(fedId),
                  "skipFlavors": configuration.unpackSkipFlavors(fedId),
                  "patternMode": specs["patternMode"],
+                 "warnSkip16": specs["warnSkip16"],
                  }
         if specs["name"] == "CMS":
             rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
@@ -206,7 +207,7 @@ def collectedRaw(tree=None, specs={}):
 
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
-def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
+def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
              skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternMode={}):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
     assert headerOnly or (utca in [False, True]), \
@@ -256,7 +257,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
                                             patternMode=patternMode)
                 if returnCode is not None:
                     nWord16Skipped += 1
-                    if (iWord64 != nWord64 - 2 - nToSkip):
+                    if (iWord64 != nWord64 - 2 - nToSkip) and warnSkip16:
                         printer.warning(" ".join(["skipping",
                                                   "FED %d" % header["FEDid"],
                                                   "event %d" % header["EvN"],
@@ -453,17 +454,22 @@ def oneRun(file1="",
            nEvents=None,
            label="",
            dump=None,
+           warnSkip16=None,
            ):
 
     assert file1
     assert feds1
+
+    common = {"nEventsMax": nEvents,
+              "patternMode": patternMode,
+              "dump": dump,
+              "warnSkip16": warnSkip16,
+              }
     checkFedList(feds1)
     spec1 = fileSpec(file1, feds1[0])
+    spec1.update(common)
     spec1.update({"fileName": file1,
                   "fedIds": feds1,
-                  "nEventsMax": nEvents,
-                  "patternMode": patternMode,
-                  "dump": dump,
                   "label": "file1",
                   })
     inner = {}
@@ -472,11 +478,9 @@ def oneRun(file1="",
         assert feds2
         checkFedList(feds2)
         spec2 = fileSpec(file2, feds2[0])
+        spec2.update(common)
         spec2.update({"fileName": file2,
                       "fedIds": feds2,
-                      "nEventsMax": nEvents,
-                      "patternMode": patternMode,
-                      "dump": dump,
                       "label": "file2",
                       })
         inner = spec2
