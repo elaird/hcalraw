@@ -138,9 +138,19 @@ def utcaArgs(inputFile=""):
             "--identity-map --no-warn-skip16"]
 
 
-def dumpEvents(inputFile="", outputDir="", run=0, n=3):
+def dumpEventsNoColor(**kargs):
+    kargs["color"] = False
+    return dumpEvents(**kargs)
+
+
+def dumpEvents(inputFile="", outputDir="", run=0, n=3, color=True):
     args = utcaArgs(inputFile) + ["--dump=4 --nevents=%d" % n]
-    cmd = oneRun(args, outputFile="%s/%devents.txt" % (outputDir, n))
+    outputFile = "%s/%devents.txt" % (outputDir, n)
+    if color:
+        outputFile = outputFile.replace(".txt", "_color.txt")
+    else:
+        args.append("--no-color")
+    cmd = oneRun(args, outputFile=outputFile)
     return commandOutput(cmd)
 
 
@@ -228,7 +238,7 @@ if __name__ == "__main__":
            minimumRun=214782,
            )
 
-    for func in [dumpEvents, compare]:
+    for func in [dumpEvents, dumpEventsNoColor, compare]:
         go(baseDir="%s/public/uTCA" % os.environ["HOME"],
            runListFile=runListFile,
            select=lambda x: ("/HF/" in x) and ("no_utca" not in x),
