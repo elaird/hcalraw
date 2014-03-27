@@ -53,6 +53,11 @@ def opts():
                       default=False,
                       action="store_true",
                       help="profile the run")
+    common.add_option("--label",
+                      dest="label",
+                      default="latest",
+                      help="string used for the output .root file")
+
     parser.add_option_group(common)
 
     match = optparse.OptionGroup(parser, "Options for matching events across files")
@@ -189,7 +194,6 @@ if __name__ == "__main__":
     for key in ["useEvn", "filterEvn", "printEventMap", "identityMap"]:
         mapOptions[key] = getattr(options, key)
 
-    label = "latest"
     def go():
         analyze.oneRun(file1=options.file1,
                        feds1=fedList(options.feds1),
@@ -198,7 +202,7 @@ if __name__ == "__main__":
                        nEvents=integer(options.nevents, "nevents"),
                        patternMode=patternOptions,
                        mapOptions=mapOptions,
-                       label=label,
+                       label=options.label,
                        dump=integer(options.dump, "dump"),
                        )
 
@@ -212,7 +216,7 @@ if __name__ == "__main__":
         if options.file2:
             for iChannel in range(3):
                 print "Channel %d:" % iChannel
-                analyze.printHisto(label, histoName="MatchedFibersCh%d" % iChannel)
+                analyze.printHisto(options.label, histoName="MatchedFibersCh%d" % iChannel)
                 print
         import graphs
-        graphs.makeSummaryPdf(labels=[label])
+        graphs.makeSummaryPdf(labels=[options.label])
