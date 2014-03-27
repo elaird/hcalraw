@@ -288,7 +288,8 @@ def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
                               " TTS",
                               " nBytesHW",
                               "nBytesSW",
-                              "CRC16",
+                              #"CRC16",
+                              "nSkip16",
                               ])
         printer.blue("-"*len(headers))
         printer.blue(headers)
@@ -300,7 +301,8 @@ def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
                                  ("  %1x" % t["TTS"]) if "TTS" in t else "  - ",
                                  ("    %4d" % (t["nWord64"]*8)) if "nWord64" in t else "    --  ",
                                  "    %4d" % d["nBytesSW"],
-                                 (" 0x%04x" % t["CRC16"]) if "CRC16" in t else "   - ",
+                                 #(" 0x%04x" % t["CRC16"]) if "CRC16" in t else "   - ",
+                                 "%7d" % d["nWord16Skipped"],
                                  ]))
         if 2 <= dump:
             htrOverview(h)
