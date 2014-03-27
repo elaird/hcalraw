@@ -130,7 +130,7 @@ def compareFibering(inputFile="", outputDir="", run=0):
 
 
 def utcaArgs(inputFile=""):
-    return ["--file1='%s' --feds1=929 --feds2=721,722" % inputFile]
+    return ["--file1='%s' --feds1=929 --feds2=721,722 --identity-map" % inputFile]
 
 
 def dumpOneEvent(inputFile="", outputDir="", run=0):
@@ -140,7 +140,7 @@ def dumpOneEvent(inputFile="", outputDir="", run=0):
 
 
 def compare(inputFile="", outputDir="", run=0):
-    args = utcaArgs(inputFile) + ["--nevents=1000 --identity-map --no-color"]
+    args = utcaArgs(inputFile) + ["--nevents=1000 --no-color"]
     cmd = oneRun(args, outputFile="%s/comparison.txt" % outputDir)
     return commandOutput(cmd)
 
