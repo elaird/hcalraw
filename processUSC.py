@@ -107,9 +107,12 @@ def env():
     return ["cd ~elaird/public/hcalraw_pro", "source env/slc6-cmssw.sh"]
 
 
-def oneRun(args=[], outputFile=""):
-    out = " && ".join(env() + ["./oneRun.py"])
-    out += " %s >& %s" % (" ".join(args), outputFile)
+def oneRun(args=[], outputFile="", suppress=["Xrd", "nologin"]):
+    out = " && ".join(env() + ["./oneRun.py "])
+    out += " ".join(args)
+    for item in suppress:
+        out += " |& grep -v %s" % item
+    out += " >& %s" % outputFile
     return out
 
 
@@ -130,12 +133,14 @@ def compareFibering(inputFile="", outputDir="", run=0):
 
 
 def utcaArgs(inputFile=""):
-    return ["--file1='%s' --feds1=929 --feds2=721,722 --identity-map" % inputFile]
+    return ["--file1='%s'" % inputFile,
+            "--feds1=929 --feds2=721,722",
+            "--identity-map --no-warn-skip16"]
 
 
-def dumpOneEvent(inputFile="", outputDir="", run=0):
-    args = utcaArgs(inputFile) + ["--nevents=1 --dump=4"]
-    cmd = oneRun(args, outputFile="%s/1event.txt" % outputDir)
+def dumpEvents(inputFile="", outputDir="", run=0, n=3):
+    args = utcaArgs(inputFile) + ["--dump=4 --nevents=%d" % n]
+    cmd = oneRun(args, outputFile="%s/%devents.txt" % (outputDir, n))
     return commandOutput(cmd)
 
 
@@ -223,7 +228,7 @@ if __name__ == "__main__":
            minimumRun=214782,
            )
 
-    for func in [dumpOneEvent, compare]:
+    for func in [dumpEvents, compare]:
         go(baseDir="%s/public/uTCA" % os.environ["HOME"],
            runListFile=runListFile,
            select=lambda x: ("/HF/" in x) and ("no_utca" not in x),
