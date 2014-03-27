@@ -207,7 +207,10 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
             continue
         if data["ErrF"] in skipErrF:
             continue
-        red = (1+data["Fiber"], data["FibCh"]) in nonMatched
+        if printer.__color:  # hack
+            red = (1+data["Fiber"], data["FibCh"]) in nonMatched
+        else:
+            red = False
         out.append("   ".join(["  %2d" % crate,
                                "%3d%1s" % (slot, top),
                                "%2d" % data["Fiber"],
