@@ -46,21 +46,34 @@ def rootFiles(eosDir=""):
     return stdout(cmd)
 
 
-def prepareDir(baseDir="", run=0, suffix=""):
-    thisDir = "%s/%d" % (baseDir, run)
-    if not os.path.exists(thisDir):
-        os.mkdir(thisDir)
+def makeDir(baseDir="", run=0):
+    out = "%s/%d" % (baseDir, run)
+    if not os.path.exists(out):
+        os.mkdir(out)
+    return out
 
-    procFlag = "%s/processing.%s" % (thisDir, suffix)
-    doneFlag = "%s/.processed.%s" % (thisDir, suffix)
 
-    if os.path.exists(procFlag):
+def flags(runDir="", suffix="", dependsUpon=[]):
+    def proc(s):
+        return "%s/processing.%s" % (runDir, s)
+    def done(s):
+        return "%s/.processed.%s" % (runDir, s)
+
+    yes = (True, proc(suffix), done(suffix))
+    no = (False, "", "")
+
+    notReady = filter(lambda x: not os.path.exists(done(x)), dependsUpon)
+
+    if os.path.exists(proc(suffix)):
         print "Run %d (%s) is being processed already." % (run, suffix)
-        return [""]*3
-    elif os.path.exists(doneFlag):
-        return [""]*3
+        return no
+    elif notReady:
+        print "These dependencies are not ready:", notReady
+        return no
+    elif os.path.exists(done(suffix)):
+        return no
     else:
-        return thisDir, procFlag, doneFlag
+        return yes
 
 
 def selectedRuns(select=lambda x: False, runListFile=""):
@@ -151,6 +164,7 @@ def go(baseDir="",
        runListFile="",
        select=lambda x: False, 
        process=lambda inputFile, outputDir, run: {},
+       dependsUpon=[],
        minimumRun=None,
        maximumRun=None,
        eosPrefix="root://eoscms.cern.ch",
@@ -174,9 +188,12 @@ def go(baseDir="",
             msg += "\n".join(processes)
             sys.exit(msg)
 
+        runDir = makeDir(baseDir, run)
         suffix = process.__name__
-        runDir, procFlag, doneFlag = prepareDir(baseDir, run, suffix=suffix)
-        if runDir:
+        ready, procFlag, doneFlag = flags(runDir,
+                                          suffix=suffix,
+                                          dependsUpon=dependsUpon)
+        if ready:
             stdout("touch %s" % procFlag)
             d = process(inputFile="%s/%s/%s" % (eosPrefix, eosDir, rootFile),
                         outputDir=runDir,
@@ -194,11 +211,14 @@ if __name__ == "__main__":
                    hcalRuns="http://cmshcalweb01.cern.ch/HCALruns.txt",
                    )
 
-    for func in [dumpFibering, compareFibering]:
+    for func, deps in [(dumpFibering, []),
+                       (compareFibering, ["dumpFibering"]),
+                       ]:
         go(baseDir="%s/public/FiberID" % os.environ["HOME"],
            runListFile=runListFile,
            select=lambda x: "FiberID" in x,
            process=func,
+           dependsUpon=deps,
            minimumRun=214782,
            )
 
