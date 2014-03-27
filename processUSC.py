@@ -53,7 +53,7 @@ def makeDir(baseDir="", run=0):
     return out
 
 
-def flags(runDir="", suffix="", dependsUpon=[]):
+def flags(runDir="", run=0, suffix="", dependsUpon=[]):
     def proc(s):
         return "%s/processing.%s" % (runDir, s)
     def done(s):
@@ -190,7 +190,8 @@ def go(baseDir="",
 
         runDir = makeDir(baseDir, run)
         suffix = process.__name__
-        ready, procFlag, doneFlag = flags(runDir,
+        ready, procFlag, doneFlag = flags(runDir=runDir,
+                                          run=run,
                                           suffix=suffix,
                                           dependsUpon=dependsUpon)
         if ready:
