@@ -65,14 +65,13 @@ def eventMaps(s={}, options={}):
     backward = {}
 
     f = r.TFile.Open(fileName)
-    if f.IsZombie():
-        sys.exit()
+    if (not f) or f.IsZombie():
+        sys.exit("File %s could not be opened." % fileName)
 
     tree = f.Get(treeName)
     if not tree:
-        printer.msg("tree %s not found.  These objects are available:" % treeName)
         f.ls()
-        sys.exit()
+        sys.exit("tree %s not found.  The above objects are available." % treeName)
 
     for iEvent in range(nEvents(tree, nEventsMax)):
         orn = bcn = evn = None
@@ -312,11 +311,10 @@ def wordsOneBranch(tree=None, branch=""):
     try:
         chunk = getattr(tree, branch)
     except AttributeError:
-        printer.msg("Branch %s not found.  These branches are available:" % branch)
+        msg = ["Branch %s not found.  These branches are available:" % branch]
         names = [item.GetName() for item in tree.GetListOfBranches()]
-        for name in sorted(names):
-            printer.msg(name)
-        sys.exit()
+        msg += sorted(names)
+        sys.exit("\n".join(msg))
     return chunk
 
 
@@ -418,7 +416,8 @@ def go(outer={}, inner={}, label="", mapOptions={}, printSummary=None):
 def fileSpec(fileName="", someFedId=None):
     f = r.TFile.Open(fileName)
     if (not f) or f.IsZombie():
-        sys.exit()
+        sys.exit("File %s could not be opened." % fileName)
+
     treeNames = []
     for tkey in f.GetListOfKeys():
         obj = f.Get(tkey.GetName())
@@ -432,9 +431,9 @@ def fileSpec(fileName="", someFedId=None):
             specs.append(spec)
 
     if len(specs) != 1:
-        printer.error("found multiple known TTrees in file %s" % fileName)
-        printer.msg(str(specs))
-        sys.exit()
+        msg = "found multiple known TTrees in file %s\n" % fileName
+        msg += str(specs)
+        sys.exit(msg)
     else:
         return specs[0]
     f.Close()
