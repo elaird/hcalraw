@@ -2,6 +2,7 @@
 
 import configuration
 import fileinput
+import sys
 
 
 def mapping(file=None, skip=[]):
@@ -12,7 +13,12 @@ def mapping(file=None, skip=[]):
             continue
 
         if ":" in line:
-            be, fe = line.split(":")
+            fields = line.split(":")
+            if len(fields) != 2:
+                sys.exit("Problem processing this line:\n%s" % line)
+            else:
+                be, fe = fields
+
             out[tuple(be.split())] = tuple(fe.split())
         elif line != "\n":
             misc.append(line)
