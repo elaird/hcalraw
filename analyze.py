@@ -362,7 +362,7 @@ def eventToEvent(mapF={}, mapB={}, options={}):
     return out
 
 
-def go(outer={}, inner={}, label="", mapOptions={}, printSummary=None):
+def go(outer={}, inner={}, outputFile="", mapOptions={}, printSummary=None):
     innerEvent = {}
     deltaOrn = {}
 
@@ -388,7 +388,12 @@ def go(outer={}, inner={}, label="", mapOptions={}, printSummary=None):
     loop(inner=inner, outer=outer, innerEvent=innerEvent, book=book)
 
     #write results to a ROOT file
-    f = r.TFile("%s/%s.root" % (utils.outputDir(), label), "RECREATE")
+    dirName = os.path.dirname(outputFile)
+    if not os.path.exists(dirName):
+        print "Creating directory '%s'" % dirName
+        os.mkdir(dirName)
+
+    f = r.TFile(outputFile, "RECREATE")
     gr = graph(categories(oMap=oMapF, iMap=iMapF, innerEvent=innerEvent))
     nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
 
@@ -407,7 +412,7 @@ def go(outer={}, inner={}, label="", mapOptions={}, printSummary=None):
     f.Close()
 
     if printSummary:
-        s = "%s: %4s = %6d" % (label, outer["label"], len(oMapF))
+        s = "%s: %4s = %6d" % (outputFile, outer["label"], len(oMapF))
         if inner:
             s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
         printer.msg(s)
@@ -451,7 +456,7 @@ def oneRun(file1="",
            patternMode={},
            mapOptions={},
            nEvents=None,
-           label="",
+           outputFile="",
            dump=None,
            warnSkip16=None,
            ):
@@ -486,13 +491,13 @@ def oneRun(file1="",
 
     go(outer=spec1,
        inner=inner,
-       label=label,
+       outputFile=outputFile,
        mapOptions=mapOptions,
        printSummary=(not patternMode) and (file1 != file2))
 
 
-def printHisto(label="", histoName="MatchedFibers"):
-    f = r.TFile("%s/%s.root" % (utils.outputDir(), label))
+def printHisto(fileName="", histoName="MatchedFibers"):
+    f = r.TFile(fileName)
     h = f.Get(histoName)
     if not h:
         printer.error("histogram %s not found." % histoName)
