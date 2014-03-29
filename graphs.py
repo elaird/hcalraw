@@ -112,37 +112,21 @@ def histoLoop(f, lst, func):
     return out
 
 
-def makeSummaryPdf(inputFiles=[], pdf="summary.pdf"):
-    canvas = r.TCanvas()
-    canvas.Print(pdf+"[")
+def onePage(f=None, pad0=None, pad1=None, pad2=None):
+    keep = []
 
-    pad0 = r.TPad("pad0", "pad0", 0.0, 0.95, 1.0, 1.00)
-    pad1 = r.TPad("pad1", "pad1", 0.0, 0.75, 1.0, 0.95)
-    pad2 = r.TPad("pad1", "pad1", 0.0, 0.00, 1.0, 0.75)
-    pad2.Divide(3, 3)
+    #label
+    pad0.cd()
+    text = r.TText(0.5, 0.5, f.GetPath())
+    text.SetNDC()
+    text.SetTextAlign(22)
+    text.SetTextSize(20.0*text.GetTextSize())
+    text.Draw()
+    keep.append(text)
 
-    pad0.Draw()
-    pad1.Draw()
-    pad2.Draw()
-
-    for fileName in inputFiles:
-        f = r.TFile(fileName)
-        if not f:
-            continue
-
-        #label
-        pad0.cd()
-        text = r.TText(0.5, 0.5, fileName)
-        text.SetNDC()
-        text.SetTextAlign(22)
-        text.SetTextSize(20.0*text.GetTextSize())
-        text.Draw()
-
-        #category graphs
-        graph = f.Get("category_vs_time")
-        if not graph:
-            continue
-
+    #category graphs
+    graph = f.Get("category_vs_time")
+    if graph:
         graph.SetMarkerStyle(20)
         graph.SetMarkerColor(r.gStyle.GetHistLineColor())
         graph.SetMarkerSize(0.5*graph.GetMarkerSize())
@@ -157,21 +141,22 @@ def makeSummaryPdf(inputFiles=[], pdf="summary.pdf"):
         magnify(null, factor=3.0)
         labelAxis(null, labels={1: t[0], 2: t[1], 3: t[2]})
         graph.Draw("psame")
+        keep += [graph, null]
 
-        keep = []
 
-        #EvN, OrN, BcN agreement (989 - 714)
-        pad2.cd(1)
-        adjustPad(logY=True)
+    #EvN, OrN, BcN agreement (989 - 714)
+    pad2.cd(1)
+    adjustPad(logY=True)
 
-        keep += histoLoop(f,
-                          [("OrN", r.kBlue, 1),
-                           ("EvN", r.kCyan, 2),
-                           ("BcN", r.kBlack, 3),
-                           ],
-                          lambda x: "delta%s" % x,
-                          )
+    keep += histoLoop(f,
+                      [("OrN", r.kBlue, 1),
+                       ("EvN", r.kCyan, 2),
+                       ("BcN", r.kBlack, 3),
+                       ],
+                      lambda x: "delta%s" % x,
+                      )
 
+    if True:
         for iHisto, name in enumerate(["", "nBadHtrs", "nWord16Skipped",
                                        "ErrF0", "PopCapFrac", "TTS",
                                        "MatchedFibersCh0", "MatchedFibersCh1", "MatchedFibersCh2",
@@ -201,7 +186,27 @@ def makeSummaryPdf(inputFiles=[], pdf="summary.pdf"):
                                    ],
                                   lambda x: "%s_%d" % (name, x),
                                   )
+    return keep
 
+
+def makeSummaryPdf(inputFiles=[], feds=[], pdf="summary.pdf"):
+    canvas = r.TCanvas()
+    canvas.Print(pdf + "[")
+
+    pad0 = r.TPad("pad0", "pad0", 0.0, 0.95, 1.0, 1.00)
+    pad1 = r.TPad("pad1", "pad1", 0.0, 0.75, 1.0, 0.95)
+    pad2 = r.TPad("pad1", "pad1", 0.0, 0.00, 1.0, 0.75)
+    pad2.Divide(3, 3)
+
+    pad0.Draw()
+    pad1.Draw()
+    pad2.Draw()
+
+    for fileName in inputFiles:
+        f = r.TFile(fileName)
+        if (not f) or f.IsZombie():
+            continue
+        junk = onePage(f, pad0, pad1, pad2)
         canvas.Print(pdf)
         f.Close()
-    canvas.Print(pdf+"]")
+    canvas.Print(pdf + "]")
