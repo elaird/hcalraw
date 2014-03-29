@@ -133,6 +133,8 @@ def opts():
     if not all([options.file1, options.feds1]):
         parser.print_help()
         sys.exit(1)
+    if not options.outputFile.endswith(".root"):
+        sys.exit("--output-file must end with .root (%s)" % options.outputFile)
     if options.feds2 and not options.file2:
         print "Using --file1 also for --file2"
         options.file2 = options.file1
@@ -229,4 +231,7 @@ if __name__ == "__main__":
     feds = fedList(options.feds1) + fedList(options.feds2)
     if len(feds) <= 3:
         import graphs
-        graphs.makeSummaryPdf(inputFiles=[options.outputFile], feds=feds)
+        graphs.makeSummaryPdf(inputFiles=[options.outputFile],
+                              feds=feds,
+                              pdf=options.outputFile.replace(".root", ".pdf"),
+                              )
