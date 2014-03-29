@@ -220,14 +220,6 @@ if __name__ == "__main__":
         go()
 
 
-    if options.file2:
-        for iChannel in range(3):
-            print "Channel %d:" % iChannel
-            analyze.printHisto(options.outputFile,
-                               histoName="MatchedFibersCh%d" % iChannel)
-            print
-
-
     feds = fedList(options.feds1) + fedList(options.feds2)
     if len(feds) <= 3:
         import graphs

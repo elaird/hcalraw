@@ -362,7 +362,9 @@ def eventToEvent(mapF={}, mapB={}, options={}):
     return out
 
 
-def go(outer={}, inner={}, outputFile="", mapOptions={}, printSummary=None):
+def go(outer={}, inner={}, outputFile="", mapOptions={},
+       printEventSummary=None, printChannelSummary=None):
+
     innerEvent = {}
     deltaOrn = {}
 
@@ -411,11 +413,18 @@ def go(outer={}, inner={}, outputFile="", mapOptions={}, printSummary=None):
         h.Write()
     f.Close()
 
-    if printSummary:
+    if printEventSummary:
         s = "%s: %4s = %6d" % (outputFile, outer["label"], len(oMapF))
         if inner:
             s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
         printer.msg(s)
+
+    if printChannelSummary:
+        for iChannel in range(3):
+            print "Channel %d:" % iChannel
+            printHisto(outputFile,
+                       histoName="MatchedFibersCh%d" % iChannel)
+            print
 
 
 def fileSpec(fileName="", someFedId=None):
@@ -493,7 +502,9 @@ def oneRun(file1="",
        inner=inner,
        outputFile=outputFile,
        mapOptions=mapOptions,
-       printSummary=(not patternMode) and (file1 != file2))
+       printEventSummary=(not patternMode) and (file1 != file2),
+       printChannelSummary=file2,
+       )
 
 
 def printHisto(fileName="", histoName="MatchedFibers"):
