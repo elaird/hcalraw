@@ -422,8 +422,7 @@ def go(outer={}, inner={}, outputFile="", mapOptions={},
     if printChannelSummary:
         for iChannel in range(3):
             print "Channel %d:" % iChannel
-            printHisto(outputFile,
-                       histoName="MatchedFibersCh%d" % iChannel)
+            printHisto(outputFile, histoName="MatchedFibersCh%d" % iChannel)
             print
 
 
