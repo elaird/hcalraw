@@ -8,12 +8,6 @@ def cmssw():
     return "CMSSW_VERSION" in os.environ
 
 
-def outputDir(directoryName="output"):
-    if not os.path.exists(directoryName):
-        os.mkdir(directoryName)
-    return directoryName
-
-
 def minutes(orn):
     orbPerSec = 11.1e3
     return orn/orbPerSec/60.0
