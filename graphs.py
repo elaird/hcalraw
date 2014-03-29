@@ -112,7 +112,7 @@ def histoLoop(f, lst, func):
     return out
 
 
-def makeSummaryPdf(labels=[], pdf="summary.pdf"):
+def makeSummaryPdf(inputFiles=[], pdf="summary.pdf"):
     canvas = r.TCanvas()
     canvas.Print(pdf+"[")
 
@@ -125,13 +125,14 @@ def makeSummaryPdf(labels=[], pdf="summary.pdf"):
     pad1.Draw()
     pad2.Draw()
 
-    for label in labels:
-        f = r.TFile("%s/%s.root" % (utils.outputDir(), label))
+    for fileName in inputFiles:
+        f = r.TFile(fileName)
         if not f:
             continue
+
         #label
         pad0.cd()
-        text = r.TText(0.5, 0.5, label.replace("Run2", "Run 2"))
+        text = r.TText(0.5, 0.5, fileName)
         text.SetNDC()
         text.SetTextAlign(22)
         text.SetTextSize(20.0*text.GetTextSize())
