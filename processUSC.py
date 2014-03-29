@@ -24,12 +24,17 @@ def stdout(cmd="", checkErr=True):
     return out["stdout"].split("\n")
 
 
-def blob(d={}):
+def blob(d={}, newlines=["&&", "|&", ">&"]):
+    def s(x):
+        o = str(x)
+        for item in newlines:
+            o = o.replace(item, "%s\n" % item)
+        return o
+
     lines = []
     for key, value in sorted(d.iteritems()):
-        lines += ["* %s *" % key, "",
-                  str(value).replace("&&", "&&\n"),
-                  "", ""]
+        lines += ["* %s *" % key, "", s(value), "", ""]
+
     return "\n".join(lines)
 
 
