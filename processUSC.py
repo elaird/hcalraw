@@ -24,6 +24,15 @@ def stdout(cmd="", checkErr=True):
     return out["stdout"].split("\n")
 
 
+def blob(d={}):
+    lines = []
+    for key, value in sorted(d.iteritems()):
+        lines += ["* %s *" % key, "",
+                  str(value).replace("&&", "&&\n"),
+                  "", ""]
+    return "\n".join(lines)
+
+
 def prepareRunList(dest="", hcalRuns=""):
     dirName = os.path.dirname(dest)
     if not os.path.exists(dirName):
@@ -162,14 +171,8 @@ def compare(inputFile="", outputDir="", run=0):
 
 def report(d={}, subject=""):
     print subject
-    lines = []
-    for key, value in sorted(d.iteritems()):
-        lines += ["* %s *" % key, "",
-                  str(value).replace("&&", "&&\n"),
-                  "", ""]
-
     if d.get("stderr") or d.get("returncode"):
-        cmd = "echo '%s' |& mail -s '%s' %s" % ("\n".join(lines),
+        cmd = "echo '%s' |& mail -s '%s' %s" % (blob(d),
                                                 subject,
                                                 os.environ["USER"])
         os.system(cmd)
@@ -218,7 +221,8 @@ def go(baseDir="",
 
             report(d, subject='Run %d: %s' % (run, suffix))
             if not d["returncode"]:
-                stdout("touch %s" % doneFlag)
+                with open(doneFlag) as f:
+                    print >> f, blob(d)
 
 
 if __name__ == "__main__":
