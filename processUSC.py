@@ -170,7 +170,7 @@ def dumpEvents(inputFile="", outputDir="", run=0, n=3, color=True):
 
 def compare(inputFile="", outputDir="", run=0):
     args = utcaArgs(inputFile)
-    args += ["--nevents=100",
+    args += ["--nevents=1000",
              "--no-color",
              "--output-file=%s/compare.root" % outputDir,
              ]
