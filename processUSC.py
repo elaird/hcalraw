@@ -164,7 +164,11 @@ def dumpEvents(inputFile="", outputDir="", run=0, n=3, color=True):
 
 
 def compare(inputFile="", outputDir="", run=0):
-    args = utcaArgs(inputFile) + ["--nevents=1000 --no-color"]
+    args = utcaArgs(inputFile)
+    args += ["--nevents=100",
+             "--no-color",
+             "--output-file=%s/compare.root" % outputDir,
+             ]
     cmd = oneRun(args, outputFile="%s/comparison.txt" % outputDir)
     return commandOutput(cmd)
 
