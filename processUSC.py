@@ -221,7 +221,7 @@ def go(baseDir="",
 
             report(d, subject='Run %d: %s' % (run, suffix))
             if not d["returncode"]:
-                with open(doneFlag) as f:
+                with open(doneFlag, "w") as f:
                     print >> f, blob(d)
 
 
