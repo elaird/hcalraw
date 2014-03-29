@@ -112,7 +112,7 @@ def histoLoop(f, lst, func):
     return out
 
 
-def onePage(f=None, pad0=None, pad1=None, pad2=None):
+def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
     keep = []
 
     #label
@@ -172,20 +172,14 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None):
                 stylize(h)
                 keep.append(h)
             else:
-                keep += histoLoop(f,
-                                  [#(714, r.kRed, 1),
-                                   #(722, r.kGreen, 2),
-                                   #(989, r.kBlack, 3),
+                lst = []
+                color = [r.kBlack, r.kRed, r.kBlue]
+                style = [1, 2, 3]
+                for iFed, fed in enumerate(sorted(feds)):
+                    lst.append((fed, color[iFed], style[iFed]))
 
-                                   #(702, r.kGreen, 2),
-                                   #(931, r.kBlack, 3),
+                keep += histoLoop(f, lst, lambda x: "%s_%d" % (name, x))
 
-                                   (929, r.kGreen, 2),
-                                   (721, r.kRed, 1),
-                                   (722, r.kBlack, 3),
-                                   ],
-                                  lambda x: "%s_%d" % (name, x),
-                                  )
     return keep
 
 
@@ -206,7 +200,7 @@ def makeSummaryPdf(inputFiles=[], feds=[], pdf="summary.pdf"):
         f = r.TFile(fileName)
         if (not f) or f.IsZombie():
             continue
-        junk = onePage(f, pad0, pad1, pad2)
+        junk = onePage(f, pad0, pad1, pad2, feds)
         canvas.Print(pdf)
         f.Close()
     canvas.Print(pdf + "]")
