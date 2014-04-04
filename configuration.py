@@ -60,23 +60,22 @@ def isVme(fedId=None):
     return 700 <= fedId <= 731
 
 
-def format(treeName="", someFedId=None):
-    assert someFedId is not None
+def format(treeName=""):
     out = None
     if treeName == "CMSRAW":
         out = {"name":  "HCAL",
-               "branch": "HCAL_DCC" if isVme(someFedId) else "Chunk",
+               "branch": lambda fedId: "%s%d" % ("HCAL_DCC" if isVme(fedId) else "Chunk", fedId),
                "auxBranch": False,
                }
 
     if treeName == "moltree":
         out = {"name": "MOL",
-               "branch": "vec",
+               "branch": lambda fedId: "vec%d" % fedId,
                }
 
     if treeName == "deadbeeftree":
         out = {"name": "DB",
-               "branch": "db",
+               "branch": lambda fedId: "db%d" % fedId,
                }
 
     if treeName == "Events":
