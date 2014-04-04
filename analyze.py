@@ -52,15 +52,18 @@ def coords(d):
 def eventMaps(s={}, options={}):
     fileName = s["fileName"]
     treeName = s["treeName"]
-    nEventsMax = s["nEventsMax"]
-    fedIds = s["fedIds"]
-    name = s["name"]
     assert fileName
     assert treeName
 
+    name = s["name"]
+    nEventsMax = s["nEventsMax"]
+    fedId0 = s["fedIds"][0]
+    branch0 = s["branch"](fedId0)
+
     useEvn = options.get('useEvn', False)
     filterEvn = options.get('filterEvn', False)
-    bcnDelta = configuration.bcnDelta(fedIds[0])
+    bcnDelta = configuration.bcnDelta(fedId0)
+
     forward = {}
     backward = {}
 
@@ -84,7 +87,7 @@ def eventMaps(s={}, options={}):
             else:
                 tree.GetEntry(iEvent)
                 raw = unpacked(fedData=charsOneFed(tree=tree,
-                                                   fedId=fedIds[0],
+                                                   fedId=fedId0,
                                                    collection=s["rawCollection"],
                                                    ),
                                bcnDelta=bcnDelta,
@@ -99,10 +102,7 @@ def eventMaps(s={}, options={}):
                 bcn = tree.CDFEventInfo.getBunchNumber()
             else:
                 tree.GetEntry(iEvent)
-                raw = unpacked(fedData=wordsOneChunk(tree=tree,
-                                                     fedId=fedIds[0],
-                                                     branchName=s["branch"],
-                                                     ),
+                raw = unpacked(fedData=wordsOneChunk(tree=tree, branch=branch0),
                                bcnDelta=bcnDelta,
                                nBytesPer=8,
                                headerOnly=True)
@@ -110,7 +110,7 @@ def eventMaps(s={}, options={}):
 
         elif name == "DB":
             tree.GetEntry(iEvent)
-            raw = unpacked(fedData=wordsOneBranch(tree=tree, branch="%s%d" % (s["branch"], fedIds[0])),
+            raw = unpacked(fedData=wordsOneBranch(tree=tree, branch=branch0),
                            bcnDelta=bcnDelta,
                            nBytesPer=4,
                            headerOnly=True)
@@ -118,8 +118,7 @@ def eventMaps(s={}, options={}):
 
         elif name == "MOL":
             tree.GetEntry(iEvent)
-            fedId = fedIds[0]
-            rawThisFed = wordsOneBranch(tree=tree, branch="%s%d" % (s["branch"], fedId))
+            rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
             mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
             raw = unpacked(fedData=rawThisFed,
                            skipWords64=skipWords64,
@@ -181,17 +180,19 @@ def collectedRaw(tree=None, specs={}):
                  "patternMode": specs["patternMode"],
                  "warnSkip16": specs["warnSkip16"],
                  }
+        branch = specs["branch"](fedId)
+
         if specs["name"] == "CMS":
             rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=1, **kargs)
         elif specs["name"] == "HCAL":
-            rawThisFed = wordsOneChunk(tree, fedId, specs["branch"])
+            rawThisFed = wordsOneChunk(tree, branch)
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
         elif specs["name"] == "DB":
-            rawThisFed = wordsOneBranch(tree=tree, branch="%s%d" % (specs["branch"], fedId))
+            rawThisFed = wordsOneBranch(tree=tree, branch=branch)
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=4, **kargs)
         elif specs["name"] == "MOL":
-            rawThisFed = wordsOneBranch(tree=tree, branch="%s%d" % (specs["branch"], fedId))
+            rawThisFed = wordsOneBranch(tree=tree, branch=branch)
             mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8,
                                   skipWords64=skipWords64, **kargs)
@@ -300,9 +301,9 @@ def charsOneFed(tree=None, fedId=None, collection=""):
     return r.FEDRawData2(FEDRawData).vectorChar()
 
 
-def wordsOneChunk(tree=None, fedId=None, branchName=""):
+def wordsOneChunk(tree=None, branch=""):
     #Common Data Format
-    chunk = wordsOneBranch(tree, "%s%d" % (branchName, fedId))
+    chunk = wordsOneBranch(tree, branch)
     #wrapper class creates std::vector<ULong64_t>
     return r.CDFChunk2(chunk).chunk()
 
@@ -426,7 +427,7 @@ def go(outer={}, inner={}, outputFile="", mapOptions={},
             print
 
 
-def fileSpec(fileName="", someFedId=None):
+def fileSpec(fileName=""):
     f = r.TFile.Open(fileName)
     if (not f) or f.IsZombie():
         sys.exit("File %s could not be opened." % fileName)
@@ -439,7 +440,7 @@ def fileSpec(fileName="", someFedId=None):
 
     specs = []
     for treeName in set(treeNames):  # set accomodate cycles, e.g. CMSRAW;3 CMSRAW;4
-        spec = configuration.format(treeName, someFedId)
+        spec = configuration.format(treeName)
         if spec:
             specs.append(spec)
 
@@ -450,11 +451,6 @@ def fileSpec(fileName="", someFedId=None):
     else:
         return specs[0]
     f.Close()
-
-
-def checkFedList(feds=[]):
-    if len(set([configuration.isVme(fed) for fed in feds])) != 1:
-        sys.exit("fed list %s is mixed among uTCA and VME." % str(feds))
 
 
 def oneRun(file1="",
@@ -477,8 +473,7 @@ def oneRun(file1="",
               "dump": dump,
               "warnSkip16": warnSkip16,
               }
-    checkFedList(feds1)
-    spec1 = fileSpec(file1, feds1[0])
+    spec1 = fileSpec(file1)
     spec1.update(common)
     spec1.update({"fileName": file1,
                   "fedIds": feds1,
@@ -488,8 +483,7 @@ def oneRun(file1="",
 
     if file2:
         assert feds2
-        checkFedList(feds2)
-        spec2 = fileSpec(file2, feds2[0])
+        spec2 = fileSpec(file2)
         spec2.update(common)
         spec2.update({"fileName": file2,
                       "fedIds": feds2,
