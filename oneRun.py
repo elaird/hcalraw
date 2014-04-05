@@ -142,13 +142,13 @@ def opts():
 
 
 def integer(value="", tag=""):
-    if value is not '':
-        try:
-            return int(value)
-        except ValueError:
-            sys.exit("%s '%s' cannot be converted to an int." % (tag, value))
-    else:
+    if value == '':
         return None
+
+    try:
+        return int(value)
+    except ValueError:
+        sys.exit("%s '%s' cannot be converted to an int." % (tag, value))
 
 
 def fedList(s=""):
