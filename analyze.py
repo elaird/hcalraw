@@ -205,6 +205,21 @@ def collectedRaw(tree=None, specs={}):
     return raw
 
 
+def w64(fedData, jWord64, nBytesPer):
+    if nBytesPer == 1:
+        offset = 8*jWord64
+        bytes = [fedData.at(offset+iByte) for iByte in range(8)]
+        word64 = struct.unpack('Q', "".join(bytes))[0]
+        #like above with 'B'*8 rather than 'Q':
+        #b = [ord(fedData.at(offset+iByte)) for iByte in range(8)]
+    elif nBytesPer == 4:
+        word64 = fedData.at(2*jWord64)
+        word64 += fedData.at(2*jWord64 + 1) << 32
+    elif nBytesPer == 8:
+        word64 = fedData.at(jWord64)
+        return word64
+
+
 #AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
 #DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
@@ -223,17 +238,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
     nToSkip = len(set(skipWords64))
     nSkipped64 = 0
     for jWord64 in range(nWord64):
-        if nBytesPer == 1:
-            offset = 8*jWord64
-            bytes = [fedData.at(offset+iByte) for iByte in range(8)]
-            word64 = struct.unpack('Q', "".join(bytes))[0]
-            #like above with 'B'*8 rather than 'Q':
-            #b = [ord(fedData.at(offset+iByte)) for iByte in range(8)]
-        elif nBytesPer == 4:
-            word64 = fedData.at(2*jWord64)
-            word64 += fedData.at(2*jWord64 + 1) << 32
-        elif nBytesPer == 8:
-            word64 = fedData.at(jWord64)
+        word64 = w64(fedData, jWord64, nBytesPer)
 
         if jWord64 in skipWords64:
             nSkipped64 += 1
@@ -241,7 +246,6 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
         iWord64 = jWord64 - nSkipped64
 
         if iWord64 < iWordPayload0:
-            #print (header["FEDid"] if "FEDid" in header else " "*3), iWord64, header.keys()
             decode.header(header, iWord64, word64, utca, bcnDelta)
         elif headerOnly:
             break
@@ -268,7 +272,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
             decode.trailer(trailer, iWord64, word64)
-    #print (header["FEDid"] if "FEDid" in header else " "*3), header.keys()
+
     return {"header": header,
             "trailer": trailer,
             "htrBlocks": htrBlocks,
@@ -304,6 +308,7 @@ def charsOneFed(tree=None, fedId=None, collection=""):
 def wordsOneChunk(tree=None, branch=""):
     #Common Data Format
     chunk = wordsOneBranch(tree, branch)
+    #print "%s chunk has data length %d" % (branch, chunk.getDataLength())
     #wrapper class creates std::vector<ULong64_t>
     return r.CDFChunk2(chunk).chunk()
 
