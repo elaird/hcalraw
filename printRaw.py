@@ -81,6 +81,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                    "  OrN5",
                    " BcN",
                    "ModuleId",
+                   "Fl",
                    "FrmtV",
                    #"nWordTP",
                    "nWordQIE",
@@ -98,7 +99,8 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                "0x%02x" % p["OrN5"],
                "%4d" % p["BcN"],
                "  0x%03x" % p["ModuleId"],
-               "  0x%01x" % p["FormatVer"],
+               " %2d" % p["FWFlavor"],
+               " 0x%01x" % p["FormatVer"],
                #"  %3d  " % p["nWord16Tp"],
                "   %3d" % p["nWord16Qie"],
                "    %2d" % p["nSamples"],
@@ -115,7 +117,6 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
         ]
 
     out.append("  ".join(strings))
-
     printer.green("\n".join(out))
     if 4 <= dump:
         kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2],
@@ -135,8 +136,16 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
             printer.msg("\n".join(cd[1:]))
 
         if 5 <= dump:
-            f = (uhtrTriggerData if utca else htrTriggerData)
-            td = f(p["triggerData"], skipZero=(dump <= 5), zs=zs)
+            skipZero = dump <= 5
+            if utca:
+                td = uhtrTriggerData(p["triggerData"], skipZero=skipZero)
+            else:
+                td = htrTriggerData(p["triggerData"],
+                                    skipZero=skipZero,
+                                    zs=zs,
+                                    flavor=p["FWFlavor"],
+                )
+
             if len(td) >= 2:
                 printer.yellow(td[0])
                 printer.msg("\n".join(td[1:]))
@@ -156,7 +165,7 @@ def qieString(qieData={}, red=False):
     return out
 
 
-def htrTriggerData(d={}, skipZero=False, zs={}):
+def htrTriggerData(d={}, skipZero=False, zs={}, flavor=None):
     columns = ["SLB-ch", "Peak", "SofI", "TP(hex)  0   1   2   3"]
     if zs:
         columns.append("  ZS?")
@@ -189,7 +198,7 @@ def htrTriggerData(d={}, skipZero=False, zs={}):
     return out
 
 
-def uhtrTriggerData(d={}, skipZero=False, zs={}):
+def uhtrTriggerData(d={}, skipZero=False):
     out = []
     out.append("  ".join([" TPid",
                           "Fl",
