@@ -71,36 +71,50 @@ def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
         print "\n".join(lines)  # skip printer to facilitate diff
 
 
-def oneHtr(p={}, iOffset=None, dump=None, utca=None, nonMatched=[]):
-    out = []
-    if (not iOffset) or (4 <= dump):
-        out.append("  ".join(["iWord16",
-                              "   EvN",
-                              "  OrN5",
-                              " BcN",
-                              "ModuleId",
-                              "FrmtV",
-                              #"nWordTP",
-                              "nWordQIE",
-                              "nSamp",
-                              "nPre",
-                              "EvN8",
-                              "  CRC",
-                              ]))
+def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
+    zs = p.get("ZS")
 
-    out.append("  ".join([" %04d" % p["0Word16"],
-                          " 0x%07x" % p["EvN"],
-                          "0x%02x" % p["OrN5"],
-                          "%4d" % p["BcN"],
-                          "  0x%03x" % p["ModuleId"],
-                          "  0x%01x" % p["FormatVer"],
-                          #"  %3d  " % p["nWord16Tp"],
-                          "   %3d" % p["nWord16Qie"],
-                          "    %2d" % p["nSamples"],
-                          "  %2d" % p["nPreSamples"],
-                          "  0x%02x" % p["EvN8"],
-                          "0x%04x" % p["CRC"],
-                          ]))
+    out = []
+    if printColumnHeaders:
+        columns = ["iWord16",
+                   "   EvN",
+                   "  OrN5",
+                   " BcN",
+                   "ModuleId",
+                   "FrmtV",
+                   #"nWordTP",
+                   "nWordQIE",
+                   "nSamp",
+                   "nPre",
+                   "EvN8",
+                   "  CRC",
+        ]
+        if zs:
+            columns += [" ", "ZS:   mask,  Thr1, Thr24, ThrTP"]
+        out.append("  ".join(columns))
+
+    strings = [" %04d" % p["0Word16"],
+               " 0x%07x" % p["EvN"],
+               "0x%02x" % p["OrN5"],
+               "%4d" % p["BcN"],
+               "  0x%03x" % p["ModuleId"],
+               "  0x%01x" % p["FormatVer"],
+               #"  %3d  " % p["nWord16Tp"],
+               "   %3d" % p["nWord16Qie"],
+               "    %2d" % p["nSamples"],
+               "  %2d" % p["nPreSamples"],
+               "  0x%02x" % p["EvN8"],
+               "0x%04x" % p["CRC"],
+    ]
+    if zs:
+        strings += ["    ",
+                    "0x%04x" % zs["Mask"],
+                    "  %3d" % zs["Threshold1"],
+                    "  %3d" % zs["Threshold24"],
+                    "  %3d" % zs["ThresholdTP"],
+        ]
+
+    out.append("  ".join(strings))
 
     printer.green("\n".join(out))
     if 4 <= dump:
@@ -328,6 +342,8 @@ def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
     offsets = d["htrBlocks"].keys()
     if not offsets:
         return
+
+    printColumnHeaders = True
     for iOffset, offset in enumerate(sorted(offsets)):
         p = d["htrBlocks"][offset]
         if "patternData" in p:
@@ -335,10 +351,14 @@ def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
                            patternMode=patternMode,
                            fedId=d["header"]["FEDid"],
                            iOffset=iOffset)
-        elif 3 <= dump:  # and 5 <= p["Slot"]:
-            oneHtr(p=p, iOffset=iOffset, dump=dump,
+        elif 3 <= dump:
+            oneHtr(p=p,
+                   printColumnHeaders=printColumnHeaders,
+                   dump=dump,
                    utca=not configuration.isVme(h["FEDid"]),
                    nonMatched=nonMatched)
+            if dump == 3:
+                printColumnHeaders = False
 
 
 def oneFedMol(d):
