@@ -99,7 +99,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                "0x%02x" % p["OrN5"],
                "%4d" % p["BcN"],
                "  0x%03x" % p["ModuleId"],
-               " %2d" % p["FWFlavor"],
+               " %2d" % p.get("FWFlavor", -1),
                " 0x%01x" % p["FormatVer"],
                #"  %3d  " % p["nWord16Tp"],
                "   %3d" % p["nWord16Qie"],
