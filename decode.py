@@ -95,8 +95,9 @@ def htrHeader(l={}, w=None, i=None, utca=None, bcnDelta=None):
     if i == 1:
         l["EvN"] += w << 8
 
-    if i == 2:
-        return
+    if i == 2 and not utca:
+        l["HM"] = (w >> 13) & 0x1
+        l["EE"] = (w >> 2) & 0x1
 
     if i == 3:
         l["OrN5"] = (w >> 11) & 0x1f
