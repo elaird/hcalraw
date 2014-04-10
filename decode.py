@@ -136,9 +136,12 @@ def htrHeader(l={}, w=None, i=None, utca=None, bcnDelta=None):
 
 def htrTps(l={}, w=None):
     tag = (w >> 11) & 0x1f
-    if tag not in l["triggerData"]:
-        l["triggerData"][tag] = []
-    l["triggerData"][tag].append({"Z": (w >> 10) & 0x1,
+    slb = (tag >> 2) & 0x7
+    ch = tag & 0x3
+    key = (slb, ch)
+    if key not in l["triggerData"]:
+        l["triggerData"][key] = []
+    l["triggerData"][key].append({"Z": (w >> 10) & 0x1,
                                   "SOI": (w >> 9) & 0x1,
                                   "TP": w & 0x1ff,
                               })
