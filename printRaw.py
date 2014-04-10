@@ -144,7 +144,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
 
 def qieString(qieData={}, red=False):
     l = []
-    for iQie in range(12):
+    for iQie in range(10):
         if iQie in qieData:
             l.append("%2x" % qieData[iQie])
         else:
@@ -157,11 +157,11 @@ def qieString(qieData={}, red=False):
 
 
 def htrTriggerData(d={}, skipZero=False, zs={}):
-    columns = ["  Tag", "Peak", "SofI", "TP(hex)  0   1   2   3"]
+    columns = ["SLB-ch", "Peak", "SofI", "TP(hex)  0   1   2   3"]
     if zs:
         columns.append("  ZS?")
     out = ["  ".join(columns)]
-    for tag, lst in sorted(d.iteritems()):
+    for (slb, ch), lst in sorted(d.iteritems()):
         z = ""
         soi = ""
         tp = ""
@@ -174,14 +174,14 @@ def htrTriggerData(d={}, skipZero=False, zs={}):
 
         if zs:
             marks = zs["TPMarks"]
-            iChannel = tag
+            iChannel = 4*(slb - 1) + ch
             if iChannel < len(marks):
                 m = "y" if marks[iChannel] else "n"
             else:
                 m = " "
             tp += " "*5 + m
 
-        out.append("  ".join([" 0x%02x" % tag,
+        out.append("  ".join(["  %1d- %1d" % (slb, ch),
                               "%4s" % z,
                               "%4s" % soi,
                               " "*4,
@@ -254,13 +254,14 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                                "%1d" % data["Flavor"],
                                "%2d" % data["ErrF"],
                                "  %1d" % data["CapId0"],
-                               " "*11,
+                               "   %2d %s" % (len(data["QIE"]), " "*5)
                                ])+qieString(data["QIE"], red=red)
                    )
         if latency:
             dct = latency.get("Fiber%d" % FiberP1)
             if dct and data["FibCh"] == 1:
-                lat = ["%s%s" % (dct["Empty"], dct["Full"]),
+                lat = [" "*4,
+                       "%s%s" % (dct["Empty"], dct["Full"]),
                        "%3d" % dct["Cnt"],
                        "%4d" % dct["IdleBCN"],
                 ]
