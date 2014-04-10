@@ -121,6 +121,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
         kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2],
                  "nonMatched": reduced(nonMatched, p["ModuleId"]),
                  "latency": p.get("Latency"),
+                 "zs": p.get("ZS"),
                  }
         if 6 <= dump:
             kargs["skipErrF"] = []
@@ -206,7 +207,7 @@ def uhtrTriggerData(d={}, skipZero=False):
 
 def htrChannelData(lst=[], crate=0, slot=0, top="",
                    fibChs=[], skipErrF=[3],
-                   nonMatched=[], latency={}):
+                   nonMatched=[], latency={}, zs={}):
     out = []
     columns = ["Crate",
                "Slot",
@@ -219,6 +220,8 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
     ]
     if latency:
         columns += [" ", " EF", "Cnt", "IDLE"]
+    if zs:
+        columns += [" ", "ZS?"]
     out.append("  ".join(columns))
 
     for data in lst:
@@ -249,6 +252,14 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                        "%4d" % dct["IdleBCN"],
                 ]
                 out[-1] += "  ".join(lat)
+        if zs:
+            iChannel = 3*data["Fiber"] + data["FibCh"]
+            marks = zs["DigiMarks"]
+            if iChannel < len(marks):
+                m = "y" if marks[iChannel] else "n"
+            else:
+                m = " "
+            out[-1] += m
 
     return out
 
