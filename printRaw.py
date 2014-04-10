@@ -246,7 +246,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                    )
         if latency:
             dct = latency.get("Fiber%d" % FiberP1)
-            if dct:
+            if dct and data["FibCh"] == 1:
                 lat = ["%s%s" % (dct["Empty"], dct["Full"]),
                        "%3d" % dct["Cnt"],
                        "%4d" % dct["IdleBCN"],
