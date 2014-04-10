@@ -90,7 +90,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                    "  CRC",
         ]
         if zs:
-            columns += [" ", "ZS:   mask,  Thr1, Thr24, ThrTP"]
+            columns += [" ", "ZSMask:  Thr1, Thr24, ThrTP"]
         out.append("  ".join(columns))
 
     strings = [" %04d" % p["0Word16"],
@@ -107,7 +107,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                "0x%04x" % p["CRC"],
     ]
     if zs:
-        strings += ["    ",
+        strings += ["",
                     "0x%04x" % zs["Mask"],
                     "  %3d" % zs["Threshold1"],
                     "  %3d" % zs["Threshold24"],
