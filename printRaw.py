@@ -273,7 +273,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                 m = "y" if marks[iChannel] else "n"
             else:
                 m = " "
-            out[-1] += m
+            out[-1] += "%7s" % m
 
     return out
 
