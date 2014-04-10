@@ -3,7 +3,7 @@ import printer
 import printRaw
 
 
-def htrSummary(blocks=[], msg=""):
+def htrSummary(blocks=[], book=None, fedId=None, msg=""):
     nBadHtrs = 0
     caps = {}
     ErrF = {}
@@ -21,6 +21,9 @@ def htrSummary(blocks=[], msg=""):
             nBadHtrs += 1
             continue
 
+        book.fill(block["BcN"], "BcN_HTRs_%d" % fedId, 36, 0, 3600,
+                  title="FED %d; BcN;HTRs / bin" % fedId)
+
         for channelData in block["channelData"].values():
             ErrF[channelData["ErrF"]] += 1
             if not channelData["ErrF"]:
@@ -30,7 +33,7 @@ def htrSummary(blocks=[], msg=""):
 
 def singleFedPlots(fedId=None, d={}, book={}):
     book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 16, -0.5, 15.5,
-                title="FED %d; nWord16 skipped during unpacking;Events / bin" % fedId)
+              title="FED %d; nWord16 skipped during unpacking;Events / bin" % fedId)
 
     t = d["trailer"]
     if "TTS" in t:
@@ -44,7 +47,10 @@ def singleFedPlots(fedId=None, d={}, book={}):
         msg2 = " header lacks EvN.  Keys: %s" % str(d["header"].keys())
         printer.error(msg + msg2)
 
-    nBadHtrs, ErrF, caps = htrSummary(blocks=d["htrBlocks"].values(), msg=msg)
+    nBadHtrs, ErrF, caps = htrSummary(blocks=d["htrBlocks"].values(),
+                                      book=book,
+                                      fedId=fedId,
+                                      msg=msg)
 
     errFSum = 0.0 + sum(ErrF.values())
     if errFSum:
@@ -94,6 +100,10 @@ def compare(raw1={}, raw2={}, book={}):
         for fedId, dct in sorted(raw.iteritems()):
             if fedId is None:
                 continue
+
+            book.fill(dct["nBytesSW"], "nBytesSW_%d" % fedId, 50, 0, 5000,
+                      title="FED %d; nBytes;Events / bin" % fedId)
+
             if not dct["nBytesSW"]:
                 printer.error("Zero bytes read for FED %d" % fedId)
                 continue
