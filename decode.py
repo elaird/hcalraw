@@ -129,9 +129,14 @@ def htrHeader(l={}, w=None, i=None, utca=None, bcnDelta=None):
             l["nWord16Tp"] = (w >> 8) & 0xff
             l["nPreSamples"] = (w >> 3) & 0x1f
 
-    if i == 6 and not utca:
-        l["US"] = (w >> 15) & 0x1
-        l["CM"] = (w >> 14) & 0x1
+    if not utca:
+        if i == 6:
+            l["US"] = (w >> 15) & 0x1
+            l["CM"] = (w >> 14) & 0x1
+
+        if i == 7:
+            l["PipelineLength"] = w & 0xff
+            l["FWFlavor"] = (w >> 8) & 0x7f
 
 
 def htrTps(l={}, w=None):
