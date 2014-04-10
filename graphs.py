@@ -48,9 +48,9 @@ def magnify(h, factor=1.0):
         axis.SetTitleSize(factor*axis.GetTitleSize())
 
 
-def adjustPad(pad=r.gPad, logY=False):
-    r.gPad.SetLeftMargin(0.25)
-    r.gPad.SetBottomMargin(0.25)
+def adjustPad(pad=r.gPad, logY=False, margin=0.2):
+    r.gPad.SetLeftMargin(margin)
+    r.gPad.SetBottomMargin(margin)
     r.gPad.SetTickx()
     r.gPad.SetTicky()
     if logY:
@@ -157,9 +157,10 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
                       )
 
     if True:
-        for iHisto, name in enumerate(["", "nBadHtrs", "nWord16Skipped",
-                                       "ErrF0", "PopCapFrac", "TTS",
-                                       "MatchedFibersCh0", "MatchedFibersCh1", "MatchedFibersCh2",
+        for iHisto, name in enumerate(["", "nBytesSW", "nBadHtrs", "nWord16Skipped",
+                                       "ErrF0", "ErrF1", "ErrF2", "ErrF3",
+                                       "MatchedFibersCh0", "MatchedFibersCh1", "MatchedFibersCh2", "BcN_HTRs",
+                                       #"TTS", "PopCapFrac",
                                        ]):
             if not name:
                 continue
@@ -190,8 +191,8 @@ def makeSummaryPdf(inputFiles=[], feds=[], pdf="summary.pdf"):
     pad0 = r.TPad("pad0", "pad0", 0.0, 0.95, 1.0, 1.00)
     pad1 = r.TPad("pad1", "pad1", 0.0, 0.75, 1.0, 0.95)
     pad2 = r.TPad("pad1", "pad1", 0.0, 0.00, 1.0, 0.75)
-    pad2.Divide(3, 3)
 
+    pad2.Divide(4, 3)
     pad0.Draw()
     pad1.Draw()
     pad2.Draw()
