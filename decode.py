@@ -148,9 +148,17 @@ def htrExtra(l={}, w=None, i=None):
     if l["US"]:
         if "ZS" not in l:
             l["ZS"] = {}
+        if i == 1:
+            l["ZS"]["DigiMarks"] = []
+            l["ZS"]["TPMarks"] = []
+
         if i <= 3:
-            digiMarks = w & 0xff
-            tpMarks = (w >> 8) & 0xff
+            digi = w & 0xff
+            tp = (w >> 8) & 0xff
+            for iBit in range(8):
+                l["ZS"]["DigiMarks"].append((digi >> iBit) & 0x1)
+                l["ZS"]["TPMarks"].append((tp >> iBit) & 0x1)
+
         if i == 4:
             l["ZS"]["Threshold1"] = w & 0xff
             l["ZS"]["Threshold24"] = (w >> 8) & 0xff
