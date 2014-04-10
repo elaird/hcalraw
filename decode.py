@@ -144,14 +144,31 @@ def htrTps(l={}, w=None):
                               })
 
 
-def htrExtra(l={}, w=None, k=None):
+def htrExtra(l={}, w=None, i=None):
     if l["US"]:
-        print "zs"
+        if "ZS" not in l:
+            l["ZS"] = {}
+        if i <= 3:
+            digiMarks = w & 0xff
+            tpMarks = (w >> 8) & 0xff
+        if i == 4:
+            l["ZS"]["Threshold1"] = w & 0xff
+            l["ZS"]["Threshold24"] = (w >> 8) & 0xff
+        if i == 5:
+            l["ZS"]["ThresholdTP"] = (w >> 12) & 0xf
+        if i == 6:
+            t = (w >> 12) & 0xf
+            l["ZS"]["ThresholdTP"] |= (t << 4)
+        if i == 7:
+            m = (w >> 12) & 0x7
+            l["ZS"]["Mask"] = (m << 16)
+        if i == 8:
+            l["ZS"]["Mask"] |= w
     else:
         if "Latency" not in l:
             l["Latency"] = {}
 
-        key = "Fiber%d" % (13 - k)
+        key = "Fiber%d" % i
         l["Latency"][key] = {"Empty": (w >> 15) & 0x1,
                              "Full": (w >> 14) & 0x1,
                              "Cnt": (w >> 12) & 0x3,
@@ -201,7 +218,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             return
 
         if (5 <= k <= 12) and not l["CM"]:
-            htrExtra(l, w=word16, k=k)
+            htrExtra(l, w=word16, i=13-k)
             return
 
     if k <= 4:
