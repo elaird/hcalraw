@@ -136,7 +136,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
 
         if 5 <= dump:
             f = (uhtrTriggerData if utca else htrTriggerData)
-            td = f(p["triggerData"], skipZero=(dump <= 5))
+            td = f(p["triggerData"], skipZero=(dump <= 5), zs=zs)
             if len(td) >= 2:
                 printer.yellow(td[0])
                 printer.msg("\n".join(td[1:]))
@@ -156,8 +156,11 @@ def qieString(qieData={}, red=False):
     return out
 
 
-def htrTriggerData(d={}, skipZero=False):
-    out = ["  ".join(["  Tag", "Peak", "SofI", "TP(hex)  0   1   2   3"])]
+def htrTriggerData(d={}, skipZero=False, zs={}):
+    columns = ["  Tag", "Peak", "SofI", "TP(hex)  0   1   2   3"]
+    if zs:
+        columns.append("  ZS?")
+    out = ["  ".join(columns)]
     for tag, lst in sorted(d.iteritems()):
         z = ""
         soi = ""
@@ -168,6 +171,16 @@ def htrTriggerData(d={}, skipZero=False):
             z += str(int(dct["Z"]))
             soi += str(int(dct["SOI"]))
             tp += " %3x" % dct["TP"]
+
+        if zs:
+            marks = zs["TPMarks"]
+            iChannel = tag
+            if iChannel < len(marks):
+                m = "y" if marks[iChannel] else "n"
+            else:
+                m = " "
+            tp += " "*5 + m
+
         out.append("  ".join([" 0x%02x" % tag,
                               "%4s" % z,
                               "%4s" % soi,
@@ -176,7 +189,7 @@ def htrTriggerData(d={}, skipZero=False):
     return out
 
 
-def uhtrTriggerData(d={}, skipZero=False):
+def uhtrTriggerData(d={}, skipZero=False, zs={}):
     out = []
     out.append("  ".join([" TPid",
                           "Fl",
