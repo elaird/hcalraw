@@ -106,6 +106,7 @@ def oneHtr(p={}, iOffset=None, dump=None, utca=None, nonMatched=[]):
     if 4 <= dump:
         kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2],
                  "nonMatched": reduced(nonMatched, p["ModuleId"]),
+                 "latency": p.get("Latency"),
                  }
         if 6 <= dump:
             kargs["skipErrF"] = []
@@ -190,25 +191,30 @@ def uhtrTriggerData(d={}, skipZero=False):
 
 
 def htrChannelData(lst=[], crate=0, slot=0, top="",
-                   fibChs=[], skipErrF=[3], nonMatched=[]):
+                   fibChs=[], skipErrF=[3],
+                   nonMatched=[], latency={}):
     out = []
-    out.append("  ".join(["Crate",
-                          "Slot",
-                          " Fi",
-                          "Ch",
-                          "Fl",
-                          "ErrF",
-                          "CapId0",
-                          "QIE(hex)  0  1  2  3  4  5  6  7  8  9",
-                          ])
-               )
+    columns = ["Crate",
+               "Slot",
+               " Fi",
+               "Ch",
+               "Fl",
+               "ErrF",
+               "CapId0",
+               "QIE(hex)  0  1  2  3  4  5  6  7  8  9",
+    ]
+    if latency:
+        columns += [" ", " EF", "Cnt", "IDLE"]
+    out.append("  ".join(columns))
+
     for data in lst:
+        FiberP1 = 1 + data["Fiber"]
         if data["FibCh"] not in fibChs:
             continue
         if data["ErrF"] in skipErrF:
             continue
         if printer.__color:  # hack
-            red = (1+data["Fiber"], data["FibCh"]) in nonMatched
+            red = (FiberP1, data["FibCh"]) in nonMatched
         else:
             red = False
         out.append("   ".join(["  %2d" % crate,
@@ -221,6 +227,15 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                                " "*11,
                                ])+qieString(data["QIE"], red=red)
                    )
+        if latency:
+            dct = latency.get("Fiber%d" % FiberP1)
+            if dct:
+                lat = ["%s%s" % (dct["Empty"], dct["Full"]),
+                       "%3d" % dct["Cnt"],
+                       "%4d" % dct["IdleBCN"],
+                ]
+                out[-1] += "  ".join(lat)
+
     return out
 
 
