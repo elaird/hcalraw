@@ -145,13 +145,18 @@ def htrTps(l={}, w=None):
 
 
 def htrExtra(l={}, w=None, k=None):
-    if l["CM"]:
-        return
-
     if l["US"]:
         print "zs"
     else:
-        print "idle"
+        if "Latency" not in l:
+            l["Latency"] = {}
+
+        key = "Fiber%d" % (13 - k)
+        l["Latency"][key] = {"Empty": (w >> 15) & 0x1,
+                             "Full": (w >> 14) & 0x1,
+                             "Cnt": (w >> 12) & 0x3,
+                             "IdleBCN": w & 0x3ff,
+                             }
 
 
 def htrTrailer(l={}, w=None, k=None):
@@ -195,7 +200,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             htrTps(l, word16)
             return
 
-        if 5 <= k <= 12:
+        if (5 <= k <= 12) and not l["CM"]:
             htrExtra(l, w=word16, k=k)
             return
 
