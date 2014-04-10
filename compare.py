@@ -3,23 +3,15 @@ import printer
 import printRaw
 
 
-def singleFedPlots(raw={}, fedId=None, book={}):
-    d = raw[fedId]
-
-    book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 16, -0.5, 15.5,
-                title="FED %d; nWord16 skipped during unpacking;Events / bin" % fedId)
-
-    t = d["trailer"]
-    if "TTS" in t:
-        book.fill(t["TTS"], "TTS_%d" % fedId, 16, -0.5, 15.5,
-                  title="FED %d; TTS state;Events / bin" % fedId)
-
-    caps = {0: 0, 1: 0, 2: 0, 3: 0}
-    ErrF = {0: 0, 1: 0, 2: 0, 3: 0}
-
+def htrSummary(blocks=[], msg=""):
     nBadHtrs = 0
-    msg = "FED %d event %d" % (d["header"]["FEDid"], d["header"]["EvN"])
-    for block in d["htrBlocks"].values():
+    caps = {}
+    ErrF = {}
+    for i in range(4):
+        caps[i] = 0
+        ErrF[i] = 0
+
+    for block in blocks:
         if type(block) is not dict:
             printer.warning("%s block is not dict" % msg)
             nBadHtrs += 1
@@ -33,11 +25,32 @@ def singleFedPlots(raw={}, fedId=None, book={}):
             ErrF[channelData["ErrF"]] += 1
             if not channelData["ErrF"]:
                 caps[channelData["CapId0"]] += 1
+    return nBadHtrs, ErrF, caps
 
-    errFSum = 0.0+sum(ErrF.values())
+
+def singleFedPlots(fedId=None, d={}, book={}):
+    book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 16, -0.5, 15.5,
+                title="FED %d; nWord16 skipped during unpacking;Events / bin" % fedId)
+
+    t = d["trailer"]
+    if "TTS" in t:
+        book.fill(t["TTS"], "TTS_%d" % fedId, 16, -0.5, 15.5,
+                  title="FED %d; TTS state;Events / bin" % fedId)
+
+    msg = "FED %d" % fedId
+    if "EvN" in d["header"]:
+        msg += " event %d" % d["header"]["EvN"]
+    else:
+        msg2 = " header lacks EvN.  Keys: %s" % str(d["header"].keys())
+        printer.error(msg + msg2)
+
+    nBadHtrs, ErrF, caps = htrSummary(blocks=d["htrBlocks"].values(), msg=msg)
+
+    errFSum = 0.0 + sum(ErrF.values())
     if errFSum:
-        book.fill(ErrF[0]/errFSum, "ErrF0_%d" % fedId, 44, 0.0, 1.1,
-                  title="FED %d;frac. chan. w/ErrF==0;Events / bin" % fedId)
+        for code, n in ErrF.iteritems():
+            book.fill(n/errFSum, "ErrF%d_%d" % (code, fedId), 44, 0.0, 1.1,
+                      title="FED %d;frac. chan. w/ErrF==%d;Events / bin" % (fedId, code))
 
     capSum = 0.0+sum(caps.values())
     if capSum:
@@ -78,10 +91,19 @@ def nPerChannel(lst=[], iChannel=None):
 
 def compare(raw1={}, raw2={}, book={}):
     for raw in [raw1, raw2]:
-        for fedId, dct in raw.iteritems():
+        for fedId, dct in sorted(raw.iteritems()):
             if fedId is None:
                 continue
-            if singleFedPlots(raw, fedId, book):
+            if not dct["nBytesSW"]:
+                printer.error("Zero bytes read for FED %d" % fedId)
+                continue
+
+            fedIdHw = dct["header"]["FEDid"]
+            if fedId != fedIdHw:
+                printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
+                continue
+
+            if singleFedPlots(fedId, dct, book):
                 return
             if (None in raw) and raw[None]["patternMode"]:
                 checkHtrModules(fedId, raw[fedId]["htrBlocks"])
