@@ -71,41 +71,58 @@ def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
         print "\n".join(lines)  # skip printer to facilitate diff
 
 
-def oneHtr(p={}, iOffset=None, dump=None, utca=None, nonMatched=[]):
+def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
+    zs = p.get("ZS")
+
     out = []
-    if (not iOffset) or (4 <= dump):
-        out.append("  ".join(["iWord16",
-                              "   EvN",
-                              "  OrN5",
-                              " BcN",
-                              "ModuleId",
-                              "FrmtV",
-                              #"nWordTP",
-                              "nWordQIE",
-                              "nSamp",
-                              "nPre",
-                              "EvN8",
-                              "  CRC",
-                              ]))
+    if printColumnHeaders:
+        columns = ["iWord16",
+                   "   EvN",
+                   "  OrN5",
+                   " BcN",
+                   "ModuleId",
+                   "Fl",
+                   "FrmtV",
+                   #"nWordTP",
+                   "nWordQIE",
+                   "nSamp",
+                   "nPre",
+                   "EvN8",
+                   "  CRC",
+        ]
+        if zs:
+            columns += [" ", "ZSMask:  Thr1, Thr24, ThrTP"]
+        out.append("  ".join(columns))
 
-    out.append("  ".join([" %04d" % p["0Word16"],
-                          " 0x%07x" % p["EvN"],
-                          "0x%02x" % p["OrN5"],
-                          "%4d" % p["BcN"],
-                          "  0x%03x" % p["ModuleId"],
-                          "  0x%01x" % p["FormatVer"],
-                          #"  %3d  " % p["nWord16Tp"],
-                          "   %3d" % p["nWord16Qie"],
-                          "    %2d" % p["nSamples"],
-                          "  %2d" % p["nPreSamples"],
-                          "  0x%02x" % p["EvN8"],
-                          "0x%04x" % p["CRC"],
-                          ]))
+    strings = [" %04d" % p["0Word16"],
+               " 0x%07x" % p["EvN"],
+               "0x%02x" % p["OrN5"],
+               "%4d" % p["BcN"],
+               "  0x%03x" % p["ModuleId"],
+               " %2d" % p.get("FWFlavor", -1),
+               " 0x%01x" % p["FormatVer"],
+               #"  %3d  " % p["nWord16Tp"],
+               "   %3d" % p["nWord16Qie"],
+               "    %2d" % p["nSamples"],
+               "  %2d" % p["nPreSamples"],
+               "  0x%02x" % p["EvN8"],
+               "0x%04x" % p["CRC"],
+    ]
+    if zs:
+        strings += ["",
+                    "0x%04x" % zs["Mask"],
+                    "  %3d" % zs["Threshold1"],
+                    "  %3d" % zs["Threshold24"],
+                    "  %3d" % zs["ThresholdTP"],
+        ]
 
+    out.append("  ".join(strings))
     printer.green("\n".join(out))
     if 4 <= dump:
         kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2],
                  "nonMatched": reduced(nonMatched, p["ModuleId"]),
+                 "latency": p.get("Latency"),
+                 "zs": p.get("ZS"),
                  }
         if 6 <= dump:
             kargs["skipErrF"] = []
@@ -119,8 +136,16 @@ def oneHtr(p={}, iOffset=None, dump=None, utca=None, nonMatched=[]):
             printer.msg("\n".join(cd[1:]))
 
         if 5 <= dump:
-            f = (uhtrTriggerData if utca else htrTriggerData)
-            td = f(p["triggerData"], skipZero=(dump <= 5))
+            skipZero = dump <= 5
+            if utca:
+                td = uhtrTriggerData(p["triggerData"], skipZero=skipZero)
+            else:
+                td = htrTriggerData(p["triggerData"],
+                                    skipZero=skipZero,
+                                    zs=zs,
+                                    flavor=p["FWFlavor"],
+                )
+
             if len(td) >= 2:
                 printer.yellow(td[0])
                 printer.msg("\n".join(td[1:]))
@@ -128,7 +153,7 @@ def oneHtr(p={}, iOffset=None, dump=None, utca=None, nonMatched=[]):
 
 def qieString(qieData={}, red=False):
     l = []
-    for iQie in range(12):
+    for iQie in range(10):
         if iQie in qieData:
             l.append("%2x" % qieData[iQie])
         else:
@@ -140,9 +165,12 @@ def qieString(qieData={}, red=False):
     return out
 
 
-def htrTriggerData(d={}, skipZero=False):
-    out = ["  ".join(["  Tag", "Peak", "SofI", "TP(hex)  0   1   2   3"])]
-    for tag, lst in sorted(d.iteritems()):
+def htrTriggerData(d={}, skipZero=False, zs={}, flavor=None):
+    columns = ["SLB-ch", "Peak", "SofI", "TP(hex)  0   1   2   3"]
+    if zs:
+        columns.append("  ZS?")
+    out = ["  ".join(columns)]
+    for (slb, ch), lst in sorted(d.iteritems()):
         z = ""
         soi = ""
         tp = ""
@@ -152,7 +180,17 @@ def htrTriggerData(d={}, skipZero=False):
             z += str(int(dct["Z"]))
             soi += str(int(dct["SOI"]))
             tp += " %3x" % dct["TP"]
-        out.append("  ".join([" 0x%02x" % tag,
+
+        if zs:
+            marks = zs["TPMarks"]
+            iChannel = 4*(slb - 1) + ch
+            if iChannel < len(marks):
+                m = "y" if marks[iChannel] else "n"
+            else:
+                m = " "
+            tp += " "*5 + m
+
+        out.append("  ".join(["  %1d- %1d" % (slb, ch),
                               "%4s" % z,
                               "%4s" % soi,
                               " "*4,
@@ -190,25 +228,32 @@ def uhtrTriggerData(d={}, skipZero=False):
 
 
 def htrChannelData(lst=[], crate=0, slot=0, top="",
-                   fibChs=[], skipErrF=[3], nonMatched=[]):
+                   fibChs=[], skipErrF=[3],
+                   nonMatched=[], latency={}, zs={}):
     out = []
-    out.append("  ".join(["Crate",
-                          "Slot",
-                          " Fi",
-                          "Ch",
-                          "Fl",
-                          "ErrF",
-                          "CapId0",
-                          "QIE(hex)  0  1  2  3  4  5  6  7  8  9",
-                          ])
-               )
+    columns = ["Crate",
+               "Slot",
+               " Fi",
+               "Ch",
+               "Fl",
+               "ErrF",
+               "CapId0",
+               "QIE(hex)  0  1  2  3  4  5  6  7  8  9",
+    ]
+    if latency:
+        columns += [" ", " EF", "Cnt", "IDLE"]
+    if zs:
+        columns += [" ", "ZS?"]
+    out.append("  ".join(columns))
+
     for data in lst:
+        FiberP1 = 1 + data["Fiber"]
         if data["FibCh"] not in fibChs:
             continue
         if data["ErrF"] in skipErrF:
             continue
         if printer.__color:  # hack
-            red = (1+data["Fiber"], data["FibCh"]) in nonMatched
+            red = (FiberP1, data["FibCh"]) in nonMatched
         else:
             red = False
         out.append("   ".join(["  %2d" % crate,
@@ -218,9 +263,27 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                                "%1d" % data["Flavor"],
                                "%2d" % data["ErrF"],
                                "  %1d" % data["CapId0"],
-                               " "*11,
+                               "   %2d %s" % (len(data["QIE"]), " "*5)
                                ])+qieString(data["QIE"], red=red)
                    )
+        if latency:
+            dct = latency.get("Fiber%d" % FiberP1)
+            if dct and data["FibCh"] == 1:
+                lat = [" "*4,
+                       "%s%s" % (dct["Empty"], dct["Full"]),
+                       "%3d" % dct["Cnt"],
+                       "%4d" % dct["IdleBCN"],
+                ]
+                out[-1] += "  ".join(lat)
+        if zs:
+            iChannel = 3*data["Fiber"] + data["FibCh"]
+            marks = zs["DigiMarks"]
+            if iChannel < len(marks):
+                m = "y" if marks[iChannel] else "n"
+            else:
+                m = " "
+            out[-1] += "%7s" % m
+
     return out
 
 
@@ -313,6 +376,8 @@ def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
     offsets = d["htrBlocks"].keys()
     if not offsets:
         return
+
+    printColumnHeaders = True
     for iOffset, offset in enumerate(sorted(offsets)):
         p = d["htrBlocks"][offset]
         if "patternData" in p:
@@ -320,10 +385,14 @@ def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
                            patternMode=patternMode,
                            fedId=d["header"]["FEDid"],
                            iOffset=iOffset)
-        elif 3 <= dump:  # and 5 <= p["Slot"]:
-            oneHtr(p=p, iOffset=iOffset, dump=dump,
+        elif 3 <= dump:
+            oneHtr(p=p,
+                   printColumnHeaders=printColumnHeaders,
+                   dump=dump,
                    utca=not configuration.isVme(h["FEDid"]),
                    nonMatched=nonMatched)
+            if dump == 3:
+                printColumnHeaders = False
 
 
 def oneFedMol(d):

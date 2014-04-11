@@ -88,9 +88,127 @@ def MOLheader(d={}, word64_1=None, word64_2=None):
     d[iblock]["Trigger"] = w2 & 0xffffff
 
 
+def htrHeader(l={}, w=None, i=None, utca=None, bcnDelta=None):
+    if i == 0:
+        l["EvN"] = w & 0xff
+
+    if i == 1:
+        l["EvN"] += w << 8
+
+    if i == 2 and not utca:
+        l["HM"] = (w >> 13) & 0x1
+        l["EE"] = (w >> 2) & 0x1
+
+    if i == 3:
+        l["OrN5"] = (w >> 11) & 0x1f
+        l["ModuleId"] = w & 0x7ff
+        if utca:
+            l["Crate"] = l["ModuleId"] >> 4
+            l["Slot"] = l["ModuleId"] & 0xf
+            l["Top"] = " "
+        else:
+            # http://isscvs.cern.ch/cgi-bin/viewcvs-all.cgi/TriDAS/hcal/hcalHW/src/common/hcalHTR.cc?revision=1.88
+            # int id=(m_crate<<6)+((m_slot&0x1F)<<1)+((true_for_top)?(1):(0));
+            # fpga->dev->write("HTRsubmodN",id);
+            l["Crate"] = l["ModuleId"] >> 6
+            l["Slot"] = (l["ModuleId"] >> 1) & 0x1f
+            l["Top"] = "t" if (l["ModuleId"] & 0x1) else "b"
+
+    if i == 4:
+        l["BcN"] = w & 0xfff
+        l["OrN5"], l["BcN"] = ornBcn(l["OrN5"], l["BcN"], bcnDelta)
+        l["FormatVer"] = (w >> 12) & 0xf
+        assert utca or l["FormatVer"] == 6, "HTR FormatVer %s is not supported." % str(l["FormatVer"])
+
+    if i == 5:
+        l["channelData"] = {}
+        l["triggerData"] = {}
+        if utca:
+            #l["nWord16Payload"] = w & 0x1fff  # !document
+            l["nPreSamples"] = (w >> 3) & 0x1f  # !document
+        else:
+            l["nWord16Tp"] = (w >> 8) & 0xff
+            l["nPreSamples"] = (w >> 3) & 0x1f
+
+    if not utca:
+        if i == 6:
+            l["US"] = (w >> 15) & 0x1
+            l["CM"] = (w >> 14) & 0x1
+
+        if i == 7:
+            l["PipelineLength"] = w & 0xff
+            l["FWFlavor"] = (w >> 8) & 0x7f
+
+
+def htrTps(l={}, w=None):
+    tag = (w >> 11) & 0x1f
+    slb = (tag >> 2) & 0x7
+    ch = tag & 0x3
+    key = (slb, ch)
+    if key not in l["triggerData"]:
+        l["triggerData"][key] = []
+    l["triggerData"][key].append({"Z": (w >> 10) & 0x1,
+                                  "SOI": (w >> 9) & 0x1,
+                                  "TP": w & 0x1ff,
+                              })
+
+
+def htrExtra(l={}, w=None, i=None):
+    if l["US"]:
+        if "ZS" not in l:
+            l["ZS"] = {}
+        if i == 1:
+            l["ZS"]["DigiMarks"] = []
+            l["ZS"]["TPMarks"] = []
+
+        if i <= 3:
+            digi = w & 0xff
+            tp = (w >> 8) & 0xff
+            for iBit in range(8):
+                l["ZS"]["DigiMarks"].append((digi >> iBit) & 0x1)
+                l["ZS"]["TPMarks"].append((tp >> iBit) & 0x1)
+
+        if i == 4:
+            l["ZS"]["Threshold1"] = w & 0xff
+            l["ZS"]["Threshold24"] = (w >> 8) & 0xff
+        if i == 5:
+            l["ZS"]["ThresholdTP"] = (w >> 12) & 0xf
+        if i == 6:
+            t = (w >> 12) & 0xf
+            l["ZS"]["ThresholdTP"] |= (t << 4)
+        if i == 7:
+            m = (w >> 12) & 0x7
+            l["ZS"]["Mask"] = (m << 16)
+        if i == 8:
+            l["ZS"]["Mask"] |= w
+    else:
+        if "Latency" not in l:
+            l["Latency"] = {}
+
+        key = "Fiber%d" % i
+        l["Latency"][key] = {"Empty": (w >> 15) & 0x1,
+                             "Full": (w >> 14) & 0x1,
+                             "Cnt": (w >> 12) & 0x3,
+                             "IdleBCN": w & 0x3ff,
+                             }
+
+
+def htrTrailer(l={}, w=None, k=None):
+    if k == 4:  # !document
+        l["nWord16Qie"] = w & 0x7ff
+        l["nSamples"] = (w >> 11) & 0x1f
+    if k == 3:  # !document (2 for utca)
+        l["CRC"] = w
+    if k == 2:  # skip zeroes
+        return
+    if k == 1:
+        l["EvN8"] = w >> 8
+        l["DTCErrors"] = w & 0xff
+
+
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             utca=None, bcnDelta=0, skipFlavors=[], patternMode={}):
-    w = word16
+
     if "htrIndex" not in d:
         for iHtr in range(len(word16Counts)):
             d[iHtr] = {"nWord16": word16Counts[iHtr]}
@@ -106,82 +224,32 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
 
     i = iWord16 - l["0Word16"]
 
-    #header
-    if i == 0:
-        l["EvN"] = w & 0xff
-        return
-    if i == 1:
-        l["EvN"] += w << 8
-        return
-    if i == 2:
-        return
-    if i == 3:
-        l["OrN5"] = (w >> 11) & 0x1f
-        l["ModuleId"] = w & 0x7ff
-        if utca:
-            l["Crate"] = l["ModuleId"] >> 4
-            l["Slot"] = l["ModuleId"] & 0xf
-            l["Top"] = " "
-        else:
-            # http://isscvs.cern.ch/cgi-bin/viewcvs-all.cgi/TriDAS/hcal/hcalHW/src/common/hcalHTR.cc?revision=1.88
-            # int id=(m_crate<<6)+((m_slot&0x1F)<<1)+((true_for_top)?(1):(0));
-            # fpga->dev->write("HTRsubmodN",id);
-            l["Crate"] = l["ModuleId"] >> 6
-            l["Slot"] = (l["ModuleId"] >> 1) & 0x1f
-            l["Top"] = "t" if (l["ModuleId"] & 0x1) else "b"
-        return
-    if i == 4:
-        l["BcN"] = w & 0xfff
-        l["OrN5"], l["BcN"] = ornBcn(l["OrN5"], l["BcN"], bcnDelta)
-        l["FormatVer"] = (w >> 12) & 0xf
-        assert utca or l["FormatVer"] == 6, "HTR FormatVer %s is not supported." % str(l["FormatVer"])
-        return
-    if i == 5:
-        l["channelData"] = {}
-        l["triggerData"] = {}
-        if utca:
-            #l["nWord16Payload"] = w & 0x1fff  # !document
-            l["nPreSamples"] = (w >> 3) & 0x1f  # !document
-        else:
-            l["nWord16Tp"] = (w >> 8) & 0xff
-            l["nPreSamples"] = (w >> 3) & 0x1f
-        return
-    if i in [6, 7]:
-        return
-    if (not utca) and i < 8 + l["nWord16Tp"]:
-        tag = (w >> 11) & 0x1f
-        if tag not in l["triggerData"]:
-            l["triggerData"][tag] = []
-        l["triggerData"][tag].append({"Z": (w >> 10) & 0x1,
-                                      "SOI": (w >> 9) & 0x1,
-                                      "TP": w & 0x1ff,
-                                      })
+    if i < 8:
+        htrHeader(l, w=word16, i=i, utca=utca, bcnDelta=bcnDelta)
         return
 
-    #trailer
-    if i == l["nWord16"] - 4:  # !document
-        l["nWord16Qie"] = w & 0x7ff
-        l["nSamples"] = (w >> 11) & 0x1f
-        return
-    if i == l["nWord16"] - 3:  # !document (2 for utca)
-        l["CRC"] = w
-        return
-    elif i == l["nWord16"] - 1:
-        if patternMode:
-            storePatternData(l, **patternMode)
-        d["htrIndex"] += 1
-        l["EvN8"] = w >> 8
-        l["DTCErrors"] = w & 0xff
-        clearChannel(d)  # in case event is malformed
-        return
+    k = l["nWord16"] - i
+    if not utca:
+        if i < 8 + l["nWord16Tp"]:
+            htrTps(l, word16)
+            return
 
-    #skip "extra info"
-    if (not utca) and (i >= l["nWord16"]-12):
+        if (5 <= k <= 12) and not l["CM"]:
+            htrExtra(l, w=word16, i=13-k)
+            return
+
+    if k <= 4:
+        htrTrailer(l, w=word16, k=k)
+        if k == 1:
+            d["htrIndex"] += 1
+            if patternMode:
+                storePatternData(l, **patternMode)
+            clearChannel(d)  # in case event is malformed
         return
 
     #data
-    if (w >> 15):
-        flavor = (w >> 12) & 0x7
+    if (word16 >> 15):
+        flavor = (word16 >> 12) & 0x7
         if flavor in skipFlavors:
             clearChannel(d)
         else:
