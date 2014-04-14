@@ -1,6 +1,7 @@
 import os
 import struct
 import sys
+import time
 import utils
 
 r = utils.ROOT()
@@ -76,6 +77,10 @@ def eventMaps(s={}, options={}):
         f.ls()
         sys.exit("tree %s not found.  The above objects are available." % treeName)
 
+    if s["progress"]:
+        iMask = 0
+        print "Mapping %s:" % s["label"]
+
     for iEvent in range(nEvents(tree, nEventsMax)):
         orn = bcn = evn = None
 
@@ -130,6 +135,9 @@ def eventMaps(s={}, options={}):
         else:
             sys.exit("name %s not found." % name)
 
+        if s["progress"]:
+            iMask = progress(iEvent, iMask)
+
         t = (orn, evn) if useEvn else (orn, )
         if filterEvn and (evn & 0x1fff):
             continue
@@ -138,7 +146,17 @@ def eventMaps(s={}, options={}):
         backward[t] = iEvent
 
     f.Close()
+    if s["progress"]:
+        print
     return forward, backward
+
+
+def progress(iEvent, iMask):
+    if iEvent and not (iEvent & (2**iMask - 1)):
+        print "%8d" % iEvent, time.ctime()
+        return iMask + 1
+    else:
+        return iMask
 
 
 def loop(inner={}, outer={}, innerEvent={}, book={}):
@@ -151,10 +169,17 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
     tree = f.Get(outer["treeName"])
     assert tree, outer["treeName"]
 
+    if outer["progress"]:
+        iMask = 0
+        print "Looping:"
+
     for iOuterEvent in range(nEvents(tree, outer["nEventsMax"])):
         nb = tree.GetEntry(iOuterEvent)
         if nb <= 0:
             continue
+
+        if outer["progress"]:
+            iMask = progress(iOuterEvent, iMask)
 
         kargs = {"raw1": collectedRaw(tree=tree, specs=outer),
                  "book": book}
@@ -464,10 +489,9 @@ def oneRun(file1="",
            feds2=[],
            patternMode={},
            mapOptions={},
+           printOptions={},
            nEvents=None,
            outputFile="",
-           dump=None,
-           warnSkip16=None,
            ):
 
     assert file1
@@ -475,9 +499,9 @@ def oneRun(file1="",
 
     common = {"nEventsMax": nEvents,
               "patternMode": patternMode,
-              "dump": dump,
-              "warnSkip16": warnSkip16,
               }
+    common.update(printOptions)
+
     spec1 = fileSpec(file1)
     spec1.update(common)
     spec1.update({"fileName": file1,

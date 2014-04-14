@@ -17,18 +17,24 @@ def opts():
                     help="FEDs to use in file1, e.g. 714,722 or e.g. HBHE")
     parser.add_option_group(reqd)
 
-    common = optparse.OptionGroup(parser, "Optional")
-    common.add_option("--patterns",
-                      dest="patterns",
-                      default=False,
-                      action="store_true",
-                      help="interpret QIE data as FE patterns")
+    common = optparse.OptionGroup(parser, "Misc options")
     common.add_option("--nevents",
                       dest="nevents",
                       default="",
                       metavar="N",
                       help="stop after N events")
+    common.add_option("--output-file",
+                      dest="outputFile",
+                      default="output/latest.root",
+                      help="store histograms in this .root file.")
+    common.add_option("--profile",
+                      dest="profile",
+                      default=False,
+                      action="store_true",
+                      help="profile the run")
+    parser.add_option_group(common)
 
+    printing = optparse.OptionGroup(parser, "Options for printing to stdout")
     dump = ["dump level (0-6), default is 0.",
             "0: only summary (no per-event info)",
             "1: DCC/AMC13 headers",
@@ -38,32 +44,28 @@ def opts():
             "5: data (fibers with ErrF != 3); TPs (> 0)",
             "6: data (all); TPs (all)",
             ]
-    common.add_option("--dump",
-                      dest="dump",
-                      default=0,
-                      metavar="D",
-                      help=" ".join([d.ljust(60) for d in dump]))
-    common.add_option("--no-warn-skip16",
-                      dest="noWarnSkip16",
-                      default=False,
-                      action="store_true",
-                      help="disable warning when unpacker skips 16-bit words")
-    common.add_option("--no-color",
-                      dest="noColor",
-                      default=False,
-                      action="store_true",
-                      help="disable color in stdout")
-    common.add_option("--profile",
-                      dest="profile",
-                      default=False,
-                      action="store_true",
-                      help="profile the run")
-    common.add_option("--output-file",
-                      dest="outputFile",
-                      default="output/latest.root",
-                      help="store histograms in this .root file.")
+    printing.add_option("--dump",
+                        dest="dump",
+                        default=0,
+                        metavar="D",
+                        help=" ".join([d.ljust(60) for d in dump]))
+    printing.add_option("--no-warn-skip16",
+                        dest="noWarnSkip16",
+                        default=False,
+                        action="store_true",
+                        help="disable warning when unpacker skips 16-bit words")
+    printing.add_option("--no-color",
+                        dest="noColor",
+                        default=False,
+                        action="store_true",
+                        help="disable color in stdout")
+    printing.add_option("--progress",
+                        dest="progress",
+                        default=False,
+                        action="store_true",
+                        help="print TTree entry number (when power of 2)")
 
-    parser.add_option_group(common)
+    parser.add_option_group(printing)
 
     match = optparse.OptionGroup(parser, "Options for matching events across files")
     match.add_option("--file2",
@@ -107,6 +109,12 @@ def opts():
     parser.add_option_group(match)
 
     patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
+    patterns.add_option("--patterns",
+                        dest="patterns",
+                        default=False,
+                        action="store_true",
+                        help="interpret QIE data as FE patterns")
+
     patterns.add_option("--npatternts",
                         dest="nPatternTs",
                         default=20,
@@ -201,6 +209,10 @@ if __name__ == "__main__":
     for key in ["useEvn", "filterEvn", "printEventMap", "identityMap"]:
         mapOptions[key] = getattr(options, key)
 
+    printOptions = {"dump": integer(options.dump, "dump"),
+                    "warnSkip16": not options.noWarnSkip16,
+                    "progress": options.progress,
+                    }
     def go():
         analyze.oneRun(file1=options.file1,
                        feds1=fedList(options.feds1),
@@ -210,8 +222,7 @@ if __name__ == "__main__":
                        patternMode=patternOptions,
                        mapOptions=mapOptions,
                        outputFile=options.outputFile,
-                       dump=integer(options.dump, "dump"),
-                       warnSkip16=not options.noWarnSkip16,
+                       printOptions=printOptions,
                        )
 
     if options.profile:
