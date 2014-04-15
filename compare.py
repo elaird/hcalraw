@@ -205,18 +205,17 @@ def dataMap(raw={}, skipErrF=[3]):
     forward = {}
     backward = {}
 
-    fiberMap = configuration.fiberMap()
-
     for fedId, d in raw.iteritems():
         if fedId is None:
             continue
 
+        fiberMap = configuration.fiberMap(fedId)
         for key, block in d["htrBlocks"].iteritems():
             for channelData in block["channelData"].values():
                 channel = channelData["FibCh"]
                 matchRange = configuration.matchRange(fedId, block["Slot"], channel)
                 fiber = 1 + channelData["Fiber"]
-                fiber = fiberMap[fiber] if fiber in fiberMap else fiber
+                fiber = fiberMap.get(fiber, fiber)
                 if channelData["ErrF"] in skipErrF:
                     continue
                 coords = (fedId, block["ModuleId"], fiber, channel)
