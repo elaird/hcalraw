@@ -118,7 +118,9 @@ def htrHeader(l={}, w=None, i=None, utca=None, bcnDelta=None):
         l["BcN"] = w & 0xfff
         l["OrN5"], l["BcN"] = ornBcn(l["OrN5"], l["BcN"], bcnDelta)
         l["FormatVer"] = (w >> 12) & 0xf
-        assert utca or l["FormatVer"] == 6, "HTR FormatVer %s is not supported." % str(l["FormatVer"])
+        if (not utca) and l["FormatVer"] != 6:
+            c =  "(crate %2d slot %2d%1s)" % (l["Crate"], l["Slot"], l["Top"])
+            printer.error("HTR %s FormatVer %d is not supported." % (c, l["FormatVer"]))
 
     if i == 5:
         l["channelData"] = {}
