@@ -3,7 +3,7 @@ import printer
 import printRaw
 
 
-def htrSummary(blocks=[], book=None, fedId=None, msg=""):
+def htrSummary(blocks=[], book=None, fedId=None, msg="", adcPlots=False):
     nBadHtrs = 0
     caps = {}
     ErrF = {}
@@ -28,10 +28,15 @@ def htrSummary(blocks=[], book=None, fedId=None, msg=""):
             ErrF[channelData["ErrF"]] += 1
             if not channelData["ErrF"]:
                 caps[channelData["CapId0"]] += 1
+                if adcPlots:
+                    for adc in channelData["QIE"].values():
+                        book.fill(adc, "all_adc", 128, -0.5, 127.5,
+                                  title=";all ADC (when ErrF==0); TS / bin")
+
     return nBadHtrs, ErrF, caps
 
 
-def singleFedPlots(fedId=None, d={}, book={}):
+def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
     book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 16, -0.5, 15.5,
               title="FED %d; nWord16 skipped during unpacking;Events / bin" % fedId)
 
@@ -50,7 +55,8 @@ def singleFedPlots(fedId=None, d={}, book={}):
     nBadHtrs, ErrF, caps = htrSummary(blocks=d["htrBlocks"].values(),
                                       book=book,
                                       fedId=fedId,
-                                      msg=msg)
+                                      msg=msg,
+                                      adcPlots=adcPlots)
 
     errFSum = 0.0 + sum(ErrF.values())
     if errFSum:
@@ -95,8 +101,9 @@ def nPerChannel(lst=[], iChannel=None):
     return len(filter(lambda x: x[-1] == iChannel, lst))
 
 
-def compare(raw1={}, raw2={}, book={}):
+def compare(raw1={}, raw2={}, book={}, adcPlots=False):
     for raw in [raw1, raw2]:
+        maxAdc = -1
         for fedId, dct in sorted(raw.iteritems()):
             if fedId is None:
                 continue
@@ -113,10 +120,25 @@ def compare(raw1={}, raw2={}, book={}):
                 printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
                 continue
 
-            if singleFedPlots(fedId, dct, book):
+            if singleFedPlots(fedId=fedId,
+                              d=dct,
+                              book=book,
+                              adcPlots=adcPlots):
                 return
             if (None in raw) and raw[None]["patternMode"]:
                 checkHtrModules(fedId, raw[fedId]["htrBlocks"])
+
+            if adcPlots:
+                for block in dct["htrBlocks"].values():
+                    for channelData in block["channelData"].values():
+                        if not channelData["ErrF"]:
+                            for adc in channelData["QIE"].values():
+                                if maxAdc < adc:
+                                    maxAdc = adc
+
+        if adcPlots and raw is raw1:
+            book.fill(maxAdc, "max_adc", 128, -0.5, 127.5,
+                      title=";max ADC (when ErrF==0); events / bin")
 
     mapF1, mapB1 = dataMap(raw1)
     mapF2, mapB2 = dataMap(raw2)
