@@ -277,3 +277,13 @@ if __name__ == "__main__":
            process=func,
            runs=utcaRuns,
            )
+
+    # summary pdf
+    def pdf(**_):
+        inFiles = sorted(stdout("cd %s; find | grep compare.pdf" % utcaDir))
+        cmd = "cd %s" % utcaDir
+        cmd += " && gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=%s/all.pdf " % utcaDir
+        cmd += " ".join(inFiles)
+        return commandOutput(cmd)
+
+    go(baseDir=utcaDir, process=pdf, runs=utcaRuns[-1:])
