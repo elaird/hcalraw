@@ -175,7 +175,9 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
             else:
                 lst = []
                 color = [r.kBlack, r.kRed, r.kBlue]
+                color += [r.kBlack] * (len(feds) - len(color))
                 style = [1, 2, 3]
+                style += [1] * (len(feds) - len(style))
                 for iFed, fed in enumerate(sorted(feds)):
                     lst.append((fed, color[iFed], style[iFed]))
 
