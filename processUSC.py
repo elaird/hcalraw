@@ -121,6 +121,11 @@ def env():
     return ["cd ~elaird/public/hcalraw_pro", "source env/slc6-cmssw.sh"]
 
 
+def gitLog(inputFile="", outputDir="", run=0):
+    cmds = ["git log | grep %s | head -1" % s for s in ["commit", "Date"]]
+    return commandOutput(" && ".join(env() + cmds))
+
+
 def oneRun(args=[], outputFile="", suppress=["Xrd", "nologin"]):
     out = " && ".join(env() + ["./oneRun.py "])
     out += " ".join(args)
@@ -240,7 +245,8 @@ if __name__ == "__main__":
                    hcalRuns="http://cmshcalweb01.cern.ch/HCALruns.txt",
                    )
 
-    for func, deps in [(dumpFibering, []),
+    for func, deps in [(gitLog, []),
+                       (dumpFibering, []),
                        (compareFibering, ["dumpFibering"]),
                        ]:
         go(baseDir="%s/public/FiberID" % os.environ["HOME"],
@@ -251,7 +257,7 @@ if __name__ == "__main__":
            minimumRun=214782,
            )
 
-    for func in [dumpEvents, dumpEventsNoColor, compare]:
+    for func in [gitLog, dumpEvents, dumpEventsNoColor, compare]:
         go(baseDir="%s/public/uTCA" % os.environ["HOME"],
            runListFile=runListFile,
            select=lambda x: ("/HF/" in x) and ("no_utca" not in x),
