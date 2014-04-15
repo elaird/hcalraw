@@ -43,9 +43,11 @@ def matchRange(fedId=None, slot=None, fibCh=None):
     return range(10)
 
 
-def fiberMap():
-    #return d2c()
-    return {}
+def fiberMap(fedId=None):
+    if 989 <= fedId <= 990:  # mCTR2d
+        return d2c()
+    else:
+        return {}
 
 
 def expectedHtr(fedId, spigot):
