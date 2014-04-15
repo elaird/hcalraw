@@ -185,6 +185,8 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
 
 
 def makeSummaryPdf(inputFiles=[], feds=[], pdf="summary.pdf"):
+    r.gROOT.SetStyle("Plain")
+
     canvas = r.TCanvas()
     canvas.Print(pdf + "[")
 
