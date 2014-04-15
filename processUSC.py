@@ -192,22 +192,27 @@ def report(d={}, subject=""):
         os.system(cmd)
 
 
+def runs(runListFile="",
+         minimumRun=None,
+         maximumRun=None,
+         select=lambda x: False,
+         ):
+    assert runListFile
+    runs = filter(lambda x: minimumRun <= x, selectedRuns(select, runListFile))
+    if maximumRun:
+        runs = filter(lambda x: x <= maximumRun, runs)
+    return runs
+
+
 def go(baseDir="",
-       runListFile="",
-       select=lambda x: False, 
+       runs=[],
        process=lambda inputFile, outputDir, run: {},
        dependsUpon=[],
-       minimumRun=None,
-       maximumRun=None,
        eosPrefix="root://eoscms.cern.ch",
        eosDir="/eos/cms/store/group/comm_hcal/LS1",
        jobCheck="oneRun",
        nProcMax=5,
        ):
-    assert runListFile
-    runs = filter(lambda x: minimumRun <= x, selectedRuns(select, runListFile))
-    if maximumRun:
-        runs = filter(lambda x: x <= maximumRun, runs)
 
     for rootFile in rootFiles(eosDir):
         run = goodRun(rootFile)
@@ -245,22 +250,30 @@ if __name__ == "__main__":
                    hcalRuns="http://cmshcalweb01.cern.ch/HCALruns.txt",
                    )
 
+    fiberIdRuns = runs(runListFile=runListFile,
+                       minimumRun=214782,
+                       select=lambda x: "FiberID" in x,
+                       )
+
     for func, deps in [(gitLog, []),
                        (dumpFibering, []),
                        (compareFibering, ["dumpFibering"]),
                        ]:
         go(baseDir="%s/public/FiberID" % os.environ["HOME"],
-           runListFile=runListFile,
-           select=lambda x: "FiberID" in x,
            process=func,
            dependsUpon=deps,
-           minimumRun=214782,
+           runs=fiberIdRuns,
            )
 
+
+    utcaRuns = runs(runListFile=runListFile,
+                    minimumRun=219866,
+                    select=lambda x: ("/HF/" in x) and ("no_utca" not in x),
+                    )
+    utcaDir = "%s/public/uTCA" % os.environ["HOME"]
+
     for func in [gitLog, dumpEvents, dumpEventsNoColor, compare]:
-        go(baseDir="%s/public/uTCA" % os.environ["HOME"],
-           runListFile=runListFile,
-           select=lambda x: ("/HF/" in x) and ("no_utca" not in x),
+        go(baseDir=utcaDir,
            process=func,
-           minimumRun=219866,
+           runs=utcaRuns,
            )
