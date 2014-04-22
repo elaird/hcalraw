@@ -48,7 +48,7 @@ def prepareRunList(dest="", hcalRuns=""):
         try:
             os.remove(dest)
         except OSError, e:
-            assert e.no == 2
+            assert e.errno == 2
 
     stdout("wget -O %s %s" % (dest, hcalRuns), checkErr=False)
 
