@@ -279,9 +279,11 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
                 word16 = (word64 >> (16*i)) & 0xffff
                 iWord16 = 4*iWord64+i
                 returnCode = decode.payload(htrBlocks,
-                                            iWord16=iWord16, word16=word16,
+                                            iWord16=iWord16,
+                                            word16=word16,
                                             word16Counts=header["word16Counts"],
-                                            utca=utca, bcnDelta=bcnDelta,
+                                            utca=utca,
+                                            bcnDelta=bcnDelta,
                                             skipFlavors=skipFlavors,
                                             patternMode=patternMode)
                 if returnCode is not None:
@@ -333,7 +335,6 @@ def charsOneFed(tree=None, fedId=None, collection=""):
 def wordsOneChunk(tree=None, branch=""):
     #Common Data Format
     chunk = wordsOneBranch(tree, branch)
-    #print "%s chunk has data length %d" % (branch, chunk.getDataLength())
     #wrapper class creates std::vector<ULong64_t>
     return r.CDFChunk2(chunk).chunk()
 
