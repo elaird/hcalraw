@@ -290,17 +290,16 @@ def channelInit(iWord16=None, word16=None, flavor=None):
 
     if flavor == 4:
         dataKey = "triggerData"
-        channelHeader.update({"SOI": {},
-                              "OK": {},
-                              "TP": {},
-                              })
+        for key in ["SOI", "OK", "TP"]:
+            channelHeader[key] = {}
+
     elif flavor in [5, 6]:
         dataKey = "channelData"
-        channelHeader.update({"Fiber": channelId / 4,
-                              "FibCh": channelId % 4,
-                              "QIE": {},
-                              "CapId": {},
-                              })
+        channelHeader["Fiber"] = channelId / 4
+        channelHeader["FibCh"] = channelId % 4
+        channelHeader["QIE"] = {}
+        channelHeader["CapId"] = {}
+
     return dataKey, channelId, channelHeader
 
 
