@@ -236,6 +236,7 @@ def go(baseDir="",
         if ready:
             stdout("touch %s" % procFlag)
             d = process(inputFile="%s/%s/%s" % (eosPrefix, eosDir, rootFile),
+                        #inputFile="%s/USC_%d.root" % (os.environ["HOME"], run),
                         outputDir=runDir,
                         run=run)
             stdout("rm %s" % procFlag)
@@ -260,7 +261,7 @@ if __name__ == "__main__":
     fiberIdRuns = runs(runListFile=runListFile,
                        minimumRun=214782,
                        select=lambda x: "FiberID" in x,
-                       )
+                       ) + [222060]
 
     for func, deps in [(gitLog, []),
                        (dumpFibering, []),
