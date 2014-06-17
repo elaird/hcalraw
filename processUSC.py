@@ -218,6 +218,8 @@ def go(baseDir="",
         run = goodRun(rootFile)
         if run not in runs:
             continue
+        else:
+            runs.remove(run)
 
         processes = stdout("ps -ef | grep %s | grep %s" % (os.environ["USER"], jobCheck))
         if nProcMax < len(processes):
@@ -242,6 +244,11 @@ def go(baseDir="",
             if not d["returncode"]:
                 with open(doneFlag, "w") as f:
                     print >> f, blob(d)
+
+    if runs:
+        print "Runs not found in EOS:"
+        for run in runs:
+            print run
 
 
 if __name__ == "__main__":
