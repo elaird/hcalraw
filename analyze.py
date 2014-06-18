@@ -63,7 +63,6 @@ def eventMaps(s={}, options={}):
 
     useEvn = options.get('useEvn', False)
     filterEvn = options.get('filterEvn', False)
-    bcnDelta = configuration.bcnDelta(fedId0)
 
     forward = {}
     backward = {}
@@ -95,7 +94,6 @@ def eventMaps(s={}, options={}):
                                                    fedId=fedId0,
                                                    collection=s["rawCollection"],
                                                    ),
-                               bcnDelta=bcnDelta,
                                nBytesPer=1,
                                headerOnly=True)
                 orn, bcn, evn = coords(raw)
@@ -108,7 +106,6 @@ def eventMaps(s={}, options={}):
             else:
                 tree.GetEntry(iEvent)
                 raw = unpacked(fedData=wordsOneChunk(tree=tree, branch=branch0),
-                               bcnDelta=bcnDelta,
                                nBytesPer=8,
                                headerOnly=True)
                 orn, bcn, evn = coords(raw)
@@ -116,7 +113,6 @@ def eventMaps(s={}, options={}):
         elif name == "DB":
             tree.GetEntry(iEvent)
             raw = unpacked(fedData=wordsOneBranch(tree=tree, branch=branch0),
-                           bcnDelta=bcnDelta,
                            nBytesPer=4,
                            headerOnly=True)
             orn, bcn, evn = coords(raw)
@@ -127,7 +123,6 @@ def eventMaps(s={}, options={}):
             mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
             raw = unpacked(fedData=rawThisFed,
                            skipWords64=skipWords64,
-                           bcnDelta=bcnDelta,
                            nBytesPer=8,
                            headerOnly=True)
             orn, bcn, evn = coords(raw)
@@ -199,8 +194,7 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
 def collectedRaw(tree=None, specs={}):
     raw = {}
     for fedId in specs["fedIds"]:
-        kargs = {"bcnDelta": configuration.bcnDelta(fedId),
-                 "patternMode": specs["patternMode"],
+        kargs = {"patternMode": specs["patternMode"],
                  "warnSkip16": specs["warnSkip16"],
                  }
         branch = specs["branch"](fedId)
@@ -245,7 +239,7 @@ def w64(fedData, jWord64, nBytesPer):
 
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
-             skipWords64=[], bcnDelta=0, patternMode={}):
+             skipWords64=[], patternMode={}):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {}
@@ -267,7 +261,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
         iWord64 = jWord64 - nSkipped64
 
         if iWord64 < iWordPayload0:
-            decode.header(header, iWord64, word64, bcnDelta)
+            decode.header(header, iWord64, word64)
             utca = header.get("utca", None)
             if utca is not None:
                 skipFlavors = configuration.unpackSkipFlavors(utca)
@@ -284,7 +278,6 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
                                             word16=word16,
                                             word16Counts=header["word16Counts"],
                                             utca=utca,
-                                            bcnDelta=bcnDelta,
                                             skipFlavors=skipFlavors,
                                             patternMode=patternMode)
                 if returnCode is not None:
