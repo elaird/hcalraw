@@ -164,6 +164,8 @@ def htrHeader(l={}, w=None, i=None, utca=None):
         if i == 7:
             l["PipelineLength"] = w & 0xff
             l["FWFlavor"] = (w >> 8) & 0x7f
+            if (l["FWFlavor"] & 0xe0) == 0x80:
+                printer.error("Found TTP in crate %d slot %d" % (l["Crate"], l["Slot"]))
 
 
 def htrTps(l={}, w=None):
