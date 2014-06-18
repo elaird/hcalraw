@@ -21,8 +21,8 @@ def unpackSkipFlavors(utca):
         return [7]
 
 
-def bcnDelta(fedId=None):
-    return 0 if _isVme(fedId) else -118
+def bcnDelta(utca):
+    return -118 if utca else 0
 
 
 def matchRange(fedId=None, slot=None, fibCh=None):
