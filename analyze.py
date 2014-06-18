@@ -193,10 +193,11 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
 
 def collectedRaw(tree=None, specs={}):
     raw = {}
+    kargs = {"patternMode": specs["patternMode"],
+             "warnSkip16": specs["warnSkip16"],
+             }
+
     for fedId in specs["fedIds"]:
-        kargs = {"patternMode": specs["patternMode"],
-                 "warnSkip16": specs["warnSkip16"],
-                 }
         branch = specs["branch"](fedId)
 
         if specs["name"] == "CMS":
