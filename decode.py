@@ -131,7 +131,7 @@ def htrHeader(l={}, w=None, i=None, utca=None):
             l["Slot"] = l["ModuleId"] & 0xf
             l["Top"] = " "
         else:
-            # http://isscvs.cern.ch/cgi-bin/viewcvs-all.cgi/TriDAS/hcal/hcalHW/src/common/hcalHTR.cc?revision=1.88
+            # https://svnweb.cern.ch/cern/wsvn/cmshcos/trunk/hcalHW/src/common/hcalHTR.cc
             # int id=(m_crate<<6)+((m_slot&0x1F)<<1)+((true_for_top)?(1):(0));
             # fpga->dev->write("HTRsubmodN",id);
             l["Crate"] = l["ModuleId"] >> 6
@@ -142,9 +142,7 @@ def htrHeader(l={}, w=None, i=None, utca=None):
         l["BcN"] = w & 0xfff
         l["OrN5"], l["BcN"] = ornBcn(l["OrN5"], l["BcN"], utca)
         l["FormatVer"] = (w >> 12) & 0xf
-        if (not utca) and l["FormatVer"] != 6:
-            c =  "(crate %2d slot %2d%1s)" % (l["Crate"], l["Slot"], l["Top"])
-            printer.error("HTR %s FormatVer %d is not supported." % (c, l["FormatVer"]))
+        l["UnsupportedFormat"] = (not utca) and (l["FormatVer"] != 6)
 
     if i == 5:
         l["channelData"] = {}
@@ -162,10 +160,17 @@ def htrHeader(l={}, w=None, i=None, utca=None):
             l["CM"] = (w >> 14) & 0x1
 
         if i == 7:
+            l["IsTTP"] = (w >> 15) & 0x1
             l["PipelineLength"] = w & 0xff
-            l["FWFlavor"] = (w >> 8) & 0x7f
-            if (l["FWFlavor"] & 0xe0) == 0x80:
-                printer.error("Found TTP in crate %d slot %d" % (l["Crate"], l["Slot"]))
+            if l["IsTTP"]:
+                l["TTPAlgo"] = (w >> 8) & 0x7
+                for key in ["Crate", "Slot", "Top", "UnsupportedFormat"]:
+                    del l[key]
+            else:
+                l["FWFlavor"] = (w >> 8) & 0x7f
+                if l["UnsupportedFormat"]:
+                    c =  "(crate %2d slot %2d%1s)" % (l["Crate"], l["Slot"], l["Top"])
+                    printer.error("HTR %s FormatVer %d is not supported." % (c, l["FormatVer"]))
 
 
 def htrTps(l={}, w=None):
