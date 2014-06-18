@@ -55,7 +55,7 @@ def uHtrDict(w, l=[]):
             }
 
 
-def header(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
+def header(d={}, iWord64=None, word64=None, bcnDelta=0):
     w = word64
     if iWord64 == 0:
         #d["FoV"] = (w >> 4) & 0xf
@@ -70,10 +70,10 @@ def header(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
     if d["uFoV"]:
         printer.error("FED %s: uFoV %d is not supported." % (d["FEDid"], d["uFoV"]))
     else:
-        header_ufov0(d=d, iWord64=iWord64, word64=word64, utca=utca, bcnDelta=bcnDelta)
+        header_ufov0(d=d, iWord64=iWord64, word64=word64, bcnDelta=bcnDelta)
 
 
-def header_ufov0(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
+def header_ufov0(d={}, iWord64=None, word64=None, bcnDelta=0):
     w = word64
     if iWord64 == 1:
         d["OrN"] = (w >> 4) & 0xffffffff
@@ -83,8 +83,9 @@ def header_ufov0(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
 
     if iWord64 == 2:
         d["FormatVersion"] = w & 0xff
+        d["utca"] = 0x10 <= d["FormatVersion"]
 
-    if utca:
+    if d["utca"]:
         if 3 <= iWord64 <= 5:
             uhtr0 = 4*(iWord64-3)
             for i in range(4):
