@@ -1,10 +1,14 @@
-#AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
-#DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
-#HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
+# AMC13/uHTR (through April 2014) http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_3.pdf
+# AMC13 (May 2014 onward) http://ohm.bu.edu/~hazen/CMS/AMC13/UpdatedDAQPath_2014-05-01.pdf
+# uHTR  (May 2014 onward) https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12306&version=2&filename=uhtr_spec.pdf
+# DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
+# HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
+
 
 import configuration
 import printer
 import sys
+
 
 def ornBcn(ornIn, bcnIn, bcnDelta=0):
     if not bcnDelta:
@@ -54,13 +58,31 @@ def uHtrDict(w, l=[]):
 def header(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
     w = word64
     if iWord64 == 0:
+        #d["FoV"] = (w >> 4) & 0xf
         d["FEDid"] = (w >> 8) & 0xfff
         d["BcN"] = (w >> 20) & 0xfff
         d["EvN"] = (w >> 32) & 0xffffff
+        return
+
+    if iWord64 == 1:
+        d["uFoV"] = (w >> 60) & 0xf
+
+    if d["uFoV"]:
+        printer.error("FED %s: uFoV %d is not supported." % (d["FEDid"], d["uFoV"]))
+    else:
+        header_ufov0(d=d, iWord64=iWord64, word64=word64, utca=utca, bcnDelta=bcnDelta)
+
+
+def header_ufov0(d={}, iWord64=None, word64=None, utca=None, bcnDelta=0):
+    w = word64
     if iWord64 == 1:
         d["OrN"] = (w >> 4) & 0xffffffff
         d["OrN"], d["BcN"] = ornBcn(d["OrN"], d["BcN"], bcnDelta)
         d["word16Counts"] = []
+        return
+
+    if iWord64 == 2:
+        d["FormatVersion"] = w & 0xff
 
     if utca:
         if 3 <= iWord64 <= 5:
