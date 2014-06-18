@@ -80,6 +80,8 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
 def checkHtrModules(fedId=None, htrBlocks={}):
     crates = []
     for spigot, block in htrBlocks.iteritems():
+        if block["IsTTP"]:
+            continue
         expected = configuration.expectedHtr(fedId, spigot)
         crates.append(block["Crate"])
         bad = [block["Top"] != expected["Top"],
