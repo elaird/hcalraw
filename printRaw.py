@@ -143,8 +143,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                 td = htrTriggerData(p["triggerData"],
                                     skipZero=skipZero,
                                     zs=zs,
-                                    flavor=p["FWFlavor"],
-                )
+                                    )
 
             if len(td) >= 2:
                 printer.yellow(td[0])
@@ -165,7 +164,7 @@ def qieString(qieData={}, red=False):
     return out
 
 
-def htrTriggerData(d={}, skipZero=False, zs={}, flavor=None):
+def htrTriggerData(d={}, skipZero=False, zs={}):
     columns = ["SLB-ch", "Peak", "SofI", "TP(hex)  0   1   2   3"]
     if zs:
         columns.append("  ZS?")
