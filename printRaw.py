@@ -57,11 +57,14 @@ def htrOverview(d={}):
 
 
 def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
-    cd = htrChannelData(p["channelData"].values(),
-                        crate=p["Crate"],
-                        slot=p["Slot"],
-                        top=p["Top"],
-                        fibChs=[1])
+    if p["IsTTP"]:
+        cd = []
+    else:
+        cd = htrChannelData(p["channelData"].values(),
+                            crate=p["Crate"],
+                            slot=p["Slot"],
+                            top=p["Top"],
+                            fibChs=[1])
     if len(cd) >= 2:
         lines = patternData(p["patternData"],
                             moduleId="%3d %2d" % (fedId, iOffset),
@@ -126,11 +129,14 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                  }
         if 6 <= dump:
             kargs["skipErrF"] = []
-        cd = htrChannelData(p["channelData"].values(),
-                            crate=p["Crate"],
-                            slot=p["Slot"],
-                            top=p["Top"],
-                            **kargs)
+        if p["IsTTP"]:
+            cd = []
+        else:
+            cd = htrChannelData(p["channelData"].values(),
+                                crate=p["Crate"],
+                                slot=p["Slot"],
+                                top=p["Top"],
+                                **kargs)
         if len(cd) >= 2:
             printer.yellow(cd[0])
             printer.msg("\n".join(cd[1:]))
