@@ -10,7 +10,8 @@ import printer
 import sys
 
 
-def ornBcn(ornIn, bcnIn, bcnDelta=0):
+def ornBcn(ornIn, bcnIn, utca):
+    bcnDelta = configuration.bcnDelta(utca)
     if not bcnDelta:
         return ornIn, bcnIn
 
@@ -55,7 +56,7 @@ def uHtrDict(w, l=[]):
             }
 
 
-def header(d={}, iWord64=None, word64=None, bcnDelta=0):
+def header(d={}, iWord64=None, word64=None):
     w = word64
     if iWord64 == 0:
         #d["FoV"] = (w >> 4) & 0xf
@@ -70,20 +71,20 @@ def header(d={}, iWord64=None, word64=None, bcnDelta=0):
     if d["uFoV"]:
         printer.error("FED %s: uFoV %d is not supported." % (d["FEDid"], d["uFoV"]))
     else:
-        header_ufov0(d=d, iWord64=iWord64, word64=word64, bcnDelta=bcnDelta)
+        header_ufov0(d=d, iWord64=iWord64, word64=word64)
 
 
-def header_ufov0(d={}, iWord64=None, word64=None, bcnDelta=0):
+def header_ufov0(d={}, iWord64=None, word64=None):
     w = word64
     if iWord64 == 1:
         d["OrN"] = (w >> 4) & 0xffffffff
-        d["OrN"], d["BcN"] = ornBcn(d["OrN"], d["BcN"], bcnDelta)
         d["word16Counts"] = []
         return
 
     if iWord64 == 2:
         d["FormatVersion"] = w & 0xff
         d["utca"] = 0x10 <= d["FormatVersion"]
+        d["OrN"], d["BcN"] = ornBcn(d["OrN"], d["BcN"], d["utca"])
 
     if d["utca"]:
         if 3 <= iWord64 <= 5:
@@ -111,7 +112,7 @@ def MOLheader(d={}, word64_1=None, word64_2=None):
     d[iblock]["Trigger"] = w2 & 0xffffff
 
 
-def htrHeader(l={}, w=None, i=None, utca=None, bcnDelta=None):
+def htrHeader(l={}, w=None, i=None, utca=None):
     if i == 0:
         l["EvN"] = w & 0xff
 
@@ -139,7 +140,7 @@ def htrHeader(l={}, w=None, i=None, utca=None, bcnDelta=None):
 
     if i == 4:
         l["BcN"] = w & 0xfff
-        l["OrN5"], l["BcN"] = ornBcn(l["OrN5"], l["BcN"], bcnDelta)
+        l["OrN5"], l["BcN"] = ornBcn(l["OrN5"], l["BcN"], utca)
         l["FormatVer"] = (w >> 12) & 0xf
         if (not utca) and l["FormatVer"] != 6:
             c =  "(crate %2d slot %2d%1s)" % (l["Crate"], l["Slot"], l["Top"])
@@ -232,7 +233,7 @@ def htrTrailer(l={}, w=None, k=None):
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, bcnDelta=0, skipFlavors=[], patternMode={}):
+            utca=None, skipFlavors=[], patternMode={}):
 
     if "htrIndex" not in d:
         for iHtr in range(len(word16Counts)):
@@ -250,7 +251,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
     i = iWord16 - l["0Word16"]
 
     if i < 8:
-        htrHeader(l, w=word16, i=i, utca=utca, bcnDelta=bcnDelta)
+        htrHeader(l, w=word16, i=i, utca=utca)
         return
 
     k = l["nWord16"] - i
