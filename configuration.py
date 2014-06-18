@@ -14,15 +14,15 @@ def processed(s=""):
         return ""
 
 
-def unpackSkipFlavors(fedId=None):
-    if isVme(fedId):
-        return [7]
-    else:
+def unpackSkipFlavors(utca):
+    if utca:
         return [0, 1, 2, 3, 7]
+    else:
+        return [7]
 
 
 def bcnDelta(fedId=None):
-    return 0 if isVme(fedId) else -118
+    return 0 if _isVme(fedId) else -118
 
 
 def matchRange(fedId=None, slot=None, fibCh=None):
@@ -34,7 +34,7 @@ def matchRange(fedId=None, slot=None, fibCh=None):
 
     # 1-TS shift on uHTR fibCh=2 until front f/w B_31
     if __shiftFibCh2 and fibCh == 2:
-        if isVme(fedId):
+        if _isVme(fedId):
             return range(1, 10)
         else:
             return range(9)
@@ -58,7 +58,7 @@ def expectedHtr(fedId, spigot):
             "Slot": slot}
 
 
-def isVme(fedId=None):
+def _isVme(fedId=None):
     return 700 <= fedId <= 731
 
 
@@ -66,7 +66,7 @@ def format(treeName=""):
     out = None
     if treeName == "CMSRAW":
         out = {"name":  "HCAL",
-               "branch": lambda fedId: "%s%d" % ("HCAL_DCC" if isVme(fedId) else "Chunk", fedId),
+               "branch": lambda fedId: "%s%d" % ("HCAL_DCC" if _isVme(fedId) else "Chunk", fedId),
                "auxBranch": False,
                }
 
