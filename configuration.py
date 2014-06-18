@@ -25,7 +25,7 @@ def bcnDelta(utca):
     return -118 if utca else 0
 
 
-def matchRange(fedId=None, slot=None, fibCh=None):
+def matchRange(fedId=None, slot=None, fibCh=None, utca=None):
     # exceptions for Jan. 2013 slice-test (HF)
     if fedId == 990 or (fedId == 989 and 5 <= slot):
         return range(1, 10)
@@ -34,10 +34,10 @@ def matchRange(fedId=None, slot=None, fibCh=None):
 
     # 1-TS shift on uHTR fibCh=2 until front f/w B_31
     if __shiftFibCh2 and fibCh == 2:
-        if _isVme(fedId):
-            return range(1, 10)
-        else:
+        if utca:
             return range(9)
+        else:
+            return range(1, 10)
 
     # ok
     return range(10)
