@@ -79,9 +79,6 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
 
 def checkHtrModules(fedId=None, htrBlocks={}):
     crates = []
-    if not configuration.isVme(fedId):
-        printer.error("HTR Module check not implemented for uTCA.")
-        return
     for spigot, block in htrBlocks.iteritems():
         expected = configuration.expectedHtr(fedId, spigot)
         crates.append(block["Crate"])
@@ -126,7 +123,10 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False):
                               adcPlots=adcPlots):
                 return
             if (None in raw) and raw[None]["patternMode"]:
-                checkHtrModules(fedId, raw[fedId]["htrBlocks"])
+                if raw[fedId]["header"]["utca"]:
+                    printer.error("HTR Module check not implemented for uTCA.")
+                else:
+                    checkHtrModules(fedId=fedId, htrBlocks=raw[fedId]["htrBlocks"])
 
             if adcPlots:
                 for block in dct["htrBlocks"].values():

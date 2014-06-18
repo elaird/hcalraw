@@ -389,7 +389,7 @@ def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
             oneHtr(p=p,
                    printColumnHeaders=printColumnHeaders,
                    dump=dump,
-                   utca=not configuration.isVme(h["FEDid"]),
+                   utca=h["utca"],
                    nonMatched=nonMatched)
             if dump == 3:
                 printColumnHeaders = False
