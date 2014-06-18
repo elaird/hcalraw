@@ -199,9 +199,7 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
 def collectedRaw(tree=None, specs={}):
     raw = {}
     for fedId in specs["fedIds"]:
-        kargs = {"utca": not configuration.isVme(fedId),
-                 "bcnDelta": configuration.bcnDelta(fedId),
-                 "skipFlavors": configuration.unpackSkipFlavors(fedId),
+        kargs = {"bcnDelta": configuration.bcnDelta(fedId),
                  "patternMode": specs["patternMode"],
                  "warnSkip16": specs["warnSkip16"],
                  }
@@ -245,19 +243,17 @@ def w64(fedData, jWord64, nBytesPer):
         return word64
 
 
-#AMC13 http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_2.pdf
-#DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
+# for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
-             skipWords64=[], bcnDelta=0, utca=None, skipFlavors=[], patternMode={}):
+             skipWords64=[], bcnDelta=0, patternMode={}):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
-    assert headerOnly or (utca in [False, True]), \
-        "Specify whether data is uTCA or VME (unless skipping HTR blocks)."
+
     header = {}
     trailer = {}
     htrBlocks = {}
 
     nWord64 = fedData.size()*nBytesPer/8
-    iWordPayload0 = 6 if utca else 12
+    iWordPayload0 = 6  # adjusted for VME below
     nWord16Skipped = 0
 
     nToSkip = len(set(skipWords64))
@@ -271,7 +267,12 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
         iWord64 = jWord64 - nSkipped64
 
         if iWord64 < iWordPayload0:
-            decode.header(header, iWord64, word64, utca, bcnDelta)
+            decode.header(header, iWord64, word64, bcnDelta)
+            utca = header.get("utca", None)
+            if utca is not None:
+                skipFlavors = configuration.unpackSkipFlavors(utca)
+                if not utca:
+                    iWordPayload0 = 12
         elif headerOnly:
             break
         elif iWord64 < nWord64 - 1 - nToSkip:
