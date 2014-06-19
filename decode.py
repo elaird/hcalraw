@@ -3,6 +3,7 @@
 # uHTR  (May 2014 onward) https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12306&version=2&filename=uhtr_spec.pdf
 # DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 # HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
+# TTP http://cmsdoc.cern.ch/cms/HCAL/document/Aux/HcalTechTriggerProcessor/dataformat.html
 
 
 import configuration
@@ -262,14 +263,6 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         return
 
     k = l["nWord16"] - i
-    if not utca:
-        if i < 8 + l["nWord16Tp"]:
-            htrTps(l, word16)
-            return
-
-        if (5 <= k <= 12) and not l["CM"]:
-            htrExtra(l, w=word16, i=13-k)
-            return
 
     if k <= 4:
         htrTrailer(l, w=word16, k=k)
@@ -280,7 +273,28 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             clearChannel(d)  # in case event is malformed
         return
 
-    #data
+    if l["IsTTP"]:
+        pass
+    else:
+        if not utca:
+            if i < 8 + l["nWord16Tp"]:
+                htrTps(l, word16)
+                return
+
+            if (5 <= k <= 12) and not l["CM"]:
+                htrExtra(l, w=word16, i=13-k)
+                return
+
+        htrData(d=d,
+                l=l,
+                iWord16=iWord16,
+                word16=word16,
+                skipFlavors=skipFlavors,
+                patternMode=patternMode,
+                )
+
+
+def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[], patternMode={}):
     if (word16 >> 15):
         flavor = (word16 >> 12) & 0x7
         if flavor in skipFlavors:
