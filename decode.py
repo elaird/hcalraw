@@ -274,7 +274,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         return
 
     if l["IsTTP"]:
-        pass
+        ttpData(l, (i - 8) % 6, word16)
     else:
         if not utca:
             if i < 8 + l["nWord16Tp"]:
@@ -292,6 +292,26 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
                 skipFlavors=skipFlavors,
                 patternMode=patternMode,
                 )
+
+
+def ttpData(l={}, iDataMod6=None, word16=None):
+    if "ttpInput" not in l:
+        l["ttpInput"] = []
+        l["ttpAlgoDep"] = []
+        l["ttpOutput"] = []
+
+    if not iDataMod6:
+        for key in ["ttpInput", "ttpAlgoDep", "ttpOutput"]:
+            l[key].append(0)
+
+    if iDataMod6 <= 3:
+        l["ttpInput"][-1] |= word16 << (iDataMod6 * 16)
+    if iDataMod6 == 4:
+        l["ttpInput"][-1] |= (word16 & 0xff) << (iDataMod6 * 16)
+        l["ttpAlgoDep"][-1] = word16 >> 8
+    if iDataMod6 == 5:
+        l["ttpAlgoDep"][-1] |= (word16 & 0xfff) << 8
+        l["ttpOutput"][-1] = (word16 >> 12) & 0xf
 
 
 def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[], patternMode={}):
