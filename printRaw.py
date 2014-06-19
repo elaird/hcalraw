@@ -130,7 +130,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
         if 6 <= dump:
             kargs["skipErrF"] = []
         if p["IsTTP"]:
-            cd = []
+            cd = ttpData(p["ttpInput"], p["ttpOutput"], p["ttpAlgoDep"])
         else:
             cd = htrChannelData(p["channelData"].values(),
                                 crate=p["Crate"],
@@ -290,6 +290,21 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
             out[-1] += "%7s" % m
 
     return out
+
+
+def ttpData(ttpInput=[], ttpOutput=[], ttpAlgoDep=[]):
+    l = []
+    columns = ["TS", "0xhgfedcba9876543210", "0x algo", "0xo"]
+    l.append("   ".join(columns))
+
+    for i, (inp, out, algo) in enumerate(zip(ttpInput, ttpOutput, ttpAlgoDep)):
+        l.append("   ".join(["%2d" % i,
+                             "  %018x" % inp,
+                             "  %05x" % algo,
+                             "  %1x" % out,
+                             ])
+                 )
+    return l
 
 
 def patternData(d={}, moduleId="", slim=False, process=False):
