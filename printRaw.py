@@ -261,7 +261,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
             red = (FiberP1, data["FibCh"]) in nonMatched
         else:
             red = False
-        out.append("   ".join(["  %2d" % crate,
+        out.append("   ".join([" %3d" % crate,
                                "%3d%1s" % (slot, top),
                                "%2d" % data["Fiber"],
                                "%1d" % data["FibCh"],
