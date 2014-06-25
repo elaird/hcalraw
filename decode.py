@@ -113,7 +113,48 @@ def MOLheader(d={}, word64_1=None, word64_2=None):
     d[iblock]["Trigger"] = w2 & 0xffffff
 
 
-def htrHeader(l={}, w=None, i=None, utca=None):
+def htrHeaderV1(l={}, w=None, i=None, utca=None):
+    if i == 0:
+        l["DataLength"] = w
+
+    if i == 1:
+        l["DataLength"] |= (w & 0xf) << 16
+        l["BcN"] = w >> 4
+
+    if i == 2:
+        l["EvN"] = w
+
+    if i == 3:
+        l["EvN"] |= (w & 0xff) << 16
+
+    if i == 4:
+        l["Presamples"] = (w >> 12) & 0xf
+        l["Slot"] = (w >> 8) & 0xf
+        l["Crate"] = w & 0xff
+        # compat
+        l["ModuleId"] = 0
+        l["Top"] = " "
+        l["nPreSamples"] = l["Presamples"]
+
+    if i == 5:
+        l["OrN"] = w
+        l["OrN5"] = l["OrN"] & 0x1f  # compat
+
+    if i == 6:
+        l["PayloadFormat"] = (w >> 12) & 0xf
+        l["EventType"] = (w >> 8) & 0xf
+        l["FwFlavor"] = w & 0xff
+        l["FormatVer"] = l["PayloadFormat"]  # compat
+
+    if i == 7:
+        l["Header7"] = w
+
+    l["IsTTP"] = False
+    l["channelData"] = {}
+    l["triggerData"] = {}
+
+
+def htrHeaderV0(l={}, w=None, i=None, utca=None):
     if i == 0:
         l["EvN"] = w & 0xff
 
@@ -172,6 +213,8 @@ def htrHeader(l={}, w=None, i=None, utca=None):
                 if l["UnsupportedFormat"]:
                     c =  "(crate %2d slot %2d%1s)" % (l["Crate"], l["Slot"], l["Top"])
                     printer.error("HTR %s FormatVer %d is not supported." % (c, l["FormatVer"]))
+    else:
+        l["IsTTP"] = False
 
 
 def htrTps(l={}, w=None):
@@ -259,7 +302,16 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
     i = iWord16 - l["0Word16"]
 
     if i < 8:
-        htrHeader(l, w=word16, i=i, utca=utca)
+        if not i:
+            l["headerWords"] = []
+        l["headerWords"].append(word16)
+        if i == 7:
+            v1 = (l["headerWords"][6] >> 12) & 0x1
+            v1 &= utca
+            func = htrHeaderV1 if v1 else htrHeaderV0
+            for iHeaderWord in range(8):
+                func(l, w=l["headerWords"][iHeaderWord], i=iHeaderWord, utca=utca)
+            del l["headerWords"]
         return
 
     k = l["nWord16"] - i
