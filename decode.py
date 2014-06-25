@@ -270,7 +270,7 @@ def htrExtra(l={}, w=None, i=None):
                              }
 
 
-def htrTrailer(l={}, w=None, k=None):
+def htrTrailerV0(l={}, w=None, k=None):
     if k == 4:  # !document
         l["nWord16Qie"] = w & 0x7ff
         l["nSamples"] = (w >> 11) & 0x1f
@@ -281,6 +281,13 @@ def htrTrailer(l={}, w=None, k=None):
     if k == 1:
         l["EvN8"] = w >> 8
         l["DTCErrors"] = w & 0xff
+
+
+def htrTrailerV1(l={}, w=None, k=None):
+    if k == 2:
+        l["CRC"] = w
+    if k == 1:
+        l["EvN8"] = w >> 8
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
@@ -306,9 +313,9 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             l["headerWords"] = []
         l["headerWords"].append(word16)
         if i == 7:
-            v1 = (l["headerWords"][6] >> 12) & 0x1
-            v1 &= utca
-            func = htrHeaderV1 if v1 else htrHeaderV0
+            l["V1"] = (l["headerWords"][6] >> 12) & 0x1
+            l["V1"] &= utca
+            func = htrHeaderV1 if l["V1"] else htrHeaderV0
             for iHeaderWord in range(8):
                 func(l, w=l["headerWords"][iHeaderWord], i=iHeaderWord, utca=utca)
             del l["headerWords"]
@@ -316,8 +323,9 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
 
     k = l["nWord16"] - i
 
-    if k <= 4:
-        htrTrailer(l, w=word16, k=k)
+    if k <= 2:
+        func = htrTrailerV1 if l["V1"] else htrTrailerV0
+        func(l, w=word16, k=k)
         if k == 1:
             d["htrIndex"] += 1
             if patternMode:
@@ -331,6 +339,10 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         if not utca:
             if i < 8 + l["nWord16Tp"]:
                 htrTps(l, word16)
+                return
+
+            if (3 <= k <= 4):
+                htrTrailerV0(l, w=word16, k=k)
                 return
 
             if (5 <= k <= 12) and not l["CM"]:
