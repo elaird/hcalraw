@@ -261,7 +261,6 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
             nSkipped64 += 1
             continue
         iWord64 = jWord64 - nSkipped64
-
         if iWord64 < header["iWordPayload0"]:
             decode.header(header, iWord64, word64)
             if header["utca"] is not None:
@@ -281,13 +280,15 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
                                             patternMode=patternMode)
                 if returnCode is not None:
                     nWord16Skipped += 1
-                    if (iWord64 != nWord64 - 2 - nToSkip) and warnSkip16:
+                    if warnSkip16:  # and (iWord64 != nWord64 - 2 - nToSkip)
                         printer.warning(" ".join(["skipping",
                                                   "FED %d" % header["FEDid"],
                                                   "event %d" % header["EvN"],
                                                   "iWord16 %d" % iWord16,
-                                                  "word16 %d" % word16,
+                                                  "word16 %0x04x" % word16,
                                                   ]))
+            if header["uFoV"] and (iWord64 == nWord64 - 2 - nToSkip):
+                decode.block_trailer_ufov1(trailer, iWord64, word64)
         else:
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
