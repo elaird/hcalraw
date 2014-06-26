@@ -195,6 +195,7 @@ def collectedRaw(tree=None, specs={}):
     raw = {}
     kargs = {"patternMode": specs["patternMode"],
              "warnSkip16": specs["warnSkip16"],
+             "dump": specs["dump"],
              }
 
     for fedId in specs["fedIds"]:
@@ -240,7 +241,7 @@ def w64(fedData, jWord64, nBytesPer):
 
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
-             skipWords64=[], patternMode={}):
+             skipWords64=[], patternMode={}, dump=0):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
@@ -261,6 +262,12 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
             nSkipped64 += 1
             continue
         iWord64 = jWord64 - nSkipped64
+
+        if 7 <= dump:
+            if not iWord64:
+                print "#iw64 w64"
+            print "%5d" % iWord64, "%016x" % word64
+
         if iWord64 < header["iWordPayload0"]:
             decode.header(header, iWord64, word64)
             if header["utca"] is not None:
@@ -277,7 +284,8 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
                                             word16Counts=header["word16Counts"],
                                             utca=header["utca"],
                                             skipFlavors=skipFlavors,
-                                            patternMode=patternMode)
+                                            patternMode=patternMode,
+                                            dump=dump)
                 if returnCode is not None:
                     nWord16Skipped += 1
                     if warnSkip16:  # and (iWord64 != nWord64 - 2 - nToSkip)
@@ -285,14 +293,16 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
                                                   "FED %d" % header["FEDid"],
                                                   "event %d" % header["EvN"],
                                                   "iWord16 %d" % iWord16,
-                                                  "word16 %0x04x" % word16,
+                                                  "word16 0x%04x" % word16,
                                                   ]))
             if header["uFoV"] and (iWord64 == nWord64 - 2 - nToSkip):
                 decode.block_trailer_ufov1(trailer, iWord64, word64)
+                print trailer
         else:
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
             decode.trailer(trailer, iWord64, word64)
+            print trailer
 
     return {"header": header,
             "trailer": trailer,
