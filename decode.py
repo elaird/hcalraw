@@ -178,6 +178,7 @@ def htrHeaderV1(l={}, w=None, i=None, utca=None):
     if i == 5:
         l["OrN"] = w
         l["OrN5"] = l["OrN"] & 0x1f  # compat
+        l["OrN"], l["BcN"] = ornBcn(l["OrN"], l["BcN"], True)
 
     if i == 6:
         l["PayloadFormat"] = (w >> 12) & 0xf
