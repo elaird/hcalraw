@@ -79,12 +79,38 @@ def header(d={}, iWord64=None, word64=None):
 def block_header_ufov1(d={}, iWord64=None, word64=None):
     w = word64
     if iWord64 == 1:
-        d["OrN"] = (w >> 4) & 0xffffffff
-        d["nAMC"] = (w >> 52) & 0xf
         d["word16Counts"] = []
         d["utca"] = True
+
+        d["OrN"] = (w >> 4) & 0xffffffff
+        d["OrN"], d["BcN"] = ornBcn(d["OrN"], d["BcN"], d["utca"])
+
+        d["nAMC"] = (w >> 52) & 0xf
         d["iWordPayload0"] = 2 + d["nAMC"]
         return
+
+    if iWord64 < d["iWordPayload0"]:
+        iAMC = (w >> 16) & 0xf
+        key = "uHTR%d" % iAMC
+        d[key] = {}
+
+        lmsepvc = (w >> 56) & 0x7f
+        for i, l in enumerate(["L", "M", "S", "E", "P", "V", "C"]):
+            d[key][l] = (lmsepvc >> (6-i)) & 0x1
+        if d[key]["M"]:
+            sys.exit("multi-block unpacking not implemented")
+        d[key]["BoardID"] = w & 0xffff
+        d[key]["Blk_no"] = (w >> 20) & 0xff
+        d[key]["nWord16"] = (w >> 32) & 0xffffff
+        d[key]["nWord16"] *= 4
+        d["word16Counts"].append(d[key]["nWord16"])
+
+
+def block_trailer_ufov1(d={}, iWord64=None, word64=None):
+    d["BcN12"] = word64 & 0xfff
+    d["EvN8"] = (word64 >> 12) & 0xff
+    d["Blk_no8"] = (word64 >> 20) & 0xff
+    d["CRC32"] = word64 >> 32
 
 
 def header_ufov0(d={}, iWord64=None, word64=None):
@@ -209,25 +235,22 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
             l["nWord16Tp"] = (w >> 8) & 0xff
             l["nPreSamples"] = (w >> 3) & 0x1f
 
-    if not utca:
-        if i == 6:
-            l["US"] = (w >> 15) & 0x1
-            l["CM"] = (w >> 14) & 0x1
+    if i == 6:
+        l["US"] = (w >> 15) & 0x1
+        l["CM"] = (w >> 14) & 0x1
 
-        if i == 7:
-            l["IsTTP"] = (w >> 15) & 0x1
-            l["PipelineLength"] = w & 0xff
-            if l["IsTTP"]:
-                l["TTPAlgo"] = (w >> 8) & 0x7
-                for key in ["Crate", "Slot", "Top", "UnsupportedFormat"]:
-                    del l[key]
-            else:
-                l["FWFlavor"] = (w >> 8) & 0x7f
-                if l["UnsupportedFormat"]:
-                    c =  "(crate %2d slot %2d%1s)" % (l["Crate"], l["Slot"], l["Top"])
-                    printer.error("HTR %s FormatVer %d is not supported." % (c, l["FormatVer"]))
-    else:
-        l["IsTTP"] = False
+    if i == 7:
+        l["IsTTP"] = (w >> 15) & 0x1
+        l["PipelineLength"] = w & 0xff
+        if l["IsTTP"]:
+            l["TTPAlgo"] = (w >> 8) & 0x7
+            for key in ["Crate", "Slot", "Top", "UnsupportedFormat"]:
+                del l[key]
+        else:
+            l["FWFlavor"] = (w >> 8) & 0x7f
+            if l["UnsupportedFormat"]:
+                c =  "(crate %2d slot %2d%1s)" % (l["Crate"], l["Slot"], l["Top"])
+                printer.error("HTR %s FormatVer %d is not supported." % (c, l["FormatVer"]))
 
 
 def htrTps(l={}, w=None):
@@ -283,24 +306,12 @@ def htrExtra(l={}, w=None, i=None):
                              }
 
 
-def htrTrailerV0(l={}, w=None, k=None):
-    if k == 4:  # !document
+def htrPreTrailer(l={}, w=None, k=None):
+    if k == 4:
         l["nWord16Qie"] = w & 0x7ff
         l["nSamples"] = (w >> 11) & 0x1f
-    if k == 3:  # !document (2 for utca)
+    if k == 3:
         l["CRC"] = w
-    if k == 2:  # skip zeroes
-        return
-    if k == 1:
-        l["EvN8"] = w >> 8
-        l["DTCErrors"] = w & 0xff
-
-
-def htrTrailerV1(l={}, w=None, k=None):
-    if k == 2:
-        l["CRC"] = w
-    if k == 1:
-        l["EvN8"] = w >> 8
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
@@ -336,10 +347,16 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
 
     k = l["nWord16"] - i
 
+    if k == 3:  # !document
+        if utca and not l["V1"]:
+            l["CRC"] = word16
+            return
+
     if k <= 2:
-        func = htrTrailerV1 if l["V1"] else htrTrailerV0
-        func(l, w=word16, k=k)
+        if (k == 2) and l["V1"]:
+            l["CRC"] = word16
         if k == 1:
+            l["EvN8"] = word16 >> 8
             d["htrIndex"] += 1
             if patternMode:
                 storePatternData(l, **patternMode)
@@ -355,7 +372,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
                 return
 
             if (3 <= k <= 4):
-                htrTrailerV0(l, w=word16, k=k)
+                htrPreTrailer(l, word16, k)
                 return
 
             if (5 <= k <= 12) and not l["CM"]:
