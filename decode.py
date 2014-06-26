@@ -64,15 +64,27 @@ def header(d={}, iWord64=None, word64=None):
         d["FEDid"] = (w >> 8) & 0xfff
         d["BcN"] = (w >> 20) & 0xfff
         d["EvN"] = (w >> 32) & 0xffffff
+        #d["Evt_ty"] = (w >> 56) & 0xf
         return
 
     if iWord64 == 1:
         d["uFoV"] = (w >> 60) & 0xf
 
     if d["uFoV"]:
-        printer.error("FED %s: uFoV %d is not supported." % (d["FEDid"], d["uFoV"]))
+        block_header_ufov1(d=d, iWord64=iWord64, word64=word64)
     else:
         header_ufov0(d=d, iWord64=iWord64, word64=word64)
+
+
+def block_header_ufov1(d={}, iWord64=None, word64=None):
+    w = word64
+    if iWord64 == 1:
+        d["OrN"] = (w >> 4) & 0xffffffff
+        d["nAMC"] = (w >> 52) & 0xf
+        d["word16Counts"] = []
+        d["utca"] = True
+        d["iWordPayload0"] = 2 + d["nAMC"]
+        return
 
 
 def header_ufov0(d={}, iWord64=None, word64=None):
@@ -85,6 +97,7 @@ def header_ufov0(d={}, iWord64=None, word64=None):
     if iWord64 == 2:
         d["FormatVersion"] = w & 0xff
         d["utca"] = 0x10 <= d["FormatVersion"]
+        d["iWordPayload0"] = 6 if d["utca"] else 12
         d["OrN"], d["BcN"] = ornBcn(d["OrN"], d["BcN"], d["utca"])
 
     if d["utca"]:
