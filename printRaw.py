@@ -36,7 +36,7 @@ def oneEvent(d={}, nonMatched=[]):
 
 
 def htrOverview(d={}):
-    abbr = "uHTR" if "uHTR0" in d else "HTR"
+    abbr = "HTR" if "HTR0" in d else "uHTR"
     hyphens = "   "+("-"*(67 if (abbr == "uHTR") else 82))
     printer.cyan(hyphens)
 
@@ -86,10 +86,10 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                    "ModuleId",
                    "Fl",
                    "FrmtV",
+                   "nPre",
                    #"nWordTP",
                    "nWordQIE",
                    "nSamp",
-                   "nPre",
                    "EvN8",
                    "  CRC",
         ]
@@ -102,15 +102,16 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                "0x%02x" % p["OrN5"],
                "%4d" % p["BcN"],
                "  0x%03x" % p["ModuleId"],
-               " %2d" % p.get("FWFlavor", -1),
+               " %2d" % p.get("FWFlavor", -1),  # absent in uHTR
                " 0x%01x" % p["FormatVer"],
-               #"  %3d  " % p["nWord16Tp"],
-               "   %3d" % p.get("nWord16Qie", -1),
-               "    %2d" % p.get("nSamples", -1),
                "  %2d" % p["nPreSamples"],
+               #"  %3d  " % p["nWord16Tp"],
+               "   %3d" % p.get("nWord16Qie", -1),  # absent in uHTR
+               "    %2d" % p.get("nSamples", -1),  # absent in uHTR
                "  0x%02x" % p["EvN8"],
                "0x%04x" % p["CRC"],
-    ]
+               ]
+
     if zs:
         strings += ["",
                     "0x%04x" % zs["Mask"],
