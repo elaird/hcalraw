@@ -243,7 +243,9 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
              skipWords64=[], patternMode={}):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
-    header = {"iWordPayload0": 6}  # modified by decode.header
+    header = {"iWordPayload0": 6,
+              "utca": None,
+              }  # modified by decode.header
     trailer = {}
     htrBlocks = {}
 
@@ -262,9 +264,8 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
 
         if iWord64 < header["iWordPayload0"]:
             decode.header(header, iWord64, word64)
-            utca = header.get("utca", None)
-            if utca is not None:
-                skipFlavors = configuration.unpackSkipFlavors(utca)
+            if header["utca"] is not None:
+                skipFlavors = configuration.unpackSkipFlavors(header["utca"])
         elif headerOnly:
             break
         elif iWord64 < nWord64 - 1 - nToSkip:
@@ -275,7 +276,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
                                             iWord16=iWord16,
                                             word16=word16,
                                             word16Counts=header["word16Counts"],
-                                            utca=utca,
+                                            utca=header["utca"],
                                             skipFlavors=skipFlavors,
                                             patternMode=patternMode)
                 if returnCode is not None:
