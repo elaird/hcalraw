@@ -316,7 +316,10 @@ def htrPreTrailer(l={}, w=None, k=None):
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, skipFlavors=[], patternMode={}):
+            utca=None, skipFlavors=[], patternMode={}, dump=0):
+
+    if 8 <= dump:
+        print "      (%5d 0x%04x)" % (iWord16, word16)
 
     if "htrIndex" not in d:
         for iHtr in range(len(word16Counts)):
