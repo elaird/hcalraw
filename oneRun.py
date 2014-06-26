@@ -43,6 +43,8 @@ def opts():
             "4: data (channel=1, fibers with ErrF != 3)",
             "5: data (fibers with ErrF != 3); TPs (> 0)",
             "6: data (all); TPs (all)",
+            "7: 64bit words; data (all); TPs (all)",
+            "8: 64(+16)bit words; data (all); TPs (all)",
             ]
     printing.add_option("--dump",
                         dest="dump",
