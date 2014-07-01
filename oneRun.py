@@ -35,7 +35,7 @@ def opts():
     parser.add_option_group(common)
 
     printing = optparse.OptionGroup(parser, "Options for printing to stdout")
-    dump = ["dump level (0-6), default is 0.",
+    dump = ["dump level (0-8), default is 0.",
             "0: only summary (no per-event info)",
             "1: DCC/AMC13 headers",
             "2: (u)HTR summary info",
