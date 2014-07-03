@@ -317,6 +317,13 @@ def htrPreTrailer(l={}, w=None, k=None):
         l["CRC"] = w
 
 
+def end(d, l, patternMode):
+    d["htrIndex"] += 1
+    if patternMode:
+        storePatternData(l, **patternMode)
+    clearChannel(d)  # in case event is malformed
+
+
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             utca=None, skipFlavors=[], patternMode={}, dump=0):
 
@@ -352,22 +359,32 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         return
 
     k = l["nWord16"] - i
-    #print iWord16, i, k, "0x%04x" % word16
 
     if k == 3 and utca and not l["V1"]:  # !document
         l["CRC"] = word16
         return
 
-    if k <= 2:
-        if (k == 2) and l["V1"]:
+    if l["V1"] and k <= 4:
+        if k == 4:
+            l["DataLength16T"] = word16
+        if k == 3:
+            l["DataLength16T"] |= (word16 & 0xf) << 16
+            l["DataLength16T"] *= 4
+            l["EvN8"] = word16 >> 8
+        if k == 2:
             l["CRC"] = word16
         if k == 1:
-            l["EvN8"] = word16 >> 8
-            d["htrIndex"] += 1
-            if patternMode:
-                storePatternData(l, **patternMode)
-            clearChannel(d)  # in case event is malformed
+            l["CRC"] |= word16 << 16
+            end(d, l, patternMode)
+
         return
+
+    if (not l["V1"]) and k <= 2:
+        if k == 1:
+            l["EvN8"] = word16 >> 8
+            end(d, l, patternMode)
+        return
+
 
     if l["IsTTP"]:
         ttpData(l, (i - 8) % 6, word16)
