@@ -85,7 +85,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
     if "nWord16Qie" in p:
         col = "nWord16Qie"
     else:
-        col = "DataLength"
+        col = "DataLength16"
 
     out = []
     if printColumnHeaders:
@@ -118,13 +118,12 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                #"  %3d  " % p["nWord16Tp"],
                ]
     if "Qie" in col:
-        strings.append("     %3d  " % p.get(col, -1))
+        strings.append("     %3d " % p.get(col, -1))
     else:
-        s = "   %3d/%3d" % (p.get(col, -1), p.get(col+"T", -1))
+        s = "    %3d/%3d" % (p.get(col, -1), p.get(col+"T", -1))
         strings.append(s)
 
-    strings += [
-               "  %2d" % p.get("nSamples", -1),  # absent in uHTR
+    strings += ["   %2d" % p.get("nSamples", -1),  # absent in uHTR
                "  0x%02x" % p["EvN8"],
                "0x%04x" % p["CRC"],
                ]
