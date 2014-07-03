@@ -38,6 +38,11 @@ def opts():
                      default=-118,
                      metavar="N",
                      help="Add this to uTCA BcN (and OrN).  Default is -118.")
+    common.add_option("--adc-plots",
+                      dest="adcPlots",
+                      default=False,
+                      action="store_true",
+                      help="Histogram ADC values.")
     parser.add_option_group(common)
 
     printing = optparse.OptionGroup(parser, "Options for printing to stdout")
@@ -117,6 +122,11 @@ def opts():
                      default=False,
                      action="store_true",
                      help="Shift fibCh=2 by 1 TS to compensate for uHTR f/w bug.")
+    matchCh.add_option("--skipErrF",
+                     dest="skipErrF",
+                     default="1,3",
+                     metavar="s",
+                     help="Skip channels with these ErrF values (default is 1,3).")
     parser.add_option_group(matchCh)
 
     patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
@@ -212,8 +222,12 @@ if __name__ == "__main__":
     if options.noColor:
         printer.__color = False
 
-    patternOptions = {"nFibers": integer(options.nPatternFibers, "npatternfibers"),
-                      "nTs": integer(options.nPatternTs, "npatternts"),
+    compareOptions = {"adcPlots": options.adcPlots,
+                      "skipErrF": fedList(options.skipErrF),
+                      }
+
+    patternOptions = {"nFibers": integer(options.nPatternFibers, "n-pattern-fibers"),
+                      "nTs": integer(options.nPatternTs, "n-pattern-ts"),
                       "pureFibersOnly": not options.patternB,
                       "process": not options.rawPatterns,
                       } if options.patterns else {}
@@ -236,6 +250,7 @@ if __name__ == "__main__":
                        mapOptions=mapOptions,
                        outputFile=options.outputFile,
                        printOptions=printOptions,
+                       compareOptions=compareOptions,
                        )
 
     if options.profile:
