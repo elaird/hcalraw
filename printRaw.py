@@ -384,30 +384,41 @@ def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
     h = d["header"]
     t = d["trailer"]
     if (not patternMode) and (1 <= dump):
-        headers = "   ".join([" FEDid",
-                              "  EvN",
-                              "       OrN",
-                              "    BcN",
-                              "minutes",
-                              " TTS",
-                              " nBytesHW",
-                              "nBytesSW",
-                              #"CRC16",
-                              "nSkip16",
-                              ])
+        fields = [" FEDid",
+                  "  EvN",
+                  "       OrN",
+                  "    BcN",
+                  "minutes",
+                  " TTS",
+                  " nBytesHW",
+                  "nBytesSW",
+                  #"CRC16",
+                  "nSkip16",
+                  ]
+        if h["uFoV"]:
+            fields += ["BcN12", "EvN8", "Blk8"]
+
+        headers = "   ".join(fields)
         printer.blue("-"*len(headers))
         printer.blue(headers)
-        printer.blue("   ".join(["  %3d" % h["FEDid"],
-                                 "0x%07x" % h["EvN"],
-                                 "0x%08x" % h["OrN"],
-                                 "%4d" % h["BcN"],
-                                 "%7.3f" % utils.minutes(h["OrN"]),
-                                 ("  %1x" % t["TTS"]) if "TTS" in t else "  - ",
-                                 ("    %4d" % (t["nWord64"]*8)) if "nWord64" in t else "    --  ",
-                                 "    %4d" % d["nBytesSW"],
-                                 #(" 0x%04x" % t["CRC16"]) if "CRC16" in t else "   - ",
-                                 "%7d" % d["nWord16Skipped"],
-                                 ]))
+        sList = ["  %3d" % h["FEDid"],
+                 "0x%07x" % h["EvN"],
+                 "0x%08x" % h["OrN"],
+                 "%4d" % h["BcN"],
+                 "%7.3f" % utils.minutes(h["OrN"]),
+                 ("  %1x" % t["TTS"]) if "TTS" in t else "  - ",
+                 ("    %4d" % (t["nWord64"]*8)) if "nWord64" in t else "    --  ",
+                 "    %4d" % d["nBytesSW"],
+                 #(" 0x%04x" % t["CRC16"]) if "CRC16" in t else "   - ",
+                 "%7d" % d["nWord16Skipped"],
+                 ]
+        if h["uFoV"]:
+            sList += ["   %4d" % t["BcN12"],
+                      "0x%02x" % t["EvN8"],
+                      "  %2d" % t["Blk_no8"],
+                      ]
+
+        printer.blue("   ".join(sList))
         if 2 <= dump:
             htrOverview(h)
 
