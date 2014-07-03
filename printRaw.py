@@ -42,6 +42,7 @@ def htrOverview(d={}):
 
     htr = ["  ", "   %4s" % abbr]
     epcv = ["  ", "   EPCV"]
+    lms = ["  ", "    LMS"]
     nWord16 = ["  ", "nWord16"]
     for iHtr in range(15):
         key = "%s%d" % (abbr, iHtr)
@@ -50,8 +51,12 @@ def htrOverview(d={}):
         h = d[key]
         htr.append("%4d" % iHtr)
         epcv.append("%d%d%d%d" % (h["E"], h["P"], h["C"], h["V"]))
+        if "L" in h:
+            lms.append(" %d%d%d" % (h["L"], h["M"], h["S"]))
         nWord16.append("%4d" % (h["nWord16"]))
-    for line in [htr, epcv, nWord16]:
+
+    lines = [htr] + ([lms] if 3 <= len(lms) else []) + [epcv, nWord16]
+    for line in lines:
         printer.cyan(" ".join(line))
     printer.cyan(hyphens)
 
@@ -77,6 +82,11 @@ def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
 def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
     zs = p.get("ZS")
 
+    if "nWord16Qie" in p:
+        col = "nWord16Qie"
+    else:
+        col = "DataLength"
+
     out = []
     if printColumnHeaders:
         columns = ["iWord16",
@@ -88,7 +98,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                    "FrmtV",
                    "nPre",
                    #"nWordTP",
-                   "nWordQIE",
+                   col,
                    "nSamp",
                    "EvN8",
                    "  CRC",
@@ -106,8 +116,15 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                " 0x%01x" % p["FormatVer"],
                "  %2d" % p["nPreSamples"],
                #"  %3d  " % p["nWord16Tp"],
-               "   %3d" % p.get("nWord16Qie", -1),  # absent in uHTR
-               "    %2d" % p.get("nSamples", -1),  # absent in uHTR
+               ]
+    if "Qie" in col:
+        strings.append("     %3d  " % p.get(col, -1))
+    else:
+        s = "   %3d/%3d" % (p.get(col, -1), p.get(col+"T", -1))
+        strings.append(s)
+
+    strings += [
+               "  %2d" % p.get("nSamples", -1),  # absent in uHTR
                "  0x%02x" % p["EvN8"],
                "0x%04x" % p["CRC"],
                ]
