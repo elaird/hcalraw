@@ -33,11 +33,11 @@ def opts():
                       default=False,
                       action="store_true",
                       help="profile the run")
-    #common.add_option("--utca-bcn-delta",
-    #                 dest="utcaBcnDelta",
-    #                 default=-118,
-    #                 metavar="N",
-    #                 help="Add this to uTCA BcN (and OrN).  Default is -118.")
+    common.add_option("--utca-bcn-delta",
+                     dest="utcaBcnDelta",
+                     default=-118,
+                     metavar="N",
+                     help="Add this to uTCA BcN (and OrN).  Default is -118.")
     parser.add_option_group(common)
 
     printing = optparse.OptionGroup(parser, "Options for printing to stdout")
@@ -109,12 +109,15 @@ def opts():
                      default=False,
                      action="store_true",
                      help="Print event map to stdout.")
-    match.add_option("--shiftFibCh2",
+    parser.add_option_group(match)
+
+    matchCh = optparse.OptionGroup(parser, "Options for matching channels across events")
+    matchCh.add_option("--shiftFibCh2",
                      dest="shiftFibCh2",
                      default=False,
                      action="store_true",
                      help="Shift fibCh=2 by 1 TS to compensate for uHTR f/w bug.")
-    parser.add_option_group(match)
+    parser.add_option_group(matchCh)
 
     patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
     patterns.add_option("--patterns",
@@ -204,6 +207,8 @@ if __name__ == "__main__":
     import cProfile
 
     configuration.__shiftFibCh2 = options.shiftFibCh2
+    configuration.__utcaBcnDelta = integer(options.utcaBcnDelta)
+
     if options.noColor:
         printer.__color = False
 

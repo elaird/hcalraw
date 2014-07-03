@@ -1,7 +1,11 @@
 import re
 
-__shiftFibCh2 = False  # overwritten by oneRun.py
+
 __pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
+
+# these are overwritten by oneRun.py
+__shiftFibCh2 = False
+__utcaBcnDelta = None
 
 
 def processed(s=""):
@@ -14,15 +18,15 @@ def processed(s=""):
         return ""
 
 
+def bcnDelta(utca):
+    return __utcaBcnDelta if utca else 0
+
+
 def unpackSkipFlavors(utca):
     if utca:
         return [0, 1, 2, 3, 7]
     else:
         return [7]
-
-
-def bcnDelta(utca):
-    return -118 if utca else 0
 
 
 def matchRange(fedId=None, slot=None, fibCh=None, utca=None):
@@ -58,11 +62,10 @@ def expectedHtr(fedId, spigot):
             "Slot": slot}
 
 
-def _isVme(fedId=None):
-    return 700 <= fedId <= 731
-
-
 def format(treeName=""):
+    def _isVme(fedId=None):
+        return 700 <= fedId <= 731
+
     out = None
     if treeName == "CMSRAW":
         out = {"name":  "HCAL",
