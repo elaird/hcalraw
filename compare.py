@@ -100,7 +100,7 @@ def nPerChannel(lst=[], iChannel=None):
     return len(filter(lambda x: x[-1] == iChannel, lst))
 
 
-def compare(raw1={}, raw2={}, book={}, adcPlots=False):
+def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[]):
     for raw in [raw1, raw2]:
         maxAdc = -1
         for fedId, dct in sorted(raw.iteritems()):
@@ -142,8 +142,8 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False):
             book.fill(maxAdc, "max_adc", 128, -0.5, 127.5,
                       title=";max ADC (when ErrF==0); events / bin")
 
-    mapF1, mapB1 = dataMap(raw1)
-    mapF2, mapB2 = dataMap(raw2)
+    mapF1, mapB1 = dataMap(raw1, skipErrF=skipErrF)
+    mapF2, mapB2 = dataMap(raw2, skipErrF=skipErrF)
     matched12, nonMatched12 = matchStats(mapF1, mapB2)
     matched21, nonMatched21 = matchStats(mapF2, mapB1)
 
@@ -228,7 +228,7 @@ def matchStats(f={}, b={}):
     return matched, failed
 
 
-def dataMap(raw={}, skipErrF=[3]):
+def dataMap(raw={}, skipErrF=[]):
     forward = {}
     backward = {}
 
