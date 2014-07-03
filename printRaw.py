@@ -127,6 +127,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
                  "nonMatched": reduced(nonMatched, p["ModuleId"]),
                  "latency": p.get("Latency"),
                  "zs": p.get("ZS"),
+                 "skipErrF": [3],
                  }
         if 6 <= dump:
             kargs["skipErrF"] = []
@@ -234,7 +235,7 @@ def uhtrTriggerData(d={}, skipZero=False):
 
 
 def htrChannelData(lst=[], crate=0, slot=0, top="",
-                   fibChs=[], skipErrF=[3],
+                   fibChs=[], skipErrF=[],
                    nonMatched=[], latency={}, zs={}):
     out = []
     columns = ["Crate",
