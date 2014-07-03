@@ -26,12 +26,18 @@ def opts():
     common.add_option("--output-file",
                       dest="outputFile",
                       default="output/latest.root",
+                      metavar="f",
                       help="store histograms in this .root file.")
     common.add_option("--profile",
                       dest="profile",
                       default=False,
                       action="store_true",
                       help="profile the run")
+    #common.add_option("--utca-bcn-delta",
+    #                 dest="utcaBcnDelta",
+    #                 default=-118,
+    #                 metavar="N",
+    #                 help="Add this to uTCA BcN (and OrN).  Default is -118.")
     parser.add_option_group(common)
 
     printing = optparse.OptionGroup(parser, "Options for printing to stdout")
@@ -92,7 +98,7 @@ def opts():
                      dest="ornTolerance",
                      default=0,
                      metavar="N",
-                     help="Consider |OrN1 - OrN2| <= N a match.")
+                     help="Consider |OrN1 - OrN2| <= N a match (default is 0).")
     match.add_option("--identity-map",
                      dest="identityMap",
                      default=False,
@@ -117,12 +123,12 @@ def opts():
                         action="store_true",
                         help="interpret QIE data as FE patterns")
 
-    patterns.add_option("--npatternts",
+    patterns.add_option("--n-pattern-ts",
                         dest="nPatternTs",
                         default=20,
                         metavar="N",
                         help="No. of time slices to consider (default is 20).")
-    patterns.add_option("--rawpatterns",
+    patterns.add_option("--raw-patterns",
                         dest="rawPatterns",
                         default=False,
                         action="store_true",
@@ -132,7 +138,7 @@ def opts():
                         default=False,
                         action="store_true",
                         help="Consider patterns mixed across fibers.")
-    patterns.add_option("--npatternfibers",
+    patterns.add_option("--n-pattern-fibers",
                         dest="nPatternFibers",
                         default=8,
                         metavar="N",
