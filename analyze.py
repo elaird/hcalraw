@@ -154,7 +154,7 @@ def progress(iEvent, iMask):
         return iMask
 
 
-def loop(inner={}, outer={}, innerEvent={}, book={}):
+def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
     if inner:
         fI = r.TFile.Open(inner["fileName"])
         treeI = fI.Get(inner["treeName"])
@@ -178,6 +178,7 @@ def loop(inner={}, outer={}, innerEvent={}, book={}):
 
         kargs = {"raw1": collectedRaw(tree=tree, specs=outer),
                  "book": book}
+        kargs.update(compareOptions)
         if inner:
             iInnerEvent = innerEvent[iOuterEvent]
             if (iInnerEvent is None) or (treeI.GetEntry(iInnerEvent) <= 0):
@@ -398,7 +399,8 @@ def eventToEvent(mapF={}, mapB={}, options={}):
     return out
 
 
-def go(outer={}, inner={}, outputFile="", mapOptions={},
+def go(outer={}, inner={}, outputFile="",
+       mapOptions={}, compareOptions={},
        printEventSummary=None, printChannelSummary=None):
 
     innerEvent = {}
@@ -423,7 +425,8 @@ def go(outer={}, inner={}, outputFile="", mapOptions={},
                                        ]))
 
     book = autoBook.autoBook("book")
-    loop(inner=inner, outer=outer, innerEvent=innerEvent, book=book)
+    loop(inner=inner, outer=outer, innerEvent=innerEvent,
+         book=book, compareOptions=compareOptions)
 
     #write results to a ROOT file
     dirName = os.path.dirname(outputFile)
@@ -494,6 +497,7 @@ def oneRun(file1="",
            feds2=[],
            patternMode={},
            mapOptions={},
+           compareOptions={},
            printOptions={},
            nEvents=None,
            outputFile="",
@@ -529,6 +533,7 @@ def oneRun(file1="",
        inner=inner,
        outputFile=outputFile,
        mapOptions=mapOptions,
+       compareOptions=compareOptions,
        printEventSummary=(not patternMode) and (file1 != file2),
        printChannelSummary=file2,
        )
