@@ -13,6 +13,7 @@ import sys
 
 def ornBcn(ornIn, bcnIn, utca):
     bcnDelta = configuration.bcnDelta(utca)
+
     if not bcnDelta:
         return ornIn, bcnIn
 
@@ -108,6 +109,7 @@ def block_header_ufov1(d={}, iWord64=None, word64=None):
 
 def block_trailer_ufov1(d={}, iWord64=None, word64=None):
     d["BcN12"] = word64 & 0xfff
+    _, d["BcN12"] = ornBcn(0, d["BcN12"], True)
     d["EvN8"] = (word64 >> 12) & 0xff
     d["Blk_no8"] = (word64 >> 20) & 0xff
     d["CRC32"] = word64 >> 32
@@ -154,10 +156,11 @@ def MOLheader(d={}, word64_1=None, word64_2=None):
 
 def htrHeaderV1(l={}, w=None, i=None, utca=None):
     if i == 0:
-        l["DataLength"] = w
+        l["DataLength16"] = w
 
     if i == 1:
-        l["DataLength"] |= (w & 0xf) << 16
+        l["DataLength16"] |= (w & 0xf) << 16
+        l["DataLength16"] *= 4
         l["BcN"] = w >> 4
 
     if i == 2:
@@ -167,13 +170,12 @@ def htrHeaderV1(l={}, w=None, i=None, utca=None):
         l["EvN"] |= (w & 0xff) << 16
 
     if i == 4:
-        l["Presamples"] = (w >> 12) & 0xf
+        l["nPreSamples"] = (w >> 12) & 0xf
         l["Slot"] = (w >> 8) & 0xf
         l["Crate"] = w & 0xff
         # compat
         l["ModuleId"] = 0
         l["Top"] = " "
-        l["nPreSamples"] = l["Presamples"]
 
     if i == 5:
         l["OrN"] = w
@@ -350,11 +352,11 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         return
 
     k = l["nWord16"] - i
+    #print iWord16, i, k, "0x%04x" % word16
 
-    if k == 3:  # !document
-        if utca and not l["V1"]:
-            l["CRC"] = word16
-            return
+    if k == 3 and utca and not l["V1"]:  # !document
+        l["CRC"] = word16
+        return
 
     if k <= 2:
         if (k == 2) and l["V1"]:
