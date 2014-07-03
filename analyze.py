@@ -251,6 +251,8 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
     trailer = {}
     htrBlocks = {}
 
+    nWord64Trailer = 1
+
     nWord64 = fedData.size()*nBytesPer/8
     nWord16Skipped = 0
 
@@ -273,9 +275,11 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
             decode.header(header, iWord64, word64)
             if header["utca"] is not None:
                 skipFlavors = configuration.unpackSkipFlavors(header["utca"])
+            if header.get("uFoV"):
+                nWord64Trailer = 2  # accommodate block trailer
         elif headerOnly:
             break
-        elif iWord64 < nWord64 - 1 - nToSkip:
+        elif iWord64 < nWord64 - nToSkip - nWord64Trailer:
             for i in range(4):
                 word16 = (word64 >> (16*i)) & 0xffff
                 iWord16 = 4*iWord64+i
@@ -296,12 +300,14 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
                                                   "iWord16 %d" % iWord16,
                                                   "word16 0x%04x" % word16,
                                                   ]))
-            if header["uFoV"] and (iWord64 == nWord64 - 2 - nToSkip):
-                decode.block_trailer_ufov1(trailer, iWord64, word64)
         else:
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
-            decode.trailer(trailer, iWord64, word64)
+
+            if header["uFoV"] and (iWord64 == nWord64 - nToSkip - 2):
+                decode.block_trailer_ufov1(trailer, iWord64, word64)
+            else:
+                decode.trailer(trailer, iWord64, word64)
 
     return {"header": header,
             "trailer": trailer,
