@@ -298,12 +298,10 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
                                                   ]))
             if header["uFoV"] and (iWord64 == nWord64 - 2 - nToSkip):
                 decode.block_trailer_ufov1(trailer, iWord64, word64)
-                #print trailer
         else:
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
             decode.trailer(trailer, iWord64, word64)
-            #print trailer
 
     return {"header": header,
             "trailer": trailer,
