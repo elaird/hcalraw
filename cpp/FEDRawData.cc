@@ -5,8 +5,7 @@
    \date 28 Jun 2005
 */
 
-#include <DataFormats/FEDRawData/interface/FEDRawData.h>
-#include <FWCore/Utilities/interface/Exception.h>
+#include "FEDRawData.h"
 #include <iostream>
 
 using namespace std;
@@ -16,7 +15,7 @@ FEDRawData::FEDRawData()
 }
 
 FEDRawData::FEDRawData(size_t newsize):data_(newsize){
-  if (newsize%8!=0) throw cms::Exception("DataCorrupt") << "FEDRawData::resize: " << newsize << " is not a multiple of 8 bytes." << endl;
+  if (newsize%8!=0) cerr << "DataCorrupt: FEDRawData::resize: " << newsize << " is not a multiple of 8 bytes." << endl;
 }
 
 FEDRawData::FEDRawData(const FEDRawData &in) : data_(in.data_)
@@ -34,5 +33,5 @@ void FEDRawData::resize(size_t newsize) {
 
   data_.resize(newsize);
 
-  if (newsize%8!=0) throw cms::Exception("DataCorrupt") << "FEDRawData::resize: " << newsize << " is not a multiple of 8 bytes." << endl;
+  if (newsize%8!=0) cerr << "DataCorrupt: FEDRawData::resize: " << newsize << " is not a multiple of 8 bytes." << endl;
 }
