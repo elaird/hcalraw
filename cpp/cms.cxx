@@ -1,4 +1,4 @@
-#include "DataFormats/FEDRawData/interface/FEDRawData.h"
+#include "FEDRawData.cc"
 
 //expose std::vector
 class FEDRawData2 : public FEDRawData {
