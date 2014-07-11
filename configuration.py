@@ -8,7 +8,22 @@ __shiftFibCh2 = False
 __utcaBcnDelta = None
 
 
-def processed(s=""):
+def processed(s="", sixToEight=False, reg=True):
+    l = []
+    for code_str in s.split():
+        code = int(code_str, base=16)
+        if sixToEight:
+            code = (code >> 1) + 32
+
+        if (32 <= code <= 126):
+            l.append("%2s" % chr(code))
+        else:
+            l.append("%2x" % code)
+
+    s = " ".join(l)
+    if not reg:
+        return s
+
     match = __pattern.search(s)
     if match:
         m = match.group()
