@@ -16,21 +16,21 @@ def setup():
     r.gROOT.SetBatch(True)
     r.gErrorIgnoreLevel = 2000  # silence TCanvas.Print()
     r.gROOT.LoadMacro("cpp/cdf.cxx+")
+    r.gROOT.LoadMacro("cpp/cms.cxx+")
 
     if utils.cmssw():
         #enable convenient use of CMSSW classes
         r.gSystem.Load("libFWCoreFWLite.so")
         r.AutoLibraryLoader.enable()
 
-        #define helper classes
-        libs = ["DataFormatsFEDRawData"]
-        if os.environ["CMSSW_RELEASE_BASE"]:
-            base = os.environ["CMSSW_RELEASE_BASE"]
-        else:
-            base = os.environ["CMSSW_BASE"]
-        libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
-        r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
-        r.gROOT.LoadMacro("cpp/cms.cxx+")
+        ##define helper classes
+        #libs = ["DataFormatsFEDRawData"]
+        #if os.environ["CMSSW_RELEASE_BASE"]:
+        #    base = os.environ["CMSSW_RELEASE_BASE"]
+        #else:
+        #    base = os.environ["CMSSW_BASE"]
+        #libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
+        #r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
 
 
 setup()
