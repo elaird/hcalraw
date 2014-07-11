@@ -356,17 +356,14 @@ def patternData(d={}, moduleId="", slim=False, process=False):
     return out
 
 
-def patternString(patterns=[], key="", ascii=True, process=None):
+def patternString(patterns=[], key="", process=None):
     l = []
     for p in patterns:
         for k in [key+"0", key+"1"]:
             code = p[k]
-            if ascii and (32 <= code <= 126):
-                l.append("%2s" % chr(code))
-            else:
-                l.append("%2x" % code)
-    out = " ".join(l)
+            l.append("%2x" % code)
 
+    out = " ".join(l)
     processed = configuration.processed(out)
 
     if process:
