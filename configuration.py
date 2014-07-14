@@ -8,29 +8,28 @@ __shiftFibCh2 = False
 __utcaBcnDelta = None
 
 
-def processed(s="", sixToEight=False, reg=True):
+def patternString(codes=[], sixToEight=False, asciify=True, reg=True):
+    if not any(codes):
+        return None
+
     l = []
-    for code_str in s.split():
-        code = int(code_str, base=16)
+    for code in codes:
         if sixToEight:
             code = (code >> 1) + 32
 
-        if (32 <= code <= 126):
+        if asciify and (32 <= code <= 126):
             l.append("%2s" % chr(code))
         else:
             l.append("%2x" % code)
 
     s = " ".join(l)
-    if not reg:
-        return s
-
     match = __pattern.search(s)
-    if match:
+    if reg and match:
         m = match.group()
         m = m.replace(" ", "").replace("-", "")
         return "%s %s %s" % (m[:-2].ljust(6), m[-2], m[-1])
     else:
-        return ""
+        return s
 
 
 def bcnDelta(utca):
