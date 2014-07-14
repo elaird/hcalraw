@@ -61,7 +61,7 @@ def htrOverview(d={}):
     printer.cyan(hyphens)
 
 
-def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
+def oneHtrPatterns(p={}, patternMode={}, fedId=None, iOffset=None, utca=None):
     if p["IsTTP"]:
         cd = []
     else:
@@ -71,8 +71,10 @@ def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
                             top=p["Top"],
                             fibChs=[1])
     if len(cd) >= 2:
+        moduleId = "%3d %2d" % (fedId, p["Slot"] if utca else iOffset)
         lines = patternData(p["patternData"],
-                            moduleId="%3d %2d" % (fedId, iOffset),
+                            moduleId=moduleId,
+                            utca=utca,
                             slim=patternMode["pureFibersOnly"],
                             )
         print "\n".join(lines)  # skip printer to facilitate diff
@@ -324,7 +326,7 @@ def ttpData(ttpInput=[], ttpOutput=[], ttpAlgoDep=[]):
     return l
 
 
-def patternData(d={}, moduleId="", slim=False):
+def patternData(d={}, moduleId="", utca=None, slim=False):
     if slim:
         out = [""]
     else:
@@ -332,7 +334,7 @@ def patternData(d={}, moduleId="", slim=False):
         chars = " ".join(["%2d" % i for i in range(20)])
         out = ["  ".join(headers+[chars])]
 
-    for fiber1, lst in d.iteritems():
+    for fiber1, lst in sorted(d.iteritems()):
         for key in ["A", "B", "C"]:
             if slim and key == "B":
                 continue
@@ -349,7 +351,10 @@ def patternData(d={}, moduleId="", slim=False):
                 fibers = "     %2d" % (1 + fiber1)
 
             if slim:
-                out.append("%s %2d:  %s" % (moduleId, 1 + int(fibers), ps))
+                fiberNum = int(fibers)
+                if not utca:
+                    fiberNum += 1
+                out.append("%s %2d:  %s" % (moduleId, fiberNum, ps))
             else:
                 out.append("   ".join([moduleId, fibers, "  %s" % key, "  "]) + ps)
     return out
@@ -416,7 +421,8 @@ def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
             oneHtrPatterns(p=p,
                            patternMode=patternMode,
                            fedId=d["header"]["FEDid"],
-                           iOffset=iOffset)
+                           iOffset=iOffset,
+                           utca=h["utca"])
         elif 3 <= dump:
             oneHtr(p=p,
                    printColumnHeaders=printColumnHeaders,
