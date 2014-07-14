@@ -138,14 +138,24 @@ def opts():
 
     patterns.add_option("--nts",
                         dest="nts",
-                        default=20,
+                        default=10,
                         metavar="N",
-                        help="No. of time slices to consider (default is 20).")
+                        help="No. of time slices to consider (default is 10).")
     patterns.add_option("--compressed",
                         dest="compressed",
                         default=False,
                         action="store_true",
-                        help="Assume patterns use only the middle 6 of 8 bits.")
+                        help="Handle lack of capids by doing (code>>1)&0x3f + 32.")
+    patterns.add_option("--no-asciify",
+                        dest="noAsciify",
+                        default=False,
+                        action="store_true",
+                        help="Do not convert hex codes to ASCII.")
+    patterns.add_option("--no-reg-match",
+                        dest="noRegMatch",
+                        default=False,
+                        action="store_true",
+                        help="Print full pattern, even if it matches regexp.")
     patterns.add_option("--patternB",
                         dest="patternB",
                         default=False,
@@ -219,6 +229,8 @@ if __name__ == "__main__":
     configuration.__shiftFibCh2 = options.shiftFibCh2
     configuration.__utcaBcnDelta = integer(options.utcaBcnDelta)
     configuration.__compressedPatterns = options.compressed
+    configuration.__asciifyPatterns = not options.noAsciify
+    configuration.__regMatchPatterns = not options.noRegMatch
 
     if options.noColor:
         printer.__color = False
@@ -230,6 +242,7 @@ if __name__ == "__main__":
     patternOptions = {"nFibers": integer(options.nPatternFibers, "n-pattern-fibers"),
                       "nTs": integer(options.nts, "nts"),
                       "pureFibersOnly": not options.patternB,
+                      "compressed": options.compressed,
                       } if options.patterns else {}
 
     mapOptions = {"ornTolerance": integer(options.ornTolerance, "orn-tolerance")}
