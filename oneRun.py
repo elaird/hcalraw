@@ -136,22 +136,22 @@ def opts():
                         action="store_true",
                         help="interpret QIE data as FE patterns")
 
-    patterns.add_option("--n-pattern-ts",
-                        dest="nPatternTs",
+    patterns.add_option("--nts",
+                        dest="nts",
                         default=20,
                         metavar="N",
                         help="No. of time slices to consider (default is 20).")
-    patterns.add_option("--raw-patterns",
-                        dest="rawPatterns",
+    patterns.add_option("--compressed",
+                        dest="compressed",
                         default=False,
                         action="store_true",
-                        help="Print unprocessed patterns.")
+                        help="Assume patterns use only the middle 6 of 8 bits.")
     patterns.add_option("--patternB",
                         dest="patternB",
                         default=False,
                         action="store_true",
-                        help="Consider patterns mixed across fibers.")
-    patterns.add_option("--n-pattern-fibers",
+                        help="Consider also patterns mixed across fibers.")
+    patterns.add_option("--nfibers",
                         dest="nPatternFibers",
                         default=8,
                         metavar="N",
@@ -218,6 +218,7 @@ if __name__ == "__main__":
 
     configuration.__shiftFibCh2 = options.shiftFibCh2
     configuration.__utcaBcnDelta = integer(options.utcaBcnDelta)
+    configuration.__compressedPatterns = options.compressed
 
     if options.noColor:
         printer.__color = False
@@ -227,9 +228,8 @@ if __name__ == "__main__":
                       }
 
     patternOptions = {"nFibers": integer(options.nPatternFibers, "n-pattern-fibers"),
-                      "nTs": integer(options.nPatternTs, "n-pattern-ts"),
+                      "nTs": integer(options.nts, "nts"),
                       "pureFibersOnly": not options.patternB,
-                      "process": not options.rawPatterns,
                       } if options.patterns else {}
 
     mapOptions = {"ornTolerance": integer(options.ornTolerance, "orn-tolerance")}
