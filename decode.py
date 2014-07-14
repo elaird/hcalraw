@@ -503,7 +503,7 @@ def channelId(fiber=None, fibCh=None):
     return 4*fiber + fibCh
 
 
-def storePatternData(l={}, nFibers=None, nTs=None, **_):
+def storePatternData(l={}, nFibers=None, nTs=None, compressed=None, **_):
     if nFibers == 6:
         offset = 1
     elif nFibers == 8:
@@ -535,8 +535,10 @@ def storePatternData(l={}, nFibers=None, nTs=None, **_):
                             continue
                         if d[key]["CapId"]:
                             cap = d[key]["CapId"][iTs]
-                        else:
+                        elif not compressed:
                             sys.exit("Cap-ids per time-slice not found.  Run without passing '--patterns'.")
+                        else:
+                            cap = 0
                         if fibCh == 0:
                             feWord32 |= qie << 25
                             feWord32 |= cap << 7
