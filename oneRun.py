@@ -197,6 +197,8 @@ def fedList(s=""):
         return range(700, 718)
     if s in ["HF", "hf"]:
         return range(718, 724)
+    if s in ["HBHEHF", "hbhehf", "HBEF", "hbef"]:
+        return range(700, 724)
     if s in ["HO", "ho"]:
         return range(724, 732)
     if not s:
