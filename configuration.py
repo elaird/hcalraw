@@ -7,8 +7,10 @@ __pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 __shiftFibCh2 = False
 __utcaBcnDelta = None
 __compressedPatterns = None
+__asciifyPatterns = None
+__regMatchPatterns = None
 
-def patternString(codes=[], asciify=True, reg=True):
+def patternString(codes=[]):
     if not any(codes):
         return None
 
@@ -18,14 +20,14 @@ def patternString(codes=[], asciify=True, reg=True):
             code = (code >> 1) & 0x3f
             code += 32
 
-        if asciify and (32 <= code <= 126):
+        if __asciifyPatterns and (32 <= code <= 126):
             l.append("%2s" % chr(code))
         else:
             l.append("%2x" % code)
 
     s = " ".join(l)
     match = __pattern.search(s)
-    if reg and match:
+    if __regMatchPatterns and match:
         m = match.group()
         m = m.replace(" ", "").replace("-", "")
         return "%s %s %s" % (m[:-2].ljust(6), m[-2], m[-1])
