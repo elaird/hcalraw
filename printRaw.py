@@ -74,7 +74,6 @@ def oneHtrPatterns(p={}, fedId=None, iOffset=None, patternMode={}):
         lines = patternData(p["patternData"],
                             moduleId="%3d %2d" % (fedId, iOffset),
                             slim=patternMode["pureFibersOnly"],
-                            process=patternMode["process"],
                             )
         print "\n".join(lines)  # skip printer to facilitate diff
 
@@ -325,7 +324,7 @@ def ttpData(ttpInput=[], ttpOutput=[], ttpAlgoDep=[]):
     return l
 
 
-def patternData(d={}, moduleId="", slim=False, process=False):
+def patternData(d={}, moduleId="", slim=False):
     if slim:
         out = [""]
     else:
@@ -338,8 +337,8 @@ def patternData(d={}, moduleId="", slim=False, process=False):
             if slim and key == "B":
                 continue
 
-            ps = patternString(lst, key, process=process)
-            if process and not ps:
+            ps = patternString(lst, key)
+            if not ps:
                 continue
 
             if key == "B":
@@ -356,25 +355,12 @@ def patternData(d={}, moduleId="", slim=False, process=False):
     return out
 
 
-def patternString(patterns=[], key="", process=None):
-    l = []
+def patternString(patterns=[], key=""):
+    codes = []
     for p in patterns:
         for k in [key+"0", key+"1"]:
-            code = p[k]
-            l.append("%2x" % code)
-
-    out = " ".join(l)
-    processed = configuration.processed(out)
-
-    if process:
-        if processed:
-            return processed
-        elif out.replace("0", "").replace(" ", ""):
-            return out
-        else:
-            return ""
-    else:
-        return out
+            codes.append(p[k])
+    return configuration.patternString(codes)
 
 
 def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
