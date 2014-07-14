@@ -6,16 +6,17 @@ __pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 # these are overwritten by oneRun.py
 __shiftFibCh2 = False
 __utcaBcnDelta = None
+__compressedPatterns = None
 
-
-def patternString(codes=[], sixToEight=False, asciify=True, reg=True):
+def patternString(codes=[], asciify=True, reg=True):
     if not any(codes):
         return None
 
     l = []
     for code in codes:
-        if sixToEight:
-            code = (code >> 1) + 32
+        if __compressedPatterns:
+            code = (code >> 1) & 0x3f
+            code += 32
 
         if asciify and (32 <= code <= 126):
             l.append("%2s" % chr(code))
