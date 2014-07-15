@@ -161,11 +161,11 @@ def opts():
                         default=False,
                         action="store_true",
                         help="Consider also patterns mixed across fibers.")
-    patterns.add_option("--nfibers",
-                        dest="nPatternFibers",
-                        default=8,
-                        metavar="N",
-                        help="No. of fibers to consider (default is 8).")
+    patterns.add_option("--rm-ribbon",
+                        dest="rmRibbon",
+                        default=False,
+                        action="store_true",
+                        help="Pair central 6 fibers (of 8 or 12).")
     parser.add_option_group(patterns)
 
     options, args = parser.parse_args()
@@ -191,18 +191,22 @@ def integer(value="", tag=""):
 
 
 def fedList(s=""):
-    if s in ["HCAL", "hcal"]:
-        return range(700, 732)
-    if s in ["HBHE", "hbhe"]:
-        return range(700, 718)
-    if s in ["HF", "hf"]:
-        return range(718, 724)
-    if s in ["HBHEHF", "hbhehf", "HBEF", "hbef"]:
-        return range(700, 724)
-    if s in ["HO", "ho"]:
-        return range(724, 732)
+    d = {"HBHE": range(700, 718),
+         "HF": range(718, 724),
+         "HO": range(724, 732),
+         "uHF": [929],
+         }
+
+    d["HBHEHF"] = d["HBHE"] + d["HF"]
+    d["HBEF"] = d["HBHEHF"]
+    d["HCAL"] = d["HBEF"] + d["HO"]
+    d["uHCAL"] = d["HCAL"] + d["uHF"]
+
     if not s:
         return []
+    if s in d:
+        return d[s]
+
     out = [int(x) for x in s.split(",")]
     return out
 
@@ -241,7 +245,7 @@ if __name__ == "__main__":
                       "skipErrF": fedList(options.skipErrF),
                       }
 
-    patternOptions = {"nFibers": integer(options.nPatternFibers, "n-pattern-fibers"),
+    patternOptions = {"rmRibbon": options.rmRibbon,
                       "nTs": integer(options.nts, "nts"),
                       "pureFibersOnly": not options.patternB,
                       "compressed": options.compressed,
