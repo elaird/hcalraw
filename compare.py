@@ -242,7 +242,7 @@ def dataMap(raw={}, skipErrF=[]):
             for channelData in block["channelData"].values():
                 channel = channelData["FibCh"]
                 matchRange = configuration.matchRange(fedId, block["Slot"], channel, utca)
-                fiber = 1 + channelData["Fiber"]
+                fiber = channelData["Fiber"]
                 fiber = fiberMap.get(fiber, fiber)
                 if channelData["ErrF"] in skipErrF:
                     continue

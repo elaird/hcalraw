@@ -271,13 +271,12 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
     out.append("  ".join(columns))
 
     for data in lst:
-        FiberP1 = 1 + data["Fiber"]
         if data["FibCh"] not in fibChs:
             continue
         if data["ErrF"] in skipErrF:
             continue
         if printer.__color:  # hack
-            red = (FiberP1, data["FibCh"]) in nonMatched
+            red = (data["Fiber"], data["FibCh"]) in nonMatched
         else:
             red = False
         out.append("   ".join([" %3d" % crate,
@@ -291,7 +290,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                                ])+qieString(data["QIE"], red=red)
                    )
         if latency:
-            dct = latency.get("Fiber%d" % FiberP1)
+            dct = latency.get("Fiber%d" % data["Fiber"])
             if dct and data["FibCh"] == 1:
                 lat = [" "*4,
                        "%s%s" % (dct["Empty"], dct["Full"]),
