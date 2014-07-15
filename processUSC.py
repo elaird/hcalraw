@@ -257,10 +257,10 @@ def go(baseDir="",
                 with open(doneFlag, "w") as f:
                     print >> f, blob(d)
 
-    if runs:
-        print "Runs not found in EOS:"
-        for run in runs:
-            print run
+    #if runs:
+    #    print "Runs not found in EOS:"
+    #    for run in runs:
+    #        print run
 
 
 if __name__ == "__main__":
@@ -289,7 +289,7 @@ if __name__ == "__main__":
 
     utcaRuns = runs(runListFile=runListFile,
                     minimumRun=219866,
-                    select=lambda x: ("/HF/" in x) and ("no_utca" not in x),
+                    select=lambda x: ("/HF/" in x) and ("no_utca" not in x) and ("SelfTrigger" not in x),
                     )
     utcaDir = "%s/public/uTCA" % os.environ["HOME"]
 
