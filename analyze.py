@@ -275,6 +275,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
             decode.header(header, iWord64, word64)
             if header["utca"] is not None:
                 skipFlavors = configuration.unpackSkipFlavors(header["utca"])
+                patternMode["nFibers"] = configuration.nFibers(header["utca"])
             if header.get("uFoV"):
                 nWord64Trailer = 2  # accommodate block trailer
         elif headerOnly:

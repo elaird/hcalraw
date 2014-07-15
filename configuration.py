@@ -39,6 +39,10 @@ def bcnDelta(utca):
     return __utcaBcnDelta if utca else 0
 
 
+def nFibers(utca):
+    return 24 if utca else 8
+
+
 def unpackSkipFlavors(utca):
     if utca:
         return [0, 1, 2, 3, 7]
