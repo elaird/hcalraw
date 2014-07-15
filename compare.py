@@ -125,9 +125,7 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[]):
                               adcPlots=adcPlots):
                 return
             if (None in raw) and raw[None]["patternMode"]["active"]:
-                if raw[fedId]["header"]["utca"]:
-                    printer.error("HTR Module check not implemented for uTCA.")
-                else:
+                if not raw[fedId]["header"]["utca"]:
                     checkHtrModules(fedId=fedId, htrBlocks=raw[fedId]["htrBlocks"])
 
             if adcPlots:
