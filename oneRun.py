@@ -249,7 +249,8 @@ if __name__ == "__main__":
                       "nTs": integer(options.nts, "nts"),
                       "pureFibersOnly": not options.patternB,
                       "compressed": options.compressed,
-                      } if options.patterns else {}
+                      "active": options.patterns,
+                      }
 
     mapOptions = {"ornTolerance": integer(options.ornTolerance, "orn-tolerance")}
     for key in ["useEvn", "filterEvn", "printEventMap", "identityMap"]:
