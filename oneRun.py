@@ -35,9 +35,9 @@ def opts():
                       help="profile the run")
     common.add_option("--utca-bcn-delta",
                      dest="utcaBcnDelta",
-                     default=-118,
+                     default=-119,
                      metavar="N",
-                     help="Add this to uTCA BcN (and OrN).  Default is -118.")
+                     help="Add this to uTCA BcN (and OrN).  Default is -119.")
     common.add_option("--adc-plots",
                       dest="adcPlots",
                       default=False,
