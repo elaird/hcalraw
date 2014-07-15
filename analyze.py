@@ -539,7 +539,7 @@ def oneRun(file1="",
        outputFile=outputFile,
        mapOptions=mapOptions,
        compareOptions=compareOptions,
-       printEventSummary=(not patternMode) and (file1 != file2),
+       printEventSummary=(not patternMode["active"]) and (file1 != file2),
        printChannelSummary=file2,
        )
 

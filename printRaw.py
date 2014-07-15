@@ -14,7 +14,7 @@ def oneEvent(d={}, nonMatched=[]):
 
     aux = d[None]
     dump = aux["dump"]
-    if (not aux["patternMode"]) and (1 <= dump):
+    if (not aux["patternMode"]["active"]) and (1 <= dump):
         printer.purple("-"*85)
         printer.purple("%4s iEntry 0x%08x (%d)" % (aux["label"],
                                                    aux["iEntry"],
@@ -370,7 +370,7 @@ def patternString(patterns=[], key=""):
 def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
     h = d["header"]
     t = d["trailer"]
-    if (not patternMode) and (1 <= dump):
+    if (not patternMode["active"]) and (1 <= dump):
         fields = [" FEDid",
                   "  EvN",
                   "       OrN",
