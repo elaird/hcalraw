@@ -72,7 +72,7 @@ def oneHtrPatterns(p={}, patternMode={}, fedId=None, iOffset=None, utca=None):
                             fibChs=[1])
     if len(cd) >= 2:
         if utca:
-            moduleId = "%3d %2d" % (p["Crate"], p["Slot"])
+            moduleId = "u%2d %2d" % (p["Crate"], p["Slot"])
         else:
             moduleId = "%3d %2d" % (fedId, iOffset)
         lines = patternData(p["patternData"],
