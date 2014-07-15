@@ -138,10 +138,21 @@ def oneRun(args=[], outputFile="", suppress=["Xrd", "nologin"]):
 def dumpFibering(inputFile="", outputDir="", run=0):
     outputFile = "%s/cabled.txt" % outputDir
     args = ["--file1='%s'" % inputFile,
-            "--feds1=HCAL",
+            #"--feds1=HCAL",
             "--patterns",
             "--nevents=1",
             ]
+
+    if 222965 <= run:
+        args.append("--compressed")
+    if run <= 223008:
+        args.append("--nts=20")
+
+    if 222965 <= run <= 223013:
+        args.append("--feds1=HBHEHF")
+    else:
+        args.append("--feds1=HCAL")
+
     return commandOutput(oneRun(args, outputFile))
 
 
@@ -261,7 +272,9 @@ if __name__ == "__main__":
     fiberIdRuns = runs(runListFile=runListFile,
                        minimumRun=214782,
                        select=lambda x: "FiberID" in x,
-                       ) + [222060]
+                       ) + [222060, 222964,
+                            222965, 223008,
+                            223011, 223013]
 
     for func, deps in [(gitLog, []),
                        (dumpFibering, []),
