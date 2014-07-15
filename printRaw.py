@@ -345,12 +345,13 @@ def patternData(d={}, moduleId="", utca=None, slim=False):
             if not ps:
                 continue
 
+            fiber1_ = fiber1 + (0 if utca else 1)
             if key == "B":
-                fibers = "  %2d,%2d" % (fiber1, 1+fiber1)
+                fibers = "  %2d,%2d" % (fiber1_, 1 + fiber1_)
             elif key == "A":
-                fibers = "     %2d" % (fiber1)
+                fibers = "     %2d" % (fiber1_)
             elif key == "C":
-                fibers = "     %2d" % (1 + fiber1)
+                fibers = "     %2d" % (1 + fiber1_)
 
             if slim:
                 fiberNum = int(fibers)
