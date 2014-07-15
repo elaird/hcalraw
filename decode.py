@@ -408,6 +408,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
                 word16=word16,
                 skipFlavors=skipFlavors,
                 patternMode=patternMode,
+                utca=utca,
                 )
 
 
@@ -431,7 +432,7 @@ def ttpData(l={}, iDataMod6=None, word16=None):
         l["ttpOutput"][-1] = (word16 >> 12) & 0xf
 
 
-def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[], patternMode={}):
+def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[], patternMode={}, utca=None):
     if (word16 >> 15):
         flavor = (word16 >> 12) & 0x7
         if flavor in skipFlavors:
@@ -440,6 +441,7 @@ def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[], patternMode={
             dataKey, channelId, channelHeader = channelInit(iWord16=iWord16,
                                                             word16=word16,
                                                             flavor=flavor,
+                                                            utca=utca,
                                                             )
             if dataKey is None:
                 printer.warning("skipping flavor %d (EvN %d, iWord16 %d)." % (flavor, l["EvN"], iWord16))
@@ -461,7 +463,7 @@ def clearChannel(d):
             del d[key]
 
 
-def channelInit(iWord16=None, word16=None, flavor=None):
+def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
     dataKey = None
     channelId = word16 & 0xff
     channelHeader = {"Flavor": flavor,
@@ -478,6 +480,8 @@ def channelInit(iWord16=None, word16=None, flavor=None):
     elif flavor in [5, 6]:
         dataKey = "channelData"
         channelHeader["Fiber"] = channelId / 4
+        if not utca:
+            channelHeader["Fiber"] += 1
         channelHeader["FibCh"] = channelId % 4
         channelHeader["QIE"] = {}
         channelHeader["CapId"] = {}
@@ -503,13 +507,8 @@ def channelId(fiber=None, fibCh=None):
     return 4*fiber + fibCh
 
 
-def storePatternData(l={}, nFibers=None, nTs=None, compressed=None, **_):
-    if nFibers == 6:
-        offset = 1
-    elif nFibers == 8:
-        offset = 0
-    else:
-        assert False, nFibers
+def storePatternData(l={}, nFibers=None, nTs=None, compressed=None, rmRibbon=None, **_):
+    offset = 1 if rmRibbon else 0
 
     l["patternData"] = {}
     d = l["channelData"]
@@ -536,7 +535,7 @@ def storePatternData(l={}, nFibers=None, nTs=None, compressed=None, **_):
                         if d[key]["CapId"]:
                             cap = d[key]["CapId"][iTs]
                         elif not compressed:
-                            sys.exit("Cap-ids per time-slice not found.  Run without passing '--patterns'.")
+                            sys.exit("Cap-ids per time-slice not found.  Either pass '--compressed' or do not pass '--patterns'.")
                         else:
                             cap = 0
                         if fibCh == 0:
