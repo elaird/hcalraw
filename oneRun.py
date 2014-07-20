@@ -25,7 +25,7 @@ def opts():
                       help="stop after N events (including skipped events)")
     common.add_option("--nevents-skip",
                       dest="neventsSkip",
-                      default="",
+                      default=0,
                       metavar="M",
                       help="skip the first M events")
     common.add_option("--output-file",
