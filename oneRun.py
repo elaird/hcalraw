@@ -22,7 +22,12 @@ def opts():
                       dest="nevents",
                       default="",
                       metavar="N",
-                      help="stop after N events")
+                      help="stop after N events (including skipped events)")
+    common.add_option("--nevents-skip",
+                      dest="neventsSkip",
+                      default="",
+                      metavar="M",
+                      help="skip the first M events")
     common.add_option("--output-file",
                       dest="outputFile",
                       default="output/latest.root",
@@ -266,6 +271,7 @@ if __name__ == "__main__":
                        file2=options.file2,
                        feds2=fedList(options.feds2),
                        nEvents=integer(options.nevents, "nevents"),
+                       nEventsSkip=integer(options.neventsSkip, "neventsSkip"),
                        patternMode=patternOptions,
                        mapOptions=mapOptions,
                        outputFile=options.outputFile,
