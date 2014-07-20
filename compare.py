@@ -154,7 +154,7 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[]):
 
     for iChannel in range(3):
         title = ";no. matched fibers (ch%d);events / bin" % iChannel
-        nBins = 24
+        nBins = 36
         bins = (nBins, -0.5, nBins - 0.5)
         book.fill(nPerChannel(matched12.keys(), iChannel),
                   "MatchedFibersCh%d" % iChannel,
