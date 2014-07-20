@@ -355,9 +355,7 @@ def patternData(d={}, moduleId="", utca=None, slim=False):
 
             if slim:
                 fiberNum = int(fibers)
-                if not utca:
-                    fiberNum += 1
-                out.append("%s %2d:  %s" % (moduleId, fiberNum, ps))
+                out.append("%s %2d:  %s" % (moduleId, int(fibers), ps))
             else:
                 out.append("   ".join([moduleId, fibers, "  %s" % key, "  "]) + ps)
     return out
