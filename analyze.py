@@ -168,7 +168,8 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
         iMask = 0
         print "Looping:"
 
-    for iOuterEvent in range(nEvents(tree, outer["nEventsMax"])):
+    for iOuterEvent in range(outer["nEventsSkip"],
+                             nEvents(tree, outer["nEventsMax"])):
         nb = tree.GetEntry(iOuterEvent)
         if nb <= 0:
             continue
@@ -505,6 +506,7 @@ def oneRun(file1="",
            compareOptions={},
            printOptions={},
            nEvents=None,
+           nEventsSkip=None,
            outputFile="",
            ):
 
@@ -512,6 +514,7 @@ def oneRun(file1="",
     assert feds1
 
     common = {"nEventsMax": nEvents,
+              "nEventsSkip": nEventsSkip,
               "patternMode": patternMode,
               }
     common.update(printOptions)
