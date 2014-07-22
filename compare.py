@@ -182,21 +182,21 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[]):
         book.fill(raw1[fed1]["header"][x] - raw2[fed2]["header"][x], "delta"+x, 11, -5.5, 5.5, title=title)
 
 
-def coordString(fedId, moduleId, fiber, channel):
-    return "%3d %2d %2d %2d" % (fedId, moduleId, fiber, channel)
+def coordString(crate, slot, tb, fiber, channel):
+    return "%2d %2d%1s %2d %2d" % (crate, slot, tb, fiber, channel)
 
 
 def reportMatched(matched={}):
-    print "MATCHED fibers %d:" % len(matched)
-    print "uTCA --> CMS"
-    print "(fed  h  f ch) --> (fed  h  f ch)"
+    print "%d MATCHED channels:" % len(matched)
+    print "uTCA --> VME"
+    print "(cr sl   f ch) --> (cr sl   f ch)"
     print "---------------------------------"
     for k in sorted(matched.keys()):
         print "(%s) --> (%s)" % (coordString(*k), coordString(*matched[k]))
 
     print
-    print "CMS --> uTCA"
-    print "(fed  h  f ch) --> (fed  h  f ch)"
+    print "VME --> uTCA"
+    print "(cr sl   f ch) --> (cr sl   f ch)"
     print "---------------------------------"
     lines = []
     for k, v in matched.iteritems():
@@ -244,7 +244,7 @@ def dataMap(raw={}, skipErrF=[]):
                 fiber = fiberMap.get(fiber, fiber)
                 if channelData["ErrF"] in skipErrF:
                     continue
-                coords = (fedId, block["ModuleId"], fiber, channel)
+                coords = (block["Crate"], block["Slot"], block["Top"], fiber, channel)
                 qie = channelData["QIE"]
                 if len(qie) < len(matchRange):
                     #print "skipping bogus channel",coords
