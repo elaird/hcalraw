@@ -244,6 +244,8 @@ def go(baseDir="",
                                           run=run,
                                           suffix=suffix,
                                           dependsUpon=dependsUpon)
+
+        #print run, ready, procFlag, doneFlag, process
         if ready:
             stdout("touch %s" % procFlag)
             d = process(inputFile="%s/%s/%s" % (eosPrefix, eosDir, rootFile),
@@ -274,7 +276,7 @@ if __name__ == "__main__":
                        select=lambda x: "FiberID" in x,
                        ) + [222060, 222964,
                             222965, 223008,
-                            223011, 223013, 
+                            223011, 223013,
                             223331, 223333]
 
     for func, deps in [#(gitLog, []),
@@ -284,7 +286,7 @@ if __name__ == "__main__":
         go(baseDir="%s/public/FiberID" % os.environ["HOME"],
            process=func,
            dependsUpon=deps,
-           runs=fiberIdRuns,
+           runs=fiberIdRuns+[],
            )
 
 
@@ -300,7 +302,7 @@ if __name__ == "__main__":
                  compare]:
         go(baseDir=utcaDir,
            process=func,
-           runs=utcaRuns,
+           runs=utcaRuns+[],
            )
 
     # summary pdf
