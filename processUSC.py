@@ -274,9 +274,10 @@ if __name__ == "__main__":
                        select=lambda x: "FiberID" in x,
                        ) + [222060, 222964,
                             222965, 223008,
-                            223011, 223013]
+                            223011, 223013, 
+                            223331, 223333]
 
-    for func, deps in [(gitLog, []),
+    for func, deps in [#(gitLog, []),
                        (dumpFibering, []),
                        (compareFibering, ["dumpFibering"]),
                        ]:
@@ -293,7 +294,10 @@ if __name__ == "__main__":
                     )
     utcaDir = "%s/public/uTCA" % os.environ["HOME"]
 
-    for func in [gitLog, dumpEvents, dumpEventsNoColor, compare]:
+    for func in [#gitLog,
+                 dumpEvents,
+                 dumpEventsNoColor,
+                 compare]:
         go(baseDir=utcaDir,
            process=func,
            runs=utcaRuns,
