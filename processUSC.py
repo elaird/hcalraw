@@ -164,7 +164,7 @@ def compareFibering(inputFile="", outputDir="", run=0):
 
 def utcaArgs(inputFile=""):
     return ["--file1='%s'" % inputFile,
-            "--feds1=929 --feds2=721,722",
+            "--feds1=929 --feds2=721",
             "--identity-map --no-warn-skip16"]
 
 
