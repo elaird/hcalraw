@@ -148,7 +148,7 @@ def dumpFibering(inputFile="", outputDir="", run=0):
     if run <= 223008:
         args.append("--nts=20")
 
-    if 222965 <= run <= 223013:
+    if 222965 <= run <= 223333:
         args.append("--feds1=HBHEHF")
     else:
         args.append("--feds1=HCAL")
