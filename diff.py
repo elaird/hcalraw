@@ -14,10 +14,11 @@ def mapping(file=None, skip=[]):
 
         if ":" in line:
             fields = line.split(":")
-            if len(fields) != 2:
-                sys.exit("Problem processing this line:\n%s" % line)
+            if len(fields) <= 1:
+                sys.exit("Problem processing this line (length %d < 2):\n%s" % (len(fields), line))
             else:
-                be, fe = fields
+                be = fields[0]
+                fe = " ".join(fields[1:])
 
             out[tuple(be.split())] = tuple(fe.split())
         elif line != "\n":
