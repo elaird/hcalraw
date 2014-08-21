@@ -265,6 +265,27 @@ def go(baseDir="",
     #        print run
 
 
+def extraRuns(fileName=""):
+    out = []
+    f = open(fileName)
+    for iLine, line in enumerate(f):
+        if line and line[0] == "#":
+            continue
+
+        fields = line.split()
+        if len(fields) != 1:
+            print "len(fields) %d != 1 in line %d of '%s'" % (len(fields), 1 + iLine, fileName)
+            continue
+        try:
+            out.append(int(fields[0]))
+        except ValueError:
+            print "Could not determine run number in line %d of '%s'." % (1 + iLine, fileName)
+            continue
+
+    f.close()
+    return out
+
+
 if __name__ == "__main__":
     runListFile = "%s/public/html/runlist.txt" % os.environ["HOME"]
     prepareRunList(dest=runListFile,
@@ -274,11 +295,7 @@ if __name__ == "__main__":
     fiberIdRuns = runs(runListFile=runListFile,
                        minimumRun=214782,
                        select=lambda x: "FiberID" in x,
-                       ) + [222060, 222964,
-                            222965, 223008,
-                            223011, 223013,
-                            223331, 223333,
-                            225180, 225187]
+                       ) + extraRuns("%s/public/FiberID/extraruns.txt" % os.environ["HOME"])
 
     for func, deps in [#(gitLog, []),
                        (dumpFibering, []),
