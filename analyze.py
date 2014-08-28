@@ -218,11 +218,10 @@ def collectedRaw(tree=None, specs={}):
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8,
                                   skipWords64=skipWords64, **kargs)
             raw[fedId]["MOL"] = mol
-    raw[None] = {"iEntry": tree.GetReadEntry(),
-                 "label": specs["label"],
-                 "patternMode": specs["patternMode"],
-                 "dump": specs["dump"],
-                 }
+    raw[None] = {"iEntry": tree.GetReadEntry()}
+    for key in ["label", "patternMode", "dump", "crateslots"]:
+        raw[None][key] = specs[key]
+
     return raw
 
 
