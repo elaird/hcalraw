@@ -100,7 +100,7 @@ def nPerChannel(lst=[], iChannel=None):
     return len(filter(lambda x: x[-1] == iChannel, lst))
 
 
-def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[]):
+def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=False):
     for raw in [raw1, raw2]:
         maxAdc = -1
         for fedId, dct in sorted(raw.iteritems()):
@@ -140,8 +140,8 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[]):
             book.fill(maxAdc, "max_adc", 128, -0.5, 127.5,
                       title=";max ADC (when ErrF==0); events / bin")
 
-    mapF1, mapB1 = dataMap(raw1, skipErrF=skipErrF)
-    mapF2, mapB2 = dataMap(raw2, skipErrF=skipErrF)
+    mapF1, mapB1 = dataMap(raw1, skipErrF=skipErrF, skipAllZero=skipAllZero)
+    mapF2, mapB2 = dataMap(raw2, skipErrF=skipErrF, skipAllZero=skipAllZero)
     matched12, nonMatched12 = matchStats(mapF1, mapB2)
     matched21, nonMatched21 = matchStats(mapF2, mapB1)
 
@@ -226,7 +226,7 @@ def matchStats(f={}, b={}):
     return matched, failed
 
 
-def dataMap(raw={}, skipErrF=[]):
+def dataMap(raw={}, skipErrF=[], skipAllZero=None):
     forward = {}
     backward = {}
 
@@ -250,6 +250,8 @@ def dataMap(raw={}, skipErrF=[]):
                     #print "skipping bogus channel",coords
                     continue
                 data = tuple([qie.get(i) for i in matchRange])
+                if skipAllZero and not any(data):
+                    continue
                 #print coords,matchRange,[hex(d) for d in data]
                 forward[coords] = data
                 backward[data] = coords
