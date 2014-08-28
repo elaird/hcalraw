@@ -132,6 +132,11 @@ def opts():
                      default="1,3",
                      metavar="s",
                      help="Skip channels with these ErrF values (default is 1,3).")
+    matchCh.add_option("--skipAllZero",
+                     dest="skipAllZero",
+                     default=False,
+                     action="store_true",
+                     help="Skip channels with all QIE samples = 0.")
     parser.add_option_group(matchCh)
 
     patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
@@ -248,6 +253,7 @@ if __name__ == "__main__":
 
     compareOptions = {"adcPlots": options.adcPlots,
                       "skipErrF": fedList(options.skipErrF),
+                      "skipAllZero": options.skipAllZero,
                       }
 
     patternOptions = {"rmRibbon": options.rmRibbon,
