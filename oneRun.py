@@ -67,6 +67,17 @@ def opts():
                         default=0,
                         metavar="D",
                         help=" ".join([d.ljust(60) for d in dump]))
+    printing.add_option("--crateslots",
+                        dest="crateslots",
+                        default=None,
+                        metavar="D",
+                        help="Whitelist of (100*crate)+slot to dump.")
+    uscSummer2014 = "917,918,2911,2912"
+    printing.add_option("--usc-summer2014",
+                        dest="uscSummer2014",
+                        default=False,
+                        action="store_true",
+                        help="--crateslots=%s" % uscSummer2014)
     printing.add_option("--no-warn-skip16",
                         dest="noWarnSkip16",
                         default=False,
@@ -187,6 +198,11 @@ def opts():
     if options.feds2 and not options.file2:
         print "Using --file1 also for --file2"
         options.file2 = options.file1
+
+    if options.uscSummer2014:
+        if options.crateslots is not None:
+            print "--usc-summer-2014: forcing --crateslots=%s" % uscSummer2014
+        options.crateslots = uscSummer2014
     return options
 
 
@@ -270,6 +286,7 @@ if __name__ == "__main__":
     printOptions = {"dump": integer(options.dump, "dump"),
                     "warnSkip16": not options.noWarnSkip16,
                     "progress": options.progress,
+                    "crateslots": fedList(options.crateslots),
                     }
     def go():
         analyze.oneRun(file1=options.file1,
