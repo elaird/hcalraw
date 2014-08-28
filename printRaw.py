@@ -29,6 +29,7 @@ def oneEvent(d={}, nonMatched=[]):
         oneFedHcal(data,
                    patternMode=aux["patternMode"],
                    dump=dump,
+                   crateslots=aux["crateslots"],
                    nonMatched=reduced(nonMatched, fedId),
                    )
     if 1 <= dump:
@@ -83,7 +84,7 @@ def oneHtrPatterns(p={}, patternMode={}, fedId=None, iOffset=None, utca=None):
         print "\n".join(lines)  # skip printer to facilitate diff
 
 
-def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
+def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, nonMatched=[]):
     zs = p.get("ZS")
 
     if "nWord16Qie" in p:
@@ -154,6 +155,8 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, utca=None, nonMatched=[]):
         if p["IsTTP"]:
             cd = ttpData(p["ttpInput"], p["ttpOutput"], p["ttpAlgoDep"])
         else:
+            if crateslots and (100*p["Crate"] + p["Slot"]) not in crateslots:
+                return
             cd = htrChannelData(p["channelData"].values(),
                                 crate=p["Crate"],
                                 slot=p["Slot"],
@@ -369,7 +372,7 @@ def patternString(patterns=[], key=""):
     return configuration.patternString(codes)
 
 
-def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
+def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[], nonMatched=[]):
     h = d["header"]
     t = d["trailer"]
     if (not patternMode["active"]) and (1 <= dump):
@@ -428,6 +431,7 @@ def oneFedHcal(d={}, patternMode=False, dump=None, nonMatched=[]):
             oneHtr(p=p,
                    printColumnHeaders=printColumnHeaders,
                    dump=dump,
+                   crateslots=crateslots,
                    utca=h["utca"],
                    nonMatched=nonMatched)
             if dump == 3:
