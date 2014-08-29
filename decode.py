@@ -1,6 +1,6 @@
-# AMC13/uHTR (through April 2014) http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_3.pdf
 # AMC13 (May 2014 onward) http://ohm.bu.edu/~hazen/CMS/AMC13/UpdatedDAQPath_2014-05-01.pdf
 # uHTR  (May 2014 onward) https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12306&version=2&filename=uhtr_spec.pdf
+# AMC13/uHTR (through April 2014) http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_3.pdf
 # DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 # HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
 # TTP http://cmsdoc.cern.ch/cms/HCAL/document/Aux/HcalTechTriggerProcessor/dataformat.html
@@ -477,21 +477,42 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
         for key in ["SOI", "OK", "TP"]:
             channelHeader[key] = {}
 
-    elif flavor in [5, 6]:
+    elif flavor != 7:
         dataKey = "channelData"
         channelHeader["Fiber"] = channelId / 4
         if not utca:
             channelHeader["Fiber"] += 1
+
         channelHeader["FibCh"] = channelId % 4
         channelHeader["QIE"] = {}
         channelHeader["CapId"] = {}
+
+        if 0 <= flavor <= 1:
+            for key in ["SOI", "TDC"]:
+                channelHeader[key] = {}
+        if 2 <= flavor <= 3:
+            for key in ["SOI", "OK", "TDCRise", "TDCFall"]:
+                channelHeader[key] = {}
 
     return dataKey, channelId, channelHeader
 
 
 def storeChannelData(dct={}, iWord16=None, word16=None):
     j = iWord16 - dct["iWord16"] - 1
-    if dct["Flavor"] == 4:
+    if 0 <= dct["Flavor"] <= 1:
+        dct["SOI"][j] = (word16 >> 14) & 0x1
+        dct["TDC"][j] = (word16 >> 8) & 0x3f
+        dct["QIE"][j] = word16 & 0xff
+    elif 2 <= dct["Flavor"] <= 3:
+        k = j / 2
+        if j % 2:
+            dct["TDCRise"][k] = word16 & 0x3f
+            dct["TDCFall"][k] = (word16 >> 6) & 0x3f
+        else:
+            dct["SOI"][k] = (word16 >> 13) & 0x1
+            dct["OK"][k] = (word16 >> 12) & 0x1
+            dct["QIE"][k] = word16 & 0xff
+    elif dct["Flavor"] == 4:
         dct["SOI"][j] = (word16 >> 14) & 0x1
         dct["OK"][j] = (word16 >> 13) & 0x1
         dct["TP"][j] = word16 & 0x1fff
