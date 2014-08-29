@@ -44,10 +44,7 @@ def nFibers(utca):
 
 
 def unpackSkipFlavors(utca):
-    if utca:
-        return [0, 1, 2, 3, 7]
-    else:
-        return [7]
+    return [7]
 
 
 def matchRange(fedId=None, slot=None, fibCh=None, utca=None):
