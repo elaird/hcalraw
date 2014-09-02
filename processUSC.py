@@ -221,6 +221,7 @@ def go(baseDir="",
        dependsUpon=[],
        eosPrefix="root://eoscms.cern.ch",
        eosDir="/eos/cms/store/group/comm_hcal/LS1",
+       urlPrefix="http://cmsdoc.cern.ch",
        jobCheck="oneRun",
        nProcMax=5,
        ):
@@ -254,7 +255,9 @@ def go(baseDir="",
                         run=run)
             stdout("rm %s" % procFlag)
 
-            report(d, subject='Run %d: %s' % (run, suffix))
+            urlSuffix = runDir[7+runDir.find("public/"):]
+            url = "%s/~%s/%s" % (urlPrefix, os.environ["USER"], urlSuffix)
+            report(d, subject='Run %d: %s (%s)' % (run, suffix, url))
             if not d["returncode"]:
                 with open(doneFlag, "w") as f:
                     print >> f, blob(d)
