@@ -174,7 +174,7 @@ def dumpEventsNoColor(**kargs):
 
 
 def dumpEvents(inputFile="", outputDir="", run=0, n=3, color=True):
-    args = utcaArgs(inputFile) + ["--dump=4 --nevents=%d" % n]
+    args = utcaArgs(inputFile) + ["--dump=4 --nevents=%d --usc-summer2014" % n]
     outputFile = "%s/%devents.txt" % (outputDir, n)
     if color:
         outputFile = outputFile.replace(".txt", "_color.txt")
