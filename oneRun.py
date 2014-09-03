@@ -78,6 +78,12 @@ def opts():
                         default=False,
                         action="store_true",
                         help="--crateslots=%s" % uscSummer2014)
+    bat904Crates2014 = "2,3012"
+    printing.add_option("--bat904-2014",
+                        dest="bat904Crates2014",
+                        default=False,
+                        action="store_true",
+                        help="--crateslots=%s" % bat904Crates2014)
     printing.add_option("--no-warn-skip16",
                         dest="noWarnSkip16",
                         default=False,
@@ -199,10 +205,19 @@ def opts():
         print "Using --file1 also for --file2"
         options.file2 = options.file1
 
+    if all([options.uscSummer2014, options.bat904Crates2014]):
+        sys.exit("Use at most one of --usc-summer2014, --bat904-2014")
+
     if options.uscSummer2014:
         if options.crateslots is not None:
-            print "--usc-summer-2014: forcing --crateslots=%s" % uscSummer2014
+            print "--usc-summer2014: forcing --crateslots=%s" % uscSummer2014
         options.crateslots = uscSummer2014
+
+    if options.bat904Crates2014:
+        if options.crateslots is not None:
+            print "--bat904-2014: forcing --crateslots=%s" % bat904Crates2014
+        options.crateslots = bat904Crates2014
+
     return options
 
 
