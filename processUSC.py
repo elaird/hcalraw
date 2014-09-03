@@ -184,14 +184,21 @@ def dumpEvents(inputFile="", outputDir="", run=0, n=3, color=True):
     return commandOutput(cmd)
 
 
-def compare(inputFile="", outputDir="", run=0):
+def compare(inputFile="", outputDir="", run=0, stem="compare", moreArgs=[]):
     args = utcaArgs(inputFile)
+    args += moreArgs
     args += ["--nevents=1000",
              "--no-color",
-             "--output-file=%s/compare.root" % outputDir,
+             "--output-file=%s/%s.root" % (outputDir, stem),
              ]
-    cmd = oneRun(args, outputFile="%s/comparison.txt" % outputDir)
+    cmd = oneRun(args, outputFile="%s/%s.txt" % (outputDir, stem))
     return commandOutput(cmd)
+
+
+def compareLoose(**kargs):
+    return compare(stem="compareLoose",
+                   moreArgs=["--skipErrF=3", "--skipAllZero"],
+                   **kargs)
 
 
 def report(d={}, subject=""):
@@ -320,7 +327,9 @@ if __name__ == "__main__":
     for func in [#gitLog,
                  dumpEvents,
                  dumpEventsNoColor,
-                 compare]:
+                 compare,
+                 compareLoose,
+                 ]:
         go(baseDir=utcaDir,
            process=func,
            runs=utcaRuns+[],
