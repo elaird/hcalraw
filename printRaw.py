@@ -399,8 +399,8 @@ def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[], nonMatched=[])
                  "%4d" % h["BcN"],
                  "%7.3f" % utils.minutes(h["OrN"]),
                  ("  %1x" % t["TTS"]) if "TTS" in t else "  - ",
-                 ("    %4d" % (t["nWord64"]*8)) if "nWord64" in t else "    --  ",
-                 "    %4d" % d["nBytesSW"],
+                 ("   %5d" % (t["nWord64"]*8)) if "nWord64" in t else "    --  ",
+                 "   %5d" % d["nBytesSW"],
                  #(" 0x%04x" % t["CRC16"]) if "CRC16" in t else "   - ",
                  "%7d" % d["nWord16Skipped"],
                  ]
