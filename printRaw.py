@@ -305,7 +305,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                 ]
                 out[-1] += "  ".join(lat)
         if zs:
-            iChannel = 3*data["Fiber"] + data["FibCh"]
+            iChannel = 3*(data["Fiber"] - 1) + data["FibCh"]
             marks = zs["DigiMarks"]
             if iChannel < len(marks):
                 m = "y" if marks[iChannel] else "n"
