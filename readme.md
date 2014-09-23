@@ -26,17 +26,17 @@ source env/slc6-cmssw.sh
 ####Environment
 ######SLC6/AFS
 * `env/slc6-cmssw.sh` sets up a CMSSW environment
-* `env/slc6-pypy.sh` setups up pypyROOT (outside of CMSSW)
+* `env/slc6-pypy.sh` sets up pypyROOT (outside of CMSSW)
 
 ######SLC5/AFS
 * `env/slc5-cmssw.sh` sets up a CMSSW environment
-* `env/slc5-cpython.sh` setups up pyROOT (outside of CMSSW)
+* `env/slc5-cpython.sh` sets up pyROOT (outside of CMSSW)
 
 ####Files
 * `cpp/CDF*.h` are copied from CMSSW (IORawData/HcalTBInputService/src)
 * `cpp/cdf.cxx` defines a helper class for reading data from HCAL local DAQ
 * `cpp/cms.cxx` defines a helper class for reading data from the CMS DAQ
-* `autoBook.py` is copied from github.com/elaird/supy/__autoBook__.py
+* `autoBook.py` is copied from github.com/elaird/supy/`__autoBook__.py`
 * `analyze.py` loops over .root file(s) for one run and produces output/Runxxx.root
 * `configuration.py` holds some settings that are used by analyze.py
 * `cmsswUnpack.py` is not needed, but could be executed with cmsRun
