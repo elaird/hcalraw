@@ -3,9 +3,9 @@
 
 ####Dependencies
 * python (2.x, x>=6)
-* ROOT (>=y)
-* CMSSW (<=z) is required to analyze files written by the CMS central DAQ; whereas
-* CMSSW is not required to analyze data from HCAL local runs
+* ROOT (>=5.32)
+* CMSSW is required to analyze files written by the CMS central DAQ; whereas
+* CMSSW is *not* required to analyze data from HCAL local runs
 
 ####Quick Start
 ```bash
@@ -52,7 +52,6 @@ source env/slc6-cmssw.sh
 * `utils.py` contains helper functions
 
 ####To do
-* dependency versions
 * TChain support
 * TTree cache
 * unpack by words in CMS format
