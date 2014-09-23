@@ -13,6 +13,7 @@ ssh lxplus.cern.ch
 git clone https://github.com/elaird/hcalraw.git
 cd hcalraw
 source env/slc6-cmssw.sh
+./oneRun.py --help
 ./oneRun.py --file1=data/B904_Integration_000050.root --feds1=702,931
 ./oneRun.py --file1=data/B904_Integration_000050.root --feds1=702,931 --nevents=1 --dump=4
 ./oneRun.py --file1=data/B904_Integration_000050.root --feds1=702 --feds2=931 --shiftFibCh2
@@ -26,6 +27,7 @@ source env/slc6-cmssw.sh
 ######SLC6/AFS
 * `env/slc6-cmssw.sh` sets up a CMSSW environment
 * `env/slc6-pypy.sh` setups up pypyROOT (outside of CMSSW)
+
 ######SLC5/AFS
 * `env/slc5-cmssw.sh` sets up a CMSSW environment
 * `env/slc5-cpython.sh` setups up pyROOT (outside of CMSSW)
@@ -50,13 +52,10 @@ source env/slc6-cmssw.sh
 * `utils.py` contains helper functions
 
 ####To do
-(technical)
-* readme: versions, rst
+* dependency versions
 * TChain support
 * TTree cache
 * unpack by words in CMS format
-* improve storage structure
-
-(analysis)
+* improve storage structures
 * HLT path filter in analyze.py
 * electronics map
