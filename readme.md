@@ -1,9 +1,11 @@
 ####License
-GPLv3 (http://www.gnu.org/licenses/gpl.html)
+[GPLv3](http://www.gnu.org/licenses/gpl.html)
 
 ####Dependencies
-* python (2.x, x>=6) and ROOT (>=y) are required.
-* when analyzing files written by the CMS central DAQ, CMSSW (>=z) is also required.
+* python (2.x, x>=6)
+* ROOT (>=y)
+* CMSSW (<=z) is required to analyze files written by the CMS central DAQ; whereas
+* CMSSW is not required to analyze data from HCAL local runs
 
 ####Quick Start
 ```bash
@@ -20,33 +22,32 @@ source env/slc6-cmssw.sh
 ./oneRun.py --file1=data/USC_217924.root --feds1=HCAL --patterns --nevents=1 | ./diff.py
 ```
 
+####Environment
+######SLC6/AFS
+* `env/slc6-cmssw.sh` sets up a CMSSW environment
+* `env/slc6-pypy.sh` setups up pypyROOT (outside of CMSSW)
+######SLC5/AFS
+* `env/slc5-cmssw.sh` sets up a CMSSW environment
+* `env/slc5-cpython.sh` setups up pyROOT (outside of CMSSW)
+
 ####Files
-* `env/slc5-cmssw.sh` sets up an SLC5 CMSSW environment (needed to
-       analyze CMS data); it requires AFS; it is not needed to analyze
-       HCAL test-stand data.
-
-* `env/slc5-cpython.sh` setups up pyROOT; it requires AFS and SLC5.
-* `env/slc6-pypy.sh` setups up pypyROOT; it requires AFS and SLC6.
-
-cpp/CDF*.h are copied from CMSSW (IORawData/HcalTBInputService/src)
-cpp/cdf.cxx defines a helper class for reading data from HCAL local DAQ
-cpp/cms.cxx defines a helper class for reading data from the CMS DAQ
-
-autoBook.py is copied from github.com/elaird/supy/__autoBook__.py
-analyze.py loops over .root file(s) for one run and produces output/Runxxx.root
-configuration.py holds some settings that are used by analyze.py
-cmsswUnpack.py is not needed, but could be executed with cmsRun
-diff.py compares the decoded output of a fiberID run to data/ref.txt
-multiRun.py is broken
-oneRun.py is used to analyze one run (see examples above)
-compare.py compares the payloads within two .root files for a given event
-decode.py interprets a FED's bytes in an event (called by analyze.unpacked)
-graphs.py reads in output/Runxxx.root, makes plots, and outputs summary.pdf
-printRaw.py dumps to stdout the payload(s) in an event
-printer.py contains a utility class for printing messages
-processUSC.py loops over available USC local runs and processes them
-utils.py contains helper functions
-
+* `cpp/CDF*.h` are copied from CMSSW (IORawData/HcalTBInputService/src)
+* `cpp/cdf.cxx` defines a helper class for reading data from HCAL local DAQ
+* `cpp/cms.cxx` defines a helper class for reading data from the CMS DAQ
+* `autoBook.py` is copied from github.com/elaird/supy/__autoBook__.py
+* `analyze.py` loops over .root file(s) for one run and produces output/Runxxx.root
+* `configuration.py` holds some settings that are used by analyze.py
+* `cmsswUnpack.py` is not needed, but could be executed with cmsRun
+* `diff.py` compares the decoded output of a fiberID run to data/ref.txt
+* `multiRun.py` is broken
+* `oneRun.py` is used to analyze one run (see examples above)
+* `compare.py` compares the payloads within two .root files for a given event
+* `decode.py` interprets a FED's bytes in an event (called by analyze.unpacked)
+* `graphs.py` reads in output/Runxxx.root, makes plots, and outputs summary.pdf
+* `printRaw.py` dumps to stdout the payload(s) in an event
+* `printer.py` contains a utility class for printing messages
+* `processUSC.py` loops over available USC local runs and processes them
+* `utils.py` contains helper functions
 
 ####To do
 (technical)
