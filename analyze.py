@@ -58,7 +58,7 @@ def eventMaps(s={}, options={}):
 
     name = s["name"]
     nEventsMax = s["nEventsMax"]
-    if not s["auxBranch"]:
+    if not s.get("auxBranch"):
         fedId0 = s["fedIds"][0]
         branch0 = s["branch"](fedId0)
 
