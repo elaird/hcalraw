@@ -27,14 +27,10 @@ source env/slc6-cmssw.sh
 ./oneRun.py --file1=data/USC_217924.root --feds1=HCAL --patterns --nevents=1 | ./diff.py
 ```
 
-####Environment
-######SLC6/AFS
+####Environment (SLC6/AFS)
 * `env/slc6-cmssw.sh` sets up a CMSSW environment
 * `env/slc6-pypy.sh` sets up pypyROOT (outside of CMSSW)
-
-######SLC5/AFS
-* `env/slc5-cmssw.sh` sets up a CMSSW environment
-* `env/slc5-cpython.sh` sets up pyROOT (outside of CMSSW)
+* `env/slc6-root6.sh` sets up a ROOT 6 environment (outside of CMSSW)
 
 ####Files
 * `cpp/CDF*.h` are copied from CMSSW (IORawData/HcalTBInputService/src)
