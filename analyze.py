@@ -339,14 +339,14 @@ def charsOneFed(tree=None, fedId=None, collection=""):
     #CMS data type
     FEDRawData = getattr(tree, collection).product().FEDData(fedId)
     #wrapper class exposes data_ via data()
-    return r.FEDRawData2(FEDRawData).vectorChar()
+    return r.FEDRawData2(FEDRawData)
 
 
 def wordsOneChunk(tree=None, branch=""):
     #Common Data Format
     chunk = wordsOneBranch(tree, branch)
     #wrapper class creates std::vector<ULong64_t>
-    return r.CDFChunk2(chunk).chunk()
+    return r.CDFChunk2(chunk)
 
 
 def wordsOneBranch(tree=None, branch=""):
