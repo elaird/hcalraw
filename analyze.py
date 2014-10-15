@@ -23,14 +23,14 @@ def setup():
         r.gSystem.Load("libFWCoreFWLite.so")
         r.AutoLibraryLoader.enable()
 
-        ##define helper classes
-        #libs = ["DataFormatsFEDRawData"]
-        #if os.environ["CMSSW_RELEASE_BASE"]:
-        #    base = os.environ["CMSSW_RELEASE_BASE"]
-        #else:
-        #    base = os.environ["CMSSW_BASE"]
-        #libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
-        #r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
+        #define helper classes
+        libs = ["DataFormatsFEDRawData"]
+        if os.environ["CMSSW_RELEASE_BASE"]:
+            base = os.environ["CMSSW_RELEASE_BASE"]
+        else:
+            base = os.environ["CMSSW_BASE"]
+        libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
+        r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
 
 
 setup()
@@ -58,8 +58,9 @@ def eventMaps(s={}, options={}):
 
     name = s["name"]
     nEventsMax = s["nEventsMax"]
-    fedId0 = s["fedIds"][0]
-    branch0 = s["branch"](fedId0)
+    if not s["auxBranch"]:
+        fedId0 = s["fedIds"][0]
+        branch0 = s["branch"](fedId0)
 
     useEvn = options.get('useEvn', False)
     filterEvn = options.get('filterEvn', False)
@@ -201,7 +202,8 @@ def collectedRaw(tree=None, specs={}):
              }
 
     for fedId in specs["fedIds"]:
-        branch = specs["branch"](fedId)
+        if "branch" in specs:
+            branch = specs["branch"](fedId)
 
         if specs["name"] == "CMS":
             rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
@@ -237,7 +239,7 @@ def w64(fedData, jWord64, nBytesPer):
         word64 += fedData.at(2*jWord64 + 1) << 32
     elif nBytesPer == 8:
         word64 = fedData.at(jWord64)
-        return word64
+    return word64
 
 
 # for format documentation, see decode.py
@@ -339,14 +341,14 @@ def charsOneFed(tree=None, fedId=None, collection=""):
     #CMS data type
     FEDRawData = getattr(tree, collection).product().FEDData(fedId)
     #wrapper class exposes data_ via data()
-    return r.FEDRawData2(FEDRawData).vectorChar()
+    return r.FEDRawData2(FEDRawData)
 
 
 def wordsOneChunk(tree=None, branch=""):
     #Common Data Format
     chunk = wordsOneBranch(tree, branch)
     #wrapper class creates std::vector<ULong64_t>
-    return r.CDFChunk2(chunk).chunk()
+    return r.CDFChunk2(chunk)
 
 
 def wordsOneBranch(tree=None, branch=""):
