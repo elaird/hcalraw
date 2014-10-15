@@ -1,8 +1,6 @@
 #include "FEDRawData.cc"
 
-//expose std::vector
-class FEDRawData2 : public FEDRawData {
-public:
-  FEDRawData2(const FEDRawData& in) {data_ = in.data_;}
-  std::vector<unsigned char>& vectorChar() {return data_;}
-};
+const std::vector<unsigned char> FEDRawData2(const FEDRawData& in) {
+  const unsigned char * data = in.data();
+  return std::vector<unsigned char> (data, data + in.size());
+}
