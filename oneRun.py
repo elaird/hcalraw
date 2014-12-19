@@ -232,17 +232,7 @@ def integer(value="", tag=""):
 
 
 def fedList(s=""):
-    d = {"HBHE": range(700, 718),
-         "HF": range(718, 724),
-         "HO": range(724, 732),
-         "uHF": [929],
-         }
-
-    d["HBHEHF"] = d["HBHE"] + d["HF"]
-    d["HBEF"] = d["HBHEHF"]
-    d["HCAL"] = d["HBEF"] + d["HO"]
-    d["uHCAL"] = d["HCAL"] + d["uHF"]
-
+    d = configuration.fedMap()
     if not s:
         return []
     if s in d:

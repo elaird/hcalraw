@@ -47,6 +47,20 @@ def unpackSkipFlavors(utca):
     return [7]
 
 
+def fedMap():
+    d = {"HBHE": range(700, 718),
+         "HF": range(718, 724),
+         "HO": range(724, 732),
+         "uHF": [1118, 1120, 1122],
+         }
+
+    d["HBHEHF"] = d["HBHE"] + d["HF"]
+    d["HBEF"] = d["HBHEHF"]
+    d["HCAL"] = d["HBEF"] + d["HO"]
+    d["uHCAL"] = d["HCAL"] + d["uHF"]
+    return d
+
+
 def matchRange(fedId=None, slot=None, fibCh=None, utca=None):
     # exceptions for Jan. 2013 slice-test (HF)
     if fedId == 990 or (fedId == 989 and 5 <= slot):
