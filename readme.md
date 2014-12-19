@@ -25,6 +25,7 @@ source env/slc6-cmssw.sh
 ./oneRun.py --file1=data/B904_Integration_000067.root --feds1=702 --patterns --nevents=1
 ./oneRun.py --file1=data/USC_214784.root --feds1=HCAL --patterns --nevents=1
 ./oneRun.py --file1=data/USC_217924.root --feds1=HCAL --patterns --nevents=1 | ./diff.py
+./oneRun.py --file1=data/USC_231834.root --feds1=uHCAL --nevents=1 --patterns --compressed | ./diff.py
 ```
 
 ####Environment (SLC6/AFS)
