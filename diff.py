@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import configuration
-import fileinput
+import optparse
 import sys
 
 
@@ -45,9 +45,12 @@ def diffs(ref={}, cabled={}):
 def pretty(be=None, fe=None):
     if be:
         dcc, sp, fi = be
-        exp = configuration.expectedHtr(int(dcc), int(sp))
-        htr = "%2d%1s" % (exp["Slot"], exp["Top"])
-        s = "%3s %2s(%3s) %2s:  " % (dcc, sp, htr, fi)
+        if dcc.startswith("u"):
+            s = " ".join(be)
+        else:
+            exp = configuration.expectedHtr(int(dcc), int(sp))
+            htr = "%2d%1s" % (exp["Slot"], exp["Top"])
+            s = "%3s %2s(%3s) %2s:  " % (dcc, sp, htr, fi)
     else:
         s = ""
 
@@ -128,14 +131,29 @@ def report(missing=None, different=None, same=None):
         print "None"
 
 
-if __name__ == "__main__":
-    with open("data/ref.txt") as f:
+def go(fileName=""):
+    assert fileName
+    with open(fileName) as f:
         ref, refMisc = mapping(f)
 
-    cabled, misc = mapping(fileinput.input(), skip=["Xrd", "TClassTable", "nologin"])
+    cabled, misc = mapping(sys.stdin, skip=["Xrd", "TClassTable", "nologin"])
 
     assert not refMisc
     for item in sorted(misc):
         print item
-
     report(*diffs(ref, cabled))
+
+
+def refFromOpts():
+    parser = optparse.OptionParser()
+    parser.add_option("--ref",
+                      dest="ref",
+                      default="data/ref.txt",
+                      help="file to use for reference.")
+
+    options, args = parser.parse_args()
+    return options.ref
+
+
+if __name__ == "__main__":
+    go(refFromOpts())
