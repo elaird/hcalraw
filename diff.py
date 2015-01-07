@@ -101,22 +101,28 @@ def printTable(rbxes={}, header="", zero="  "):
     print
 
 
-def report(missing=None, different=None, same=None):
+def report(missing=None, different=None, same=None, nMissingMax=None):
+    assert nMissingMax is not None
+
     printTable(fiberCount(same.values()), header="Fibers matching reference")
     nMissing = fiberCount(missing.values())
     printTable(nMissing, header="Missing Fibers")
 
-    header = "| RBXes missing exactly one fiber |"
+    header = "| RBXes with (1 <= n missing fibers <= %d) |" % nMissingMax
     print "-"*len(header)
     print header
     print "-"*len(header)
     print "DCC SP(HTR) FI: ref. RBX RM FI"
-    if not nMissing.values().count(1):
+
+    count = 0
+    for iMissing in range(1, 1 + nMissingMax):
+        count += nMissing.values().count(iMissing)
+    if not count:
         print "None"
 
     for be, ref in sorted(missing.iteritems()):
         rbx = ref[0]
-        if nMissing[rbx] == 1:
+        if 1 <= nMissing[rbx] <= nMissingMax:
             print pretty(be=be, fe=ref)
 
     print
@@ -131,7 +137,7 @@ def report(missing=None, different=None, same=None):
         print "None"
 
 
-def go(fileName=""):
+def go(fileName="", nMissingMax=None):
     assert fileName
     with open(fileName) as f:
         ref, refMisc = mapping(f)
@@ -141,19 +147,26 @@ def go(fileName=""):
     assert not refMisc
     for item in sorted(misc):
         print item
-    report(*diffs(ref, cabled))
+
+    report(*diffs(ref, cabled), nMissingMax=nMissingMax)
 
 
-def refFromOpts():
+def opts():
     parser = optparse.OptionParser()
     parser.add_option("--ref",
                       dest="ref",
                       default="data/ref.txt",
-                      help="file to use for reference.")
+                      help="file to use for reference")
+
+    parser.add_option("--nMissingMax",
+                      dest="nMissingMax",
+                      default="2",
+                      help="maximum number of missing fibers per RBX to print in detailed table")
 
     options, args = parser.parse_args()
-    return options.ref
+    return options
 
 
 if __name__ == "__main__":
-    go(refFromOpts())
+    options = opts()
+    go(options.ref, int(options.nMissingMax))
