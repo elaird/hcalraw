@@ -22,10 +22,8 @@ source env/slc6-cmssw.sh
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931
 ./oneRun.py --file1=~/public/d1_utca/209151_hltSkim.root --feds1=714 --file2=~/public/d1_utca/usc/USC_209150.root --feds2=989 --nevents=3
 # analyze pattern runs
-./oneRun.py --file1=data/B904_Integration_000067.root --feds1=702 --patterns --nevents=1
-./oneRun.py --file1=data/USC_214784.root --feds1=HCAL --patterns --nevents=1
-./oneRun.py --file1=data/USC_217924.root --feds1=HCAL --patterns --nevents=1 | ./diff.py
-./oneRun.py --file1=data/USC_231834.root --feds1=uHCAL --nevents=1 --patterns --compressed | ./diff.py
+./oneRun.py --file1=data/USC_231834.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py
+./oneRun.py --file1=data/USC_231834.root --feds1=uHF --nevents=1 --patterns --compressed | ./diff.py --ref=data/uref.txt
 ```
 
 ####Environment (SLC6/AFS)
