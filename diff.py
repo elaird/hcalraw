@@ -46,7 +46,9 @@ def pretty(be=None, fe=None):
     if be:
         dcc, sp, fi = be
         if dcc.startswith("u"):
-            s = " ".join(be)
+            crate = dcc[1:]
+            slot = sp
+            s = "%3s %2s %2s:  " % (crate, slot, fi)
         else:
             exp = configuration.expectedHtr(int(dcc), int(sp))
             htr = "%2d%1s" % (exp["Slot"], exp["Top"])
