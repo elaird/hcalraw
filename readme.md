@@ -24,6 +24,9 @@ source env/slc6-cmssw.sh
 # analyze pattern runs
 ./oneRun.py --file1=data/USC_231834.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py
 ./oneRun.py --file1=data/USC_231834.root --feds1=uHF --nevents=1 --patterns --compressed | ./diff.py --ref=data/uref.txt
+# analyze global runs
+source /afs/cern.ch/project/eos/installation/cms/etc/setup.sh
+./oneRun.py --file1=root://eoscms.cern.ch//store/data/Commissioning2015/Cosmics/RAW/v1/000/234/193/00000/FEAD7C2C-4CB4-E411-9791-02163E011890.root --feds1=uHF --feds2=HF --progress
 ```
 
 ####Environment (SLC6/AFS)
