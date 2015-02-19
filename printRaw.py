@@ -89,8 +89,10 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, n
 
     if "nWord16Qie" in p:
         col = "nWord16Qie"
-    else:
+    elif utca:
         col = "DataLength16"
+    elif p["IsTTP"]:
+        col = "          "
 
     out = []
     if printColumnHeaders:
@@ -106,7 +108,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, n
                    col,
                    "nSamp",
                    "EvN8",
-                   "  CRC",
+                   "  CRC" + ("32" if utca else ""),
         ]
         if zs:
             columns += [" ", "ZSMask:  Thr1, Thr24, ThrTP"]
@@ -122,16 +124,21 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, n
                "  %2d" % p["nPreSamples"],
                #"  %3d  " % p["nWord16Tp"],
                ]
-    if "Qie" in col:
-        strings.append("     %3d " % p.get(col, -1))
-    else:
+    if utca:
         s = "    %3d/%3d" % (p.get(col, -1), p.get(col+"T", -1))
         strings.append(s)
+    else:
+        strings.append("     %3d " % p.get(col, -1))
 
     strings += ["   %2d" % p.get("nSamples", -1),  # absent in uHTR
-               "  0x%02x" % p["EvN8"],
-               "0x%04x" % p["CRC"],
-               ]
+                "  0x%02x" % p["EvN8"],
+                ]
+    if utca:
+        strings.append("0x%08x" % p["CRC"])
+    elif "Qie" in col:
+        strings.append("0x%04x" % p["CRC"])
+    else:
+        strings.append("  TTP ")
 
     if zs:
         strings += ["",
@@ -393,7 +400,7 @@ def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[], nonMatched=[])
         headers = "   ".join(fields)
         printer.blue("-"*len(headers))
         printer.blue(headers)
-        sList = ["  %3d" % h["FEDid"],
+        sList = [" %4d" % h["FEDid"],
                  "0x%07x" % h["EvN"],
                  "0x%08x" % h["OrN"],
                  "%4d" % h["BcN"],
