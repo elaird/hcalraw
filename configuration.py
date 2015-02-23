@@ -61,7 +61,9 @@ def fedMap():
     return d
 
 
-def matchRange(fedId=None, slot=None, fibCh=None, utca=None):
+def matchRange1(fedId=None, slot=None, fibCh=None, utca=None):
+    """local runs; global runs before Feb. 2015"""
+
     # exceptions for Jan. 2013 slice-test (HF)
     if fedId == 990 or (fedId == 989 and 5 <= slot):
         return range(1, 10)
@@ -77,6 +79,15 @@ def matchRange(fedId=None, slot=None, fibCh=None, utca=None):
 
     # ok
     return range(10)
+
+
+def matchRange(fedId=None, slot=None, fibCh=None, utca=None):
+    """global runs during/since Feb. 2015"""
+
+    if 1100 <= fedId:
+        return range(2, 8)
+    else:
+        return range(6)
 
 
 def fiberMap(fedId=None):
