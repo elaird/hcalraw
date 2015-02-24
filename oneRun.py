@@ -209,8 +209,9 @@ def opts():
     if not options.outputFile.endswith(".root"):
         sys.exit("--output-file must end with .root (%s)" % options.outputFile)
     if options.feds2 and not options.file2:
-        print "Using --file1 also for --file2"
+        print "Using --file1 also for --file2; also using identity map"
         options.file2 = options.file1
+        options.identityMap = True
 
     if all([options.uscSummer2014, options.bat904Crates2014]):
         sys.exit("Use at most one of --usc-summer2014, --bat904-2014")
