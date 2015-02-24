@@ -244,7 +244,7 @@ def w64(fedData, jWord64, nBytesPer):
 
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
-             skipWords64=[], patternMode={}, dump=0):
+             skipWords64=[], patternMode={}, dump=-99):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
@@ -543,8 +543,8 @@ def oneRun(file1="",
        outputFile=outputFile,
        mapOptions=mapOptions,
        compareOptions=compareOptions,
-       printEventSummary=(not patternMode["active"]) and (file1 != file2),
-       printChannelSummary=file2,
+       printEventSummary=(not patternMode["active"]) and (file1 != file2) and 0 <= common["dump"],
+       printChannelSummary=file2 and 0 <= common["dump"],
        )
 
 

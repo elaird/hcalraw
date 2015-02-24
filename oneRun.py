@@ -51,7 +51,8 @@ def opts():
     parser.add_option_group(common)
 
     printing = optparse.OptionGroup(parser, "Options for printing to stdout")
-    dump = ["dump level (0-8), default is 0.",
+    dump = ["dump level (-1 to 8), default is -1.",
+            "-1: only program info, warnings and errors",
             "0: only summary (no per-event info)",
             "1: DCC/AMC13 headers",
             "2: (u)HTR summary info",
@@ -64,7 +65,7 @@ def opts():
             ]
     printing.add_option("--dump",
                         dest="dump",
-                        default=0,
+                        default=-1,
                         metavar="D",
                         help=" ".join([d.ljust(60) for d in dump]))
     printing.add_option("--crateslots",
