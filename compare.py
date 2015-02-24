@@ -28,6 +28,9 @@ def htrSummary(blocks=[], book=None, fedId=None, msg="", adcPlots=False):
             ErrF[channelData["ErrF"]] += 1
             if not channelData["ErrF"]:
                 caps[channelData["CapId0"]] += 1
+                nQie = len(channelData["QIE"].values())
+                book.fill(nQie, "nQieSamples_%d" % fedId, 14, -1.5, 12.5,
+                          title="FED %d; nQieSamples;channels / bin" % fedId)
                 if adcPlots:
                     for adc in channelData["QIE"].values():
                         book.fill(adc, "all_adc", 128, -0.5, 127.5,
