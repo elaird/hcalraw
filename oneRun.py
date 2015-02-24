@@ -154,6 +154,12 @@ def opts():
                      default=False,
                      action="store_true",
                      help="Skip channels with all QIE samples = 0.")
+
+    matchCh.add_option("--adc-vs-adc",
+                       dest="adcVsAdc",
+                       default=False,
+                       action="store_true",
+                       help="Make a scatter plot of uTCA vs. VME ADC values.")
     parser.add_option_group(matchCh)
 
     patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
@@ -272,10 +278,9 @@ if __name__ == "__main__":
     if options.noColor:
         printer.__color = False
 
-    compareOptions = {"adcPlots": options.adcPlots,
-                      "skipErrF": fedList(options.skipErrF),
-                      "skipAllZero": options.skipAllZero,
-                      }
+    compareOptions = {"skipErrF": fedList(options.skipErrF)}
+    for item in ["adcPlots", "skipAllZero", "adcVsAdc"]:
+        compareOptions[item] = getattr(options, item)
 
     patternOptions = {"rmRibbon": options.rmRibbon,
                       "nTs": integer(options.nts, "nts"),
