@@ -100,15 +100,15 @@ def nPerChannel(lst=[], iChannel=None):
     return len(filter(lambda x: x[-1] == iChannel, lst))
 
 
-def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=False):
-    for raw in [raw1, raw2]:
+def loop_over_feds(raw, book, adcPlots):
+    if True:
         maxAdc = -1
         for fedId, dct in sorted(raw.iteritems()):
             if fedId is None:
                 continue
 
-            book.fill(dct["nBytesSW"], "nBytesSW_%d" % fedId, 50, 0, 5000,
-                      title="FED %d; nBytes;Events / bin" % fedId)
+            book.fill(dct["nBytesSW"]/1024.0, "nBytesSW_%d" % fedId, 64, 0, 16,
+                      title="FED %d; kBytes;Events / bin" % fedId)
 
             if not dct["nBytesSW"]:
                 printer.error("Zero bytes read for FED %d" % fedId)
@@ -140,10 +140,51 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=
             book.fill(maxAdc, "max_adc", 128, -0.5, 127.5,
                       title=";max ADC (when ErrF==0); events / bin")
 
+
+def fill_adc_vs_adc(mapF1, mapF2, book):
+    for coords1, samples1  in mapF1.iteritems():
+        crate1, slot1, top1, fiber1, fibCh = coords1
+        if 2 <= slot1 <= 7:
+            slot2 = slot1 - 1
+        elif 13 <= slot1 <= 18:
+            slot2 = slot1 - 6
+        else:
+            continue
+
+        crate2 = crate1 + 20
+        fiber2 = fiber1 + 1
+        if top1 == "t":
+            fiber2 += 12
+
+        coords2 = (crate2, slot2, " ", fiber2, fibCh)
+
+        if coords2 in mapF2:
+            samples2 = mapF2[coords2]
+        else:
+            fmt = "%2d %2d%1s %1d %1d"
+            print (fmt % coords1) + ": " + fmt % coords2
+            samples2 = [-1] * len(samples1)
+        for i, s1 in enumerate(samples1):
+            s2 = samples2[i]
+            book.fill((s1, s2),
+                      "adc_vs_adc_evnok%1d_cr%02d_sl%02d_rx%1d" % (1, crate2, slot2, 12 <= fiber2),
+                      (129, 129),
+                      (-1.5, -1.5),
+                      (127.5, 127.5),
+                      title=";ADC (VME);ADC (uTCA);samples / bin")
+
+
+def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=False, adcVsAdc=False):
+    for raw in [raw1, raw2]:
+        loop_over_feds(raw, book, adcPlots)
+
     mapF1, mapB1 = dataMap(raw1, skipErrF=skipErrF, skipAllZero=skipAllZero)
     mapF2, mapB2 = dataMap(raw2, skipErrF=skipErrF, skipAllZero=skipAllZero)
     matched12, nonMatched12 = matchStats(mapF1, mapB2)
     matched21, nonMatched21 = matchStats(mapF2, mapB1)
+
+    if adcVsAdc:
+        fill_adc_vs_adc(mapF1, mapF2, book)
 
     printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
     printRaw.oneEvent(raw2, nonMatched=nonMatched21)
