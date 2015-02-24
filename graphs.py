@@ -36,10 +36,11 @@ def labelAxis(h=None, labels={}):
     yaxis.SetLabelSize(2.0*yaxis.GetLabelSize())
 
 
-def xMax(graph=None, iPoint=None):
+def xMin_xMax(graph=None):
+    """assumes that graph is sorted"""
     N = graph.GetN()
-    iPoint = min(iPoint, N-1) if (iPoint is not None) else N-1
-    return graph.GetX()[iPoint]
+    X = graph.GetX()
+    return X[0], X[N-1]
 
 
 def magnify(h, factor=1.0):
@@ -134,12 +135,15 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
 
         pad1.cd()
         adjustPad()
+        xMin, xMax = xMin_xMax(graph)
+        tenPercent = 0.1 * (xMax - xMin)
         null = r.TH2D("null", ";time (minutes)",
-                      1, 0.0, xMax(graph),
+                      1, xMin - tenPercent, xMax + tenPercent,
                       3, 0.5, 3.5)
         null.Draw()
         magnify(null, factor=3.0)
         labelAxis(null, labels={1: t[0], 2: t[1], 3: t[2]})
+        null.GetXaxis().SetTitleOffset(0.75)
         graph.Draw("psame")
         keep += [graph, null]
 
