@@ -161,7 +161,7 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
                       )
 
     if True:
-        for iHisto, name in enumerate(["", "nBytesSW", "nBadHtrs", "nWord16Skipped",
+        for iHisto, name in enumerate(["", "nBytesSW", "nQieSamples", "nWord16Skipped",
                                        "ErrF0", "ErrF1", "ErrF2", "ErrF3",
                                        "MatchedFibersCh0", "MatchedFibersCh1", "MatchedFibersCh2", "BcN_HTRs",
                                        #"TTS", "PopCapFrac",
