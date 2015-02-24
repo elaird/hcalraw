@@ -141,7 +141,7 @@ def loop_over_feds(raw, book, adcPlots):
                       title=";max ADC (when ErrF==0); events / bin")
 
 
-def fill_adc_vs_adc(mapF1, mapF2, book):
+def fill_adc_vs_adc(mapF1, mapF2, book, x, delta):
     for coords1, samples1  in mapF1.iteritems():
         crate1, slot1, top1, fiber1, fibCh = coords1
         if 2 <= slot1 <= 7:
@@ -161,13 +161,13 @@ def fill_adc_vs_adc(mapF1, mapF2, book):
         if coords2 in mapF2:
             samples2 = mapF2[coords2]
         else:
-            fmt = "%2d %2d%1s %1d %1d"
-            print (fmt % coords1) + ": " + fmt % coords2
+            # fmt = "%2d %2d%1s %1d %1d"
+            # print (fmt % coords1) + ": " + fmt % coords2
             samples2 = [-1] * len(samples1)
         for i, s1 in enumerate(samples1):
             s2 = samples2[i]
             book.fill((s1, s2),
-                      "adc_vs_adc_evnok%1d_cr%02d_sl%02d_rx%1d" % (1, crate2, slot2, 12 <= fiber2),
+                      "adc_vs_adc_%sOK%1d_cr%02d_sl%02d_rx%1d" % (x, not delta, crate2, slot2, 12 <= fiber2),
                       (129, 129),
                       (-1.5, -1.5),
                       (127.5, 127.5),
@@ -182,9 +182,6 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=
     mapF2, mapB2 = dataMap(raw2, skipErrF=skipErrF, skipAllZero=skipAllZero)
     matched12, nonMatched12 = matchStats(mapF1, mapB2)
     matched21, nonMatched21 = matchStats(mapF2, mapB1)
-
-    if adcVsAdc:
-        fill_adc_vs_adc(mapF1, mapF2, book)
 
     printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
     printRaw.oneEvent(raw2, nonMatched=nonMatched21)
@@ -213,14 +210,19 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=
 
     utca1 = raw1[fed1]["header"]["utca"]
     utca2 = raw2[fed2]["header"]["utca"]
-    delta = configuration.bcnDelta(utca1) - configuration.bcnDelta(utca2)
+    bcnDelta = configuration.bcnDelta(utca1) - configuration.bcnDelta(utca2)
 
     for x in ["BcN", "OrN", "EvN"]:
-        title = ";".join([x+("%d" % delta if (x == "BcN") else ""),
+        title = ";".join([x+("%d" % bcnDelta if (x == "BcN") else ""),
                           "FED %s - FED %s" % (fed1, fed2),
                           "Events / bin",
                           ])
-        book.fill(raw1[fed1]["header"][x] - raw2[fed2]["header"][x], "delta"+x, 11, -5.5, 5.5, title=title)
+        delta = raw1[fed1]["header"][x] - raw2[fed2]["header"][x]
+        book.fill(delta, "delta"+x, 11, -5.5, 5.5, title=title)
+
+    if adcVsAdc:
+        # WARNING: pass last x and delta from loop above
+        fill_adc_vs_adc(mapF1, mapF2, book, x, delta)
 
 
 def coordString(crate, slot, tb, fiber, channel):
