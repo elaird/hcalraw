@@ -21,7 +21,7 @@ def htrSummary(blocks=[], book=None, fedId=None, msg="", adcPlots=False):
             nBadHtrs += 1
             continue
 
-        book.fill(block["BcN"], "BcN_HTRs_%d" % fedId, 36, 0, 3600,
+        book.fill(block["BcN"], "BcN_HTRs_%d" % fedId, 36, 0, 3564,
                   title="FED %d; BcN;HTRs / bin" % fedId)
 
         for channelData in block["channelData"].values():
