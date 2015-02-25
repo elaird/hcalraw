@@ -68,19 +68,17 @@ def draw(h, title=""):
     r.gPad.SetLogz()
 
 
-if __name__ == "__main__":
+def go(fileName="output/latest.root", exclude=None):
     r.gROOT.SetBatch(True)
 
-    # skip_rxs = [(22,  4, 0),
-    #             (22, 10, 0),
-    #             (22, 11, 0),
-    #             ]
+    skip_rxs = [(22,  4, 0),
+                (22, 10, 0),
+                (22, 11, 0),
+                ] if exclude else []
 
-    skip_rxs = []
-    #skip_evnOKs = [0]
     skip_evnOKs = []
 
-    h = histo("output/235316.root", skip_rxs=skip_rxs, skip_evnOKs=skip_evnOKs)
+    h = histo(fileName, skip_rxs=skip_rxs, skip_evnOKs=skip_evnOKs)
 
     if h:
         can = r.TCanvas("canvas", "canvas", 1600, 1600)
@@ -98,6 +96,13 @@ if __name__ == "__main__":
         leg.Draw()
 
         r.gPad.Update()
-        r.gPad.Print("a.pdf")
+        pdf = fileName.replace(".root", "_scatter.pdf")
+        if exclude:
+            pdf = pdf.replace(".pdf", "_exclude.pdf")
+        r.gPad.Print(pdf)
     else:
         print "No histograms matching selection were found."
+
+
+if __name__ == "__main__":
+    go()
