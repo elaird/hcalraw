@@ -29,8 +29,8 @@ def htrSummary(blocks=[], book=None, fedId=None, msg="", adcPlots=False):
             if not channelData["ErrF"]:
                 caps[channelData["CapId0"]] += 1
                 nQie = len(channelData["QIE"].values())
-                book.fill(nQie, "nQieSamples_%d" % fedId, 14, -1.5, 12.5,
-                          title="FED %d; nQieSamples;channels / bin" % fedId)
+                book.fill(nQie, "nQieSamples_%d" % fedId, 12, -0.5, 11.5,
+                          title="FED %d;number of QIE samples;Channels / bin" % fedId)
                 if adcPlots:
                     for adc in channelData["QIE"].values():
                         book.fill(adc, "all_adc", 128, -0.5, 127.5,
@@ -141,7 +141,7 @@ def loop_over_feds(raw, book, adcPlots):
 
         if adcPlots and raw is raw1:
             book.fill(maxAdc, "max_adc", 128, -0.5, 127.5,
-                      title=";max ADC (when ErrF==0); events / bin")
+                      title=";max ADC (when ErrF==0);Events / bin")
 
 
 def fill_adc_vs_adc(mapF1, mapF2, book, x, delta):
@@ -194,7 +194,7 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=
     #    reportFailed(nonMatched12)
 
     for iChannel in range(3):
-        title = ";no. matched fibers (ch%d);events / bin" % iChannel
+        title = ";no. matched fibers (ch%d);Events / bin" % iChannel
         nBins = 400
         bins = (nBins, -0.5, nBins - 0.5)
         book.fill(nPerChannel(matched12.keys(), iChannel),
