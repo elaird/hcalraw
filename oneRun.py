@@ -327,3 +327,8 @@ if __name__ == "__main__":
                               feds=feds,
                               pdf=options.outputFile.replace(".root", ".pdf"),
                               )
+
+    if options.adcVsAdc:
+        import adc_vs_adc
+        for exclude in [False, True]:
+            adc_vs_adc.go(fileName=options.outputFile, exclude=exclude)
