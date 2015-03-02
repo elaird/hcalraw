@@ -104,47 +104,51 @@ def nPerChannel(lst=[], iChannel=None):
 
 
 def loop_over_feds(raw, book, adcPlots):
-    if True:
-        maxAdc = -1
-        for fedId, dct in sorted(raw.iteritems()):
-            if fedId is None:
-                continue
+    okFeds = set()
+    maxAdc = -1
+    for fedId, dct in sorted(raw.iteritems()):
+        if fedId is None:
+            continue
 
-            book.fill(dct["nBytesSW"]/1024.0, "nBytesSW_%d" % fedId, 64, 0, 16,
-                      title="FED %d; kBytes;Events / bin" % fedId)
+        book.fill(dct["nBytesSW"]/1024.0, "nBytesSW_%d" % fedId, 64, 0, 16,
+                  title="FED %d; kBytes;Events / bin" % fedId)
 
-            if not dct["nBytesSW"]:
-                printer.error("Zero bytes read for FED %d" % fedId)
-                continue
+        if not dct["nBytesSW"]:
+            printer.error("Zero bytes read for FED %d" % fedId)
+            continue
 
-            fedIdHw = dct["header"]["FEDid"]
-            if fedId != fedIdHw:
-                printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
-                continue
+        fedIdHw = dct["header"]["FEDid"]
+        if fedId != fedIdHw:
+            printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
+            continue
 
-            if singleFedPlots(fedId=fedId,
-                              d=dct,
-                              book=book,
-                              adcPlots=adcPlots):
-                return
-            if (None in raw) and raw[None]["patternMode"]["active"]:
-                if not raw[fedId]["header"]["utca"]:
-                    checkHtrModules(fedId=fedId, htrBlocks=raw[fedId]["htrBlocks"])
+        if singleFedPlots(fedId=fedId,
+                          d=dct,
+                          book=book,
+                          adcPlots=adcPlots):
+            return
 
-            if adcPlots:
-                for block in dct["htrBlocks"].values():
-                    for channelData in block["channelData"].values():
-                        if not channelData["ErrF"]:
-                            for adc in channelData["QIE"].values():
-                                if maxAdc < adc:
-                                    maxAdc = adc
+        okFeds.add(fedId)
+        if (None in raw) and raw[None]["patternMode"]["active"]:
+            if not raw[fedId]["header"]["utca"]:
+                checkHtrModules(fedId=fedId, htrBlocks=raw[fedId]["htrBlocks"])
 
-        if adcPlots and raw is raw1:
-            book.fill(maxAdc, "max_adc", 128, -0.5, 127.5,
-                      title=";max ADC (when ErrF==0);Events / bin")
+        if adcPlots:
+            for block in dct["htrBlocks"].values():
+                for channelData in block["channelData"].values():
+                    if not channelData["ErrF"]:
+                        for adc in channelData["QIE"].values():
+                            if maxAdc < adc:
+                                maxAdc = adc
+
+    if adcPlots and raw is raw1:
+        book.fill(maxAdc, "max_adc", 128, -0.5, 127.5,
+                  title=";max ADC (when ErrF==0);Events / bin")
+
+    return okFeds
 
 
-def fill_adc_vs_adc(mapF1, mapF2, book, x, delta):
+def fill_adc_vs_adc(mapF1, mapF2, book):
     for coords1, samples1  in mapF1.iteritems():
         crate1, slot1, top1, fiber1, fibCh = coords1
         if 2 <= slot1 <= 7:
@@ -170,7 +174,7 @@ def fill_adc_vs_adc(mapF1, mapF2, book, x, delta):
         for i, s1 in enumerate(samples1):
             s2 = samples2[i]
             book.fill((s1, s2),
-                      "adc_vs_adc_%sOK%1d_cr%02d_sl%02d_rx%1d" % (x, not delta, crate2, slot2, 12 <= fiber2),
+                      "adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, 12 <= fiber2),
                       (129, 129),
                       (-1.5, -1.5),
                       (127.5, 127.5),
@@ -178,8 +182,9 @@ def fill_adc_vs_adc(mapF1, mapF2, book, x, delta):
 
 
 def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=False, adcVsAdc=False):
+    okFeds = set()
     for raw in [raw1, raw2]:
-        loop_over_feds(raw, book, adcPlots)
+        okFeds = okFeds.union(loop_over_feds(raw, book, adcPlots))
 
     mapF1, mapB1 = dataMap(raw1, skipErrF=skipErrF, skipAllZero=skipAllZero)
     mapF2, mapB2 = dataMap(raw2, skipErrF=skipErrF, skipAllZero=skipAllZero)
@@ -220,12 +225,13 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=
                           "FED %s - FED %s" % (fed1, fed2),
                           "Events / bin",
                           ])
-        delta = raw1[fed1]["header"][x] - raw2[fed2]["header"][x]
-        book.fill(delta, "delta"+x, 11, -5.5, 5.5, title=title)
+        if fed1 in okFeds and fed2 in okFeds:
+            delta = raw1[fed1]["header"][x] - raw2[fed2]["header"][x]
+            book.fill(delta, "delta"+x, 11, -5.5, 5.5, title=title)
+
 
     if adcVsAdc:
-        # WARNING: pass last x and delta from loop above
-        fill_adc_vs_adc(mapF1, mapF2, book, x, delta)
+        fill_adc_vs_adc(mapF1, mapF2, book)
 
 
 def coordString(crate, slot, tb, fiber, channel):
