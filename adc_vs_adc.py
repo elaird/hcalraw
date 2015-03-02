@@ -3,13 +3,11 @@
 import ROOT as r
 
 
-def entitle(hSum, skip_rxs, skip_evnOKs):
+def entitle(hSum, skip_rxs):
     if hSum:
         title = []
         if skip_rxs:
             title.append("PPOD RXes" +  ",".join(["%2d/%1d" % (sl, rx) for (cr, sl, rx) in skip_rxs]))
-        if skip_evnOKs == [0]:
-            title.append("mismatched EvN")
 
         if not title:
             hSum.SetTitle("all channels")
@@ -17,7 +15,7 @@ def entitle(hSum, skip_rxs, skip_evnOKs):
             hSum.SetTitle("excluding: %s " % "#semicolon ".join(title))
 
 
-def histo(fileName="", skip_rxs=[], skip_evnOKs=[]):
+def histo(fileName="", skip_rxs=[]):
     hSum = None
     f = r.TFile(fileName)
     for cr in [22]:
@@ -26,21 +24,17 @@ def histo(fileName="", skip_rxs=[], skip_evnOKs=[]):
                 if (cr, sl, rx) in skip_rxs:
                     continue
 
-                for evnOK in range(2):
-                    if evnOK in skip_evnOKs:
-                        continue
+                h = f.Get("adc_vs_adc_cr%02d_sl%02d_rx%1d" % (cr, sl, rx))
+                if not h:
+                    continue
 
-                    h = f.Get("adc_vs_adc_EvNOK%1d_cr%02d_sl%02d_rx%1d" % (evnOK, cr, sl, rx))
-                    if not h:
-                        continue
+                if hSum is None:
+                    hSum = h.Clone("adc_vs_adc")
+                    hSum.Reset()
+                    hSum.SetDirectory(0)
+                hSum.Add(h)
 
-                    if hSum is None:
-                        hSum = h.Clone("adc_vs_adc")
-                        hSum.Reset()
-                        hSum.SetDirectory(0)
-                    hSum.Add(h)
-
-    entitle(hSum, skip_rxs, skip_evnOKs)
+    entitle(hSum, skip_rxs)
     return hSum
 
 
@@ -76,9 +70,7 @@ def go(fileName="output/latest.root", exclude=None):
                 (22, 11, 0),
                 ] if exclude else []
 
-    skip_evnOKs = []
-
-    h = histo(fileName, skip_rxs=skip_rxs, skip_evnOKs=skip_evnOKs)
+    h = histo(fileName, skip_rxs=skip_rxs)
 
     if h:
         can = r.TCanvas("canvas", "canvas", 1600, 1600)
