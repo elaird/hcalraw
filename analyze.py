@@ -187,7 +187,8 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
                 continue
             kargs["raw2"] = collectedRaw(tree=treeI, specs=inner)
 
-        compare.compare(**kargs)
+        if outer["unpack"]:
+            compare.compare(**kargs)
 
     f.Close()
     if inner:
@@ -196,10 +197,9 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
 
 def collectedRaw(tree=None, specs={}):
     raw = {}
-    kargs = {"patternMode": specs["patternMode"],
-             "warnSkip16": specs["warnSkip16"],
-             "dump": specs["dump"],
-             }
+    kargs = {}
+    for item in ["patternMode", "warnSkip16", "dump", "unpack"]:
+        kargs[item] = specs[item]
 
     for fedId in specs["fedIds"]:
         if "branch" in specs:
@@ -243,8 +243,8 @@ def w64(fedData, jWord64, nBytesPer):
 
 
 # for format documentation, see decode.py
-def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
-             skipWords64=[], patternMode={}, dump=-99):
+def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
+             warnSkip16=True, skipWords64=[], patternMode={}, dump=-99):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
@@ -272,6 +272,9 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, warnSkip16=True,
             if not iWord64:
                 print "#iw64 w64"
             print "%5d" % iWord64, "%016x" % word64
+
+        if not unpack:
+            continue
 
         if iWord64 < header["iWordPayload0"]:
             decode.header(header, iWord64, word64)
@@ -506,6 +509,7 @@ def oneRun(file1="",
            mapOptions={},
            compareOptions={},
            printOptions={},
+           unpack=True,
            nEvents=None,
            nEventsSkip=None,
            outputFile="",
@@ -517,6 +521,7 @@ def oneRun(file1="",
     common = {"nEventsMax": nEvents,
               "nEventsSkip": nEventsSkip,
               "patternMode": patternMode,
+              "unpack": unpack,
               }
     common.update(printOptions)
 
