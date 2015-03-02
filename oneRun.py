@@ -48,6 +48,11 @@ def opts():
                       default=False,
                       action="store_true",
                       help="Histogram ADC values.")
+    common.add_option("--no-unpack",
+                      dest="noUnpack",
+                      default=False,
+                      action="store_true",
+                      help="loop over raw data, but do not unpack it")
     parser.add_option_group(common)
 
     printing = optparse.OptionGroup(parser, "Options for printing to stdout")
@@ -312,6 +317,7 @@ if __name__ == "__main__":
                        outputFile=options.outputFile,
                        printOptions=printOptions,
                        compareOptions=compareOptions,
+                       unpack=not options.noUnpack,
                        )
 
     if options.profile:
