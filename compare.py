@@ -213,19 +213,19 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=
     noGood = [[], [None]]
     if raw1.keys() in noGood or raw2.keys() in noGood:
         return
-    fed1 = filter(lambda x: x is not None, raw1.keys())[0]
-    fed2 = filter(lambda x: x is not None, raw2.keys())[0]
+    fed1 = filter(lambda x: x is not None, sorted(raw1.keys()))[0]
+    fed2 = filter(lambda x: x is not None, sorted(raw2.keys()))[0]
 
     utca1 = raw1[fed1]["header"]["utca"]
     utca2 = raw2[fed2]["header"]["utca"]
     bcnDelta = configuration.bcnDelta(utca1) - configuration.bcnDelta(utca2)
 
-    for x in ["BcN", "OrN", "EvN"]:
-        title = ";".join([x+("%d" % bcnDelta if (x == "BcN") else ""),
-                          "FED %s - FED %s" % (fed1, fed2),
-                          "Events / bin",
-                          ])
-        if fed1 in okFeds and fed2 in okFeds:
+    if (fed1 in okFeds) and (fed2 in okFeds):
+        for x in ["BcN", "OrN", "EvN"]:
+            title = ";".join([x+("%d" % bcnDelta if (x == "BcN") else ""),
+                              "FED %s - FED %s" % (fed1, fed2),
+                              "Events / bin",
+                              ])
             delta = raw1[fed1]["header"][x] - raw2[fed2]["header"][x]
             book.fill(delta, "delta"+x, 11, -5.5, 5.5, title=title)
 
