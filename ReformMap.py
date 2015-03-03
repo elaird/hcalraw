@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import os
 #Generates .txt file in formatt same with oneRun.py from a list of RBXs
 
 def WordStrip(iStr="", index=""): #iStr: input string, index: the index-th word in the string that you're looking for
@@ -101,6 +101,8 @@ def ReformMap(iMapfile = "", iListfile = "", ofile = "", oFileOpenMode = "w"):
         htr_fib = WordSpace(htr_fib,2)
     
         if RBXname in RBXnameRange:
+            if 'u' in fedid:
+                continue
             if rm in rmRange and fi_ch == "0": #save only once per 3 channels
                 if len(RBXname)==5: outline = fedid + " " + spigo + " " + htr_fib + ":  " + RBXname + "  " + rm + " " + rm_fib + "\n"
                 else: outline = fedid + " " + spigo + " " + htr_fib + ":  " + RBXname + " " + rm + " " + rm_fib + "\n"
@@ -110,7 +112,13 @@ def ReformMap(iMapfile = "", iListfile = "", ofile = "", oFileOpenMode = "w"):
 
 version = 'G'
 dir = "references"
-ReformMap(iMapfile = "%s/HCALmapHO_%s.txt" %(dir, version), iListfile = "%s/CCM_numbers.txt" %dir, ofile = "all_Map_%s.txt" %version) 
-ReformMap(iMapfile = "%s/HCALmapHBEF_B.txt" %dir, iListfile = "%s/CCM_numbers.txt" %dir, ofile = "all_Map_%s.txt" %version, oFileOpenMode = "a") 
-ReformMap(iMapfile = "%s/HCALmapCALIB_A.txt" %dir, iListfile = "%s/CCM_numbers.txt" %dir, ofile = "all_Map_%s.txt" %version, oFileOpenMode = "a")
-ReformMap(iMapfile = "%s/HCALmapHBEF_E_uHTR.txt" %dir, iListfile = "%s/CCM_numbers.txt" %dir, ofile = "all_Map_%s.txt" %version, oFileOpenMode = "a")
+
+oFileName = "ref_%s.txt" %version
+ReformMap(iMapfile = "%s/HCALmapHO_%s.txt" %(dir, version), iListfile = "%s/CCM_numbers.txt" %dir, ofile = oFileName) 
+ReformMap(iMapfile = "%s/HCALmapHBEF_B.txt" %dir, iListfile = "%s/CCM_numbers.txt" %dir, ofile = oFileName, oFileOpenMode = "a") 
+ReformMap(iMapfile = "%s/HCALmapCALIB_A.txt" %dir, iListfile = "%s/CCM_numbers.txt" %dir, ofile = oFileName, oFileOpenMode = "a")
+ReformMap(iMapfile = "%s/HCALmapHBEF_E_uHTR.txt" %dir, iListfile = "%s/CCM_numbers.txt" %dir, ofile = oFileName, oFileOpenMode = "a")
+
+#sort
+os.system("sort %s > sorted_%s" %(oFileName, oFileName)) 
+print "sorted reference file saved: sorted_%s" %oFileName
