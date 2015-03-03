@@ -26,11 +26,11 @@ def htrSummary(blocks=[], book=None, fedId=None, msg="", adcPlots=False):
 
         for channelData in block["channelData"].values():
             ErrF[channelData["ErrF"]] += 1
+            nQie = len(channelData["QIE"].values())
+            book.fill(nQie, "nQieSamples_%d" % fedId, 14, -0.5, 13.5,
+                      title="FED %d;number of QIE samples;Channels / bin" % fedId)
             if not channelData["ErrF"]:
                 caps[channelData["CapId0"]] += 1
-                nQie = len(channelData["QIE"].values())
-                book.fill(nQie, "nQieSamples_%d" % fedId, 12, -0.5, 11.5,
-                          title="FED %d;number of QIE samples;Channels / bin" % fedId)
                 if adcPlots:
                     for adc in channelData["QIE"].values():
                         book.fill(adc, "all_adc", 128, -0.5, 127.5,
