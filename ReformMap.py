@@ -121,4 +121,6 @@ ReformMap(iMapfile = "%s/HCALmapHBEF_E_uHTR.txt" %dir, iListfile = "%s/CCM_numbe
 
 #sort
 os.system("sort %s > sorted_%s" %(oFileName, oFileName)) 
+os.system("rm %s" %oFileName) 
+
 print "sorted reference file saved: sorted_%s" %oFileName
