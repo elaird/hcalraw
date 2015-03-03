@@ -77,19 +77,7 @@ def opts():
                         dest="crateslots",
                         default=None,
                         metavar="D",
-                        help="Whitelist of (100*crate)+slot to dump.")
-    uscSummer2014 = "917,918,2911,2912"
-    printing.add_option("--usc-summer2014",
-                        dest="uscSummer2014",
-                        default=False,
-                        action="store_true",
-                        help="--crateslots=%s" % uscSummer2014)
-    bat904Crates2014 = "2,3012"
-    printing.add_option("--bat904-2014",
-                        dest="bat904Crates2014",
-                        default=False,
-                        action="store_true",
-                        help="--crateslots=%s" % bat904Crates2014)
+                        help="list of (100*crate)+slot to dump, e.g. 917,2911")
     printing.add_option("--no-warn-skip16",
                         dest="noWarnSkip16",
                         default=False,
@@ -145,11 +133,6 @@ def opts():
     parser.add_option_group(match)
 
     matchCh = optparse.OptionGroup(parser, "Options for matching channels across events")
-    matchCh.add_option("--shiftFibCh2",
-                     dest="shiftFibCh2",
-                     default=False,
-                     action="store_true",
-                     help="Shift fibCh=2 by 1 TS to compensate for uHTR f/w bug.")
     matchCh.add_option("--skipErrF",
                      dest="skipErrF",
                      default="1,3",
@@ -165,7 +148,7 @@ def opts():
                        dest="adcVsAdc",
                        default=False,
                        action="store_true",
-                       help="Make a scatter plot of uTCA vs. VME ADC values.")
+                       help="Make a scatter plot of FEDS2 vs. FEDS1 ADC values.")
     parser.add_option_group(matchCh)
 
     patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
@@ -218,19 +201,6 @@ def opts():
         options.file2 = options.file1
         options.identityMap = True
 
-    if all([options.uscSummer2014, options.bat904Crates2014]):
-        sys.exit("Use at most one of --usc-summer2014, --bat904-2014")
-
-    if options.uscSummer2014:
-        if options.crateslots is not None:
-            print "--usc-summer2014: forcing --crateslots=%s" % uscSummer2014
-        options.crateslots = uscSummer2014
-
-    if options.bat904Crates2014:
-        if options.crateslots is not None:
-            print "--bat904-2014: forcing --crateslots=%s" % bat904Crates2014
-        options.crateslots = bat904Crates2014
-
     return options
 
 
@@ -275,8 +245,9 @@ if __name__ == "__main__":
     import printer
     import sys
     import cProfile
+    import graphs
+    import adc_vs_adc
 
-    configuration.__shiftFibCh2 = options.shiftFibCh2
     configuration.__utcaBcnDelta = integer(options.utcaBcnDelta)
     configuration.__compressedPatterns = options.compressed
     configuration.__asciifyPatterns = not options.noAsciify
@@ -325,14 +296,11 @@ if __name__ == "__main__":
     else:
         go()
 
-
-    import graphs
     graphs.makeSummaryPdf(inputFiles=[options.outputFile],
                           feds=(fedList(options.feds1) + fedList(options.feds2))[:3],
                           pdf=options.outputFile.replace(".root", ".pdf"),
                           )
 
     if options.adcVsAdc:
-        import adc_vs_adc
         for exclude in [False, True]:
             adc_vs_adc.go(fileName=options.outputFile, exclude=exclude)
