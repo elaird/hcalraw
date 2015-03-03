@@ -141,7 +141,12 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
         pad1.cd()
         adjustPad()
         xMin, xMax = xMin_xMax(graph)
-        tenPercent = 0.1 * (xMax - xMin)
+        delta = xMax - xMin
+        if delta:
+            tenPercent = 0.1 * delta
+        else:
+            tenPercent = 0.1/60.0  # 1/10 second
+
         null = r.TH2D("null", ";time (minutes)",
                       1, xMin - tenPercent, xMax + tenPercent,
                       3, 0.5, 3.5)
@@ -153,7 +158,7 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
         keep += [graph, null]
 
 
-    #EvN, OrN, BcN agreement (989 - 714)
+    #EvN, OrN, BcN agreement
     pad2.cd(1)
     adjustPad(logY=True)
 
