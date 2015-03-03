@@ -1,4 +1,5 @@
 import math
+import printer
 import utils
 r = utils.ROOT()
 
@@ -40,7 +41,11 @@ def xMin_xMax(graph=None):
     """assumes that graph is sorted"""
     N = graph.GetN()
     X = graph.GetX()
-    return X[0], X[N-1]
+    if 1 <= N:
+        return X[0], X[N-1]
+    else:
+        printer.error("graph contains zero points.")
+        return 0.0, 0.0
 
 
 def magnify(h, factor=1.0):
