@@ -1,0 +1,2 @@
+1) In ReformMap.py, choose the right maps and location
+2) ./ReformMap.py
