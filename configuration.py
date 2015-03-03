@@ -4,7 +4,6 @@ import re
 __pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 
 # these are overwritten by oneRun.py
-__shiftFibCh2 = False
 __utcaBcnDelta = None
 __compressedPatterns = None
 __asciifyPatterns = None
@@ -61,7 +60,7 @@ def fedMap():
     return d
 
 
-def matchRange_v1(fedId=None, slot=None, fibCh=None, utca=None):
+def matchRange_v1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=False):
     """local runs; global runs before Feb. 2015"""
 
     # exceptions for Jan. 2013 slice-test (HF)
@@ -71,7 +70,7 @@ def matchRange_v1(fedId=None, slot=None, fibCh=None, utca=None):
         return range(9)
 
     # 1-TS shift on uHTR fibCh=2 until front f/w B_31
-    if __shiftFibCh2 and fibCh == 2:
+    if shiftFibCh2 and fibCh == 2:
         if utca:
             return range(9)
         else:
