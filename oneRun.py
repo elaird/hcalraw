@@ -326,13 +326,11 @@ if __name__ == "__main__":
         go()
 
 
-    feds = fedList(options.feds1) + fedList(options.feds2)
-    if len(feds) <= 3:
-        import graphs
-        graphs.makeSummaryPdf(inputFiles=[options.outputFile],
-                              feds=feds,
-                              pdf=options.outputFile.replace(".root", ".pdf"),
-                              )
+    import graphs
+    graphs.makeSummaryPdf(inputFiles=[options.outputFile],
+                          feds=(fedList(options.feds1) + fedList(options.feds2))[:3],
+                          pdf=options.outputFile.replace(".root", ".pdf"),
+                          )
 
     if options.adcVsAdc:
         import adc_vs_adc
