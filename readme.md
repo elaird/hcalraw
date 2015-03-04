@@ -20,9 +20,9 @@ LS1=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/LS1
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --skipErrF=3
 
 # analyze FE pattern runs
-./oneRun.py --file1=$LS1/USC_231834.root --feds1=uHF  --nevents=1 --patterns --compressed | ./diff.py --ref=data/uref.txt
-./oneRun.py --file1=$LS1/USC_235576.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref.txt
-./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_Mar_2_2015.txt
+./oneRun.py --file1=$LS1/USC_231834.root --feds1=uHF  --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_utca_G.txt
+./oneRun.py --file1=$LS1/USC_235576.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_2014.txt
+./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_vme_G.txt
 
 # analyze global runs
 ./oneRun.py --file1=root://eoscms.cern.ch//store/data/Commissioning2015/Cosmics/RAW/v1/000/234/193/00000/FEAD7C2C-4CB4-E411-9791-02163E011890.root --feds1=718,719 --feds2=1118 --progress
