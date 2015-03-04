@@ -95,7 +95,7 @@ def go(fileName="output/latest.root", exclude=None, feds1=[], feds2=[]):
             pdf = pdf.replace(".pdf", "_exclude.pdf")
         r.gPad.Print(pdf)
     else:
-        print "No histograms matching selection were found."
+        print "No histograms matching selection were found (consider swapping --feds1 and --feds2)."
 
 
 if __name__ == "__main__":
