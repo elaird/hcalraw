@@ -63,20 +63,20 @@ def fedMap():
 
 
 def rbxes():
-    hbef = range(1, 19)
-    ho   = range(1, 13)
+    hbe  = range(1, 19)
+    hfo  = range(1, 13)
     ho12 = range(2, 14, 2)
 
     out = []
-    for subdet, lst in [("HBM",  hbef),
-                        ("HBP",  hbef),
-                        ("HEM",  hbef),
-                        ("HEP",  hbef),
-                        ("HFM",  hbef),
-                        ("HFP",  hbef),
+    for subdet, lst in [("HBM",  hbe),
+                        ("HBP",  hbe),
+                        ("HEM",  hbe),
+                        ("HEP",  hbe),
+                        ("HFM",  hfo),
+                        ("HFP",  hfo),
                         ("HO2M", ho12),
                         ("HO1M", ho12),
-                        ("HO0",  ho  ),
+                        ("HO0",  hfo ),
                         ("HO1P", ho12),
                         ("HO2P", ho12),
                         ]:
