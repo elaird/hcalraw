@@ -133,17 +133,21 @@ def opts():
     parser.add_option_group(match)
 
     matchCh = optparse.OptionGroup(parser, "Options for matching channels across events")
+    matchCh.add_option("--match",
+                       dest="match",
+                       default="v2",
+                       metavar="s",
+                       help="choose configuration.matchRange_s (default is v2)")
     matchCh.add_option("--skipErrF",
-                     dest="skipErrF",
-                     default="1,3",
-                     metavar="s",
+                       dest="skipErrF",
+                       default="1,3",
+                       metavar="s",
                      help="Skip channels with these ErrF values (default is 1,3).")
     matchCh.add_option("--skipAllZero",
-                     dest="skipAllZero",
-                     default=False,
-                     action="store_true",
+                       dest="skipAllZero",
+                       default=False,
+                       action="store_true",
                      help="Skip channels with all QIE samples = 0.")
-
     matchCh.add_option("--adc-vs-adc",
                        dest="adcVsAdc",
                        default=False,
@@ -248,6 +252,7 @@ if __name__ == "__main__":
     import graphs
     import adc_vs_adc
 
+    configuration.matchRange = getattr(configuration, "matchRange_%s" % options.match)
     configuration.__utcaBcnDelta = integer(options.utcaBcnDelta)
     configuration.__compressedPatterns = options.compressed
     configuration.__asciifyPatterns = not options.noAsciify

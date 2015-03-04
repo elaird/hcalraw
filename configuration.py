@@ -4,10 +4,12 @@ import re
 __pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 
 # these are overwritten by oneRun.py
+matchRange = lambda x, **_: []
 __utcaBcnDelta = None
 __compressedPatterns = None
 __asciifyPatterns = None
 __regMatchPatterns = None
+
 
 def patternString(codes=[]):
     if not any(codes):
@@ -87,9 +89,6 @@ def matchRange_v2(fedId=None, slot=None, fibCh=None, utca=None):
         return range(2, 8)
     else:
         return range(6)
-
-
-matchRange = matchRange_v2
 
 
 def fiberMap(fedId=None):
