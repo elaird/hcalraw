@@ -110,17 +110,30 @@ def ReformMap(iMapfile = "", iListfile = "", ofile = "", oFileOpenMode = "w"):
 
     output.close()   
 
-version = 'G'
-dir = "references"
 
-oFileName = "ref_%s.txt" %version
-ReformMap(iMapfile = "%s/HCALmapHO_%s.txt" %(dir, version), iListfile = "%s/CCM_numbers.txt" %dir, ofile = oFileName) 
-ReformMap(iMapfile = "%s/HCALmapHBEF_B.txt" %dir, iListfile = "%s/CCM_numbers.txt" %dir, ofile = oFileName, oFileOpenMode = "a") 
-ReformMap(iMapfile = "%s/HCALmapCALIB_A.txt" %dir, iListfile = "%s/CCM_numbers.txt" %dir, ofile = oFileName, oFileOpenMode = "a")
-ReformMap(iMapfile = "%s/HCALmapHBEF_E_uHTR.txt" %dir, iListfile = "%s/CCM_numbers.txt" %dir, ofile = oFileName, oFileOpenMode = "a")
+if __name__ == "__main__":
+    version = 'G'
+    dir = "/afs/cern.ch/cms/HCAL/document/Mapping/Hua/2015-mar-3/"
 
-#sort
-os.system("sort %s > sorted_%s" %(oFileName, oFileName)) 
-os.system("rm %s" %oFileName) 
+    iListfile = "data/CCM_numbers.txt"
+    oFileName = "data/ref_%s.txt" %version
 
-print "sorted reference file saved: sorted_%s" %oFileName
+    for i, stem in enumerate(["HCALmapHO", "HCALmapHBEF", "HCALmapCALIB", "HCALmapHBEF_uHTR"]):
+        if stem.endswith("uHTR"):
+            fileName = stem.replace("uHTR", "%s_uHTR.txt" % version)
+        else:
+            fileName = "%s_%s.txt" % (stem, version)
+
+        fileName = "%s/%s" % (dir, fileName)
+        print "Reading", fileName
+
+        if i:
+            ReformMap(iMapfile=fileName, iListfile=iListfile, ofile=oFileName, oFileOpenMode="a")
+        else:
+            ReformMap(iMapfile=fileName, iListfile=iListfile, ofile=oFileName)
+
+    # sort
+    sName = "%s_sorted" % oFileName
+    os.system("sort -g %s > %s" % (oFileName, sName))
+    os.system("mv %s %s" % (sName, oFileName))
+    print "sorted reference file saved: %s" % oFileName
