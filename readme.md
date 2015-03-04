@@ -1,35 +1,39 @@
 ####License
 [GPLv3](http://www.gnu.org/licenses/gpl.html)
 
-####Dependencies
-* python (2.x, x>=6)
-* ROOT (>=5.32)
-* CMSSW is required to analyze files written by the CMS central DAQ; whereas
-* CMSSW is *not* required to analyze data from HCAL local runs
-
 ####Quick Start
 ```bash
 ssh lxplus.cern.ch
 git clone https://github.com/elaird/hcalraw.git
 cd hcalraw
 source env/slc6-cmssw.sh
+source /afs/cern.ch/project/eos/installation/cms/etc/setup.sh
+EOS_LS1=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/LS1
+
 ./oneRun.py --help
 ./oneRun.py --file1=data/B904_Integration_000050.root --feds1=702,931 --nevents=1 --dump=4
+
 # compare payloads of different sets of FEDs, within one file
 ./oneRun.py --file1=data/USC_234155.root --feds1=uHF --feds2=HF
+
 # compare payloads of different sets of FEDs, across two files
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931
 ./oneRun.py --file1=~/public/d1_utca/209151_hltSkim.root --feds1=714 --file2=~/public/d1_utca/usc/USC_209150.root --feds2=989 --nevents=3
-# analyze pattern runs if file is local
-./oneRun.py --file1=data/USC_231834.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py
-./oneRun.py --file1=data/USC_231834.root --feds1=uHF --nevents=1 --patterns --compressed | ./diff.py --ref=data/uref.txt
-# analyze pattern runs if file is on eos
-source /afs/cern.ch/project/eos/installation/cms/etc/setup.sh
-./oneRun.py --file1=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/LS1/USC_236631.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_Mar_2_2015.txt
+
+# analyze FE pattern runs
+./oneRun.py --file1=$EOS_LS1/USC_235576.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref.txt
+./oneRun.py --file1=$EOS_LS1/USC_235576.root --feds1=uHF  --nevents=1 --patterns --compressed | ./diff.py --ref=data/uref.txt
+./oneRun.py --file1=$EOS_LS1/USC_236631.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_Mar_2_2015.txt
+
 # analyze global runs
-source /afs/cern.ch/project/eos/installation/cms/etc/setup.sh
-./oneRun.py --file1=root://eoscms.cern.ch//store/data/Commissioning2015/Cosmics/RAW/v1/000/234/193/00000/FEAD7C2C-4CB4-E411-9791-02163E011890.root --feds1=uHF --feds2=HF --progress
+./oneRun.py --file1=root://eoscms.cern.ch//store/data/Commissioning2015/Cosmics/RAW/v1/000/234/193/00000/FEAD7C2C-4CB4-E411-9791-02163E011890.root --feds1=HF --feds2=uHF --progress
 ```
+
+####Dependencies
+* python (2.x, x>=6)
+* ROOT (>=5.32)
+* CMSSW is required to analyze files written by the CMS central DAQ; whereas
+* CMSSW is *not* required to analyze data from HCAL local runs
 
 ####Environment (SLC6/AFS)
 * `env/slc6-cmssw.sh` sets up a CMSSW environment
