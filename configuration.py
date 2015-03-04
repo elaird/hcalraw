@@ -62,8 +62,11 @@ def fedMap():
     return d
 
 
-def matchRange_v1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=False):
+def matchRange_LS1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=None):
+    """DO NOT USE THIS ONE; USE EITHER v0 or v1 BELOW"""
     """local runs; global runs before Feb. 2015"""
+
+    assert type(shiftFibCh2) is bool
 
     # exceptions for Jan. 2013 slice-test (HF)
     if fedId == 990 or (fedId == 989 and 5 <= slot):
@@ -80,6 +83,14 @@ def matchRange_v1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=Fals
 
     # ok
     return range(10)
+
+
+def matchRange_v0(fedId=None, slot=None, fibCh=None, utca=None):
+    return matchRange_LS1(fedId, slot, fibCh, utca, True)
+
+
+def matchRange_v1(fedId=None, slot=None, fibCh=None, utca=None):
+    return matchRange_LS1(fedId, slot, fibCh, utca, False)
 
 
 def matchRange_v2(fedId=None, slot=None, fibCh=None, utca=None):
