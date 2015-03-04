@@ -25,7 +25,7 @@ LS1=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/LS1
 ./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_Mar_2_2015.txt
 
 # analyze global runs
-./oneRun.py --file1=root://eoscms.cern.ch//store/data/Commissioning2015/Cosmics/RAW/v1/000/234/193/00000/FEAD7C2C-4CB4-E411-9791-02163E011890.root --feds1=HF --feds2=uHF --progress
+./oneRun.py --file1=root://eoscms.cern.ch//store/data/Commissioning2015/Cosmics/RAW/v1/000/234/193/00000/FEAD7C2C-4CB4-E411-9791-02163E011890.root --feds1=718,719 --feds2=1118 --progress
 ```
 
 ####License
