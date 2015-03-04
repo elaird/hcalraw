@@ -14,10 +14,10 @@ LS1=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/LS1
 ./oneRun.py --file1=data/B904_Integration_000050.root --feds1=702,931 --nevents=1 --dump=4
 
 # compare payloads of different sets of FEDs, within one file
-./oneRun.py --file1=$LS1/USC_234155.root --feds1=uHF --feds2=HF --progress --nevents=20 --match=v1 --dump=0
+./oneRun.py --file1=$LS1/USC_234155.root --feds1=HF --feds2=uHF --progress --nevents=20 --match=v1 --dump=0 --adc-vs-adc
 
 # compare payloads of different sets of FEDs, across two files
-./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v1 --skipErrF=3
+./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --skipErrF=3
 
 # analyze FE pattern runs
 ./oneRun.py --file1=$LS1/USC_231834.root --feds1=uHF  --nevents=1 --patterns --compressed | ./diff.py --ref=data/uref.txt
