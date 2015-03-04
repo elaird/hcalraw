@@ -101,8 +101,6 @@ def ReformMap(iMapfile = "", iListfile = "", ofile = "", oFileOpenMode = "w"):
         htr_fib = WordSpace(htr_fib,2)
     
         if RBXname in RBXnameRange:
-            if 'u' in fedid:
-                continue
             if rm in rmRange and fi_ch == "0": #save only once per 3 channels
                 if len(RBXname)==5: outline = fedid + " " + spigo + " " + htr_fib + ":  " + RBXname + "  " + rm + " " + rm_fib + "\n"
                 else: outline = fedid + " " + spigo + " " + htr_fib + ":  " + RBXname + " " + rm + " " + rm_fib + "\n"
@@ -113,27 +111,30 @@ def ReformMap(iMapfile = "", iListfile = "", ofile = "", oFileOpenMode = "w"):
 
 if __name__ == "__main__":
     version = 'G'
-    dir = "/afs/cern.ch/cms/HCAL/document/Mapping/Hua/2015-mar-3/"
+    dir = "/afs/cern.ch/cms/HCAL/document/Mapping/Hua/2015-mar-4/"
 
     iListfile = "data/CCM_numbers.txt"
-    oFileName = "data/ref_%s.txt" %version
 
-    for i, stem in enumerate(["HCALmapHO", "HCALmapHBEF", "HCALmapCALIB", "HCALmapHBEF_uHTR"]):
-        if stem.endswith("uHTR"):
-            fileName = stem.replace("uHTR", "%s_uHTR.txt" % version)
-        else:
-            fileName = "%s_%s.txt" % (stem, version)
+    for gen, stems in [("vme", ["HCALmapHO", "HCALmapHBEF", "HCALmapCALIB"]),
+                       ("utca", ["HCALmapHBEF_uHTR"]),
+                       ]:
+        oFileName = "data/ref_%s_%s.txt" % (gen, version)
+        for i, stem in enumerate(stems):
+            if stem.endswith("uHTR"):
+                fileName = stem.replace("uHTR", "%s_uHTR.txt" % version)
+            else:
+                fileName = "%s_%s.txt" % (stem, version)
 
-        fileName = "%s/%s" % (dir, fileName)
-        print "Reading", fileName
+            fileName = "%s/%s" % (dir, fileName)
+            print "Reading", fileName
 
-        if i:
-            ReformMap(iMapfile=fileName, iListfile=iListfile, ofile=oFileName, oFileOpenMode="a")
-        else:
-            ReformMap(iMapfile=fileName, iListfile=iListfile, ofile=oFileName)
+            if i:
+                ReformMap(iMapfile=fileName, iListfile=iListfile, ofile=oFileName, oFileOpenMode="a")
+            else:
+                ReformMap(iMapfile=fileName, iListfile=iListfile, ofile=oFileName)
 
-    # sort
-    sName = "%s_sorted" % oFileName
-    os.system("sort -g %s > %s" % (oFileName, sName))
-    os.system("mv %s %s" % (sName, oFileName))
-    print "sorted reference file saved: %s" % oFileName
+        # sort
+        sName = "%s_sorted" % oFileName
+        os.system("sort -g %s > %s" % (oFileName, sName))
+        os.system("mv %s %s" % (sName, oFileName))
+        print "sorted reference file saved: %s" % oFileName
