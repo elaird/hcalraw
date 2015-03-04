@@ -1,6 +1,9 @@
 #!/usr/bin/env python
+
 import os
-#Generates .txt file in formatt same with oneRun.py from a list of RBXs
+import configuration
+
+#Generates .txt file in format same with oneRun.py from a list of RBXs
 
 def WordStrip(iStr="", index=""): #iStr: input string, index: the index-th word in the string that you're looking for
     nWord = 0
@@ -62,19 +65,13 @@ def getKeyPosition(mapFileName = ""):
         
         
 
-def ReformMap(iMapfile = "", iListfile = "", ofile = "", oFileOpenMode = "w"):
+def ReformMap(iMapfile = "", ofile = "", oFileOpenMode = "w"):
 
     lines = open(iMapfile, "r").readlines() #opens & read the file
     output = open(ofile, oFileOpenMode)  #opens & write the file
 
-    ListLines = open(iListfile, "r").readlines()
+    RBXnameRange = configuration.rbxes()
 
-    subdet = []
-    for i in range(0, len(ListLines)): #store subdet names
-        current_line = ListLines[i]
-        subdet.append(current_line[0:current_line.find(",")])
-
-    RBXnameRange = subdet
     rmRange = ['1','2','3','4']
     if "CALIB" in iMapfile: rmRange = ['4','5']
     keyPosition = getKeyPosition(iMapfile)
@@ -113,8 +110,6 @@ if __name__ == "__main__":
     version = 'G'
     dir = "/afs/cern.ch/cms/HCAL/document/Mapping/Hua/2015-mar-4/"
 
-    iListfile = "data/CCM_numbers.txt"
-
     for gen, stems in [("vme", ["HCALmapHO", "HCALmapHBEF", "HCALmapCALIB"]),
                        ("utca", ["HCALmapHBEF_uHTR"]),
                        ]:
@@ -129,9 +124,9 @@ if __name__ == "__main__":
             print "Reading", fileName
 
             if i:
-                ReformMap(iMapfile=fileName, iListfile=iListfile, ofile=oFileName, oFileOpenMode="a")
+                ReformMap(iMapfile=fileName, ofile=oFileName, oFileOpenMode="a")
             else:
-                ReformMap(iMapfile=fileName, iListfile=iListfile, ofile=oFileName)
+                ReformMap(iMapfile=fileName, ofile=oFileName)
 
         # sort
         sName = "%s_sorted" % oFileName

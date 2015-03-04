@@ -81,11 +81,10 @@ def printTable(rbxes={}, header="", zero="  "):
         print header
         print "-"*len(header)
 
-    boxes = ["%02d" % i for i in range(1, 19)]
-    dets = ["HBM", "HBP",
-            "HEM", "HEP",
-            "HFM", "HFP",
-            "HO2M", "HO1M", "HO0", "HO1P", "HO2P"]
+    rbxList = configuration.rbxes()
+    boxes = sorted(list(set([rbx[-2:] for rbx in rbxList])))
+    dets  = sorted(list(set([rbx[:-2] for rbx in rbxList])))
+
     nSpaces = 5
     header = " ".join(["RBX".ljust(nSpaces)] + boxes)
     print header

@@ -3,9 +3,7 @@
 ssh lxplus.cern.ch
 git clone https://github.com/elaird/hcalraw.git
 cd hcalraw
-source env/slc6-cmssw.sh
-source /afs/cern.ch/project/eos/installation/cms/etc/setup.sh
-LS1=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/LS1
+source env/lxplus6.sh
 
 # read about usage
 ./oneRun.py --help
