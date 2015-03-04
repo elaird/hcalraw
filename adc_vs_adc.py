@@ -38,14 +38,16 @@ def histo(fileName="", skip_rxs=[]):
     return hSum
 
 
-def draw(h, title=""):
+def fedString(lst=[]):
+    return ",".join(["%d" % i for i in lst])
+
+
+def draw(h, feds1=[], feds2=[]):
     h.SetStats(False)
     h.Draw("colz")
-    h.GetXaxis().SetTitle("ADC (VME FEDs 718,719)")
-    h.GetYaxis().SetTitle("ADC (uTCA FED 1118)")
+    h.GetXaxis().SetTitle("ADC (FEDs %s)" % fedString(feds1))
+    h.GetYaxis().SetTitle("ADC (FEDs %s)" % fedString(feds2))
     h.GetZaxis().SetTitle("samples / bin")
-    if title:
-        h.SetTitle(title)
 
     for x in ["X", "Y", "Z"]:
         ax = getattr(h, "Get%saxis" % x)()
@@ -62,7 +64,7 @@ def draw(h, title=""):
     r.gPad.SetLogz()
 
 
-def go(fileName="output/latest.root", exclude=None):
+def go(fileName="output/latest.root", exclude=None, feds1=[], feds2=[]):
     r.gROOT.SetBatch(True)
 
     skip_rxs = [(22,  4, 0),
@@ -74,7 +76,7 @@ def go(fileName="output/latest.root", exclude=None):
 
     if h:
         can = r.TCanvas("canvas", "canvas", 1600, 1600)
-        draw(h)
+        draw(h, feds1=feds1, feds2=feds2)
 
         yx = r.TF1("yx", "x", h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
         yx.SetLineColor(r.kBlack)
