@@ -62,6 +62,29 @@ def fedMap():
     return d
 
 
+def rbxes():
+    hbef = range(1, 19)
+    ho   = range(1, 13)
+    ho12 = range(2, 14, 2)
+
+    out = []
+    for subdet, lst in [("HBM",  hbef),
+                        ("HBP",  hbef),
+                        ("HEM",  hbef),
+                        ("HEP",  hbef),
+                        ("HFM",  hbef),
+                        ("HFP",  hbef),
+                        ("HO2M", ho12),
+                        ("HO1M", ho12),
+                        ("HO0",  ho  ),
+                        ("HO1P", ho12),
+                        ("HO2P", ho12),
+                        ]:
+        for i in lst:
+            out.append("%s%02d" % (subdet, i))
+    return out
+
+
 def matchRange_LS1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=None):
     """DO NOT USE THIS ONE; USE EITHER v0 or v1 BELOW"""
     """local runs; global runs before Feb. 2015"""
