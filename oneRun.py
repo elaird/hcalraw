@@ -281,11 +281,15 @@ if __name__ == "__main__":
                     "progress": options.progress,
                     "crateslots": fedList(options.crateslots),
                     }
+
+    feds1 = fedList(options.feds1)
+    feds2 = fedList(options.feds2)
+
     def go():
         analyze.oneRun(file1=options.file1,
-                       feds1=fedList(options.feds1),
+                       feds1=feds1,
                        file2=options.file2,
-                       feds2=fedList(options.feds2),
+                       feds2=feds2,
                        nEvents=integer(options.nevents, "nevents"),
                        nEventsSkip=integer(options.neventsSkip, "neventsSkip"),
                        patternMode=patternOptions,
@@ -302,10 +306,10 @@ if __name__ == "__main__":
         go()
 
     graphs.makeSummaryPdf(inputFiles=[options.outputFile],
-                          feds=(fedList(options.feds1) + fedList(options.feds2))[:3],
+                          feds=(feds1 + feds2)[:3],
                           pdf=options.outputFile.replace(".root", ".pdf"),
                           )
 
     if options.adcVsAdc:
         for exclude in [False, True]:
-            adc_vs_adc.go(fileName=options.outputFile, exclude=exclude)
+            adc_vs_adc.go(fileName=options.outputFile, exclude=exclude, feds1=feds1, feds2=feds2)
