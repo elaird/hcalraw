@@ -70,11 +70,8 @@ def ReformMap(iMapfile = "", ofile = "", oFileOpenMode = "w"):
     lines = open(iMapfile, "r").readlines() #opens & read the file
     output = open(ofile, oFileOpenMode)  #opens & write the file
 
-    ListLines = open("data/CCM_numbers.txt", "r").readlines()
+    RBXnameRange = configuration.rbxes()
 
-    subdet = configuration.rbxes()
-
-    RBXnameRange = subdet
     rmRange = ['1','2','3','4']
     if "CALIB" in iMapfile: rmRange = ['4','5']
     keyPosition = getKeyPosition(iMapfile)
