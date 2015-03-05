@@ -37,6 +37,7 @@ source env/lxplus6.sh
 
 ####Environment (SLC6/AFS)
 (use exactly one of these)
+* `env/lxplus6.sh` sets up CMSSW and EOS
 * `env/slc6-cmssw.sh` sets up a CMSSW environment
 * `env/slc6-pypy.sh` sets up pypyROOT (outside of CMSSW)
 * `env/slc6-root6.sh` sets up a ROOT 6 environment (outside of CMSSW)
@@ -45,16 +46,16 @@ source env/lxplus6.sh
 * `cpp/CDF*.h` are copied from CMSSW (IORawData/HcalTBInputService/src)
 * `cpp/cdf.cxx` defines a helper class for reading data from HCAL local DAQ
 * `cpp/cms.cxx` defines a helper class for reading data from the CMS DAQ
-* `autoBook.py` is copied from github.com/elaird/supy/`__autoBook__.py`
+* `adc_vs_adc.py` if `--adc-vs-adc` is passed to `oneRun.py`, makes plots from output/Runxxx.root
 * `analyze.py` loops over .root file(s) for one run and produces output/Runxxx.root
-* `configuration.py` holds some settings that are used by analyze.py
-* `cmsswUnpack.py` is not needed, but could be executed with cmsRun
-* `diff.py` compares the decoded output of a fiberID run to data/ref.txt
-* `multiRun.py` is broken
-* `oneRun.py` is used to analyze one run (see examples above)
+* `autoBook.py` is copied from github.com/elaird/supy/`__autoBook__.py`
 * `compare.py` compares the payloads within two .root files for a given event
+* `configuration.py` holds some settings that are used by analyze.py
 * `decode.py` interprets a FED's bytes in an event (called by analyze.unpacked)
+* `diff.py` compares the decoded output of a fiberID run to data/ref.txt
 * `graphs.py` reads in output/Runxxx.root, makes plots, and outputs summary.pdf
+* `make_fiberid_references.py` produces FiberID reference files from HCAL logical maps
+* `oneRun.py` is used to analyze one run (see examples above)
 * `printRaw.py` dumps to stdout the payload(s) in an event
 * `printer.py` contains a utility class for printing messages
 * `processUSC.py` loops over available USC local runs and processes them
