@@ -24,7 +24,7 @@ source env/lxplus6.sh
 ./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_vme_G.txt
 
 # analyze global runs
-./oneRun.py --file1=root://eoscms.cern.ch//store/data/Commissioning2015/Cosmics/RAW/v1/000/234/193/00000/FEAD7C2C-4CB4-E411-9791-02163E011890.root --feds1=718,719 --feds2=1118 --progress
+./oneRun.py --file1=root://eoscms.cern.ch//store/data/Commissioning2015/Cosmics/RAW/v1/000/234/193/00000/FEAD7C2C-4CB4-E411-9791-02163E011890.root --feds1=718,719 --feds2=1118 --utca-bcn-delta=-131 --progress
 ```
 
 ####License
@@ -65,7 +65,6 @@ source env/lxplus6.sh
 ####To do
 * TChain support
 * TTree cache
-* unpack by words in CMS format
 * improve storage structures
 * HLT path filter in analyze.py
 * electronics map
