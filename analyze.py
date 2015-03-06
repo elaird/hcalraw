@@ -91,11 +91,11 @@ def eventMaps(s={}, options={}):
                 bcn = tree.EventAuxiliary.bunchCrossing()
             else:
                 tree.GetEntry(iEvent)
-                raw = unpacked(fedData=charsOneFed(tree=tree,
+                raw = unpacked(fedData=wordsOneFed(tree=tree,
                                                    fedId=fedId0,
                                                    collection=s["rawCollection"],
                                                    ),
-                               nBytesPer=1,
+                               nBytesPer=8,
                                headerOnly=True)
                 orn, bcn, evn = coords(raw)
 
@@ -181,6 +181,7 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
         kargs = {"raw1": collectedRaw(tree=tree, specs=outer),
                  "book": book}
         kargs.update(compareOptions)
+
         if inner:
             iInnerEvent = innerEvent[iOuterEvent]
             if (iInnerEvent is None) or (treeI.GetEntry(iInnerEvent) <= 0):
@@ -206,8 +207,8 @@ def collectedRaw(tree=None, specs={}):
             branch = specs["branch"](fedId)
 
         if specs["name"] == "CMS":
-            rawThisFed = charsOneFed(tree, fedId, specs["rawCollection"])
-            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=1, **kargs)
+            rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"])
+            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
         elif specs["name"] == "HCAL":
             rawThisFed = wordsOneChunk(tree, branch)
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
@@ -341,10 +342,15 @@ def unpackedMolHeader(fedData=None):
 
 
 def charsOneFed(tree=None, fedId=None, collection=""):
-    #CMS data type
+    # cpp/cms.cxx
     FEDRawData = getattr(tree, collection).product().FEDData(fedId)
-    #wrapper class exposes data_ via data()
-    return r.FEDRawData2(FEDRawData)
+    return r.FEDRawDataChars(FEDRawData)
+
+
+def wordsOneFed(tree=None, fedId=None, collection=""):
+    # cpp/cms.cxx
+    FEDRawData = getattr(tree, collection).product().FEDData(fedId)
+    return r.FEDRawDataWords(FEDRawData)
 
 
 def wordsOneChunk(tree=None, branch=""):
