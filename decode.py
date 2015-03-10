@@ -194,6 +194,7 @@ def htrHeaderV1(l={}, w=None, i=None, utca=None):
     l["IsTTP"] = False
     l["channelData"] = {}
     l["triggerData"] = {}
+    l["otherData"] = {}
 
 
 def htrHeaderV0(l={}, w=None, i=None, utca=None):
@@ -231,6 +232,7 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
     if i == 5:
         l["channelData"] = {}
         l["triggerData"] = {}
+        l["otherData"] = {}
         if utca:
             #l["nWord16Payload"] = w & 0x1fff  # !document
             l["nPreSamples"] = (w >> 3) & 0x1f  # !document
@@ -444,14 +446,14 @@ def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[], patternMode={
                                                             flavor=flavor,
                                                             utca=utca,
                                                             )
-            if dataKey is None:
-                coords = "FED %4d crate %2d slot %2d channelId 0x%04x" % (fedId, l["Crate"], l["Slot"], channelHeader["channelId"])
-                printer.warning("skipping flavor %d: %s (EvN %d, iWord16 %d)." % (flavor, coords, l["EvN"], iWord16))
-                clearChannel(d)
-            else:
-                d["dataKey"] = dataKey
-                d["channelId"] = channelId
-                l[d["dataKey"]][d["channelId"]] = channelHeader
+            if dataKey == "otherData":
+                coords = "FED %4d crate %2d slot %2d" % (fedId, l["Crate"], l["Slot"])
+                printer.warning("unknown flavor %d: %s (EvN %d, iWord16 %d, word16 0x%04x)." % (flavor, coords, l["EvN"], iWord16, word16))
+
+            d["dataKey"] = dataKey
+            d["channelId"] = channelId
+            l[d["dataKey"]][d["channelId"]] = channelHeader
+
     elif "channelId" in d:
         storeChannelData(dct=l[d["dataKey"]][d["channelId"]],
                          iWord16=iWord16,
@@ -466,7 +468,6 @@ def clearChannel(d):
 
 
 def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
-    dataKey = None
     channelId = word16 & 0xff
     channelHeader = {"Flavor": flavor,
                      "CapId0": (word16 >> 8) & 0x3,
@@ -479,7 +480,7 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
         for key in ["SOI", "OK", "TP"]:
             channelHeader[key] = {}
 
-    elif flavor == 5:
+    elif 5 <= flavor <= 6:
         dataKey = "channelData"
         channelHeader["Fiber"] = channelId / 4
         if not utca:
@@ -497,26 +498,32 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
         #         channelHeader[key] = {}
 
     else:
-        channelHeader["channelId"] = channelId
+        dataKey = "otherData"
+        channelHeader["words"] = []
 
     return dataKey, channelId, channelHeader
 
 
 def storeChannelData(dct={}, iWord16=None, word16=None):
     j = iWord16 - dct["iWord16"] - 1
-    if 0 <= dct["Flavor"] <= 1:
-        dct["SOI"][j] = (word16 >> 14) & 0x1
-        dct["TDC"][j] = (word16 >> 8) & 0x3f
-        dct["QIE"][j] = word16 & 0xff
-    elif 2 <= dct["Flavor"] <= 3:
-        k = j / 2
-        if j % 2:
-            dct["TDCRise"][k] = word16 & 0x3f
-            dct["TDCFall"][k] = (word16 >> 6) & 0x3f
-        else:
-            dct["SOI"][k] = (word16 >> 13) & 0x1
-            dct["OK"][k] = (word16 >> 12) & 0x1
-            dct["QIE"][k] = word16 & 0xff
+
+    # if 0 <= dct["Flavor"] <= 1:
+    #     dct["SOI"][j] = (word16 >> 14) & 0x1
+    #     dct["TDC"][j] = (word16 >> 8) & 0x3f
+    #     dct["QIE"][j] = word16 & 0xff
+    # elif 2 <= dct["Flavor"] <= 3:
+    #     k = j / 2
+    #     if j % 2:
+    #         dct["TDCRise"][k] = word16 & 0x3f
+    #         dct["TDCFall"][k] = (word16 >> 6) & 0x3f
+    #     else:
+    #         dct["SOI"][k] = (word16 >> 13) & 0x1
+    #         dct["OK"][k] = (word16 >> 12) & 0x1
+    #         dct["QIE"][k] = word16 & 0xff
+
+    if dct["Flavor"] <= 3 or 7 <= dct["Flavor"]:
+        dct["words"].append(word16)
+
     elif dct["Flavor"] == 4:
         dct["SOI"][j] = (word16 >> 14) & 0x1
         dct["OK"][j] = (word16 >> 13) & 0x1
