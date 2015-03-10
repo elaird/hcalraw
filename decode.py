@@ -325,7 +325,7 @@ def end(d, l, patternMode):
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, skipFlavors=[], patternMode={}, dump=-99):
+            utca=None, fedId=None, skipFlavors=[], patternMode={}, dump=-99):
 
     if 8 <= dump:
         print "      (%5d 0x%04x)" % (iWord16, word16)
@@ -409,6 +409,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
                 skipFlavors=skipFlavors,
                 patternMode=patternMode,
                 utca=utca,
+                fedId=fedId,
                 )
 
 
@@ -432,7 +433,7 @@ def ttpData(l={}, iDataMod6=None, word16=None):
         l["ttpOutput"][-1] = (word16 >> 12) & 0xf
 
 
-def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[], patternMode={}, utca=None):
+def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[], patternMode={}, utca=None, fedId=None):
     if (word16 >> 15):
         flavor = (word16 >> 12) & 0x7
         if flavor in skipFlavors:
