@@ -100,8 +100,9 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, n
                    "   EvN",
                    "  OrN5",
                    " BcN",
-                   "ModuleId",
-                   "Fl",
+                   "Cr",
+                   "Sl",
+                   " Fl",
                    "FrmtV",
                    "nPre",
                    #"nWordTP",
@@ -118,8 +119,9 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, n
                " 0x%07x" % p["EvN"],
                "0x%02x" % p["OrN5"],
                "%4d" % p["BcN"],
-               "  0x%03x" % p["ModuleId"],
-               " %2d" % p.get("FWFlavor", -1),  # absent in uHTR
+               "%2d" % p["Crate"],
+               "%2d%1s" % (p["Slot"], p["Top"]),
+               "%2d" % p.get("FWFlavor", -1),  # absent in uHTR
                " 0x%01x" % p["FormatVer"],
                "  %2d" % p["nPreSamples"],
                #"  %3d  " % p["nWord16Tp"],
