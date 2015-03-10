@@ -20,7 +20,7 @@ def oneEvent(d={}, nonMatched=[]):
                                                    aux["iEntry"],
                                                    aux["iEntry"]))
 
-    for fedId, data in d.iteritems():
+    for fedId, data in sorted(d.iteritems()):
         if fedId is None:
             continue
         if ("MOL" in data) and (1 <= dump):
