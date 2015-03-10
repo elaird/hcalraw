@@ -221,6 +221,12 @@ def collectedRaw(tree=None, specs={}):
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8,
                                   skipWords64=skipWords64, **kargs)
             raw[fedId]["MOL"] = mol
+
+        if not raw[fedId]["nBytesSW"]:
+            printer.error("skipping FED %d (read zero bytes)." % fedId)
+            del raw[fedId]
+            continue
+
     raw[None] = {"iEntry": tree.GetReadEntry()}
     for key in ["label", "patternMode", "dump", "crateslots"]:
         raw[None][key] = specs[key]

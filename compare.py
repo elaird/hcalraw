@@ -113,10 +113,6 @@ def loop_over_feds(raw, book, adcPlots):
         book.fill(dct["nBytesSW"]/1024.0, "nBytesSW_%d" % fedId, 64, 0, 16,
                   title="FED %d; kBytes;Events / bin" % fedId)
 
-        if not dct["nBytesSW"]:
-            printer.error("Zero bytes read for FED %d" % fedId)
-            continue
-
         fedIdHw = dct["header"]["FEDid"]
         if fedId != fedIdHw:
             printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
