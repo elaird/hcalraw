@@ -45,10 +45,7 @@ def nFibers(utca):
 
 
 def unpackSkipFlavors(utca):
-    out = [7]
-    if utca:
-        out.append(2)
-    return out
+    return []
 
 
 def fedMap():
