@@ -295,6 +295,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
                                             word16=word16,
                                             word16Counts=header["word16Counts"],
                                             utca=header["utca"],
+                                            fedId=header["FEDid"],
                                             skipFlavors=skipFlavors,
                                             patternMode=patternMode,
                                             dump=dump)
