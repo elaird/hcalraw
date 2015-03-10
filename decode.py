@@ -445,7 +445,7 @@ def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[], patternMode={
                                                             utca=utca,
                                                             )
             if dataKey is None:
-                coords = "FED %4d slot %2d channelId 0x%04x" % (fedId, l["Slot"], channelHeader["channelId"])
+                coords = "FED %4d crate %2d slot %2d channelId 0x%04x" % (fedId, l["Crate"], l["Slot"], channelHeader["channelId"])
                 printer.warning("skipping flavor %d: %s (EvN %d, iWord16 %d)." % (flavor, coords, l["EvN"], iWord16))
                 clearChannel(d)
             else:
