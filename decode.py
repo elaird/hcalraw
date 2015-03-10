@@ -445,7 +445,8 @@ def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[], patternMode={
                                                             utca=utca,
                                                             )
             if dataKey is None:
-                printer.warning("skipping flavor %d (EvN %d, iWord16 %d)." % (flavor, l["EvN"], iWord16))
+                coords = "FED %4d slot %2d channelId 0x%04x" % (fedId, l["Slot"], channelHeader["channelId"])
+                printer.warning("skipping flavor %d: %s (EvN %d, iWord16 %d)." % (flavor, coords, l["EvN"], iWord16))
                 clearChannel(d)
             else:
                 d["dataKey"] = dataKey
@@ -478,7 +479,7 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
         for key in ["SOI", "OK", "TP"]:
             channelHeader[key] = {}
 
-    elif flavor != 7:
+    elif flavor == 5:
         dataKey = "channelData"
         channelHeader["Fiber"] = channelId / 4
         if not utca:
@@ -488,12 +489,15 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
         channelHeader["QIE"] = {}
         channelHeader["CapId"] = {}
 
-        if 0 <= flavor <= 1:
-            for key in ["SOI", "TDC"]:
-                channelHeader[key] = {}
-        if 2 <= flavor <= 3:
-            for key in ["SOI", "OK", "TDCRise", "TDCFall"]:
-                channelHeader[key] = {}
+        # if 0 <= flavor <= 1:
+        #     for key in ["SOI", "TDC"]:
+        #         channelHeader[key] = {}
+        # if 2 <= flavor <= 3:
+        #     for key in ["SOI", "OK", "TDCRise", "TDCFall"]:
+        #         channelHeader[key] = {}
+
+    else:
+        channelHeader["channelId"] = channelId
 
     return dataKey, channelId, channelHeader
 
