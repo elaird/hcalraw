@@ -15,6 +15,7 @@ def oneEvent(d={}, nonMatched=[]):
                                                    aux["iEntry"],
                                                    aux["iEntry"]))
 
+    first = True
     for fedId, data in sorted(d.iteritems()):
         if fedId is None:
             continue
@@ -26,7 +27,10 @@ def oneEvent(d={}, nonMatched=[]):
                    dump=dump,
                    crateslots=aux["crateslots"],
                    nonMatched=nonMatched,
+                   printHeaders=(2 <= dump) or first,
                    )
+        first = False
+
     if 1 <= dump:
         print
 
@@ -376,7 +380,7 @@ def patternString(patterns=[], key=""):
     return configuration.patternString(codes)
 
 
-def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[], nonMatched=[]):
+def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[], nonMatched=[], printHeaders=None):
     h = d["header"]
     t = d["trailer"]
     if (not patternMode["active"]) and (1 <= dump):
@@ -394,9 +398,11 @@ def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[], nonMatched=[])
         if h["uFoV"]:
             fields += ["BcN12", "EvN8", "Blk8"]
 
-        headers = "   ".join(fields)
-        printer.blue("-"*len(headers))
-        printer.blue(headers)
+        if printHeaders:
+            headers = "   ".join(fields)
+            printer.blue("-" * len(headers))
+            printer.blue(headers)
+
         sList = [" %4d" % h["FEDid"],
                  "0x%07x" % h["EvN"],
                  "0x%08x" % h["OrN"],
