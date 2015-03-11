@@ -3,11 +3,6 @@ import printer
 import utils
 
 
-def reduced(lst=[], value=None):
-    subList = filter(lambda x: x[0] == value, lst)
-    return map(lambda x: x[1:], subList)
-
-
 def oneEvent(d={}, nonMatched=[]):
     if None not in d:
         return
@@ -30,7 +25,7 @@ def oneEvent(d={}, nonMatched=[]):
                    patternMode=aux["patternMode"],
                    dump=dump,
                    crateslots=aux["crateslots"],
-                   nonMatched=reduced(nonMatched, fedId),
+                   nonMatched=nonMatched,
                    )
     if 1 <= dump:
         print
@@ -154,7 +149,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, n
     printer.green("\n".join(out))
     if 4 <= dump:
         kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2],
-                 "nonMatched": reduced(nonMatched, p["ModuleId"]),
+                 "nonMatched": nonMatched,
                  "latency": p.get("Latency"),
                  "zs": p.get("ZS"),
                  "skipErrF": [3],
@@ -291,7 +286,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
         if data["ErrF"] in skipErrF:
             continue
         if printer.__color:  # hack
-            red = (data["Fiber"], data["FibCh"]) in nonMatched
+            red = (crate, slot, top, data["Fiber"], data["FibCh"]) in nonMatched
         else:
             red = False
         out.append("   ".join([" %3d" % crate,
