@@ -173,9 +173,7 @@ def htrHeaderV1(l={}, w=None, i=None, utca=None):
         l["nPreSamples"] = (w >> 12) & 0xf
         l["Slot"] = (w >> 8) & 0xf
         l["Crate"] = w & 0xff
-        # compat
-        l["ModuleId"] = 0
-        l["Top"] = " "
+        l["Top"] = " "  # compat
 
     if i == 5:
         l["OrN"] = w
@@ -210,18 +208,18 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
 
     if i == 3:
         l["OrN5"] = (w >> 11) & 0x1f
-        l["ModuleId"] = w & 0x7ff
+        moduleId = w & 0x7ff
         if utca:
-            l["Crate"] = l["ModuleId"] >> 4
-            l["Slot"] = l["ModuleId"] & 0xf
+            l["Crate"] = moduleId >> 4
+            l["Slot"] = moduleId & 0xf
             l["Top"] = " "
         else:
             # https://svnweb.cern.ch/cern/wsvn/cmshcos/trunk/hcalHW/src/common/hcalHTR.cc
             # int id=(m_crate<<6)+((m_slot&0x1F)<<1)+((true_for_top)?(1):(0));
             # fpga->dev->write("HTRsubmodN",id);
-            l["Crate"] = l["ModuleId"] >> 6
-            l["Slot"] = (l["ModuleId"] >> 1) & 0x1f
-            l["Top"] = "t" if (l["ModuleId"] & 0x1) else "b"
+            l["Crate"] = moduleId >> 6
+            l["Slot"] = (moduleId >> 1) & 0x1f
+            l["Top"] = "t" if (moduleId & 0x1) else "b"
 
     if i == 4:
         l["BcN"] = w & 0xfff
