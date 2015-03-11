@@ -394,9 +394,10 @@ def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[], nonMatched=[],
                   "nBytesSW",
                   #"CRC16",
                   "nSkip16",
+                  "BcN12",
+                  "EvN8",
+                  "Blk8",
                   ]
-        if h["uFoV"]:
-            fields += ["BcN12", "EvN8", "Blk8"]
 
         if printHeaders:
             headers = "   ".join(fields)
