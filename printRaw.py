@@ -151,6 +151,8 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, n
 
     out.append("  ".join(strings))
     printer.green("\n".join(out))
+
+    anyHtrDataPrinted = False
     if 4 <= dump:
         kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2],
                  "nonMatched": nonMatched,
@@ -173,6 +175,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, n
         if len(cd) >= 2:
             printer.yellow(cd[0])
             printer.msg("\n".join(cd[1:]))
+            anyHtrDataPrinted = True
 
         if 5 <= dump:
             skipZero = dump <= 5
@@ -187,6 +190,9 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, n
             if len(td) >= 2:
                 printer.yellow(td[0])
                 printer.msg("\n".join(td[1:]))
+                anyHtrDataPrinted = True
+
+    return anyHtrDataPrinted
 
 
 def qieString(qieData={}, red=False):
@@ -439,14 +445,12 @@ def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[], nonMatched=[],
                            iOffset=iOffset,
                            utca=h["utca"])
         elif 3 <= dump:
-            oneHtr(p=p,
-                   printColumnHeaders=printColumnHeaders,
-                   dump=dump,
-                   crateslots=crateslots,
-                   utca=h["utca"],
-                   nonMatched=nonMatched)
-            if dump == 3:
-                printColumnHeaders = False
+            printColumnHeaders = oneHtr(p=p,
+                                        printColumnHeaders=printColumnHeaders,
+                                        dump=dump,
+                                        crateslots=crateslots,
+                                        utca=h["utca"],
+                                        nonMatched=nonMatched)
 
 
 def oneFedMol(d):
