@@ -78,11 +78,11 @@ def opts():
                         default=None,
                         metavar="D",
                         help="list of (100*crate)+slot to dump, e.g. 917,2911")
-    printing.add_option("--no-warn-skip16",
-                        dest="noWarnSkip16",
+    printing.add_option("--no-warn-unpack",
+                        dest="noWarnUnpack",
                         default=False,
                         action="store_true",
-                        help="disable warning when unpacker skips 16-bit words")
+                        help="suppress warnings during unpacking")
     printing.add_option("--no-color",
                         dest="noColor",
                         default=False,
@@ -277,7 +277,7 @@ if __name__ == "__main__":
         mapOptions[key] = getattr(options, key)
 
     printOptions = {"dump": integer(options.dump, "dump"),
-                    "warnSkip16": not options.noWarnSkip16,
+                    "warn": not options.noWarnUnpack,
                     "progress": options.progress,
                     "crateslots": fedList(options.crateslots),
                     }
