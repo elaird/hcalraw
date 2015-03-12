@@ -250,8 +250,8 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
             l["TTPAlgo"] = (w >> 8) & 0x7
             # https://svnweb.cern.ch/cern/wsvn/cmshcos/trunk/hcalTrig/src/common/hcalTechTrigProcessor.cc
             # m_id.value()=m_slot*100+m_crateId;
-            l["Crate"] = l["ModuleId"] / 100
-            l["Slot"] = l["ModuleId"] - 100 * l["Crate"]
+            l["Slot"] = l["ModuleId"] / 100
+            l["Crate"] = l["ModuleId"] % 100
             l["Top"] = " "
             del l["UnsupportedFormat"]
         else:
