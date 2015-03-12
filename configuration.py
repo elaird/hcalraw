@@ -48,6 +48,14 @@ def unpackSkipFlavors(utca):
     return []
 
 
+def flavorLabels():
+    return {4: "utp",
+            5: "cmp",
+            6: "vrb",
+            7: "tch",
+            }
+
+
 def fedMap():
     d = {"HBHE": range(700, 718),
          "HF": range(718, 724),
