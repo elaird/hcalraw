@@ -199,7 +199,7 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
 def collectedRaw(tree=None, specs={}):
     raw = {}
     kargs = {}
-    for item in ["patternMode", "warnSkip16", "dump", "unpack"]:
+    for item in ["patternMode", "warn", "dump", "unpack"]:
         kargs[item] = specs[item]
 
     for fedId in specs["fedIds"]:
@@ -251,7 +251,7 @@ def w64(fedData, jWord64, nBytesPer):
 
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
-             warnSkip16=True, skipWords64=[], patternMode={}, dump=-99):
+             warn=True, skipWords64=[], patternMode={}, dump=-99):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
@@ -304,10 +304,11 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
                                             fedId=header["FEDid"],
                                             skipFlavors=skipFlavors,
                                             patternMode=patternMode,
+                                            warn=warn,
                                             dump=dump)
                 if returnCode is not None:
                     nWord16Skipped += 1
-                    if warnSkip16:  # and (iWord64 != nWord64 - 2 - nToSkip)
+                    if warn:  # and (iWord64 != nWord64 - 2 - nToSkip)
                         printer.warning(" ".join(["skipping",
                                                   "FED %d" % header["FEDid"],
                                                   "event %d" % header["EvN"],
