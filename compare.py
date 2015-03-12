@@ -3,6 +3,11 @@ import printer
 import printRaw
 
 
+def flavor(book, d, fedId):
+    book.fill(d["Flavor"], "ChannelFlavor_%d" % fedId, 10, -0.5, 9.5,
+              title="FED_%d;channel flavor;Channels / bin" % fedId)
+
+
 def htrSummary(blocks=[], book=None, fedId=None, msg="", adcPlots=False):
     nBadHtrs = 0
     caps = {}
@@ -24,7 +29,16 @@ def htrSummary(blocks=[], book=None, fedId=None, msg="", adcPlots=False):
         book.fill(block["BcN"], "BcN_HTRs_%d" % fedId, 36, 0, 3564,
                   title="FED %d; BcN;HTRs / bin" % fedId)
 
+        for otherData in block["otherData"].values():
+            flavor(book, otherData, fedId)
+
+        for triggerData in block["triggerData"].values():
+            if "Flavor" in triggerData:
+                flavor(book, triggerData, fedId)
+
         for channelData in block["channelData"].values():
+            flavor(book, channelData, fedId)
+
             ErrF[channelData["ErrF"]] += 1
             nQie = len(channelData["QIE"].values())
             book.fill(nQie, "nQieSamples_%d" % fedId, 14, -0.5, 13.5,
@@ -65,7 +79,7 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
     if errFSum:
         for code, n in ErrF.iteritems():
             book.fill(n/errFSum, "ErrF%d_%d" % (code, fedId), 44, 0.0, 1.1,
-                      title="FED %d;frac. chan. w/ErrF==%d;Events / bin" % (fedId, code))
+                      title="FED %d;frac. chan. with ErrF == %1d;Events / bin" % (fedId, code))
 
     capSum = 0.0+sum(caps.values())
     if capSum:
