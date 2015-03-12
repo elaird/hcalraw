@@ -213,14 +213,14 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=
     printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
     printRaw.oneEvent(raw2, nonMatched=nonMatched21)
 
-    #if nonMatched12:
+    # if nonMatched12:
     #    reportMatched(matched12)
     #    reportFailed(nonMatched12)
 
+    nFib = 228  # = 2 2 3 19;  gt 14 HTRs * 16 fib / HTR
+    bins = (nFib, -0.5, nFib - 0.5)
     for iChannel in range(3):
         title = ";no. matched fibers (ch%d);Events / bin" % iChannel
-        nMax = 228  # = 2 2 3 19;  gt 14 HTRs * 16 fib / HTR
-        bins = (nMax / 3, -0.5, nMax - 0.5)
         book.fill(nPerChannel(matched12.keys(), iChannel),
                   "MatchedFibersCh%d" % iChannel,
                   *bins, title=title)
