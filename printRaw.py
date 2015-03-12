@@ -118,8 +118,8 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, n
                " 0x%07x" % p["EvN"],
                "0x%02x" % p["OrN5"],
                "%4d" % p["BcN"],
-               "%2d" % p.get("Crate", -1),
-               "%2d%1s" % (p.get("Slot", -1), p.get("Top", -1)),
+               "%2d" % p["Crate"],
+               "%2d%1s" % (p["Slot"], p["Top"]),
                "%2d" % p.get("FWFlavor", -1),  # absent in uHTR
                " 0x%01x" % p["FormatVer"],
                "  %2d" % p["nPreSamples"],
