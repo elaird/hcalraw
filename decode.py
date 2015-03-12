@@ -213,6 +213,7 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
             l["Crate"] = moduleId >> 4
             l["Slot"] = moduleId & 0xf
             l["Top"] = " "
+            l["ModuleId"] = -1  # removed below
         else:
             # https://svnweb.cern.ch/cern/wsvn/cmshcos/trunk/hcalHW/src/common/hcalHTR.cc
             # int id=(m_crate<<6)+((m_slot&0x1F)<<1)+((true_for_top)?(1):(0));
