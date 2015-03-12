@@ -331,7 +331,8 @@ def end(d, l, patternMode):
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, fedId=None, skipFlavors=[], patternMode={}, dump=-99):
+            utca=None, fedId=None, skipFlavors=[], patternMode={},
+            warn=True, dump=-99):
 
     if 8 <= dump:
         print "      (%5d 0x%04x)" % (iWord16, word16)
@@ -416,6 +417,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
                 patternMode=patternMode,
                 utca=utca,
                 fedId=fedId,
+                warn=warn,
                 )
 
 
@@ -439,7 +441,9 @@ def ttpData(l={}, iDataMod6=None, word16=None):
         l["ttpOutput"][-1] = (word16 >> 12) & 0xf
 
 
-def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[], patternMode={}, utca=None, fedId=None):
+def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[],
+            patternMode={}, utca=None, fedId=None, warn=True):
+
     if (word16 >> 15):
         flavor = (word16 >> 12) & 0x7
         if flavor in skipFlavors:
@@ -450,9 +454,10 @@ def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[], patternMode={
                                                             flavor=flavor,
                                                             utca=utca,
                                                             )
-            if dataKey == "otherData":
+            if warn and dataKey == "otherData":
                 coords = "FED %4d crate %2d slot %2d" % (fedId, l["Crate"], l["Slot"])
-                printer.warning("unknown flavor %d: %s (EvN %d, iWord16 %d, word16 0x%04x)." % (flavor, coords, l["EvN"], iWord16, word16))
+                evn = "(EvN %d, iWord16 %d, word16 0x%04x)" % (l["EvN"], iWord16, word16)
+                printer.warning("unknown flavor %d: %s %s." % (flavor, coords, evn))
 
             d["dataKey"] = dataKey
             d["channelId"] = channelId
