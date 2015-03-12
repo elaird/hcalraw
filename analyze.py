@@ -290,9 +290,10 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
                 patternMode["nFibers"] = configuration.nFibers(header["utca"])
             if header.get("uFoV"):
                 nWord64Trailer = 2  # accommodate block trailer
+            iWordTrailer0 = nWord64 - nToSkip - nWord64Trailer
         elif headerOnly:
             break
-        elif iWord64 < nWord64 - nToSkip - nWord64Trailer:
+        elif iWord64 < iWordTrailer0:
             for i in range(4):
                 word16 = (word64 >> (16*i)) & 0xffff
                 iWord16 = 4*iWord64+i
@@ -309,15 +310,14 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
                 if returnCode is None:
                     continue
 
-                if not header["utca"]:
-                    sum16 = sum(header["word16Counts"])
-                    nWord16Pad = (4 - sum16 % 4) % 4
-                    iWord16PayloadEnd = 4 * header["iWordPayload0"] + sum16
-                    if (0 <= iWord16 - iWord16PayloadEnd < nWord16Pad) and not word16:
-                        continue
+                # ignore VME pad words (zero)
+                if not header["utca"] and iWord64 + 1 == iWordTrailer0:
+                    if 4 * header["iWordPayload0"] + sum(header["word16Counts"]) <= iWord16:
+                        if not word16:
+                            continue
 
                 nWord16Skipped += 1
-                if warn:  # and (iWord64 != nWord64 - 2 - nToSkip)
+                if warn:
                     printer.warning(" ".join(["skipping",
                                               "FED %d" % header["FEDid"],
                                               "event %d" % header["EvN"],
