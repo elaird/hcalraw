@@ -5,7 +5,7 @@ import printRaw
 
 def flavor(book, d, fedId):
     book.fill(d["Flavor"], "ChannelFlavor_%d" % fedId, 10, -0.5, 9.5,
-              title="FED_%d;channel flavor;Channels / bin" % fedId)
+              title="FED %d;channel flavor;Channels / bin" % fedId)
 
 
 def htrSummary(blocks=[], book=None, fedId=None, fedEvn=None,
@@ -28,7 +28,7 @@ def htrSummary(blocks=[], book=None, fedId=None, fedEvn=None,
             continue
 
         book.fill(block["EvN"] - fedEvn, "EvN_HTRs_%d" % fedId,
-                  15, -7.5, 7.5,
+                  11, -5.5, 5.5,
                   title="FED %d;HTR EvN - FED EvN;HTRs / bin" % fedId)
 
         for otherData in block["otherData"].values():
