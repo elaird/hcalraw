@@ -220,6 +220,7 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
             l["Crate"] = moduleId >> 6
             l["Slot"] = (moduleId >> 1) & 0x1f
             l["Top"] = "t" if (moduleId & 0x1) else "b"
+            l["ModuleId"] = moduleId  # used for TTP below
 
     if i == 4:
         l["BcN"] = w & 0xfff
@@ -247,13 +248,18 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
         l["PipelineLength"] = w & 0xff
         if l["IsTTP"]:
             l["TTPAlgo"] = (w >> 8) & 0x7
-            for key in ["Crate", "Slot", "Top", "UnsupportedFormat"]:
-                del l[key]
+            # https://svnweb.cern.ch/cern/wsvn/cmshcos/trunk/hcalTrig/src/common/hcalTechTrigProcessor.cc
+            # m_id.value()=m_slot*100+m_crateId;
+            l["Crate"] = l["ModuleId"] / 100
+            l["Slot"] = l["ModuleId"] - 100 * l["Crate"]
+            l["Top"] = " "
+            del l["UnsupportedFormat"]
         else:
             l["FWFlavor"] = (w >> 8) & 0x7f
             if l["UnsupportedFormat"]:
                 c =  "(crate %2d slot %2d%1s)" % (l["Crate"], l["Slot"], l["Top"])
                 printer.error("HTR %s FormatVer %d is not supported." % (c, l["FormatVer"]))
+        del l["ModuleId"]
 
 
 def htrTps(l={}, w=None):
