@@ -66,7 +66,7 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
                   title="FED %d; TTS state;Events / bin" % fedId)
 
     if "BcN" in h:
-        book.fill(h["BcN"]/100.0, "BcN_%d" % fedId, 100, 0, 36,
+        book.fill(h["BcN"]/100.0, "BcN_%d" % fedId, 99, 0, 35.64,  # = 0.36 * 99
                   title="FED %d;BcN / 100;Events / bin" % fedId)
 
     msg = "FED %d" % fedId
