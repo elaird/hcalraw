@@ -50,7 +50,7 @@ def unpackSkipFlavors(utca):
 
 def flavorLabels():
     return {4: "utp",
-            5: "cmp",
+            5: "cpt",
             6: "vrb",
             7: "tch",
             }
