@@ -1,4 +1,5 @@
 import math
+import configuration
 import printer
 import utils
 r = utils.ROOT()
@@ -29,10 +30,20 @@ def shiftFlows(histo=None):
     histo.SetEntries(entries)
 
 
-def labelAxis(h=None, labels={}):
+def labelXAxis(h=None, labels={}):
+    h.SetStats(False)
+    axis = h.GetXaxis()
+    for iBin in range(1, 1 + axis.GetNbins()):
+        x = int(axis.GetBinCenter(iBin))
+        axis.SetBinLabel(iBin, labels.get(x, "%d" % x))
+    axis.SetLabelSize(1.5*axis.GetLabelSize())
+    axis.SetLabelOffset(1.5*axis.GetLabelOffset())
+
+
+def labelYAxis(h=None, labels={}):
     h.SetStats(False)
     yaxis = h.GetYaxis()
-    for iBin, label in labels.iteritems():
+    for iBin, label in sorted(labels.iteritems()):
         yaxis.SetBinLabel(iBin, label)
     yaxis.SetLabelSize(2.0*yaxis.GetLabelSize())
 
@@ -98,6 +109,9 @@ def histoLoop(f, lst, func):
         if not h:
             continue
 
+        if h.GetName().startswith("ChannelFlavor"):
+            labelXAxis(h, labels=configuration.flavorLabels())
+
         gopts = "hist"
         if i:
             gopts += "same"
@@ -152,7 +166,7 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
                       3, 0.5, 3.5)
         null.Draw()
         magnify(null, factor=3.0)
-        labelAxis(null, labels={1: t[0], 2: t[1], 3: t[2]})
+        labelYAxis(null, labels={1: t[0], 2: t[1], 3: t[2]})
         null.GetXaxis().SetTitleOffset(0.75)
         graph.Draw("psame")
         keep += [graph, null]
