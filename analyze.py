@@ -306,15 +306,24 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
                                             patternMode=patternMode,
                                             warn=warn,
                                             dump=dump)
-                if returnCode is not None:
-                    nWord16Skipped += 1
-                    if warn:  # and (iWord64 != nWord64 - 2 - nToSkip)
-                        printer.warning(" ".join(["skipping",
-                                                  "FED %d" % header["FEDid"],
-                                                  "event %d" % header["EvN"],
-                                                  "iWord16 %d" % iWord16,
-                                                  "word16 0x%04x" % word16,
-                                                  ]))
+                if returnCode is None:
+                    continue
+
+                if not header["utca"]:
+                    sum16 = sum(header["word16Counts"])
+                    nWord16Pad = (4 - sum16 % 4) % 4
+                    iWord16PayloadEnd = 4 * header["iWordPayload0"] + sum16
+                    if (0 <= iWord16 - iWord16PayloadEnd < nWord16Pad) and not word16:
+                        continue
+
+                nWord16Skipped += 1
+                if warn:  # and (iWord64 != nWord64 - 2 - nToSkip)
+                    printer.warning(" ".join(["skipping",
+                                              "FED %d" % header["FEDid"],
+                                              "event %d" % header["EvN"],
+                                              "iWord16 %d" % iWord16,
+                                              "word16 0x%04x" % word16,
+                                              ]))
         else:
             if "htrIndex" in htrBlocks:
                 del htrBlocks["htrIndex"]  # fixme
