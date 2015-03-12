@@ -4,7 +4,7 @@ import printRaw
 
 
 def flavor(book, d, fedId):
-    book.fill(d["Flavor"], "ChannelFlavor_%d" % fedId, 10, -0.5, 9.5,
+    book.fill(d["Flavor"], "ChannelFlavor_%d" % fedId, 8, -0.5, 7.5,
               title="FED %d;channel flavor;Channels / bin" % fedId)
 
 
