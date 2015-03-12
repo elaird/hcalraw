@@ -172,9 +172,9 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
 
     if True:
         for iHisto, name in enumerate(["", "nBytesSW", "nQieSamples", "nWord16Skipped",
-                                       "ErrF1", "ErrF3", "PopCapFrac", "ChannelFlavor",
-                                       "MatchedFibersCh0", "MatchedFibersCh1", "MatchedFibersCh2", "BcN_HTRs",
-                                       #"TTS",
+                                       "ErrF1", "ErrF3", "EvN_HTRs", "ChannelFlavor",
+                                       "MatchedFibersCh0", "MatchedFibersCh1", "MatchedFibersCh2", "BcN",
+                                       #"TTS", "PopCapFrac"
                                        ]):
             if not name:
                 continue
@@ -193,6 +193,9 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
                 style = [1, 2, 3]
                 style += [1] * (len(feds) - len(style))
                 for iFed, fed in enumerate(sorted(feds)):
+                    if name == "BcN" and iFed:
+                        continue
+
                     lst.append((fed, color[iFed], style[iFed]))
 
                 keep += histoLoop(f, lst, lambda x: "%s_%d" % (name, x))
