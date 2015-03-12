@@ -25,6 +25,7 @@ source env/lxplus6.sh
 
 # analyze global runs
 ./oneRun.py --file1=root://eoscms.cern.ch//store/data/Commissioning2015/Cosmics/RAW/v1/000/234/193/00000/FEAD7C2C-4CB4-E411-9791-02163E011890.root --feds1=718,719 --feds2=1118 --utca-bcn-delta=-131 --progress
+./oneRun.py --file1=root://eoscms//eos/cms/store/data/Commissioning2015/MinimumBias/RAW/v1/000/237/318/00000/24F11386-94C6-E411-96AC-02163E012078.root --feds1=717,1118,1120,1122 --nevents=3 --utca-bcn-delta=-131
 ```
 
 ####License
