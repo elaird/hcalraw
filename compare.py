@@ -8,7 +8,8 @@ def flavor(book, d, fedId):
               title="FED_%d;channel flavor;Channels / bin" % fedId)
 
 
-def htrSummary(blocks=[], book=None, fedId=None, msg="", adcPlots=False):
+def htrSummary(blocks=[], book=None, fedId=None, fedEvn=None,
+               msg="", adcPlots=False):
     nBadHtrs = 0
     caps = {}
     ErrF = {}
@@ -26,8 +27,9 @@ def htrSummary(blocks=[], book=None, fedId=None, msg="", adcPlots=False):
             nBadHtrs += 1
             continue
 
-        book.fill(block["BcN"], "BcN_HTRs_%d" % fedId, 36, 0, 3564,
-                  title="FED %d; BcN;HTRs / bin" % fedId)
+        book.fill(block["EvN"] - fedEvn, "EvN_HTRs_%d" % fedId,
+                  15, -7.5, 7.5,
+                  title="FED %d;HTR EvN - FED EvN;HTRs / bin" % fedId)
 
         for otherData in block["otherData"].values():
             flavor(book, otherData, fedId)
@@ -57,14 +59,20 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
     book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 16, -0.5, 15.5,
               title="FED %d; nWord16 skipped during unpacking;Events / bin" % fedId)
 
+    h = d["header"]
     t = d["trailer"]
     if "TTS" in t:
         book.fill(t["TTS"], "TTS_%d" % fedId, 16, -0.5, 15.5,
                   title="FED %d; TTS state;Events / bin" % fedId)
 
+    if "BcN" in h:
+        book.fill(h["BcN"]/100.0, "BcN_%d" % fedId, 100, 0, 36,
+                  title="FED %d;BcN / 100;Events / bin" % fedId)
+
     msg = "FED %d" % fedId
-    if "EvN" in d["header"]:
-        msg += " event %d" % d["header"]["EvN"]
+    fedEvn = h.get("EvN")
+    if fedEvn is not None:
+        msg += " event %d" % fedEvn
     else:
         msg2 = " header lacks EvN.  Keys: %s" % str(d["header"].keys())
         printer.error(msg + msg2)
@@ -72,6 +80,7 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
     nBadHtrs, ErrF, caps = htrSummary(blocks=d["htrBlocks"].values(),
                                       book=book,
                                       fedId=fedId,
+                                      fedEvn=fedEvn,
                                       msg=msg,
                                       adcPlots=adcPlots)
 
@@ -210,8 +219,8 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=
 
     for iChannel in range(3):
         title = ";no. matched fibers (ch%d);Events / bin" % iChannel
-        nBins = 400
-        bins = (nBins, -0.5, nBins - 0.5)
+        nMax = 228  # = 2 2 3 19;  gt 14 HTRs * 16 fib / HTR
+        bins = (nMax / 3, -0.5, nMax - 0.5)
         book.fill(nPerChannel(matched12.keys(), iChannel),
                   "MatchedFibersCh%d" % iChannel,
                   *bins, title=title)
