@@ -169,20 +169,9 @@ def loop_over_feds(raw, book, adcPlots):
 
 def fill_adc_vs_adc(mapF1, mapF2, book):
     for coords1, samples1  in mapF1.iteritems():
-        crate1, slot1, top1, fiber1, fibCh = coords1
-        if 2 <= slot1 <= 7:
-            slot2 = slot1 - 1
-        elif 13 <= slot1 <= 18:
-            slot2 = slot1 - 6
-        else:
+        coords2 = configuration.transformed(*coords1)
+        if coords2 is None:
             continue
-
-        crate2 = crate1 + 20
-        fiber2 = fiber1 + 1
-        if top1 == "t":
-            fiber2 += 12
-
-        coords2 = (crate2, slot2, " ", fiber2, fibCh)
 
         if coords2 in mapF2:
             samples2 = mapF2[coords2]
@@ -190,14 +179,21 @@ def fill_adc_vs_adc(mapF1, mapF2, book):
             # fmt = "%2d %2d%1s %1d %1d"
             # print (fmt % coords1) + ": " + fmt % coords2
             samples2 = [-1] * len(samples1)
+
+        crate2, slot2, top2, fiber2, _ = coords2
+        if top2 == " ":
+            rx = 12 <= fiber2
+        else:
+            rx = ["b", "t"].find(top2)
+
         for i, s1 in enumerate(samples1):
             s2 = samples2[i]
             book.fill((s1, s2),
-                      "adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, 12 <= fiber2),
+                      "adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
                       (129, 129),
                       (-1.5, -1.5),
                       (127.5, 127.5),
-                      title=";ADC (VME);ADC (uTCA);samples / bin")
+                      title=";ADC;ADC;samples / bin")
 
 
 def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=False, adcVsAdc=False):
