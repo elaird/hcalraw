@@ -205,8 +205,8 @@ def adc_vs_adc(mapF1, mapF2, book=None):
 
 def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  adcPlots=False):
     if anyEmap:
-        mapF1, mapB1, _ = dataMap(raw1, skipErrF=skipErrF, checkLen=True)
-        mapF2, mapB2, _ = dataMap(raw2, skipErrF=skipErrF, checkLen=True)
+        mapF1, mapB1, _ = dataMap(raw1, skipErrF=skipErrF)
+        mapF2, mapB2, _ = dataMap(raw2, skipErrF=skipErrF)
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
         # if nonMatched12:
