@@ -12,11 +12,11 @@ source env/lxplus6.sh
 ./oneRun.py --file1=data/B904_Integration_000050.root --feds1=702,931 --nevents=1 --dump=4
 
 # compare payloads of different sets of FEDs, within one file
-./oneRun.py --file1=$LS1/USC_234155.root --feds1=HF --feds2=uHF --progress --nevents=20 --match=v1 --dump=0 --adc-vs-adc
-./oneRun.py --file1=$LS1/USC_235728.root --feds1=718,719 --feds2=1118 --progress --nevents=20 --match=v1 --dump=0 --adc-vs-adc
+./oneRun.py --file1=$LS1/USC_234155.root --feds1=HF --feds2=uHF --progress --nevents=20 --match=v1 --dump=0
+./oneRun.py --file1=$LS1/USC_235728.root --feds1=718,719 --feds2=1118 --progress --nevents=20 --match=v1 --dump=0
 
 # compare payloads of different sets of FEDs, across two files
-./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --skip-errfs=3
+./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --any-emap --skip-errfs=3
 
 # analyze FE pattern runs
 ./oneRun.py --file1=$LS1/USC_231834.root --feds1=uHF  --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_utca_G.txt
@@ -24,8 +24,8 @@ source env/lxplus6.sh
 ./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_vme_G.txt
 
 # analyze global runs
-./oneRun.py --file1=root://eoscms.cern.ch//store/data/Commissioning2015/Cosmics/RAW/v1/000/234/193/00000/FEAD7C2C-4CB4-E411-9791-02163E011890.root --feds1=718,719 --feds2=1118 --utca-bcn-delta=-131 --progress
-./oneRun.py --file1=root://eoscms//eos/cms/store/data/Commissioning2015/MinimumBias/RAW/v1/000/237/318/00000/24F11386-94C6-E411-96AC-02163E012078.root --feds1=717,1118,1120,1122 --nevents=3 --utca-bcn-delta=-131
+./oneRun.py --file1=$GR2/Cosmics/RAW/v1/000/235/316/00000/9CE27CCC-5EBB-E411-AF2C-02163E0127C8.root --feds1=718,719 --feds2=1118  --utca-bcn-delta=-131 --skip-flavors=0,2 --dump=0 --nevents=10
+./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/237/318/00000/24F11386-94C6-E411-96AC-02163E012078.root --feds1=717,1118,1120,1122 --nevents=3 --utca-bcn-delta=-131
 ```
 
 ####License
