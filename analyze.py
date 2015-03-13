@@ -199,7 +199,7 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
 def collectedRaw(tree=None, specs={}):
     raw = {}
     kargs = {}
-    for item in ["patternMode", "warn", "dump", "unpack"]:
+    for item in ["patternMode", "warn", "dump", "unpack", "skipFlavors"]:
         kargs[item] = specs[item]
 
     for fedId in specs["fedIds"]:
@@ -251,7 +251,7 @@ def w64(fedData, jWord64, nBytesPer):
 
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
-             warn=True, skipWords64=[], patternMode={}, dump=-99):
+             warn=True, skipFlavors=[], skipWords64=[], patternMode={}, dump=-99):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
@@ -286,7 +286,6 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
         if iWord64 < header["iWordPayload0"]:
             decode.header(header, iWord64, word64)
             if header["utca"] is not None:
-                skipFlavors = configuration.unpackSkipFlavors(header["utca"])
                 patternMode["nFibers"] = configuration.nFibers(header["utca"])
             if header.get("uFoV"):
                 nWord64Trailer = 2  # accommodate block trailer
@@ -533,6 +532,7 @@ def oneRun(file1="",
            compareOptions={},
            printOptions={},
            unpack=True,
+           unpackSkipFlavors=[],
            nEvents=None,
            nEventsSkip=None,
            outputFile="",
@@ -545,6 +545,7 @@ def oneRun(file1="",
               "nEventsSkip": nEventsSkip,
               "patternMode": patternMode,
               "unpack": unpack,
+              "skipFlavors": unpackSkipFlavors,
               }
     common.update(printOptions)
 

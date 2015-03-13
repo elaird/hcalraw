@@ -44,10 +44,6 @@ def nFibers(utca):
     return 24 if utca else 8
 
 
-def unpackSkipFlavors(utca):
-    return []
-
-
 def flavorLabels():
     return {4: "utp",
             5: "cpt",

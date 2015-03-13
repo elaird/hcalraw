@@ -53,6 +53,11 @@ def opts():
                       default=False,
                       action="store_true",
                       help="loop over raw data, but do not unpack it")
+    common.add_option("--no-unpack-flavors",
+                      dest="unpackSkipFlavors",
+                      default="",
+                      metavar="s",
+                      help="do not unpack channels with these flavors (e.g. 2,7).")
     parser.add_option_group(common)
 
     printing = optparse.OptionGroup(parser, "Options for printing to stdout")
@@ -142,12 +147,12 @@ def opts():
                        dest="skipErrF",
                        default="1,3",
                        metavar="s",
-                     help="Skip channels with these ErrF values (default is 1,3).")
+                       help="Skip channels with these ErrF values (default is 1,3).")
     matchCh.add_option("--skipAllZero",
                        dest="skipAllZero",
                        default=False,
                        action="store_true",
-                     help="Skip channels with all QIE samples = 0.")
+                       help="Skip channels with all QIE samples = 0.")
     matchCh.add_option("--adc-vs-adc",
                        dest="adcVsAdc",
                        default=False,
@@ -298,6 +303,7 @@ if __name__ == "__main__":
                        printOptions=printOptions,
                        compareOptions=compareOptions,
                        unpack=not options.noUnpack,
+                       unpackSkipFlavors=fedList(options.unpackSkipFlavors),
                        )
 
     if options.profile:
