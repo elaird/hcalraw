@@ -40,9 +40,9 @@ def opts():
                       help="profile the run")
     common.add_option("--utca-bcn-delta",
                      dest="utcaBcnDelta",
-                     default=-119,
+                     default="",
                      metavar="N",
-                     help="Add this to uTCA BcN (and OrN).  Default is -119.")
+                     help="Add this to uTCA BcN (and OrN).  Defaults are in configuration.matchRange_*")
     common.add_option("--adc-plots",
                       dest="adcPlots",
                       default=False,
@@ -140,9 +140,9 @@ def opts():
     matchCh = optparse.OptionGroup(parser, "Options for matching channels across events")
     matchCh.add_option("--match",
                        dest="match",
-                       default="v2",
+                       default="",
                        metavar="s",
-                       help="choose configuration.matchRange_s (default is v2)")
+                       help="choose configuration.matchRange_s")
     matchCh.add_option("--skip-errfs",
                        dest="skipErrF",
                        default="1,3",
@@ -206,7 +206,7 @@ def opts():
     if not options.outputFile.endswith(".root"):
         sys.exit("--output-file must end with .root (%s)" % options.outputFile)
     if options.feds2 and not options.file2:
-        print "Using --file1 also for --file2; also using identity map"
+        print "INFO: using --file1 also for --file2; also using identity map"
         options.file2 = options.file1
         options.identityMap = True
 
@@ -257,8 +257,14 @@ if __name__ == "__main__":
     import graphs
     import adc_vs_adc
 
-    configuration.matchRange = getattr(configuration, "matchRange_%s" % options.match)
-    configuration.__utcaBcnDelta = integer(options.utcaBcnDelta)
+    if options.match:
+        configuration.matchRange = getattr(configuration, "matchRange_%s" % options.match)
+        if options.utcaBcnDelta:
+            sys.exit("FATAL: --match implies a utca-bcn-delta; do not also pass --utca-bcn-delta .")
+        configuration.matchRange()  # call once to set utcaBcnDelta
+    elif options.utcaBcnDelta:
+        configuration.__utcaBcnDelta = integer(options.utcaBcnDelta)
+
     configuration.__compressedPatterns = options.compressed
     configuration.__asciifyPatterns = not options.noAsciify
     configuration.__regMatchPatterns = not options.noRegMatch
