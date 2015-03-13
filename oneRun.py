@@ -53,7 +53,7 @@ def opts():
                       default=False,
                       action="store_true",
                       help="loop over raw data, but do not unpack it")
-    common.add_option("--no-unpack-flavors",
+    common.add_option("--skip-flavors",
                       dest="unpackSkipFlavors",
                       default="",
                       metavar="s",
