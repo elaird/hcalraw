@@ -196,21 +196,19 @@ def fill_adc_vs_adc(mapF1, mapF2, book):
                       title=";ADC;ADC;samples / bin")
 
 
-def compare(raw1={}, raw2={}, book={},
-            skipErrF=[], skipAllZero=False, anyEmap=False,  adcPlots=False):
-
+def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  adcPlots=False):
     if anyEmap:
-        mapF1, mapB1 = dataMap(raw1, skipErrF=skipErrF, skipAllZero=skipAllZero)
-        mapF2, mapB2 = dataMap(raw2, skipErrF=skipErrF, skipAllZero=skipAllZero)
+        mapF1, mapB1, _ = dataMap(raw1, skipErrF=skipErrF, checkLen=True)
+        mapF2, mapB2, _ = dataMap(raw2, skipErrF=skipErrF, checkLen=True)
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
     else:
-        mapF1, mapB1 = dataMap(raw1, skipErrF=skipErrF)
-        mapF2, mapB2 = dataMap(raw2, skipErrF=skipErrF)
+        mapF1 = dataMap(raw1, skipErrF=skipErrF)[0]
+        mapF2 = dataMap(raw2, skipErrF=skipErrF)[0]
         fill_adc_vs_adc(mapF1, mapF2, book)
 
-        matched12, nonMatched12 = matchStats(mapF1, mapB2)
-        matched21, nonMatched21 = matchStats(mapF2, mapB1)
+        matched12, nonMatched12 = {}, []
+        matched21, nonMatched21 = {}, []
 
     printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
     printRaw.oneEvent(raw2, nonMatched=nonMatched21)
@@ -299,9 +297,10 @@ def matchStats(f={}, b={}):
     return matched, failed
 
 
-def dataMap(raw={}, skipErrF=[], skipAllZero=None):
+def dataMap(raw={}, skipErrF=[]):
     forward = {}
     backward = {}
+    skipped = []
 
     for fedId, d in raw.iteritems():
         if fedId is None:
@@ -312,20 +311,22 @@ def dataMap(raw={}, skipErrF=[], skipAllZero=None):
         for key, block in d["htrBlocks"].iteritems():
             for channelData in block["channelData"].values():
                 channel = channelData["FibCh"]
-                matchRange = configuration.matchRange(fedId, block["Slot"], channel, utca)
                 fiber = channelData["Fiber"]
                 fiber = fiberMap.get(fiber, fiber)
-                if channelData["ErrF"] in skipErrF:
-                    continue
                 coords = (block["Crate"], block["Slot"], block["Top"], fiber, channel)
+
+                if channelData["ErrF"] in skipErrF:
+                    skipped.append(coords)
+                    continue
+
+                matchRange = configuration.matchRange(fedId, block["Slot"], channel, utca)
                 qie = channelData["QIE"]
                 if len(qie) < len(matchRange):
-                    #print "skipping bogus channel",coords
+                    skipped.append(coords)
                     continue
+
                 data = tuple([qie.get(i) for i in matchRange])
-                if skipAllZero and not any(data):
-                    continue
-                #print coords,matchRange,[hex(d) for d in data]
+                # print coords, matchRange, [hex(d) for d in data]
                 forward[coords] = data
                 backward[data] = coords
-    return forward, backward
+    return forward, backward, skipped
