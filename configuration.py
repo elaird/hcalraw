@@ -144,6 +144,38 @@ def expectedHtr(fedId, spigot):
             "Slot": slot}
 
 
+def transformed(crate, slot, top, fiber, fibCh):
+    if crate < 20:
+        # VME --> uTCA
+        if 2 <= slot <= 7:
+            slot2 = slot - 1
+        elif 13 <= slot <= 18:
+            slot2 = slot - 6
+        else:
+            return None
+
+        top2 = " "
+        crate2 = crate + 20
+        fiber2 = fiber + 1
+        if top == "t":
+            fiber2 += 12
+    else:
+        # uTCA --> VME
+        crate2 = crate - 20
+        fiber2 = fiber - 1
+        if 12 <= fiber2:
+            fiber2 -= 12
+            top2 = "t"
+        else:
+            top2 = "b"
+        if slot <= 6:
+            slot2 = 1 + slot
+        else:
+            slot2 = 6 + slot
+
+    return (crate2, slot2, top2, fiber2, fibCh)
+
+
 def format(treeName=""):
     def _isVme(fedId=None):
         return 700 <= fedId <= 731
