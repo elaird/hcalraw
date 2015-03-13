@@ -50,9 +50,10 @@ def pretty(be=None, fe=None):
             slot = sp
             s = "    %2s     %2s   %2s:  " % (crate, slot, fi)
         else:
+            crate = configuration.expectedCrate(int(dcc))
             exp = configuration.expectedHtr(int(dcc), int(sp))
             htr = "%2d%1s" % (exp["Slot"], exp["Top"])
-            s = "%2s     %2s(%3s) %2s:  " % (dcc, sp, htr, fi)
+            s = "%2s(%2d) %2s(%3s) %2s:  " % (dcc, crate, sp, htr, fi)
     else:
         s = ""
 
