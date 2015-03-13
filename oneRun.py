@@ -143,12 +143,12 @@ def opts():
                        default="v2",
                        metavar="s",
                        help="choose configuration.matchRange_s (default is v2)")
-    matchCh.add_option("--skipErrF",
+    matchCh.add_option("--skip-errfs",
                        dest="skipErrF",
                        default="1,3",
                        metavar="s",
                        help="Skip channels with these ErrF values (default is 1,3).")
-    matchCh.add_option("--skipAllZero",
+    matchCh.add_option("--skip-zero",
                        dest="skipAllZero",
                        default=False,
                        action="store_true",
