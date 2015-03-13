@@ -153,11 +153,11 @@ def opts():
                        default=False,
                        action="store_true",
                        help="Skip channels with all QIE samples = 0.")
-    matchCh.add_option("--adc-vs-adc",
-                       dest="adcVsAdc",
+    matchCh.add_option("--any-emap",
+                       dest="anyEmap",
                        default=False,
                        action="store_true",
-                       help="Make a scatter plot of FEDS2 vs. FEDS1 ADC values.")
+                       help="Brute-force search for matches.")
     parser.add_option_group(matchCh)
 
     patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
@@ -267,7 +267,7 @@ if __name__ == "__main__":
         printer.__color = False
 
     compareOptions = {"skipErrF": fedList(options.skipErrF)}
-    for item in ["adcPlots", "skipAllZero", "adcVsAdc"]:
+    for item in ["adcPlots", "skipAllZero", "anyEmap"]:
         compareOptions[item] = getattr(options, item)
 
     patternOptions = {"rmRibbon": options.rmRibbon,
@@ -316,6 +316,6 @@ if __name__ == "__main__":
                           pdf=options.outputFile.replace(".root", ".pdf"),
                           )
 
-    if options.adcVsAdc:
+    if feds2 and not options.anyEmap:
         for exclude in [False, True]:
             adc_vs_adc.go(fileName=options.outputFile, exclude=exclude, feds1=feds1, feds2=feds2)
