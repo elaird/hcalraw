@@ -148,11 +148,6 @@ def opts():
                        default="1,3",
                        metavar="s",
                        help="Skip channels with these ErrF values (default is 1,3).")
-    matchCh.add_option("--skip-zero",
-                       dest="skipAllZero",
-                       default=False,
-                       action="store_true",
-                       help="Skip channels with all QIE samples = 0.")
     matchCh.add_option("--any-emap",
                        dest="anyEmap",
                        default=False,
@@ -273,7 +268,7 @@ if __name__ == "__main__":
         printer.__color = False
 
     compareOptions = {"skipErrF": fedList(options.skipErrF)}
-    for item in ["adcPlots", "skipAllZero", "anyEmap"]:
+    for item in ["adcPlots", "anyEmap"]:
         compareOptions[item] = getattr(options, item)
 
     patternOptions = {"rmRibbon": options.rmRibbon,
