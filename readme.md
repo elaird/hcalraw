@@ -19,9 +19,9 @@ source env/lxplus6.sh
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --any-emap --skip-errfs=3
 
 # analyze FE pattern runs
-./oneRun.py --file1=$LS1/USC_231834.root --feds1=uHF  --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_utca_G.txt
 ./oneRun.py --file1=$LS1/USC_235576.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_2014.txt
 ./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_vme_G.txt
+./oneRun.py --file1=$LS1/USC_231834.root --feds1=uHF  --nevents=1 --patterns --compressed | ./diff.py --ref=data/ref_utca_G.txt
 
 # analyze global runs
 ./oneRun.py --file1=$GR2/Cosmics/RAW/v1/000/235/316/00000/9CE27CCC-5EBB-E411-AF2C-02163E0127C8.root --feds1=718,719 --feds2=1118  --utca-bcn-delta=-131 --skip-flavors=0,2 --dump=0 --nevents=10
