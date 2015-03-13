@@ -167,7 +167,9 @@ def loop_over_feds(raw, book, adcPlots):
     return okFeds
 
 
-def fill_adc_vs_adc(mapF1, mapF2, book):
+def adc_vs_adc(mapF1, mapF2, book=None):
+    matched = []
+    nonMatched = []
     for coords1, samples1  in mapF1.iteritems():
         coords2 = configuration.transformed(*coords1)
         if coords2 is None:
@@ -180,20 +182,25 @@ def fill_adc_vs_adc(mapF1, mapF2, book):
             # print (fmt % coords1) + ": " + fmt % coords2
             samples2 = [-1] * len(samples1)
 
-        crate2, slot2, top2, fiber2, _ = coords2
-        if top2 == " ":
-            rx = 12 <= fiber2
+        if samples1 == samples2:
+            matched.append(coords1)
         else:
-            rx = "bt".find(top2)
+            nonMatched.append(coords1)
 
-        for i, s1 in enumerate(samples1):
-            s2 = samples2[i]
-            book.fill((s1, s2),
-                      "adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
-                      (129, 129),
-                      (-1.5, -1.5),
-                      (127.5, 127.5),
-                      title=";ADC;ADC;samples / bin")
+        if book:
+            crate2, slot2, top2, fiber2, _ = coords2
+            if top2 == " ":
+                rx = 12 <= fiber2
+            else:
+                rx = "bt".find(top2)
+
+            for i, s1 in enumerate(samples1):
+                s2 = samples2[i]
+                book.fill((s1, s2),
+                          "adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
+                          (129, 129), (-1.5, -1.5), (127.5, 127.5),
+                          title=";ADC;ADC;samples / bin")
+    return matched, nonMatched
 
 
 def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  adcPlots=False):
@@ -202,26 +209,23 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  adcPlots=Fal
         mapF2, mapB2, _ = dataMap(raw2, skipErrF=skipErrF, checkLen=True)
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
+        # if nonMatched12:
+        #    reportMatched(matched12)
+        #    reportFailed(nonMatched12)
     else:
         mapF1 = dataMap(raw1, skipErrF=skipErrF)[0]
         mapF2 = dataMap(raw2, skipErrF=skipErrF)[0]
-        fill_adc_vs_adc(mapF1, mapF2, book)
-
-        matched12, nonMatched12 = {}, []
-        matched21, nonMatched21 = {}, []
+        matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book)
+        matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1)
 
     printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
     printRaw.oneEvent(raw2, nonMatched=nonMatched21)
-
-    # if nonMatched12:
-    #    reportMatched(matched12)
-    #    reportFailed(nonMatched12)
 
     nFib = 228  # = 2 2 3 19;  gt 14 HTRs * 16 fib / HTR
     bins = (nFib, -0.5, nFib - 0.5)
     for iChannel in range(3):
         title = ";no. matched fibers (ch%d);Events / bin" % iChannel
-        book.fill(nPerChannel(matched12.keys(), iChannel),
+        book.fill(nPerChannel(matched12.keys() if anyEmap else matched12, iChannel),
                   "MatchedFibersCh%d" % iChannel,
                   *bins, title=title)
         book.fill(nPerChannel(nonMatched12, iChannel),
