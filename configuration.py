@@ -4,11 +4,13 @@ import re
 __pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 
 # these are overwritten by oneRun.py
-matchRange = lambda x, **_: []
 __utcaBcnDelta = None
 __compressedPatterns = None
 __asciifyPatterns = None
 __regMatchPatterns = None
+def matchRange(fedId=None, slot=None, fibCh=None, utca=None):
+    return []
+
 
 
 def patternString(codes=[]):
@@ -95,6 +97,9 @@ def matchRange_LS1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=Non
 
     assert type(shiftFibCh2) is bool
 
+    global __utcaBcnDelta
+    __utcaBcnDelta = -119
+
     # exceptions for Jan. 2013 slice-test (HF)
     if fedId == 990 or (fedId == 989 and 5 <= slot):
         return range(1, 10)
@@ -122,6 +127,9 @@ def matchRange_v1(fedId=None, slot=None, fibCh=None, utca=None):
 
 def matchRange_v2(fedId=None, slot=None, fibCh=None, utca=None):
     """global runs during/since Feb. 2015"""
+
+    global __utcaBcnDelta
+    __utcaBcnDelta = -131
 
     if 1100 <= fedId:
         return range(2, 8)
