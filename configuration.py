@@ -4,7 +4,7 @@ import re
 __pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 
 # these are overwritten by oneRun.py
-__utcaBcnDelta = None
+__utcaBcnDelta = 0
 __compressedPatterns = None
 __asciifyPatterns = None
 __regMatchPatterns = None
