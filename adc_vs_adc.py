@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import ROOT as r
+import sys
 
 
 def entitle(hSum, skip_rxs):
@@ -14,25 +15,29 @@ def entitle(hSum, skip_rxs):
         else:
             hSum.SetTitle("excluding: %s " % "#semicolon ".join(title))
 
+def i(s):
+    return int(s[2:])
+
 
 def histo(fileName="", skip_rxs=[]):
     hSum = None
     f = r.TFile(fileName)
-    for cr in [22]:
-        for sl in range(1, 13):
-            for rx in range(2):
-                if (cr, sl, rx) in skip_rxs:
-                    continue
+    for tkey in f.GetListOfKeys():
+        name = tkey.GetName()
+        if not name.startswith("adc_vs_adc"):
+            continue
 
-                h = f.Get("adc_vs_adc_cr%02d_sl%02d_rx%1d" % (cr, sl, rx))
-                if not h:
-                    continue
+        # "adc_vs_adc_cr%02d_sl%02d_rx%1d"
+        t = map(i, name.split("_")[3:])
+        if t in skip_rxs:
+            continue
 
-                if hSum is None:
-                    hSum = h.Clone("adc_vs_adc")
-                    hSum.Reset()
-                    hSum.SetDirectory(0)
-                hSum.Add(h)
+        h = f.Get(name)
+        if hSum is None:
+            hSum = h.Clone("adc_vs_adc")
+            hSum.Reset()
+            hSum.SetDirectory(0)
+        hSum.Add(h)
 
     entitle(hSum, skip_rxs)
     return hSum
@@ -95,7 +100,7 @@ def go(fileName="output/latest.root", exclude=None, feds1=[], feds2=[]):
             pdf = pdf.replace(".pdf", "_exclude.pdf")
         r.gPad.Print(pdf)
     else:
-        print "No histograms matching selection were found (consider swapping --feds1 and --feds2)."
+        sys.exit("No histograms matching selection were found.")
 
 
 if __name__ == "__main__":
