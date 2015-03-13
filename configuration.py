@@ -152,6 +152,33 @@ def expectedHtr(fedId, spigot):
             "Slot": slot}
 
 
+def __isVme(fedId=None):
+    return 700 <= fedId <= 731
+
+
+def expectedCrate(fedId):
+    # http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/Crates/VME_interfaces_newPCs.htm
+    if not __isVme(fedId):
+        return -1
+
+    return {350:  4,
+            351:  0,
+            352:  1,
+            353:  5,
+            354: 11,
+            355: 15,
+            356: 17,
+            357: 14,
+            358: 10,
+            359:  2,
+            360:  9,
+            361: 12,
+            362:  3,
+            363:  7,
+            364:  6,
+            365: 13}[fedId/2]
+
+
 def transformed(crate, slot, top, fiber, fibCh):
     if crate < 20:
         # VME --> uTCA
@@ -185,13 +212,10 @@ def transformed(crate, slot, top, fiber, fibCh):
 
 
 def format(treeName=""):
-    def _isVme(fedId=None):
-        return 700 <= fedId <= 731
-
     out = None
     if treeName == "CMSRAW":
         out = {"name":  "HCAL",
-               "branch": lambda fedId: "%s%d" % ("HCAL_DCC" if _isVme(fedId) else "Chunk", fedId),
+               "branch": lambda fedId: "%s%d" % ("HCAL_DCC" if __isVme(fedId) else "Chunk", fedId),
                "auxBranch": False,
                }
 
