@@ -48,11 +48,11 @@ def pretty(be=None, fe=None):
         if dcc.startswith("u"):
             crate = dcc[1:]
             slot = sp
-            s = "%3s %2s %2s:  " % (crate, slot, fi)
+            s = "    %2s     %2s   %2s:  " % (crate, slot, fi)
         else:
             exp = configuration.expectedHtr(int(dcc), int(sp))
             htr = "%2d%1s" % (exp["Slot"], exp["Top"])
-            s = "%3s %2s(%3s) %2s:  " % (dcc, sp, htr, fi)
+            s = "%2s     %2s(%3s) %2s:  " % (dcc, sp, htr, fi)
     else:
         s = ""
 
@@ -110,10 +110,10 @@ def report(missing=None, different=None, same=None, nMissingMax=None):
     printTable(nMissing, header="Missing Fibers")
 
     header = "| RBXes with (1 <= n missing fibers <= %d) |" % nMissingMax
-    print "-"*len(header)
+    print "-" * len(header)
     print header
-    print "-"*len(header)
-    print "DCC SP(HTR) FI: ref. RBX RM FI"
+    print "-" * len(header)
+    print "DCC(CR) SP(HTR) FI: ref. RBX RM FI"
 
     count = 0
     for iMissing in range(1, 1 + nMissingMax):
@@ -131,7 +131,7 @@ def report(missing=None, different=None, same=None, nMissingMax=None):
     print "| Differences |"
     print "---------------"
     if different:
-        print "DCC SP(HTR) FI: ref. RBX RM FI  |   cabled"
+        print "DCC(CR) SP(HTR) FI: ref. RBX RM FI  |   cabled"
         for be, (ref, cabled) in sorted(different.iteritems()):
             print pretty(be=be, fe=ref) + "  | " + pretty(fe=cabled)
     else:
