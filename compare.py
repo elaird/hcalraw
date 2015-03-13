@@ -196,15 +196,21 @@ def fill_adc_vs_adc(mapF1, mapF2, book):
                       title=";ADC;ADC;samples / bin")
 
 
-def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=False, adcVsAdc=False):
-    okFeds = set()
-    for raw in [raw1, raw2]:
-        okFeds = okFeds.union(loop_over_feds(raw, book, adcPlots))
+def compare(raw1={}, raw2={}, book={},
+            skipErrF=[], skipAllZero=False, anyEmap=False,  adcPlots=False):
 
-    mapF1, mapB1 = dataMap(raw1, skipErrF=skipErrF, skipAllZero=skipAllZero)
-    mapF2, mapB2 = dataMap(raw2, skipErrF=skipErrF, skipAllZero=skipAllZero)
-    matched12, nonMatched12 = matchStats(mapF1, mapB2)
-    matched21, nonMatched21 = matchStats(mapF2, mapB1)
+    if anyEmap:
+        mapF1, mapB1 = dataMap(raw1, skipErrF=skipErrF, skipAllZero=skipAllZero)
+        mapF2, mapB2 = dataMap(raw2, skipErrF=skipErrF, skipAllZero=skipAllZero)
+        matched12, nonMatched12 = matchStats(mapF1, mapB2)
+        matched21, nonMatched21 = matchStats(mapF2, mapB1)
+    else:
+        mapF1, mapB1 = dataMap(raw1, skipErrF=skipErrF)
+        mapF2, mapB2 = dataMap(raw2, skipErrF=skipErrF)
+        fill_adc_vs_adc(mapF1, mapF2, book)
+
+        matched12, nonMatched12 = matchStats(mapF1, mapB2)
+        matched21, nonMatched21 = matchStats(mapF2, mapB1)
 
     printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
     printRaw.oneEvent(raw2, nonMatched=nonMatched21)
@@ -235,6 +241,10 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=
     utca2 = raw2[fed2]["header"]["utca"]
     bcnDelta = configuration.bcnDelta(utca1) - configuration.bcnDelta(utca2)
 
+    okFeds = set()
+    for raw in [raw1, raw2]:
+        okFeds = okFeds.union(loop_over_feds(raw, book, adcPlots))
+
     if (fed1 in okFeds) and (fed2 in okFeds):
         for x in ["BcN", "OrN", "EvN"]:
             title = ";".join([x+("%d" % bcnDelta if (x == "BcN") else ""),
@@ -243,10 +253,6 @@ def compare(raw1={}, raw2={}, book={}, adcPlots=False, skipErrF=[], skipAllZero=
                               ])
             delta = raw1[fed1]["header"][x] - raw2[fed2]["header"][x]
             book.fill(delta, "delta"+x, 11, -5.5, 5.5, title=title)
-
-
-    if adcVsAdc:
-        fill_adc_vs_adc(mapF1, mapF2, book)
 
 
 def coordString(crate, slot, tb, fiber, channel):
