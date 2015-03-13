@@ -184,7 +184,7 @@ def fill_adc_vs_adc(mapF1, mapF2, book):
         if top2 == " ":
             rx = 12 <= fiber2
         else:
-            rx = ["b", "t"].find(top2)
+            rx = "bt".find(top2)
 
         for i, s1 in enumerate(samples1):
             s2 = samples2[i]
