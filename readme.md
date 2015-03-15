@@ -63,10 +63,3 @@ source env/lxplus6.sh
 * `printer.py` contains a utility class for printing messages
 * `processUSC.py` loops over available USC local runs and processes them
 * `utils.py` contains helper functions
-
-####To do
-* TChain support
-* TTree cache
-* improve storage structures
-* HLT path filter in analyze.py
-* fix --use-evn
