@@ -13,6 +13,7 @@ def htrSummary(blocks=[], book=None, fedId=None, fedEvn=None,
     nBadHtrs = 0
     caps = {}
     ErrF = {}
+    adcs = set()
     for i in range(4):
         caps[i] = 0
         ErrF[i] = 0
@@ -45,14 +46,18 @@ def htrSummary(blocks=[], book=None, fedId=None, fedEvn=None,
             nQie = len(channelData["QIE"].values())
             book.fill(nQie, "nQieSamples_%d" % fedId, 14, -0.5, 13.5,
                       title="FED %d;number of QIE samples;Channels / bin" % fedId)
-            if not channelData["ErrF"]:
-                caps[channelData["CapId0"]] += 1
-                if adcPlots:
-                    for adc in channelData["QIE"].values():
-                        book.fill(adc, "all_adc", 128, -0.5, 127.5,
-                                  title=";all ADC (when ErrF==0); TS / bin")
 
-    return nBadHtrs, ErrF, caps
+            if channelData["ErrF"]:
+                continue
+
+            caps[channelData["CapId0"]] += 1
+            if adcPlots:
+                for adc in channelData["QIE"].values():
+                    adcs.add(adc)
+                    book.fill(adc, "all_adc", 128, -0.5, 127.5,
+                              title=";all ADC (when ErrF==0); TS / bin")
+
+    return nBadHtrs, ErrF, caps, adcs
 
 
 def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
@@ -77,12 +82,12 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
         msg2 = " header lacks EvN.  Keys: %s" % str(d["header"].keys())
         printer.error(msg + msg2)
 
-    nBadHtrs, ErrF, caps = htrSummary(blocks=d["htrBlocks"].values(),
-                                      book=book,
-                                      fedId=fedId,
-                                      fedEvn=fedEvn,
-                                      msg=msg,
-                                      adcPlots=adcPlots)
+    nBadHtrs, ErrF, caps, adcs = htrSummary(blocks=d["htrBlocks"].values(),
+                                            book=book,
+                                            fedId=fedId,
+                                            fedEvn=fedEvn,
+                                            msg=msg,
+                                            adcPlots=adcPlots)
 
     errFSum = 0.0 + sum(ErrF.values())
     if errFSum:
@@ -100,7 +105,7 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
 
     book.fill(nBadHtrs, "nBadHtrs_%d" % fedId, 16, -0.5, 15.5,
               title="FED %d; N bad HTRs;Events / bin" % fedId)
-    return nBadHtrs
+    return nBadHtrs, adcs
 
 
 def checkHtrModules(fedId=None, htrBlocks={}):
@@ -128,7 +133,8 @@ def nPerChannel(lst=[], iChannel=None):
 
 def loop_over_feds(raw, book, adcPlots):
     okFeds = set()
-    maxAdc = -1
+    adcs = set()
+
     for fedId, dct in sorted(raw.iteritems()):
         if fedId is None:
             continue
@@ -141,10 +147,9 @@ def loop_over_feds(raw, book, adcPlots):
             printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
             continue
 
-        if singleFedPlots(fedId=fedId,
-                          d=dct,
-                          book=book,
-                          adcPlots=adcPlots):
+        nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book, adcPlots=adcPlots)
+        adcs = adcs.union(adcs1)
+        if nBadHtrs:
             return
 
         okFeds.add(fedId)
@@ -152,17 +157,11 @@ def loop_over_feds(raw, book, adcPlots):
             if not raw[fedId]["header"]["utca"]:
                 checkHtrModules(fedId=fedId, htrBlocks=raw[fedId]["htrBlocks"])
 
-        if adcPlots:
-            for block in dct["htrBlocks"].values():
-                for channelData in block["channelData"].values():
-                    if not channelData["ErrF"]:
-                        for adc in channelData["QIE"].values():
-                            if maxAdc < adc:
-                                maxAdc = adc
+    if not adcs:
+        adcs.add(-1)
 
-    if adcPlots and raw is raw1:
-        book.fill(maxAdc, "max_adc", 128, -0.5, 127.5,
-                  title=";max ADC (when ErrF==0);Events / bin")
+    book.fill(max(adcs), "max_adc", 129, -1.5, 127.5,
+              title=";max ADC (when ErrF==0);Events / bin")
 
     return okFeds
 
