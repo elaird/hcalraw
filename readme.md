@@ -69,6 +69,4 @@ source env/lxplus6.sh
 * TTree cache
 * improve storage structures
 * HLT path filter in analyze.py
-* fix ADC plots
 * fix --use-evn
-
