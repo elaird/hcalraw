@@ -4,8 +4,9 @@ import re
 pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 compressedPatterns = True
 
-# this value may be overwritten by configuration.matchRange_*
+# these value may be overwritten by configuration.matchRange_*
 __utcaBcnDelta = 0
+__vmeBcnDelta = 0
 
 # this function is overwritten by oneRun.py
 def matchRange(fedId=None, slot=None, fibCh=None, utca=None):
@@ -38,7 +39,7 @@ def patternString(codes=[], asciifyPatterns=True, regMatchPatterns=True):
 
 
 def bcnDelta(utca):
-    return __utcaBcnDelta if utca else 0
+    return __utcaBcnDelta if utca else __vmeBcnDelta
 
 
 def nFibers(utca):
