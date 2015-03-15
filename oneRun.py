@@ -167,21 +167,6 @@ def opts():
                         default=10,
                         metavar="N",
                         help="No. of time slices to consider (default is 10).")
-    patterns.add_option("--compressed",
-                        dest="compressed",
-                        default=False,
-                        action="store_true",
-                        help="Handle lack of capids by doing (code>>1)&0x3f + 32.")
-    patterns.add_option("--no-asciify",
-                        dest="noAsciify",
-                        default=False,
-                        action="store_true",
-                        help="Do not convert hex codes to ASCII.")
-    patterns.add_option("--no-reg-match",
-                        dest="noRegMatch",
-                        default=False,
-                        action="store_true",
-                        help="Print full pattern, even if it matches regexp.")
     patterns.add_option("--patternB",
                         dest="patternB",
                         default=False,
@@ -260,10 +245,6 @@ if __name__ == "__main__":
     elif options.utcaBcnDelta:
         configuration.__utcaBcnDelta = integer(options.utcaBcnDelta)
 
-    configuration.__compressedPatterns = options.compressed
-    configuration.__asciifyPatterns = not options.noAsciify
-    configuration.__regMatchPatterns = not options.noRegMatch
-
     if options.noColor:
         printer.__color = False
 
@@ -274,7 +255,6 @@ if __name__ == "__main__":
     patternOptions = {"rmRibbon": options.rmRibbon,
                       "nTs": integer(options.nts, "nts"),
                       "pureFibersOnly": not options.patternB,
-                      "compressed": options.compressed,
                       "active": options.patterns,
                       }
 
