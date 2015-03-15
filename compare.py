@@ -221,6 +221,15 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  adcPlots=Fal
     printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
     printRaw.oneEvent(raw2, nonMatched=nonMatched21)
 
+    okFeds = set()
+    for raw in [raw1, raw2]:
+        okFeds = okFeds.union(loop_over_feds(raw, book, adcPlots))
+
+    noGood = [[], [None]]
+    if raw1.keys() in noGood or raw2.keys() in noGood:
+        return
+
+    # histogram n matched
     nFib = 228  # = 2 2 3 19;  gt 14 HTRs * 16 fib / HTR
     bins = (nFib, -0.5, nFib - 0.5)
     for iChannel in range(3):
@@ -232,20 +241,12 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  adcPlots=Fal
                   "NonMatchedFibersCh%d" % iChannel,
                   *bins, title=title.replace("matched", "non-matched"))
 
-    #some delta plots
-    noGood = [[], [None]]
-    if raw1.keys() in noGood or raw2.keys() in noGood:
-        return
+    # histogram some deltas
     fed1 = filter(lambda x: x is not None, sorted(raw1.keys()))[0]
     fed2 = filter(lambda x: x is not None, sorted(raw2.keys()))[0]
-
     utca1 = raw1[fed1]["header"]["utca"]
     utca2 = raw2[fed2]["header"]["utca"]
     bcnDelta = configuration.bcnDelta(utca1) - configuration.bcnDelta(utca2)
-
-    okFeds = set()
-    for raw in [raw1, raw2]:
-        okFeds = okFeds.union(loop_over_feds(raw, book, adcPlots))
 
     if (fed1 in okFeds) and (fed2 in okFeds):
         for x in ["BcN", "OrN", "EvN"]:
