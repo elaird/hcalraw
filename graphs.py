@@ -132,6 +132,37 @@ def histoLoop(f, lst, func):
     return out
 
 
+def plotList(f, pad2, feds, offset, lst=[]):
+    keep = []
+
+    if True:
+        for iHisto, name in enumerate(lst):
+            if not name:
+                continue
+            pad2.cd(offset + iHisto)
+            adjustPad(logY=True)
+            h = f.Get(name)
+            if h:
+                shiftFlows(h)
+                h.Draw("hist")
+                stylize(h)
+                keep.append(h)
+            else:
+                lst = []
+                color = [r.kBlack, r.kRed, r.kBlue]
+                color += [r.kBlack] * (len(feds) - len(color))
+                style = [1, 2, 3]
+                style += [1] * (len(feds) - len(style))
+                for iFed, fed in enumerate(sorted(feds)):
+                    if name == "BcN" and iFed:
+                        continue
+
+                    lst.append((fed, color[iFed], style[iFed]))
+
+                keep += histoLoop(f, lst, lambda x: "%s_%d" % (name, x))
+    return keep
+
+
 def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
     keep = []
 
@@ -172,8 +203,15 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
         keep += [graph, null]
 
 
-    #EvN, OrN, BcN agreement
-    pad2.cd(1)
+    # single FED
+    keep += plotList(f, pad2, feds, 1,
+                     ["nBytesSW", "nQieSamples", "nWord16Skipped", "BcN",
+                      "ErrF1", "ErrF3", "EvN_HTRs", "ChannelFlavor",
+                      #"TTS", "PopCapFrac",
+                  ])
+
+    # EvN, OrN, BcN agreement
+    pad2.cd(9)
     adjustPad(logY=True)
 
     keep += histoLoop(f,
@@ -184,35 +222,9 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
                       lambda x: "delta%s" % x,
                       )
 
-    if True:
-        for iHisto, name in enumerate(["", "nBytesSW", "nQieSamples", "nWord16Skipped",
-                                       "ErrF1", "ErrF3", "EvN_HTRs", "ChannelFlavor",
-                                       "MatchedFibersCh0", "MatchedFibersCh1", "MatchedFibersCh2", "BcN",
-                                       #"TTS", "PopCapFrac"
-                                       ]):
-            if not name:
-                continue
-            pad2.cd(1+iHisto)
-            adjustPad(logY=True)
-            h = f.Get(name)
-            if h:
-                shiftFlows(h)
-                h.Draw("hist")
-                stylize(h)
-                keep.append(h)
-            else:
-                lst = []
-                color = [r.kBlack, r.kRed, r.kBlue]
-                color += [r.kBlack] * (len(feds) - len(color))
-                style = [1, 2, 3]
-                style += [1] * (len(feds) - len(style))
-                for iFed, fed in enumerate(sorted(feds)):
-                    if name == "BcN" and iFed:
-                        continue
-
-                    lst.append((fed, color[iFed], style[iFed]))
-
-                keep += histoLoop(f, lst, lambda x: "%s_%d" % (name, x))
+    # fibers
+    keep += plotList(f, pad2, feds, 10,
+                     ["MatchedFibersCh0", "MatchedFibersCh1", "MatchedFibersCh2"])
 
     return keep
 
