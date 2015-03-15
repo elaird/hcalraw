@@ -135,31 +135,30 @@ def histoLoop(f, lst, func):
 def plotList(f, pad2, feds, offset, lst=[]):
     keep = []
 
-    if True:
-        for iHisto, name in enumerate(lst):
-            if not name:
-                continue
-            pad2.cd(offset + iHisto)
-            adjustPad(logY=True)
-            h = f.Get(name)
-            if h:
-                shiftFlows(h)
-                h.Draw("hist")
-                stylize(h)
-                keep.append(h)
-            else:
-                lst = []
-                color = [r.kBlack, r.kRed, r.kBlue]
-                color += [r.kBlack] * (len(feds) - len(color))
-                style = [1, 2, 3]
-                style += [1] * (len(feds) - len(style))
-                for iFed, fed in enumerate(sorted(feds)):
-                    if name == "BcN" and iFed:
-                        continue
+    for iHisto, name in enumerate(lst):
+        if not name:
+            continue
+        pad2.cd(offset + iHisto)
+        adjustPad(logY=True)
+        h = f.Get(name)
+        if h:
+            shiftFlows(h)
+            h.Draw("hist")
+            stylize(h)
+            keep.append(h)
+        else:
+            lst = []
+            color = [r.kBlack, r.kRed, r.kBlue]
+            color += [r.kBlack] * (len(feds) - len(color))
+            style = [1, 2, 3]
+            style += [1] * (len(feds) - len(style))
+            for iFed, fed in enumerate(sorted(feds)):
+                if name == "BcN" and iFed:
+                    continue
 
-                    lst.append((fed, color[iFed], style[iFed]))
+                lst.append((fed, color[iFed], style[iFed]))
 
-                keep += histoLoop(f, lst, lambda x: "%s_%d" % (name, x))
+            keep += histoLoop(f, lst, lambda x: "%s_%d" % (name, x))
     return keep
 
 
