@@ -38,11 +38,6 @@ def opts():
                       default=False,
                       action="store_true",
                       help="profile the run")
-    common.add_option("--utca-bcn-delta",
-                     dest="utcaBcnDelta",
-                     default="",
-                     metavar="N",
-                     help="Add this to uTCA BcN (and OrN).  Defaults are in configuration.matchRange_*")
     common.add_option("--adc-plots",
                       dest="adcPlots",
                       default=False,
@@ -239,11 +234,7 @@ if __name__ == "__main__":
 
     if options.match:
         configuration.matchRange = getattr(configuration, "matchRange_%s" % options.match)
-        if options.utcaBcnDelta:
-            sys.exit("FATAL: --match implies a utca-bcn-delta; do not also pass --utca-bcn-delta .")
         configuration.matchRange()  # call once to set utcaBcnDelta
-    elif options.utcaBcnDelta:
-        configuration.__utcaBcnDelta = integer(options.utcaBcnDelta)
 
     if options.noColor:
         printer.__color = False
