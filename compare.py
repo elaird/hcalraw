@@ -131,7 +131,7 @@ def nPerChannel(lst=[], iChannel=None):
     return len(filter(lambda x: x[-1] == iChannel, lst))
 
 
-def loop_over_feds(raw, book, adcPlots):
+def loop_over_feds(raw, book, adcPlots, adcTag=""):
     okFeds = set()
     adcs = set()
 
@@ -160,7 +160,7 @@ def loop_over_feds(raw, book, adcPlots):
     if not adcs:
         adcs.add(-1)
 
-    book.fill(max(adcs), "max_adc", 129, -1.5, 127.5,
+    book.fill(max(adcs), "max_adc_%s" % adcTag, 129, -1.5, 127.5,
               title=";max ADC (when ErrF==0);Events / bin")
 
     return okFeds
@@ -220,13 +220,13 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  adcPlots=Fal
     printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
     printRaw.oneEvent(raw2, nonMatched=nonMatched21)
 
-    okFeds = set()
-    for raw in [raw1, raw2]:
-        okFeds = okFeds.union(loop_over_feds(raw, book, adcPlots))
+    okFeds = loop_over_feds(raw1, book, adcPlots, adcTag="feds1")
 
     noGood = [[], [None]]
     if raw1.keys() in noGood or raw2.keys() in noGood:
         return
+
+    okFeds = okFeds.union(loop_over_feds(raw2, book, adcPlots, adcTag="feds2"))
 
     # histogram n matched
     nFib = 228  # = 2 2 3 19;  gt 14 HTRs * 16 fib / HTR
