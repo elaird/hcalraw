@@ -22,40 +22,61 @@ def opts():
                       dest="nevents",
                       default="",
                       metavar="N",
-                      help="stop after N events (including skipped events)")
+                      help="Stop after N events (including skipped events).")
     common.add_option("--nevents-skip",
                       dest="neventsSkip",
                       default=0,
                       metavar="M",
-                      help="skip the first M events")
+                      help="Skip the first M events.")
     common.add_option("--output-file",
                       dest="outputFile",
                       default="output/latest.root",
                       metavar="f",
-                      help="store histograms in this .root file.")
+                      help="Store histograms in this .root file.")
+    common.add_option("--no-unpack",
+                      dest="noUnpack",
+                      default=False,
+                      action="store_true",
+                      help="Loop over raw data, but do not unpack it.")
+    common.add_option("--skip-flavors",
+                      dest="unpackSkipFlavors",
+                      default="",
+                      metavar="s",
+                      help="Do not unpack channels with these flavors (e.g. 2,7).")
     common.add_option("--profile",
                       dest="profile",
                       default=False,
                       action="store_true",
-                      help="profile the run")
+                      help="Profile this program.")
     common.add_option("--adc-plots",
                       dest="adcPlots",
                       default=False,
                       action="store_true",
                       help="Histogram ADC values.")
-    common.add_option("--no-unpack",
-                      dest="noUnpack",
-                      default=False,
-                      action="store_true",
-                      help="loop over raw data, but do not unpack it")
-    common.add_option("--skip-flavors",
-                      dest="unpackSkipFlavors",
-                      default="",
-                      metavar="s",
-                      help="do not unpack channels with these flavors (e.g. 2,7).")
     parser.add_option_group(common)
 
     printing = optparse.OptionGroup(parser, "Options for printing to stdout")
+    printing.add_option("--no-color",
+                        dest="noColor",
+                        default=False,
+                        action="store_true",
+                        help="disable color in stdout")
+    printing.add_option("--progress",
+                        dest="progress",
+                        default=False,
+                        action="store_true",
+                        help="print TTree entry number (when power of 2)")
+    printing.add_option("--no-warn-unpack",
+                        dest="noWarnUnpack",
+                        default=False,
+                        action="store_true",
+                        help="suppress warnings during unpacking")
+    printing.add_option("--crateslots",
+                        dest="crateslots",
+                        default=None,
+                        metavar="D",
+                        help="list of (100*crate)+slot to dump, e.g. 917,2911")
+
     dump = ["dump level (-1 to 8), default is -1.",
             "-1: only program info, warnings and errors",
             "0: only summary (no per-event info)",
@@ -73,27 +94,6 @@ def opts():
                         default=-1,
                         metavar="D",
                         help=" ".join([d.ljust(60) for d in dump]))
-    printing.add_option("--crateslots",
-                        dest="crateslots",
-                        default=None,
-                        metavar="D",
-                        help="list of (100*crate)+slot to dump, e.g. 917,2911")
-    printing.add_option("--no-warn-unpack",
-                        dest="noWarnUnpack",
-                        default=False,
-                        action="store_true",
-                        help="suppress warnings during unpacking")
-    printing.add_option("--no-color",
-                        dest="noColor",
-                        default=False,
-                        action="store_true",
-                        help="disable color in stdout")
-    printing.add_option("--progress",
-                        dest="progress",
-                        default=False,
-                        action="store_true",
-                        help="print TTree entry number (when power of 2)")
-
     parser.add_option_group(printing)
 
     match = optparse.OptionGroup(parser, "Options for matching events across files")
@@ -115,11 +115,6 @@ def opts():
                      default=False,
                      action="store_true",
                      help="Consider only EvN with (EvN & 0x1fff) == 0.")
-    match.add_option("--orn-tolerance",
-                     dest="ornTolerance",
-                     default=0,
-                     metavar="N",
-                     help="Consider |OrN1 - OrN2| <= N a match (default is 0).")
     match.add_option("--identity-map",
                      dest="identityMap",
                      default=False,
@@ -156,7 +151,6 @@ def opts():
                         default=False,
                         action="store_true",
                         help="interpret QIE data as FE patterns")
-
     patterns.add_option("--nts",
                         dest="nts",
                         default=10,
@@ -249,7 +243,7 @@ if __name__ == "__main__":
                       "active": options.patterns,
                       }
 
-    mapOptions = {"ornTolerance": integer(options.ornTolerance, "orn-tolerance")}
+    mapOptions = {"ornTolerance": 0}
     for key in ["useEvn", "filterEvn", "printEventMap", "identityMap"]:
         mapOptions[key] = getattr(options, key)
 
