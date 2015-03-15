@@ -2,8 +2,6 @@ import re
 
 
 pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
-asciifyPatterns = True
-regMatchPatterns = True
 compressedPatterns = True
 
 # this value may be overwritten by configuration.matchRange_*
@@ -14,7 +12,7 @@ def matchRange(fedId=None, slot=None, fibCh=None, utca=None):
     return []
 
 
-def patternString(codes=[]):
+def patternString(codes=[], asciifyPatterns=True, regMatchPatterns=True):
     if not any(codes):
         return None
 
