@@ -52,7 +52,7 @@ def opts():
                       dest="adcPlots",
                       default=False,
                       action="store_true",
-                      help="Histogram ADC values.")
+                      help="Histogram ADC values when ErrF == 0.")
     parser.add_option_group(common)
 
     printing = optparse.OptionGroup(parser, "Options for printing to stdout")
