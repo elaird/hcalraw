@@ -1,16 +1,17 @@
 import re
 
 
-__pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
+pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
+asciifyPatterns = True
+regMatchPatterns = True
+compressedPatterns = True
 
-# these are overwritten by oneRun.py
+# this value may be overwritten by configuration.matchRange_*
 __utcaBcnDelta = 0
-__compressedPatterns = None
-__asciifyPatterns = None
-__regMatchPatterns = None
+
+# this function is overwritten by oneRun.py
 def matchRange(fedId=None, slot=None, fibCh=None, utca=None):
     return []
-
 
 
 def patternString(codes=[]):
@@ -19,18 +20,18 @@ def patternString(codes=[]):
 
     l = []
     for code in codes:
-        if __compressedPatterns:
+        if compressedPatterns:
             code = (code >> 1) & 0x3f
             code += 32
 
-        if __asciifyPatterns and (32 <= code <= 126):
+        if asciifyPatterns and (32 <= code <= 126):
             l.append("%2s" % chr(code))
         else:
             l.append("%2x" % code)
 
     s = " ".join(l)
-    match = __pattern.search(s)
-    if __regMatchPatterns and match:
+    match = pattern.search(s)
+    if regMatchPatterns and match:
         m = match.group()
         m = m.replace(" ", "").replace("-", "")
         return "%s %s %s" % (m[:-2].ljust(6), m[-2], m[-1])
