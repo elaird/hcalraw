@@ -1,4 +1,2 @@
 source env/slc6-cmssw.sh
-source /afs/cern.ch/project/eos/installation/cms/etc/setup.sh
-export LS1=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/LS1
-export GR2=root://eoscms.cern.ch//store/data/Commissioning2015
+source env/slc6-eos.sh
