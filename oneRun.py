@@ -278,7 +278,7 @@ if __name__ == "__main__":
         go()
 
     graphs.makeSummaryPdf(inputFiles=[options.outputFile],
-                          feds=(feds1 + feds2)[:3],
+                          feds=(feds1 + feds2)[:5],
                           pdf=options.outputFile.replace(".root", ".pdf"),
                           )
 
