@@ -104,16 +104,20 @@ def histoLoop(f, lst, func):
     maxes = []
     legEntries = []
     h0 = None
+
     for i, (x, color, style) in enumerate(lst):
         h = f.Get(func(x))
         if not h:
+            continue
+
+        if not h.GetEntries():
             continue
 
         if h.GetName().startswith("ChannelFlavor"):
             labelXAxis(h, labels=configuration.flavorLabels())
 
         gopts = "hist"
-        if i:
+        if h0:
             gopts += "same"
         else:
             h0 = h
@@ -123,7 +127,7 @@ def histoLoop(f, lst, func):
         stylize(h, color, style)
         out.append(h)
 
-        legEntries.append((h, h.GetTitle()))
+        legEntries.append((h, h.GetTitle().replace("FED ", "")))
         h.SetTitle("")
 
     if maxes and h0:
@@ -148,9 +152,9 @@ def plotList(f, pad2, feds, offset, lst=[]):
             keep.append(h)
         else:
             lst = []
-            color = [r.kBlack, r.kRed, r.kBlue]
+            color = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kMagenta]
             color += [r.kBlack] * (len(feds) - len(color))
-            style = [1, 2, 3]
+            style = [1, 2, 3, 4, 5]
             style += [1] * (len(feds) - len(style))
             for iFed, fed in enumerate(sorted(feds)):
                 if name == "BcN" and iFed:
