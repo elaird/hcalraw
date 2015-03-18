@@ -127,7 +127,13 @@ def histoLoop(f, lst, func):
         stylize(h, color, style)
         out.append(h)
 
-        legEntries.append((h, h.GetTitle().replace("FED ", "")))
+        s = "MatchedFibers"
+        if not func(x).startswith(s):
+            t = h.GetTitle().replace("FED ", "")
+        else:
+            t = func(x).replace(s, "").replace("Ch", "Ch ")
+
+        legEntries.append((h, t))
         h.SetTitle("")
 
     if maxes and h0:
@@ -226,8 +232,15 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
                       )
 
     # fibers
-    keep += plotList(f, pad2, feds, 10,
-                     ["MatchedFibersCh0", "MatchedFibersCh1", "MatchedFibersCh2"])
+    pad2.cd(12)
+    adjustPad(logY=True)
+    keep += histoLoop(f,
+                      [("MatchedFibersCh0", r.kBlue, 1),
+                       ("MatchedFibersCh1", r.kCyan, 2),
+                       ("MatchedFibersCh2", r.kBlack, 3),
+                       ],
+                      lambda x: x,
+                      )
 
     return keep
 
