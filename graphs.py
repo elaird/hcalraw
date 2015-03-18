@@ -131,7 +131,10 @@ def histoLoop(f, lst, func):
         if not func(x).startswith(s):
             t = h.GetTitle().replace("FED ", "")
         else:
-            t = func(x).replace(s, "").replace("Ch", "Ch ")
+            ch = func(x).replace(s, "")[-1]
+            #t = "#splitline{%s}{%s}" % ("Ch " + ch, "%d#pm%d" % (h.GetMean(), h.GetRMS()))
+            t = "Ch%s  (%d#pm%d)" % (ch, h.GetMean(), h.GetRMS())
+            h.GetXaxis().SetTitle(h.GetXaxis().GetTitle()[:-6])
 
         legEntries.append((h, t))
         h.SetTitle("")
