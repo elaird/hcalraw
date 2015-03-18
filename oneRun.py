@@ -33,6 +33,11 @@ def opts():
                       default="output/latest.root",
                       metavar="f",
                       help="Store histograms in this .root file.")
+    common.add_option("--no-loop",
+                      dest="noLoop",
+                      default=False,
+                      action="store_true",
+                      help="Plot from existing .root file (do not look at data).")
     common.add_option("--no-unpack",
                       dest="noUnpack",
                       default=False,
@@ -272,10 +277,11 @@ if __name__ == "__main__":
                        unpackSkipFlavors=fedList(options.unpackSkipFlavors),
                        )
 
-    if options.profile:
-        cProfile.run("go()", sort="time")
-    else:
-        go()
+    if not options.noLoop:
+        if options.profile:
+            cProfile.run("go()", sort="time")
+        else:
+            go()
 
     graphs.makeSummaryPdf(inputFiles=[options.outputFile],
                           feds=(feds1 + feds2)[:5],
