@@ -416,6 +416,7 @@ def category_vs_orn(oMap={}, iMap={}, innerEvent={}):
 
 def graph(d={}):
     gr = r.TGraph()
+    gr.SetName("category_vs_time")
     for i, key in enumerate(sorted(d.keys())):
         gr.SetPoint(i, utils.minutes(key), d[key])
     return gr
@@ -471,8 +472,6 @@ def go(outer={}, inner={}, outputFile="",
 
     gr = graph(category_vs_orn(oMap=oMapF, iMap=iMapF, innerEvent=innerEvent))
     nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
-
-    gr.SetName("category_vs_time")
     labels = ["only %s (%d)" % (inner["label"],
                                 len(iMapF)-nBoth) if inner else "",
               "only %s (%d)" % (outer["label"],
