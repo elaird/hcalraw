@@ -1,4 +1,5 @@
 import math
+import collections
 import configuration
 import printer
 import utils
@@ -69,11 +70,18 @@ def multiY(graph=None):
 
 def fillRateHisto(h, g):
     x = g.GetX()
-    evnMin = {}
-    evnMax = {}
+    y = g.GetY()
+    evn = collections.defaultdict(list)
     for i in range(g.GetN()):
-        # print x[i]
-        continue
+        iBin = h.FindBin(x[i])
+        evn[iBin].append(y[i])
+
+    for iBin, lst in evn.iteritems():
+        nL1A = 1 + max(lst) - min(lst)
+        deltaT = h.GetBinWidth(iBin)  # minutes
+        deltaT *= 60.0  # seconds
+        h.SetBinContent(iBin, nL1A / deltaT)
+        h.SetBinError(iBin, 1.0 / deltaT)  #+- 1 events
 
 
 def magnify(h, factor=1.0):
@@ -218,7 +226,7 @@ def draw_graph(graph, pad1, rate=False):
         h = null.ProjectionX()
         fillRateHisto(h, graph)
         h.SetStats(False)
-        h.Draw("colz")
+        h.Draw()
         h.SetMinimum(2.0e1)
         h.SetMaximum(2.0e5)
         h.GetYaxis().SetTitle("L1A rate (Hz)")
@@ -232,7 +240,6 @@ def draw_graph(graph, pad1, rate=False):
 
     magnify(h, factor=3.0)
     h.GetXaxis().SetTitleOffset(0.75)
-
     return graph, h
 
 
@@ -252,10 +259,10 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds1=[], feds2=[]):
 
     # category/rate graph
     cats = f.Get("category_vs_time")
-    if True: # multiY(cats):
+    if multiY(cats):
         keep += draw_graph(cats, pad1)
     else:
-        keep += draw_graph(f.Get("evn_vs_orn"), pad1, rate=True)
+        keep += draw_graph(f.Get("evn_vs_time"), pad1, rate=True)
 
     # single FED
     keep += plotList(f, pad2, feds, 1,
