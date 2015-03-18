@@ -387,9 +387,12 @@ def wordsOneBranch(tree=None, branch=""):
     return chunk
 
 
-def evn_vs_orn(oMap={}):
-    for ornEvn in sorted(oMap.values()):
-        print ornEvn
+def evn_vs_time(values=[]):
+    gr = r.TGraph()
+    gr.SetName("evn_vs_time")
+    for i, (orn, evn) in enumerate(sorted(values)):
+        gr.SetPoint(i, utils.minutes(orn), evn)
+    return gr
 
 
 def category_vs_orn(oMap={}, iMap={}, innerEvent={}):
@@ -464,9 +467,7 @@ def go(outer={}, inner={}, outputFile="",
         os.mkdir(dirName)
 
     f = r.TFile(outputFile, "RECREATE")
-    # evn_vs_orn(oMap=oMapF)
-    # gr.SetName("evn_vs_orn")
-    # gr.Write()
+    evn_vs_time(oMapF.values()).Write()
 
     gr = graph(category_vs_orn(oMap=oMapF, iMap=iMapF, innerEvent=innerEvent))
     nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
