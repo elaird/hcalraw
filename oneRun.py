@@ -110,11 +110,6 @@ def opts():
                      dest="feds2",
                      default="",
                      help="FEDs to use in file2, e.g. 931")
-    match.add_option("--use-evn",
-                     dest="useEvn",
-                     default=False,
-                     action="store_true",
-                     help="Require matching EvN.")
     match.add_option("--filter-evn",
                      dest="filterEvn",
                      default=False,
@@ -248,8 +243,8 @@ if __name__ == "__main__":
                       "active": options.patterns,
                       }
 
-    mapOptions = {"ornTolerance": 0}
-    for key in ["useEvn", "filterEvn", "printEventMap", "identityMap"]:
+    mapOptions = {}
+    for key in ["filterEvn", "printEventMap", "identityMap"]:
         mapOptions[key] = getattr(options, key)
 
     printOptions = {"dump": integer(options.dump, "dump"),
