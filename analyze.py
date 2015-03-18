@@ -47,9 +47,9 @@ def coords(d):
     return h["OrN"], h["BcN"], h["EvN"]
 
 
-#this function returns two dictionaries,
-#one maps TTree entry to either (orn, ) or to (orn, evn)
-#the other maps the reverse
+# this function returns two dictionaries,
+# one maps TTree entry to (orn, evn)
+# the other maps the reverse
 def eventMaps(s={}, options={}):
     fileName = s["fileName"]
     treeName = s["treeName"]
@@ -58,11 +58,10 @@ def eventMaps(s={}, options={}):
 
     name = s["name"]
     nEventsMax = s["nEventsMax"]
-    if not s.get("auxBranch"):
+    if name != "CMS" and not s.get("auxBranch"):
         fedId0 = s["fedIds"][0]
         branch0 = s["branch"](fedId0)
 
-    useEvn = options.get('useEvn', False)
     filterEvn = options.get('filterEvn', False)
 
     forward = {}
@@ -85,14 +84,15 @@ def eventMaps(s={}, options={}):
         orn = bcn = evn = None
 
         if name == "CMS":
-            if s["auxBranch"] and (not useEvn) and (not filterEvn):
+            if s["auxBranch"] and (not filterEvn):
                 tree.GetBranch("EventAuxiliary").GetEntry(iEvent)
                 orn = tree.EventAuxiliary.orbitNumber()
                 bcn = tree.EventAuxiliary.bunchCrossing()
+                sys.exit("auxBranch lacks EvN.")
             else:
                 tree.GetEntry(iEvent)
                 raw = unpacked(fedData=wordsOneFed(tree=tree,
-                                                   fedId=fedId0,
+                                                   fedId=s["fedIds"][0],
                                                    collection=s["rawCollection"],
                                                    ),
                                nBytesPer=8,
@@ -100,7 +100,7 @@ def eventMaps(s={}, options={}):
                 orn, bcn, evn = coords(raw)
 
         elif name == "HCAL":
-            if s["auxBranch"] and (not useEvn) and (not filterEvn):
+            if s["auxBranch"] and (not filterEvn):
                 tree.GetBranch("CDFEventInfo").GetEntry(iEvent)
                 orn = tree.CDFEventInfo.getOrbitNumber()
                 bcn = tree.CDFEventInfo.getBunchNumber()
@@ -134,7 +134,7 @@ def eventMaps(s={}, options={}):
         if s["progress"]:
             iMask = progress(iEvent, iMask)
 
-        t = (orn, evn) if useEvn else (orn, )
+        t = (orn, evn)
         if filterEvn and (evn & 0x1fff):
             continue
 
@@ -387,6 +387,11 @@ def wordsOneBranch(tree=None, branch=""):
     return chunk
 
 
+def evn_vs_orn(oMap={}):
+    for ornEvn in sorted(oMap.values()):
+        print ornEvn
+
+
 def categories(oMap={}, iMap={}, innerEvent={}):
     d = {}
     for oEvent, ornEvn in oMap.iteritems():
@@ -414,20 +419,12 @@ def graph(d={}):
 
 
 def eventToEvent(mapF={}, mapB={}, options={}):
-    useEvn = options.get('useEvn', False)
-    ornTolerance = options.get('ornTolerance', 0)
-
-    deltaOrnRange = range(-ornTolerance, 1+ornTolerance)
     out = {}
     for oEvent, ornEvn in mapF.iteritems():
         out[oEvent] = None
-        #find match s.t. |orn1 - orn2| <= ornTolerance
-        orn = ornEvn[0]
-        for i in deltaOrnRange:
-            ornEvn2 = (orn+i, ornEvn[1]) if useEvn else (orn+i,)
-            if ornEvn2 in mapB:
-                #fixme: check for multiple matches
-                out[oEvent] = mapB[ornEvn2]
+        if ornEvn in mapB:
+            # fixme: check for multiple matches
+            out[oEvent] = mapB[ornEvn]
     return out
 
 
@@ -467,6 +464,8 @@ def go(outer={}, inner={}, outputFile="",
         os.mkdir(dirName)
 
     f = r.TFile(outputFile, "RECREATE")
+    evn_vs_orn(oMap=oMapF)
+
     gr = graph(categories(oMap=oMapF, iMap=iMapF, innerEvent=innerEvent))
     nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
 
