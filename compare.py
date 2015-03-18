@@ -242,19 +242,23 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  adcPlots=Fal
 
     # histogram some deltas
     fed1 = filter(lambda x: x is not None, sorted(raw1.keys()))[0]
-    fed2 = filter(lambda x: x is not None, sorted(raw2.keys()))[0]
-    utca1 = raw1[fed1]["header"]["utca"]
-    utca2 = raw2[fed2]["header"]["utca"]
-    bcnDelta = configuration.bcnDelta(utca1) - configuration.bcnDelta(utca2)
+    d1 = raw1[fed1]
+    for fed2, d2 in raw2.iteritems():
+        if fed2 is None:
+            continue
 
-    if (fed1 in okFeds) and (fed2 in okFeds):
-        for x in ["BcN", "OrN", "EvN"]:
-            title = ";".join([x+("%d" % bcnDelta if (x == "BcN") else ""),
-                              "FED %s - FED %s" % (fed1, fed2),
-                              "Events / bin",
-                              ])
-            delta = raw1[fed1]["header"][x] - raw2[fed2]["header"][x]
-            book.fill(delta, "delta"+x, 11, -5.5, 5.5, title=title)
+        utca1 = d1["header"]["utca"]
+        utca2 = d2["header"]["utca"]
+        bcnDelta = configuration.bcnDelta(utca1) - configuration.bcnDelta(utca2)
+
+        if (fed1 in okFeds) and (fed2 in okFeds):
+            for x in ["BcN", "OrN", "EvN"]:
+                title = ";".join([x+("%d" % bcnDelta if (x == "BcN") else ""),
+                                  "FED %s - FED %s" % (fed1, fed2),
+                                  "Events / bin",
+                                  ])
+                delta = d1["header"][x] - d2["header"][x]
+                book.fill(delta, "delta%s_%s_%s" % (x, fed1, fed2), 11, -5.5, 5.5, title=title)
 
 
 def coordString(crate, slot, tb, fiber, channel):
