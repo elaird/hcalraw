@@ -240,7 +240,7 @@ def format(treeName=""):
 
     if treeName == "Events":
         out = {"name": "CMS",
-               "auxBranch": True,
+               "auxBranch": False,
                "rawCollection": "FEDRawDataCollection_rawDataCollector__LHC",
                }
     if out:

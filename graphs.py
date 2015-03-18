@@ -1,4 +1,5 @@
 import math
+import collections
 import configuration
 import printer
 import utils
@@ -57,6 +58,30 @@ def xMin_xMax(graph=None):
     else:
         printer.error("graph contains zero points.")
         return 0.0, 0.0
+
+
+def multiY(graph=None):
+    s = set()
+    y = graph.GetY()
+    for i in range(graph.GetN()):
+        s.add(y[i])
+    return 2 <= len(s)
+
+
+def fillRateHisto(h, g):
+    x = g.GetX()
+    y = g.GetY()
+    evn = collections.defaultdict(list)
+    for i in range(g.GetN()):
+        iBin = h.FindBin(x[i])
+        evn[iBin].append(y[i])
+
+    for iBin, lst in evn.iteritems():
+        nL1A = 1 + max(lst) - min(lst)
+        deltaT = h.GetBinWidth(iBin)  # minutes
+        deltaT *= 60.0  # seconds
+        h.SetBinContent(iBin, nL1A / deltaT)
+        h.SetBinError(iBin, 1.0 / deltaT)  #+- 1 events
 
 
 def magnify(h, factor=1.0):
@@ -175,12 +200,56 @@ def plotList(f, pad2, feds, offset, lst=[]):
     return keep
 
 
+def draw_graph(graph, pad1, rate=False):
+    if not graph:
+        return
+
+    graph.SetMarkerStyle(20)
+    graph.SetMarkerColor(r.gStyle.GetHistLineColor())
+    graph.SetMarkerSize(0.5*graph.GetMarkerSize())
+    t = graph.GetTitle().split("_")
+
+    pad1.cd()
+    adjustPad()
+    xMin, xMax = xMin_xMax(graph)
+    delta = xMax - xMin
+    if delta:
+        tenPercent = 0.1 * delta
+    else:
+        tenPercent = 0.1/60.0  # 1/10 second
+
+    null = r.TH2D("null", ";time (minutes)",
+                  60, xMin - tenPercent, xMax + tenPercent,
+                  3, 0.5, 3.5)
+
+    if rate:
+        h = null.ProjectionX()
+        fillRateHisto(h, graph)
+        h.SetStats(False)
+        h.Draw()
+        h.SetMinimum(5.0e1)
+        h.SetMaximum(2.0e5)
+        h.GetYaxis().SetTitle("L1A rate (Hz)")
+        h.GetYaxis().SetTitleOffset(0.3)
+        r.gPad.SetLogy()
+        r.gPad.SetGridy()
+    else:
+        h = null
+        h.Draw()
+        labelYAxis(h, labels={1: t[0], 2: t[1], 3: t[2]})
+        graph.Draw("psame")
+
+    magnify(h, factor=3.0)
+    h.GetXaxis().SetTitleOffset(0.75)
+    return graph, h
+
+
 def onePage(f=None, pad0=None, pad1=None, pad2=None, feds1=[], feds2=[]):
     feds = (feds1 + feds2)[:5]
 
     keep = []
 
-    #label
+    # label
     pad0.cd()
     text = r.TText(0.5, 0.5, f.GetPath())
     text.SetNDC()
@@ -189,33 +258,12 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds1=[], feds2=[]):
     text.Draw()
     keep.append(text)
 
-    #category graphs
-    graph = f.Get("category_vs_time")
-    if graph:
-        graph.SetMarkerStyle(20)
-        graph.SetMarkerColor(r.gStyle.GetHistLineColor())
-        graph.SetMarkerSize(0.5*graph.GetMarkerSize())
-        t = graph.GetTitle().split("_")
-
-        pad1.cd()
-        adjustPad()
-        xMin, xMax = xMin_xMax(graph)
-        delta = xMax - xMin
-        if delta:
-            tenPercent = 0.1 * delta
-        else:
-            tenPercent = 0.1/60.0  # 1/10 second
-
-        null = r.TH2D("null", ";time (minutes)",
-                      1, xMin - tenPercent, xMax + tenPercent,
-                      3, 0.5, 3.5)
-        null.Draw()
-        magnify(null, factor=3.0)
-        labelYAxis(null, labels={1: t[0], 2: t[1], 3: t[2]})
-        null.GetXaxis().SetTitleOffset(0.75)
-        graph.Draw("psame")
-        keep += [graph, null]
-
+    # category/rate graph
+    cats = f.Get("category_vs_time")
+    if multiY(cats):
+        keep += draw_graph(cats, pad1)
+    else:
+        keep += draw_graph(f.Get("evn_vs_time"), pad1, rate=True)
 
     # single FED
     keep += plotList(f, pad2, feds, 1,
