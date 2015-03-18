@@ -219,7 +219,7 @@ def draw_graph(graph, pad1, rate=False):
         tenPercent = 0.1/60.0  # 1/10 second
 
     null = r.TH2D("null", ";time (minutes)",
-                  120, xMin - tenPercent, xMax + tenPercent,
+                  60, xMin - tenPercent, xMax + tenPercent,
                   3, 0.5, 3.5)
 
     if rate:
@@ -227,11 +227,12 @@ def draw_graph(graph, pad1, rate=False):
         fillRateHisto(h, graph)
         h.SetStats(False)
         h.Draw()
-        h.SetMinimum(2.0e1)
+        h.SetMinimum(5.0e1)
         h.SetMaximum(2.0e5)
         h.GetYaxis().SetTitle("L1A rate (Hz)")
         h.GetYaxis().SetTitleOffset(0.3)
         r.gPad.SetLogy()
+        r.gPad.SetGridy()
     else:
         h = null
         h.Draw()
