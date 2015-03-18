@@ -27,7 +27,8 @@ source env/lxplus6.sh
 # analyze global runs
 ./oneRun.py --file1=$GR2/Cosmics/RAW/v1/000/235/316/00000/9CE27CCC-5EBB-E411-AF2C-02163E0127C8.root --feds1=718,719 --feds2=1118  --match=v2 --skip-flavors=0,2 --dump=0 --nevents=10
 ./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/237/318/00000/24F11386-94C6-E411-96AC-02163E012078.root --feds1=717,1118,1120,1122 --match=v2 --nevents=3
-./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/238/159/00000/666E2367-C0CC-E411-A1DC-02163E012152.root --feds1=718,719,1118,1120,1122 --progress --output-file=output/238159.root
+./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/238/159/00000/666E2367-C0CC-E411-A1DC-02163E012152.root --feds1=718,719 --feds2=1118,1120,1122 --match=v3 --progress --output-file=output/238159.root
+./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/238/194/00000/22CB97E4-ECCC-E411-BB27-02163E011D5F.root --feds1=718,719 --feds2=1118,1120,1122 --match=v3 --progress --output-file=output/238194.root --nevents=2000 --no-warn-unpack
 ```
 
 ####License
