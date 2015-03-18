@@ -172,7 +172,9 @@ def plotList(f, pad2, feds, offset, lst=[]):
     return keep
 
 
-def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
+def onePage(f=None, pad0=None, pad1=None, pad2=None, feds1=[], feds2=[]):
+    feds = (feds1 + feds2)[:5]
+
     keep = []
 
     #label
@@ -220,16 +222,17 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
                   ])
 
     # EvN, OrN, BcN agreement
-    pad2.cd(9)
-    adjustPad(logY=True)
-
-    keep += histoLoop(f,
-                      [("OrN", r.kBlue, 1),
-                       ("EvN", r.kCyan, 2),
-                       ("BcN", r.kBlack, 3),
-                       ],
-                      lambda x: "delta%s" % x,
-                      )
+    fed1 = sorted(feds1)[0]
+    for i, fed2 in enumerate(feds2[:3]):
+        pad2.cd(9 + i)
+        adjustPad(logY=True)
+        keep += histoLoop(f,
+                          [("OrN", r.kBlue, 1),
+                           ("EvN", r.kCyan, 2),
+                           ("BcN", r.kBlack, 3),
+                           ],
+                          lambda x: "delta%s_%s_%s" % (x, fed1, fed2),
+                          )
 
     # fibers
     pad2.cd(12)
@@ -245,7 +248,7 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds=[]):
     return keep
 
 
-def makeSummaryPdf(inputFiles=[], feds=[], pdf="summary.pdf"):
+def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf"):
     r.gROOT.SetStyle("Plain")
 
     canvas = r.TCanvas()
@@ -264,7 +267,7 @@ def makeSummaryPdf(inputFiles=[], feds=[], pdf="summary.pdf"):
         f = r.TFile(fileName)
         if (not f) or f.IsZombie():
             continue
-        junk = onePage(f, pad0, pad1, pad2, feds)
+        junk = onePage(f, pad0, pad1, pad2, feds1, feds2)
         canvas.Print(pdf)
         f.Close()
     canvas.Print(pdf + "]")
