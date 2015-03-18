@@ -126,7 +126,7 @@ def matchRange_v1(fedId=None, slot=None, fibCh=None, utca=None):
 
 
 def matchRange_v2(fedId=None, slot=None, fibCh=None, utca=None):
-    """global runs during/since Feb. 2015"""
+    """global runs from Feb. 2015 - Mar. 16, 2015"""
 
     global __utcaBcnDelta
     __utcaBcnDelta = -131
@@ -135,6 +135,15 @@ def matchRange_v2(fedId=None, slot=None, fibCh=None, utca=None):
         return range(2, 8)
     else:
         return range(6)
+
+
+def matchRange_v3(fedId=None, slot=None, fibCh=None, utca=None):
+    """global runs from March 16, 2015"""
+
+    global __utcaBcnDelta
+    __utcaBcnDelta = -131
+
+    return range(6)
 
 
 def fiberMap(fedId=None):
