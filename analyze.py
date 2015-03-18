@@ -392,7 +392,7 @@ def evn_vs_orn(oMap={}):
         print ornEvn
 
 
-def categories(oMap={}, iMap={}, innerEvent={}):
+def category_vs_orn(oMap={}, iMap={}, innerEvent={}):
     d = {}
     for oEvent, ornEvn in oMap.iteritems():
         orn = ornEvn[0]
@@ -464,9 +464,11 @@ def go(outer={}, inner={}, outputFile="",
         os.mkdir(dirName)
 
     f = r.TFile(outputFile, "RECREATE")
-    evn_vs_orn(oMap=oMapF)
+    # evn_vs_orn(oMap=oMapF)
+    # gr.SetName("evn_vs_orn")
+    # gr.Write()
 
-    gr = graph(categories(oMap=oMapF, iMap=iMapF, innerEvent=innerEvent))
+    gr = graph(category_vs_orn(oMap=oMapF, iMap=iMapF, innerEvent=innerEvent))
     nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
 
     gr.SetName("category_vs_time")

@@ -255,7 +255,7 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds1=[], feds2=[]):
     if True: # multiY(cats):
         keep += draw_graph(cats, pad1)
     else:
-        keep += draw_graph(f.Get("category_vs_time"), pad1, rate=True)
+        keep += draw_graph(f.Get("evn_vs_orn"), pad1, rate=True)
 
     # single FED
     keep += plotList(f, pad2, feds, 1,
