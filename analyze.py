@@ -155,15 +155,19 @@ def progress(iEvent, iMask):
         return iMask
 
 
-def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
+def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}, cacheSizeMB=None):
     if inner:
         fI = r.TFile.Open(inner["fileName"])
         treeI = fI.Get(inner["treeName"])
         assert treeI, inner["treeName"]
+        if cacheSizeMB:
+            treeI.SetCacheSize(cacheSizeMB * 1024**2)
 
     f = r.TFile.Open(outer["fileName"])
     tree = f.Get(outer["treeName"])
     assert tree, outer["treeName"]
+    if cacheSizeMB:
+        tree.SetCacheSize(cacheSizeMB * 1024**2)
 
     if outer["progress"]:
         iMask = 0
