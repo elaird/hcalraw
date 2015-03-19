@@ -278,8 +278,8 @@ def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
     # single FED
     keep += plotList(f, pad2, feds, 4,
                      ["BcN",
-                      "nBytesSW", "nWord16Skipped", "EvN_HTRs", "nQieSamples",
-                      "ErrF1", "ErrF3", "ChannelFlavor",
+                      "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples",
+                      "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "ErrF13",
                       #"TTS", "PopCapFrac",
                   ])
 
