@@ -8,7 +8,8 @@ def flavor(book, d, fedId):
               title="FED %d;channel flavor;Channels / bin" % fedId)
 
 
-def htrSummary(blocks=[], book=None, fedId=None, fedEvn=None,
+def htrSummary(blocks=[], book=None, fedId=None,
+               fedEvn=None, fedOrn=None, fedBcn=None,
                msg="", adcPlots=False):
     nBadHtrs = 0
     caps = {}
@@ -31,6 +32,14 @@ def htrSummary(blocks=[], book=None, fedId=None, fedEvn=None,
         book.fill(block["EvN"] - fedEvn, "EvN_HTRs_%d" % fedId,
                   11, -5.5, 5.5,
                   title="FED %d;HTR EvN - FED EvN;HTRs / bin" % fedId)
+
+        book.fill(block["OrN5"] - fedOrn & 0x1f, "OrN5_HTRs_%d" % fedId,
+                  11, -5.5, 5.5,
+                  title="FED %d;HTR OrN5 - FED OrN5;HTRs / bin" % fedId)
+
+        book.fill(block["BcN"] - fedBcn, "BcN_HTRs_%d" % fedId,
+                  11, -5.5, 5.5,
+                  title="FED %d;HTR BcN - FED BcN;HTRs / bin" % fedId)
 
         for otherData in block["otherData"].values():
             flavor(book, otherData, fedId)
@@ -76,6 +85,9 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
 
     msg = "FED %d" % fedId
     fedEvn = h.get("EvN")
+    fedOrn = h.get("OrN")
+    fedBcn = h.get("BcN")
+
     if fedEvn is not None:
         msg += " event %d" % fedEvn
     else:
@@ -86,6 +98,8 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
                                             book=book,
                                             fedId=fedId,
                                             fedEvn=fedEvn,
+                                            fedOrn=fedOrn,
+                                            fedBcn=fedBcn,
                                             msg=msg,
                                             adcPlots=adcPlots)
 
