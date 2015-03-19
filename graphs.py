@@ -80,8 +80,11 @@ def fillRateHisto(h, g):
         nL1A = 1 + max(lst) - min(lst)
         deltaT = h.GetBinWidth(iBin)  # minutes
         deltaT *= 60.0  # seconds
-        h.SetBinContent(iBin, nL1A / deltaT)
-        h.SetBinError(iBin, 1.0 / deltaT)  #+- 1 events
+        c = nL1A / deltaT
+        h.SetBinContent(iBin, c)
+
+        relErr = 1.0 / len(lst)  # +- 1 events
+        h.SetBinError(iBin, c * relErr)
 
 
 def magnify(h, factor=1.0):
@@ -90,9 +93,13 @@ def magnify(h, factor=1.0):
         axis.SetTitleSize(factor*axis.GetTitleSize())
 
 
-def adjustPad(pad=r.gPad, logY=False, margin=0.2):
-    r.gPad.SetLeftMargin(margin)
-    r.gPad.SetBottomMargin(margin)
+def adjustPad(pad=r.gPad, logY=False,
+              m={"Left": 0.2, "Bottom": 0.2, "Right": None, "Top": None}):
+    for key, value in m.iteritems():
+        if value is None:
+            continue
+        getattr(r.gPad, "Set%sMargin" % key)(value)
+
     r.gPad.SetTickx()
     r.gPad.SetTicky()
     if logY:
@@ -200,7 +207,7 @@ def plotList(f, pad2, feds, offset, lst=[]):
     return keep
 
 
-def draw_graph(graph, pad1, rate=False):
+def draw_graph(graph, pad1, title="", rate=False):
     if not graph:
         return
 
@@ -210,7 +217,11 @@ def draw_graph(graph, pad1, rate=False):
     t = graph.GetTitle().split("_")
 
     pad1.cd()
-    adjustPad()
+    if rate:
+        adjustPad(m={"Bottom": 0.2, "Left": 0.1, "Top": 0.2, "Right": 0.0})
+    else:
+        adjustPad()
+
     xMin, xMax = xMin_xMax(graph)
     delta = xMax - xMin
     if delta:
@@ -218,7 +229,7 @@ def draw_graph(graph, pad1, rate=False):
     else:
         tenPercent = 0.1/60.0  # 1/10 second
 
-    null = r.TH2D("null", ";time (minutes)",
+    null = r.TH2D("null", "%s;time (minutes)" % title,
                   60, xMin - tenPercent, xMax + tenPercent,
                   3, 0.5, 3.5)
 
@@ -230,7 +241,7 @@ def draw_graph(graph, pad1, rate=False):
         h.SetMinimum(5.0e1)
         h.SetMaximum(2.0e5)
         h.GetYaxis().SetTitle("L1A rate (Hz)")
-        h.GetYaxis().SetTitleOffset(0.3)
+        h.GetYaxis().SetTitleOffset(0.4)
         r.gPad.SetLogy()
         r.gPad.SetGridy()
     else:
@@ -244,38 +255,38 @@ def draw_graph(graph, pad1, rate=False):
     return graph, h
 
 
-def onePage(f=None, pad0=None, pad1=None, pad2=None, feds1=[], feds2=[]):
+def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
     feds = (feds1 + feds2)[:5]
 
     keep = []
 
-    # label
-    pad0.cd()
-    text = r.TText(0.5, 0.5, f.GetPath())
-    text.SetNDC()
-    text.SetTextAlign(22)
-    text.SetTextSize(20.0*text.GetTextSize())
-    text.Draw()
-    keep.append(text)
-
     # category/rate graph
+    r.gStyle.SetTitleBorderSize(0)
+    r.gStyle.SetTitleX(0.53)
+    r.gStyle.SetTitleY(0.9)
+    r.gStyle.SetTitleFontSize(0.12)
+    r.gStyle.SetTitleAlign(22)
+
+    title = f.GetPath()
     cats = f.Get("category_vs_time")
     if multiY(cats):
-        keep += draw_graph(cats, pad1)
+        keep += draw_graph(cats, pad1, title)
     else:
-        keep += draw_graph(f.Get("evn_vs_time"), pad1, rate=True)
+        keep += draw_graph(f.Get("evn_vs_time"), pad1, title, rate=True)
+
 
     # single FED
-    keep += plotList(f, pad2, feds, 1,
-                     ["nBytesSW", "nWord16Skipped", "EvN_HTRs", "nQieSamples",
-                      "ErrF1", "ErrF3", "ChannelFlavor", "BcN",
+    keep += plotList(f, pad2, feds, 4,
+                     ["BcN",
+                      "nBytesSW", "nWord16Skipped", "EvN_HTRs", "nQieSamples",
+                      "ErrF1", "ErrF3", "ChannelFlavor",
                       #"TTS", "PopCapFrac",
                   ])
 
     # EvN, OrN, BcN agreement
     fed1 = sorted(feds1)[0]
     for i, fed2 in enumerate(feds2[:3]):
-        pad2.cd(9 + i)
+        pad2.cd(13 + i)
         adjustPad(logY=True)
         keep += histoLoop(f,
                           [("OrN", r.kBlue, 1),
@@ -286,7 +297,7 @@ def onePage(f=None, pad0=None, pad1=None, pad2=None, feds1=[], feds2=[]):
                           )
 
     # fibers
-    pad2.cd(12)
+    pad2.cd(16)
     adjustPad(logY=True)
     keep += histoLoop(f,
                       [("MatchedFibersCh0", r.kBlue, 1),
@@ -305,20 +316,18 @@ def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf"):
     canvas = r.TCanvas()
     canvas.Print(pdf + "[")
 
-    pad0 = r.TPad("pad0", "pad0", 0.0, 0.95, 1.0, 1.00)
-    pad1 = r.TPad("pad1", "pad1", 0.0, 0.75, 1.0, 0.95)
-    pad2 = r.TPad("pad1", "pad1", 0.0, 0.00, 1.0, 0.75)
+    pad1 = r.TPad("pad1", "pad1", 0.00, 0.75, 0.75, 1.00)
+    pad2 = r.TPad("pad2", "pad2", 0.00, 0.00, 1.00, 1.00)
 
-    pad2.Divide(4, 3)
-    pad0.Draw()
-    pad1.Draw()
+    pad2.Divide(4, 4)
     pad2.Draw()
+    pad1.Draw()
 
     for fileName in inputFiles:
         f = r.TFile(fileName)
         if (not f) or f.IsZombie():
             continue
-        junk = onePage(f, pad0, pad1, pad2, feds1, feds2)
+        junk = onePage(f, pad1, pad2, feds1, feds2)
         canvas.Print(pdf)
         f.Close()
     canvas.Print(pdf + "]")
