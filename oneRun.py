@@ -143,6 +143,11 @@ def opts():
                        default=False,
                        action="store_true",
                        help="Brute-force search for matches.")
+    matchCh.add_option("--print-emap",
+                       dest="printEmap",
+                       default=False,
+                       action="store_true",
+                       help="Print emap found with --any-emap.")
     parser.add_option_group(matchCh)
 
     patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
@@ -234,7 +239,7 @@ if __name__ == "__main__":
         printer.__color = False
 
     compareOptions = {"skipErrF": fedList(options.skipErrF)}
-    for item in ["adcPlots", "anyEmap"]:
+    for item in ["adcPlots", "anyEmap", "printEmap"]:
         compareOptions[item] = getattr(options, item)
 
     patternOptions = {"rmRibbon": options.rmRibbon,
