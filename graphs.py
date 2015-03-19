@@ -160,13 +160,16 @@ def histoLoop(f, lst, func):
         out.append(h)
 
         s = "MatchedFibers"
-        if not func(x).startswith(s):
-            t = h.GetTitle().replace("FED ", "")
-        else:
+        if func(x).startswith(s):
             ch = func(x).replace(s, "")[-1]
             #t = "#splitline{%s}{%s}" % ("Ch " + ch, "%d#pm%d" % (h.GetMean(), h.GetRMS()))
             t = "Ch%s  (%d#pm%d)" % (ch, h.GetMean(), h.GetRMS())
             h.GetXaxis().SetTitle(h.GetXaxis().GetTitle()[:-6])
+        else:
+            t = h.GetTitle().replace("FED ", "")
+
+        if len(lst) == 1 and  func(x).startswith("BcN"):
+            t += "   (%d entries)" % h.GetEntries()
 
         legEntries.append((h, t))
         h.SetTitle("")
