@@ -104,10 +104,12 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
                                             adcPlots=adcPlots)
 
     errFSum = 0.0 + sum(ErrF.values())
+    ErrF[13] = ErrF[1] + ErrF[3]
+
     if errFSum:
         for code, n in ErrF.iteritems():
-            book.fill(n/errFSum, "ErrF%d_%d" % (code, fedId), 44, 0.0, 1.1,
-                      title="FED %d;frac. chan. with ErrF == %1d;Events / bin" % (fedId, code))
+            title = "FED %d;frac. chan. with ErrF %s;Events / bin" % (fedId, ("== %d" % code) if code != 13 else "!= 0")
+            book.fill(n/errFSum, "ErrF%d_%d" % (code, fedId), 44, 0.0, 1.1, title=title)
 
     capSum = 0.0+sum(caps.values())
     if capSum:
