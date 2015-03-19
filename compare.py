@@ -219,6 +219,8 @@ def adc_vs_adc(mapF1, mapF2, book=None):
 
 
 def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=False, adcPlots=False):
+    dump_ge_1 = 1 <= raw1[None]["dump"]
+
     if anyEmap:
         mapF1, mapB1, _ = dataMap(raw1, skipErrF=skipErrF)
         mapF2, mapB2, _ = dataMap(raw2, skipErrF=skipErrF)
@@ -231,10 +233,12 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
         mapF1 = dataMap(raw1, skipErrF=skipErrF)[0]
         mapF2 = dataMap(raw2, skipErrF=skipErrF)[0]
         matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book)
-        matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1)
+        if dump_ge_1:
+            matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1)
 
-    printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
-    printRaw.oneEvent(raw2, nonMatched=nonMatched21)
+    if dump_ge_1:
+        printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
+        printRaw.oneEvent(raw2, nonMatched=nonMatched21)
 
     okFeds = loop_over_feds(raw1, book, adcPlots, adcTag="feds1")
 
