@@ -169,6 +169,9 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
         iMask = 0
         print "Looping:"
 
+    kargs = {"book": book}
+    kargs.update(compareOptions)
+
     for iOuterEvent in range(outer["nEventsSkip"],
                              nEvents(tree, outer["nEventsMax"])):
         nb = tree.GetEntry(iOuterEvent)
@@ -178,9 +181,7 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
         if outer["progress"]:
             iMask = progress(iOuterEvent, iMask)
 
-        kargs = {"raw1": collectedRaw(tree=tree, specs=outer),
-                 "book": book}
-        kargs.update(compareOptions)
+        kargs["raw1"] = collectedRaw(tree=tree, specs=outer)
 
         if inner:
             iInnerEvent = innerEvent[iOuterEvent]
