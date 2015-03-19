@@ -33,7 +33,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                   11, -5.5, 5.5,
                   title="FED %d;HTR EvN - FED EvN;HTRs / bin" % fedId)
 
-        book.fill(block["OrN5"] - fedOrn & 0x1f, "OrN5_HTRs_%d" % fedId,
+        book.fill(block["OrN5"] - (fedOrn & 0x1f), "OrN5_HTRs_%d" % fedId,
                   11, -5.5, 5.5,
                   title="FED %d;HTR OrN5 - FED OrN5;HTRs / bin" % fedId)
 
