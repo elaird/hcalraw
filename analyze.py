@@ -90,13 +90,17 @@ def eventMaps(s={}, options={}):
                 bcn = tree.EventAuxiliary.bunchCrossing()
                 sys.exit("auxBranch lacks EvN.")
             else:
+                fedId0 = s["fedIds"][0]
                 tree.GetEntry(iEvent)
                 raw = unpacked(fedData=wordsOneFed(tree=tree,
-                                                   fedId=s["fedIds"][0],
+                                                   fedId=fedId0,
                                                    collection=s["rawCollection"],
                                                    ),
                                nBytesPer=8,
                                headerOnly=True)
+                if not raw["nBytesSW"]:
+                    printer.error("FED0 %d has zero bytes." % fedId0)
+                    sys.exit()
                 orn, bcn, evn = coords(raw)
 
         elif name == "HCAL":
