@@ -14,7 +14,7 @@ source env/lxplus6.sh
 # compare payloads of different sets of FEDs, within one file
 ./oneRun.py --file1=$LS1/USC_234155.root --feds1=HF --feds2=uHF --progress --nevents=20 --match=v1 --dump=0
 ./oneRun.py --file1=$LS1/USC_235728.root --feds1=718,719 --feds2=1118 --progress --nevents=20 --match=v1 --dump=0
-./oneRun.py --file1=data/USC_238212.root --feds1=718,719 --feds2=uHF --match=v1 --dump=0 --output-file=output/238212.root --progress
+./oneRun.py --file1=$LS1/USC_238800.root --feds1=718,719 --feds2=uHF --match=v1 --dump=0 --output-file=output/238800.root --progress
 
 # compare payloads of different sets of FEDs, across two files
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --any-emap --skip-errfs=3
