@@ -10,9 +10,7 @@ def entitle(hSum, skip_rxs):
         if skip_rxs:
             title.append("PPOD RXes" +  ",".join(["%2d/%1d" % (sl, rx) for (cr, sl, rx) in skip_rxs]))
 
-        if not title:
-            hSum.SetTitle("all channels")
-        else:
+        if title:
             hSum.SetTitle("excluding: %s " % "#semicolon ".join(title))
 
 def i(s):
