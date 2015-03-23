@@ -30,6 +30,8 @@ source env/lxplus6.sh
 ./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/237/318/00000/24F11386-94C6-E411-96AC-02163E012078.root --feds1=717,1118,1120,1122 --match=v2 --nevents=3
 ./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/238/159/00000/666E2367-C0CC-E411-A1DC-02163E012152.root --feds1=718,719 --feds2=1118,1120,1122 --match=v3 --progress --output-file=output/238159.root
 ./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/238/194/00000/22CB97E4-ECCC-E411-BB27-02163E011D5F.root --feds1=718,719 --feds2=1118,1120,1122 --match=v3 --progress --output-file=output/238194.root --nevents=2000 --no-warn-unpack
+./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/238/243/00000/B0B8B34A-71CD-E411-A042-02163E0126A1.root --feds1=718,719 --feds2=1120,1122 --match=v3 --progress --output-file=output/238243.root --nevents=20
+./oneRun.py --file1=root://eoscms.cern.ch//store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1/000/238/534/00000/56900444-EECE-E411-B693-02163E0123FC.root
 ```
 
 ####License
