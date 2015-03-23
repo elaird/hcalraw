@@ -256,12 +256,12 @@ def uhtrTriggerData(d={}, skipZero=False):
                           ])
                )
     for channelId, data in sorted(d.iteritems()):
-        if skipZero and not any(data["TP"].values()):
+        if skipZero and not any(data["TP"]):
             continue
         soi = ""
         ok = ""
         tp = ""
-        for j in data["SOI"].keys():
+        for j in range(len(data["SOI"])):
             soi += str(data["SOI"][j])
             ok += str(data["OK"][j])
             tp += "%5x" % data["TP"][j]

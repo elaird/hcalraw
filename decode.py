@@ -490,7 +490,7 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
     if flavor == 4:
         dataKey = "triggerData"
         for key in ["SOI", "OK", "TP"]:
-            channelHeader[key] = {}
+            channelHeader[key] = []
 
     elif 5 <= flavor <= 6:
         dataKey = "channelData"
@@ -538,9 +538,9 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
         dct["words"].append(word16)
 
     elif dct["Flavor"] == 4:
-        dct["SOI"][j] = (word16 >> 14) & 0x1
-        dct["OK"][j] = (word16 >> 13) & 0x1
-        dct["TP"][j] = word16 & 0x1fff
+        dct["SOI"].append((word16 >> 14) & 0x1)
+        dct["OK"].append((word16 >> 13) & 0x1)
+        dct["TP"].append(word16 & 0x1fff)
     elif dct["Flavor"] == 5:
         dct["QIE"][2*j] = word16 & 0x7f
         dct["QIE"][2*j+1] = (word16 >> 8) & 0x7f
