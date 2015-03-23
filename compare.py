@@ -185,7 +185,7 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
 def adc_vs_adc(mapF1, mapF2, book=None):
     matched = []
     nonMatched = []
-    for coords1, samples1  in mapF1.iteritems():
+    for coords1, samples1 in mapF1.iteritems():
         coords2 = configuration.transformed(*coords1)
         if coords2 is None:
             continue
@@ -218,6 +218,31 @@ def adc_vs_adc(mapF1, mapF2, book=None):
     return matched, nonMatched
 
 
+def tp_vs_tp(mapF1, mapF2, book=None):
+    matched = []
+    nonMatched = []
+    for coords, samples1 in mapF1.iteritems():
+
+        if coords in mapF2:
+            samples2 = mapF2[coords]
+        else:
+            samples2 = [-1] * len(samples1)
+
+        if samples1 == samples2:
+            matched.append(coords)
+        else:
+            nonMatched.append(coords)
+
+        if book:
+            for i, s1 in enumerate(samples1):
+                s2 = samples2[i]
+                book.fill((s1, s2),
+                          "tp_vs_tp_cr%02d_sl%02d_tpCh%d" % (crate2, slot2, channelId),
+                          (513, 513), (-1.5, -1.5), (511.5, 511.5),
+                          title=";TP;TP;samples / bin")
+    return matched, nonMatched
+
+
 def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=False, adcPlots=False):
     dump_ge_1 = 1 <= raw1[None]["dump"]
 
@@ -235,6 +260,10 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
         matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book)
         if dump_ge_1:
             matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1)
+
+        tF1 = tpMap(raw1, skipErrF=skipErrF)[0]
+        tF2 = tpMap(raw2, skipErrF=skipErrF)[0]
+        tMatched12, tNonMatched12 = tp_vs_tp(tF1, tF2, book)
 
     if dump_ge_1:
         printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
@@ -259,6 +288,8 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
         book.fill(nPerChannel(nonMatched12, iChannel),
                   "NonMatchedFibersCh%d" % iChannel,
                   *bins, title=title.replace("matched", "non-matched"))
+
+    book.fill(len(tMatched12), "MatchedTriggerTowers", 24, -0.5, 23.5, title=";no. matched TPs;Events / bin")
 
     # histogram some deltas
     fed1 = filter(lambda x: x is not None, sorted(raw1.keys()))[0]
@@ -357,4 +388,29 @@ def dataMap(raw={}, skipErrF=[]):
                 # print coords, matchRange, [hex(d) for d in data]
                 forward[coords] = data
                 backward[data] = coords
+    return forward, backward, skipped
+
+
+def tpMap(raw={}, skipErrF=[]):
+    forward = {}
+    backward = {}
+    skipped = []
+
+    for fedId, d in raw.iteritems():
+        if fedId is None:
+            continue
+
+        utca = d["header"]["utca"]
+        for key, block in d["htrBlocks"].iteritems():
+            for key, triggerData in block["triggerData"].iteritems():
+                if type(key) is tuple and len(key) == 2:  # VME
+                    slb, ch = key
+                    channelId = 0xc0 + ch
+                elif 0xc0 <= key <= 0xc3:
+                    channelId = key
+                else:
+                    skipped.append(key)
+                    continue
+
+                forward[channelId] = triggerData["TP"]
     return forward, backward, skipped
