@@ -216,16 +216,17 @@ def htrTriggerData(d={}, skipZero=False, zs={}):
     if zs:
         columns.append("  ZS?")
     out = ["  ".join(columns)]
-    for (slb, ch), lst in sorted(d.iteritems()):
+    for (slb, ch), dct in sorted(d.iteritems()):
         z = ""
         soi = ""
         tp = ""
-        if skipZero and not any([dct["TP"] for dct in lst]):
+        if skipZero and not any([dct["TP"]]):
             continue
-        for dct in lst:
-            z += str(int(dct["Z"]))
-            soi += str(int(dct["SOI"]))
-            tp += " %3x" % dct["TP"]
+
+        for i in range(len(dct["TP"])):
+            z += str(int(dct["Z"][i]))
+            soi += str(int(dct["SOI"][i]))
+            tp += " %3x" % dct["TP"][i]
 
         if zs:
             marks = zs["TPMarks"]
