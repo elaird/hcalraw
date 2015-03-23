@@ -9,7 +9,11 @@ def oneEvent(d={}, nonMatched=[]):
 
     aux = d[None]
     dump = aux["dump"]
-    if (not aux["patternMode"]["active"]) and (1 <= dump):
+
+    if dump <= 0:
+        return
+
+    if not aux["patternMode"]["active"]:
         printer.purple("-"*85)
         printer.purple("%4s iEntry 0x%08x (%d)" % (aux["label"],
                                                    aux["iEntry"],
@@ -19,7 +23,7 @@ def oneEvent(d={}, nonMatched=[]):
     for fedId, data in sorted(d.iteritems()):
         if fedId is None:
             continue
-        if ("MOL" in data) and (1 <= dump):
+        if "MOL" in data:
             oneFedMol(data["MOL"])
 
         oneFedHcal(data,
@@ -30,9 +34,7 @@ def oneEvent(d={}, nonMatched=[]):
                    printHeaders=(2 <= dump) or first,
                    )
         first = False
-
-    if 1 <= dump:
-        print
+    print
 
 
 def htrOverview(d={}):

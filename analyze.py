@@ -90,13 +90,17 @@ def eventMaps(s={}, options={}):
                 bcn = tree.EventAuxiliary.bunchCrossing()
                 sys.exit("auxBranch lacks EvN.")
             else:
+                fedId0 = s["fedIds"][0]
                 tree.GetEntry(iEvent)
                 raw = unpacked(fedData=wordsOneFed(tree=tree,
-                                                   fedId=s["fedIds"][0],
+                                                   fedId=fedId0,
                                                    collection=s["rawCollection"],
                                                    ),
                                nBytesPer=8,
                                headerOnly=True)
+                if not raw["nBytesSW"]:
+                    printer.error("FED0 %d has zero bytes." % fedId0)
+                    sys.exit()
                 orn, bcn, evn = coords(raw)
 
         elif name == "HCAL":
@@ -155,19 +159,26 @@ def progress(iEvent, iMask):
         return iMask
 
 
-def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
+def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}, cacheSizeMB=None):
     if inner:
         fI = r.TFile.Open(inner["fileName"])
         treeI = fI.Get(inner["treeName"])
         assert treeI, inner["treeName"]
+        if cacheSizeMB:
+            treeI.SetCacheSize(cacheSizeMB * 1024**2)
 
     f = r.TFile.Open(outer["fileName"])
     tree = f.Get(outer["treeName"])
     assert tree, outer["treeName"]
+    if cacheSizeMB:
+        tree.SetCacheSize(cacheSizeMB * 1024**2)
 
     if outer["progress"]:
         iMask = 0
         print "Looping:"
+
+    kargs = {"book": book}
+    kargs.update(compareOptions)
 
     for iOuterEvent in range(outer["nEventsSkip"],
                              nEvents(tree, outer["nEventsMax"])):
@@ -178,9 +189,7 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
         if outer["progress"]:
             iMask = progress(iOuterEvent, iMask)
 
-        kargs = {"raw1": collectedRaw(tree=tree, specs=outer),
-                 "book": book}
-        kargs.update(compareOptions)
+        kargs["raw1"] = collectedRaw(tree=tree, specs=outer)
 
         if inner:
             iInnerEvent = innerEvent[iOuterEvent]
