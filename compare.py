@@ -263,7 +263,7 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
 
         tF1 = tpMap(raw1, skipErrF=skipErrF)[0]
         tF2 = tpMap(raw2, skipErrF=skipErrF)[0]
-        tMatched12, tNonMatched12 = tp_vs_tp(tF1, tF2, book)
+        #tMatched12, tNonMatched12 = tp_vs_tp(tF1, tF2, book)
 
     if dump_ge_1:
         printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
@@ -289,7 +289,7 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
                   "NonMatchedFibersCh%d" % iChannel,
                   *bins, title=title.replace("matched", "non-matched"))
 
-    book.fill(len(tMatched12), "MatchedTriggerTowers", 24, -0.5, 23.5, title=";no. matched TPs;Events / bin")
+    #book.fill(len(tMatched12), "MatchedTriggerTowers", 24, -0.5, 23.5, title=";no. matched TPs;Events / bin")
 
     # histogram some deltas
     fed1 = filter(lambda x: x is not None, sorted(raw1.keys()))[0]
