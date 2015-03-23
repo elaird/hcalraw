@@ -1,5 +1,5 @@
 # AMC13 (May 2014 onward) http://ohm.bu.edu/~hazen/CMS/AMC13/UpdatedDAQPath_2014-05-01.pdf
-# uHTR  (May 2014 onward) https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12306&version=2&filename=uhtr_spec.pdf
+# uHTR  (May 2014 onward) https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12306
 # AMC13/uHTR (through April 2014) http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_3.pdf
 # DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 # HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
