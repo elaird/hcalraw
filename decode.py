@@ -269,11 +269,14 @@ def htrTps(l={}, w=None):
     ch = tag & 0x3
     key = (slb, ch)
     if key not in l["triggerData"]:
-        l["triggerData"][key] = []
-    l["triggerData"][key].append({"Z": (w >> 10) & 0x1,
-                                  "SOI": (w >> 9) & 0x1,
-                                  "TP": w & 0x1ff,
-                              })
+        l["triggerData"][key] = {"Z": [],
+                                 "SOI": [],
+                                 "TP": [],
+                                 }
+    dct = l["triggerData"][key]
+    dct["Z"].append((w >> 10) & 0x1)
+    dct["SOI"].append((w >> 9) & 0x1)
+    dct["TP"].append(w & 0x1ff)
 
 
 def htrExtra(l={}, w=None, i=None):
@@ -480,7 +483,6 @@ def clearChannel(d):
 def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
     channelId = word16 & 0xff
     channelHeader = {"Flavor": flavor,
-                     "CapId0": (word16 >> 8) & 0x3,
                      "ErrF":   (word16 >> 10) & 0x3,
                      "iWord16": iWord16,
                      }
@@ -492,6 +494,7 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
 
     elif 5 <= flavor <= 6:
         dataKey = "channelData"
+        channelHeader["CapId0"] = (word16 >> 8) & 0x3
         channelHeader["Fiber"] = channelId / 4
         if not utca:
             channelHeader["Fiber"] += 1
