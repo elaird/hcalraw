@@ -238,11 +238,9 @@ def tp_vs_tp(mapF1, mapF2, book=None):
             nonMatched.append(coords1)
 
         if book:
-            crate2, slot2, id2 = coords2
             for i, s1 in enumerate(samples1):
                 s2 = samples2[i]
                 book.fill((s1, s2),
-                          #"tp_vs_tp_cr%02d_sl%02d_tpCh%d" % (crate2, slot2, id2),
                           "tp_vs_tp",
                           (257, 257), (-1.5, -1.5), (255.5, 255.5),
                           title=";TP;TP;samples / bin")
@@ -408,18 +406,8 @@ def tpMap(raw={}, skipErrF=[]):
 
         utca = d["header"]["utca"]
         for block in d["htrBlocks"].values():
-            cr = block["Crate"]
-            sl = block["Slot"]
             for key, triggerData in block["triggerData"].iteritems():
-                if type(key) is tuple and len(key) == 2 and key[0] == 6:  # VME
-                    slb, ch = key
-                    channelId = 0xc0 + ch
-                elif 0xc0 <= key <= 0xc3:
-                    channelId = key
-                else:
-                    skipped.append(key)
-                    continue
-                coords = (block["Crate"], block["Slot"], channelId)
+                coords = (block["Crate"], block["Slot"], block["Top"], key)
                 forward[coords] = [x & 0xff for x in triggerData["TP"]]  # ignore fine-grain bit
 
     return forward, backward, skipped
