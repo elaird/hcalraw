@@ -263,10 +263,12 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
         del l["ModuleId"]
 
 
-def htrTps(l={}, w=None):
+def htrTps(l={}, w=None, bot=None):
     tag = (w >> 11) & 0x1f
     slb = (tag >> 2) & 0x7
     ch = tag & 0x3
+    if bot:
+        ch += 4
     key = (slb, ch)
     if key not in l["triggerData"]:
         l["triggerData"][key] = {"Z": [],
@@ -402,7 +404,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
     else:
         if not utca:
             if i < 8 + l["nWord16Tp"]:
-                htrTps(l, word16)
+                htrTps(l, word16, bot=l["Top"]=="b")
                 return
 
             if (3 <= k <= 4):
