@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-from configuration import transformed
+from configuration import transformed_qie
 
 
 def check(l):
@@ -16,8 +16,8 @@ def one(crate=None, fibCh=None, slots=[], tops="", fibers=[]):
         for top in tops:
             for fiber in fibers:
                 c1 = (crate, slot, top, fiber, fibCh)
-                c2 = transformed(*c1)
-                c3 = transformed(*c2)
+                c2 = transformed_qie(*c1)
+                c3 = transformed_qie(*c2)
                 if c3 != c1:
                     print c1, c2, c3
                 l.append(c2)
