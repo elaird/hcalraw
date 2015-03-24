@@ -54,10 +54,9 @@ def draw(h, feds1=[], feds2=[], prefix=""):
     h.GetYaxis().SetTitle("%s (FEDs %s)" % (P, fedString(feds2)))
     h.GetZaxis().SetTitle("samples / bin")
 
-    for x in ["X", "Y", "Z"]:
-        ax = getattr(h, "Get%saxis" % x)()
-        ax.SetTitleOffset(1.3)
-        #ax.CenterTitle()
+    h.GetXaxis().SetTitleOffset(1.25)
+    h.GetYaxis().SetTitleOffset(1.50)
+    h.GetZaxis().SetTitleOffset(1.35)
 
     m = 0.15
     r.gPad.SetTopMargin(m)
@@ -88,6 +87,7 @@ def go(fileName="output/latest.root", exclude=None, feds1=[], feds2=[], prefix="
         yx = r.TF1("yx", "x", h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
         yx.SetLineColor(r.kBlack)
         yx.SetLineWidth(1)
+        yx.SetLineStyle(2)
         yx.Draw("same")
 
         leg = r.TLegend(0.2, 0.7, 0.35, 0.85)
