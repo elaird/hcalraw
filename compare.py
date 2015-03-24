@@ -242,7 +242,8 @@ def tp_vs_tp(mapF1, mapF2, book=None):
             for i, s1 in enumerate(samples1):
                 s2 = samples2[i]
                 book.fill((s1, s2),
-                          "tp_vs_tp_cr%02d_sl%02d_tpCh%d" % (crate2, slot2, channelId),
+                          #"tp_vs_tp_cr%02d_sl%02d_tpCh%d" % (crate2, slot2, id2),
+                          "tp_vs_tp",
                           (513, 513), (-1.5, -1.5), (511.5, 511.5),
                           title=";TP;TP;samples / bin")
     return matched, nonMatched
