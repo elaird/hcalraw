@@ -188,36 +188,54 @@ def expectedCrate(fedId):
             365: 13}[fedId/2]
 
 
-def transformed(crate, slot, top, fiber, fibCh):
+def transformed_crate_slot(crate, slot):
+    slot2 = None
     if crate < 20:
         # VME --> uTCA
+        crate2 = crate + 20
+
         if 2 <= slot <= 7:
             slot2 = slot - 1
         elif 13 <= slot <= 18:
             slot2 = slot - 6
-        else:
-            return None
+    else:
+        # uTCA --> VME
+        crate2 = crate - 20
+        if slot <= 6:
+            slot2 = 1 + slot
+        elif 7 <= slot <= 12:
+            slot2 = 6 + slot
+    return (crate2, slot2)
 
+
+def transformed_qie(crate, slot, top, fiber, fibCh):
+    crate2, slot2 = transformed_crate_slot(crate, slot)
+    if slot2 is None:
+        return None
+
+    if crate < 20:
+        # VME --> uTCA
         top2 = " "
-        crate2 = crate + 20
         fiber2 = fiber + 1
         if top == "t":
             fiber2 += 12
     else:
         # uTCA --> VME
-        crate2 = crate - 20
         fiber2 = fiber - 1
         if 12 <= fiber2:
             fiber2 -= 12
             top2 = "t"
         else:
             top2 = "b"
-        if slot <= 6:
-            slot2 = 1 + slot
-        else:
-            slot2 = 6 + slot
 
     return (crate2, slot2, top2, fiber2, fibCh)
+
+
+def transformed_tp(crate, slot, channelId):
+    crate2, slot2 = transformed_crate_slot(crate, slot)
+    if slot2 is None:
+        return None
+    return (crate2, slot2, channelId)
 
 
 def format(treeName=""):
