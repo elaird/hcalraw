@@ -17,12 +17,12 @@ def i(s):
     return int(s[2:])
 
 
-def histo(fileName="", skip_rxs=[]):
+def histo(fileName="", skip_rxs=[], prefix=""):
     hSum = None
     f = r.TFile(fileName)
     for tkey in f.GetListOfKeys():
         name = tkey.GetName()
-        if not name.startswith("adc_vs_adc"):
+        if not name.startswith(prefix):
             continue
 
         # "adc_vs_adc_cr%02d_sl%02d_rx%1d"
@@ -32,7 +32,7 @@ def histo(fileName="", skip_rxs=[]):
 
         h = f.Get(name)
         if hSum is None:
-            hSum = h.Clone("adc_vs_adc")
+            hSum = h.Clone(prefix)
             hSum.Reset()
             hSum.SetDirectory(0)
         hSum.Add(h)
@@ -45,11 +45,13 @@ def fedString(lst=[]):
     return ",".join(["%d" % i for i in lst])
 
 
-def draw(h, feds1=[], feds2=[]):
+def draw(h, feds1=[], feds2=[], prefix=""):
+    P = prefix[:prefix.find("_vs_")].upper()
+
     h.SetStats(False)
     h.Draw("colz")
-    h.GetXaxis().SetTitle("ADC (FEDs %s)" % fedString(feds1))
-    h.GetYaxis().SetTitle("ADC (FEDs %s)" % fedString(feds2))
+    h.GetXaxis().SetTitle("%s (FEDs %s)" % (P, fedString(feds1)))
+    h.GetYaxis().SetTitle("%s (FEDs %s)" % (P, fedString(feds2)))
     h.GetZaxis().SetTitle("samples / bin")
 
     for x in ["X", "Y", "Z"]:
@@ -67,7 +69,9 @@ def draw(h, feds1=[], feds2=[]):
     r.gPad.SetLogz()
 
 
-def go(fileName="output/latest.root", exclude=None, feds1=[], feds2=[]):
+def go(fileName="output/latest.root", exclude=None, feds1=[], feds2=[], prefix=""):
+    assert prefix
+
     r.gROOT.SetBatch(True)
 
     skip_rxs = [(22,  4, 0),
@@ -75,11 +79,11 @@ def go(fileName="output/latest.root", exclude=None, feds1=[], feds2=[]):
                 (22, 11, 0),
                 ] if exclude else []
 
-    h = histo(fileName, skip_rxs=skip_rxs)
+    h = histo(fileName, skip_rxs=skip_rxs, prefix=prefix)
 
     if h:
         can = r.TCanvas("canvas", "canvas", 1600, 1600)
-        draw(h, feds1=feds1, feds2=feds2)
+        draw(h, feds1=feds1, feds2=feds2, prefix=prefix)
 
         yx = r.TF1("yx", "x", h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
         yx.SetLineColor(r.kBlack)
@@ -93,7 +97,7 @@ def go(fileName="output/latest.root", exclude=None, feds1=[], feds2=[]):
         leg.Draw()
 
         r.gPad.Update()
-        pdf = fileName.replace(".root", "_scatter.pdf")
+        pdf = fileName.replace(".root", "_%s.pdf" % prefix)
         if exclude:
             pdf = pdf.replace(".pdf", "_exclude.pdf")
         r.gPad.Print(pdf)
@@ -102,4 +106,4 @@ def go(fileName="output/latest.root", exclude=None, feds1=[], feds2=[]):
 
 
 if __name__ == "__main__":
-    go()
+    go(prefix="adc_vs_adc")
