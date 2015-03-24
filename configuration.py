@@ -231,11 +231,23 @@ def transformed_qie(crate, slot, top, fiber, fibCh):
     return (crate2, slot2, top2, fiber2, fibCh)
 
 
-def transformed_tp(crate, slot, channelId):
+def transformed_tp(crate, slot, top, key):
     crate2, slot2 = transformed_crate_slot(crate, slot)
     if slot2 is None:
         return None
-    return (crate2, slot2, channelId)
+
+    if type(key) is tuple and len(key) == 2 and key[0] == 6:  # VME
+        top2 = " "
+        slb, ch = key
+        if top == "b":
+            ch -= 2
+        if slot in [2, 4, 6, 13, 15, 17]:
+            ch -= 2
+        key2 = 0xc0 + ch
+    else:
+        return None
+
+    return (crate2, slot2, top2, key2)
 
 
 def format(treeName=""):
