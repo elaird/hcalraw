@@ -174,6 +174,8 @@ def histoLoop(f, lst, func):
             #t = "#splitline{%s}{%s}" % ("Ch " + ch, "%d#pm%d" % (h.GetMean(), h.GetRMS()))
             t = "Ch%s  (%d#pm%d)" % (ch, h.GetMean(), h.GetRMS())
             h.GetXaxis().SetTitle(h.GetXaxis().GetTitle()[:-6])
+        elif func(x).startswith("MatchedTriggerTowers"):
+            t = "%d#pm%d" % (h.GetMean(), h.GetRMS())
         else:
             t = h.GetTitle().replace("FED ", "")
 
@@ -207,26 +209,24 @@ def plotList(f, pad2, offset=None, names=[], logY=True, logX=False, logZ=False, 
             h.Draw(gopts)
             stylize(h)
             keep.append(h)
-            if name == "MatchedTriggerTowers":
-                h.SetTitle("(%d #pm %d)" % (h.GetMean(), h.GetRMS()))
-            else:
-                P = name[:name.find("_vs_")].upper()
-                h.GetXaxis().SetTitle("%s (%s)" % (P, fedString(feds1)))
-                h.GetYaxis().SetTitle("%s (%s)" % (P, fedString(feds2)))
-                h.GetZaxis().SetTitle("samples / bin")
 
-                yx = r.TF1("yx", "x", h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
-                yx.SetLineColor(r.kBlack)
-                yx.SetLineWidth(1)
-                yx.SetLineStyle(3)
-                yx.Draw("same")
+            P = name[:name.find("_vs_")].upper()
+            h.GetXaxis().SetTitle("%s (%s)" % (P, fedString(feds1)))
+            h.GetYaxis().SetTitle("%s (%s)" % (P, fedString(feds2)))
+            h.GetZaxis().SetTitle("samples / bin")
 
-                leg = r.TLegend(0.2, 0.75, 0.5, 0.85)
-                leg.SetBorderSize(0)
-                leg.SetFillStyle(0)
-                leg.AddEntry(yx, "y = x", "l")
-                leg.Draw()
-                keep += [yx, leg]
+            yx = r.TF1("yx", "x", h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
+            yx.SetLineColor(r.kBlack)
+            yx.SetLineWidth(1)
+            yx.SetLineStyle(3)
+            yx.Draw("same")
+
+            leg = r.TLegend(0.2, 0.75, 0.5, 0.85)
+            leg.SetBorderSize(0)
+            leg.SetFillStyle(0)
+            leg.AddEntry(yx, "y = x", "l")
+            leg.Draw()
+            keep += [yx, leg]
         else:
             names = []
             color = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kMagenta]
@@ -347,7 +347,9 @@ def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
                       )
 
     # tps
-    keep += plotList(f, pad2, offset=20, names=["MatchedTriggerTowers"], feds1=feds1, feds2=feds2)
+    pad2.cd(20)
+    adjustPad(logY=True)
+    keep += histoLoop(f, [("MatchedTriggerTowers", r.kBlack, 1)], lambda x: x)
 
     return keep
 
