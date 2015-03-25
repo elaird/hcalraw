@@ -102,7 +102,7 @@ def go(fileName="output/latest.root", exclude=None, feds1=[], feds2=[], prefix="
             pdf = pdf.replace(".pdf", "_exclude.pdf")
         r.gPad.Print(pdf)
     else:
-        sys.exit("No histograms matching selection were found.")
+        sys.exit("No histograms matching selection (prefix %s) were found." % prefix)
 
 
 if __name__ == "__main__":
