@@ -189,7 +189,11 @@ def histoLoop(f, lst, func):
     return out
 
 
-def plotList(f, pad2, feds, offset=None, names=[], logY=True, logX=False, logZ=False, gopts="hist"):
+def fedString(lst=[]):
+    return ",".join(["%d" % i for i in lst])
+
+
+def plotList(f, pad2, offset=None, names=[], logY=True, logX=False, logZ=False, gopts="hist", feds1=[], feds2=[]):
     keep = []
 
     for iHisto, name in enumerate(names):
@@ -206,13 +210,18 @@ def plotList(f, pad2, feds, offset=None, names=[], logY=True, logX=False, logZ=F
             if name == "MatchedTriggerTowers":
                 h.SetTitle("(%d #pm %d)" % (h.GetMean(), h.GetRMS()))
             else:
+                P = name[:name.find("_vs_")].upper()
+                h.GetXaxis().SetTitle("%s (%s)" % (P, fedString(feds1)))
+                h.GetYaxis().SetTitle("%s (%s)" % (P, fedString(feds2)))
+                h.GetZaxis().SetTitle("samples / bin")
+
                 yx = r.TF1("yx", "x", h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
                 yx.SetLineColor(r.kBlack)
                 yx.SetLineWidth(1)
                 yx.SetLineStyle(3)
                 yx.Draw("same")
 
-                leg = r.TLegend(0.2, 0.7, 0.35, 0.85)
+                leg = r.TLegend(0.2, 0.75, 0.5, 0.85)
                 leg.SetBorderSize(0)
                 leg.SetFillStyle(0)
                 leg.AddEntry(yx, "y = x", "l")
@@ -221,6 +230,7 @@ def plotList(f, pad2, feds, offset=None, names=[], logY=True, logX=False, logZ=F
         else:
             names = []
             color = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kMagenta]
+            feds = (feds1 + feds2)[:5]
             color += [r.kBlack] * (len(feds) - len(color))
             style = [1, 2, 3, 4, 5]
             style += [1] * (len(feds) - len(style))
@@ -283,8 +293,6 @@ def draw_graph(graph, pad1, title="", rate=False):
 
 
 def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
-    feds = (feds1 + feds2)[:5]
-
     keep = []
 
     # category/rate graph
@@ -303,16 +311,17 @@ def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
 
 
     # single FED
-    keep += plotList(f, pad2, feds, offset=5,
+    keep += plotList(f, pad2, offset=5,
                      names=["BcN",
                             "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples", "ErrF13",
                             "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs",
                             #"TTS", "PopCapFrac",
-                            ])
+                            ], feds1=feds1, feds2=feds2)
 
     # agreement
-    keep += plotList(f, pad2, feds, offset=14, names=["adc_vs_adc", "tp_vs_tp"],
-                     logY=False, logZ=True, gopts="colz")
+    keep += plotList(f, pad2, offset=14, names=["adc_vs_adc", "tp_vs_tp"],
+                     logY=False, logZ=True, gopts="colz", feds1=feds1, feds2=feds2)
+
     # EvN, OrN, BcN agreement
     fed1 = sorted(feds1)[0]
     for i, fed2 in enumerate(feds2[:3]):
@@ -338,7 +347,7 @@ def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
                       )
 
     # tps
-    keep += plotList(f, pad2, feds, offset=20, names=["MatchedTriggerTowers"])
+    keep += plotList(f, pad2, offset=20, names=["MatchedTriggerTowers"], feds1=feds1, feds2=feds2)
 
     return keep
 
