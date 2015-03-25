@@ -93,8 +93,7 @@ def magnify(h, factor=1.0):
         axis.SetTitleSize(factor*axis.GetTitleSize())
 
 
-def adjustPad(pad=r.gPad, logY=False,
-              m={"Left": 0.2, "Bottom": 0.2, "Right": None, "Top": None}):
+def adjustPad(pad=r.gPad, logY=False, m={"Left": 0.2, "Bottom": 0.2, "Right": None, "Top": None}):
     for key, value in m.iteritems():
         if value is None:
             continue
@@ -194,6 +193,8 @@ def plotList(f, pad2, feds, offset, lst=[]):
             h.Draw("hist")
             stylize(h)
             keep.append(h)
+            if name == "MatchedTriggerTowers":
+                h.SetTitle("(%d #pm %d)" % (h.GetMean(), h.GetRMS()))
         else:
             lst = []
             color = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kMagenta]
@@ -223,7 +224,7 @@ def draw_graph(graph, pad1, title="", rate=False):
     if rate:
         adjustPad(m={"Bottom": 0.2, "Left": 0.1, "Top": 0.2, "Right": 0.0})
     else:
-        adjustPad()
+        adjustPad(m={"Left": 0.2, "Bottom": 0.2, "Right": None, "Top": None})
 
     xMin, xMax = xMin_xMax(graph)
     delta = xMax - xMin
@@ -279,17 +280,18 @@ def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
 
 
     # single FED
-    keep += plotList(f, pad2, feds, 4,
+    keep += plotList(f, pad2, feds, 5,
                      ["BcN",
                       "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples",
-                      "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "ErrF13",
+                       "ErrF13", "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs",
                       #"TTS", "PopCapFrac",
-                  ])
+                      ] +  [""] * 6 + ["MatchedTriggerTowers"],
+                     )
 
     # EvN, OrN, BcN agreement
     fed1 = sorted(feds1)[0]
     for i, fed2 in enumerate(feds2[:3]):
-        pad2.cd(13 + i)
+        pad2.cd(16 + i)
         adjustPad(logY=True)
         keep += histoLoop(f,
                           [("OrN", r.kBlue, 1),
@@ -300,7 +302,7 @@ def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
                           )
 
     # fibers
-    pad2.cd(16)
+    pad2.cd(19)
     adjustPad(logY=True)
     keep += histoLoop(f,
                       [("MatchedFibersCh0", r.kBlue, 1),
@@ -322,7 +324,7 @@ def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf"):
     pad1 = r.TPad("pad1", "pad1", 0.00, 0.75, 0.75, 1.00)
     pad2 = r.TPad("pad2", "pad2", 0.00, 0.00, 1.00, 1.00)
 
-    pad2.Divide(4, 4)
+    pad2.Divide(5, 4)
     pad2.Draw()
     pad1.Draw()
 
