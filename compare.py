@@ -173,11 +173,9 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
             if not raw[fedId]["header"]["utca"]:
                 checkHtrModules(fedId=fedId, htrBlocks=raw[fedId]["htrBlocks"])
 
-    if not adcs:
-        adcs.add(-1)
-
-    book.fill(max(adcs), "max_adc_%s" % adcTag, 129, -1.5, 127.5,
-              title=";max ADC (when ErrF==0);Events / bin")
+    if adcs:
+        book.fill(max(adcs), "max_adc_%s" % adcTag, 128, -0.5, 127.5,
+                  title=";max ADC (when ErrF==0);Events / bin")
 
     return okFeds
 
@@ -202,8 +200,9 @@ def adc_vs_adc(mapF1, mapF2, book=None):
         else:
             nonMatched.append(coords1)
 
-        if book:
+        if book is not None:
             crate2, slot2, top2, fiber2, _ = coords2
+
             if top2 == " ":
                 rx = 12 <= fiber2
             else:
@@ -212,7 +211,8 @@ def adc_vs_adc(mapF1, mapF2, book=None):
             for i, s1 in enumerate(samples1):
                 s2 = samples2[i]
                 book.fill((s1, s2),
-                          "adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
+                          #"adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
+                          "adc_vs_adc",
                           (129, 129), (-1.5, -1.5), (127.5, 127.5),
                           title=";ADC;ADC;samples / bin")
     return matched, nonMatched
