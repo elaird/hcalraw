@@ -88,12 +88,18 @@ def fillRateHisto(h, g):
 
 
 def magnify(h, factor=1.0):
-    for axis in [h.GetXaxis(), h.GetYaxis()]:
+    h.GetYaxis().SetTitleOffset(1.2)
+    h.GetZaxis().SetTitleOffset(1.2)
+
+    for axis in [h.GetXaxis(), h.GetYaxis(), h.GetZaxis()][:2]:
         axis.SetLabelSize(factor*axis.GetLabelSize())
         axis.SetTitleSize(factor*axis.GetTitleSize())
 
 
-def adjustPad(pad=r.gPad, logY=False, m={"Left": 0.2, "Bottom": 0.2, "Right": None, "Top": None}):
+
+def adjustPad(pad=r.gPad, logX=False, logY=False, logZ=False,
+              m={"Left": 0.15, "Bottom": 0.15, "Right": 0.15, "Top": None}):
+
     for key, value in m.iteritems():
         if value is None:
             continue
@@ -101,15 +107,19 @@ def adjustPad(pad=r.gPad, logY=False, m={"Left": 0.2, "Bottom": 0.2, "Right": No
 
     r.gPad.SetTickx()
     r.gPad.SetTicky()
+    if logX:
+        r.gPad.SetLogx()
     if logY:
         r.gPad.SetLogy()
+    if logZ:
+        r.gPad.SetLogz()
 
 
 def stylize(h, color=r.kBlack, style=1, width=1):
     #r.gStyle.SetOptStat(110010)
     h.SetStats(False)
     h.SetMinimum(0.5)
-    magnify(h, factor=2.0)
+    magnify(h, factor=1.8)
     h.SetLineColor(color)
     h.SetLineStyle(style)
     h.SetLineWidth(width)
@@ -179,24 +189,37 @@ def histoLoop(f, lst, func):
     return out
 
 
-def plotList(f, pad2, feds, offset, lst=[]):
+def plotList(f, pad2, feds, offset=None, names=[], logY=True, logX=False, logZ=False, gopts="hist"):
     keep = []
 
-    for iHisto, name in enumerate(lst):
+    for iHisto, name in enumerate(names):
         if not name:
             continue
         pad2.cd(offset + iHisto)
-        adjustPad(logY=True)
+        adjustPad(logX=logX, logY=logY, logZ=logZ)
         h = f.Get(name)
         if h:
             shiftFlows(h)
-            h.Draw("hist")
+            h.Draw(gopts)
             stylize(h)
             keep.append(h)
             if name == "MatchedTriggerTowers":
                 h.SetTitle("(%d #pm %d)" % (h.GetMean(), h.GetRMS()))
+            else:
+                yx = r.TF1("yx", "x", h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
+                yx.SetLineColor(r.kBlack)
+                yx.SetLineWidth(1)
+                yx.SetLineStyle(3)
+                yx.Draw("same")
+
+                leg = r.TLegend(0.2, 0.7, 0.35, 0.85)
+                leg.SetBorderSize(0)
+                leg.SetFillStyle(0)
+                leg.AddEntry(yx, "y = x", "l")
+                leg.Draw()
+                keep += [yx, leg]
         else:
-            lst = []
+            names = []
             color = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kMagenta]
             color += [r.kBlack] * (len(feds) - len(color))
             style = [1, 2, 3, 4, 5]
@@ -205,9 +228,9 @@ def plotList(f, pad2, feds, offset, lst=[]):
                 if name == "BcN" and iFed:
                     continue
 
-                lst.append((fed, color[iFed], style[iFed]))
+                names.append((fed, color[iFed], style[iFed]))
 
-            keep += histoLoop(f, lst, lambda x: "%s_%d" % (name, x))
+            keep += histoLoop(f, names, lambda x: "%s_%d" % (name, x))
     return keep
 
 
@@ -280,14 +303,16 @@ def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
 
 
     # single FED
-    keep += plotList(f, pad2, feds, 5,
-                     ["BcN",
-                      "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples",
-                       "ErrF13", "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs",
-                      #"TTS", "PopCapFrac",
-                      ] +  [""] * 6 + ["MatchedTriggerTowers"],
-                     )
+    keep += plotList(f, pad2, feds, offset=5,
+                     names=["BcN",
+                            "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples", "ErrF13",
+                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs",
+                            #"TTS", "PopCapFrac",
+                            ])
 
+    # agreement
+    keep += plotList(f, pad2, feds, offset=14, names=["adc_vs_adc", "tp_vs_tp"],
+                     logY=False, logZ=True, gopts="colz")
     # EvN, OrN, BcN agreement
     fed1 = sorted(feds1)[0]
     for i, fed2 in enumerate(feds2[:3]):
@@ -312,6 +337,9 @@ def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
                       lambda x: x,
                       )
 
+    # tps
+    keep += plotList(f, pad2, feds, offset=20, names=["MatchedTriggerTowers"])
+
     return keep
 
 
@@ -324,7 +352,7 @@ def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf"):
     pad1 = r.TPad("pad1", "pad1", 0.00, 0.75, 0.75, 1.00)
     pad2 = r.TPad("pad2", "pad2", 0.00, 0.00, 1.00, 1.00)
 
-    pad2.Divide(5, 4)
+    pad2.Divide(5, 4, 0.001, 0.001)
     pad2.Draw()
     pad1.Draw()
 
