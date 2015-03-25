@@ -490,7 +490,7 @@ def go(outer={}, inner={}, outputFile="",
     gr.SetTitle("_".join(labels))
     gr.Write()
 
-    for key, h in book.iteritems():
+    for h in book.values():
         h.Write()
     f.Close()
 

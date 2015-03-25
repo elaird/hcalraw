@@ -290,5 +290,5 @@ if __name__ == "__main__":
                           )
 
     if feds2 and not options.anyEmap:
-        for exclude in [False, True]:
-            adc_vs_adc.go(fileName=options.outputFile, exclude=exclude, feds1=feds1, feds2=feds2)
+        for prefix in ["adc_vs_adc", "tp_vs_tp"]:
+            adc_vs_adc.go(fileName=options.outputFile, feds1=feds1, feds2=feds2, prefix=prefix)

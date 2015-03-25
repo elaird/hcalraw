@@ -173,11 +173,9 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
             if not raw[fedId]["header"]["utca"]:
                 checkHtrModules(fedId=fedId, htrBlocks=raw[fedId]["htrBlocks"])
 
-    if not adcs:
-        adcs.add(-1)
-
-    book.fill(max(adcs), "max_adc_%s" % adcTag, 129, -1.5, 127.5,
-              title=";max ADC (when ErrF==0);Events / bin")
+    if adcs:
+        book.fill(max(adcs), "max_adc_%s" % adcTag, 128, -0.5, 127.5,
+                  title=";max ADC (when ErrF==0);Events / bin")
 
     return okFeds
 
@@ -185,8 +183,8 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
 def adc_vs_adc(mapF1, mapF2, book=None):
     matched = []
     nonMatched = []
-    for coords1, samples1  in mapF1.iteritems():
-        coords2 = configuration.transformed(*coords1)
+    for coords1, samples1 in mapF1.iteritems():
+        coords2 = configuration.transformed_qie(*coords1)
         if coords2 is None:
             continue
 
@@ -202,8 +200,9 @@ def adc_vs_adc(mapF1, mapF2, book=None):
         else:
             nonMatched.append(coords1)
 
-        if book:
+        if book is not None:
             crate2, slot2, top2, fiber2, _ = coords2
+
             if top2 == " ":
                 rx = 12 <= fiber2
             else:
@@ -212,9 +211,39 @@ def adc_vs_adc(mapF1, mapF2, book=None):
             for i, s1 in enumerate(samples1):
                 s2 = samples2[i]
                 book.fill((s1, s2),
-                          "adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
+                          #"adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
+                          "adc_vs_adc",
                           (129, 129), (-1.5, -1.5), (127.5, 127.5),
                           title=";ADC;ADC;samples / bin")
+    return matched, nonMatched
+
+
+def tp_vs_tp(mapF1, mapF2, book=None):
+    matched = []
+    nonMatched = []
+
+    for coords1, samples1 in mapF1.iteritems():
+        coords2 = configuration.transformed_tp(*coords1)
+        if coords2 is None:
+            continue
+
+        if coords2 in mapF2:
+            samples2 = mapF2[coords2]
+        else:
+            samples2 = [-1] * len(samples1)
+
+        if samples1 == samples2:
+            matched.append(coords1)
+        else:
+            nonMatched.append(coords1)
+
+        if book:
+            for i, s1 in enumerate(samples1):
+                s2 = samples2[i]
+                book.fill((s1, s2),
+                          "tp_vs_tp",
+                          (257, 257), (-1.5, -1.5), (255.5, 255.5),
+                          title=";TP;TP;samples / bin")
     return matched, nonMatched
 
 
@@ -235,6 +264,10 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
         matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book)
         if dump_ge_1:
             matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1)
+
+        tF1 = tpMap(raw1, skipErrF=skipErrF)[0]
+        tF2 = tpMap(raw2, skipErrF=skipErrF)[0]
+        tMatched12, tNonMatched12 = tp_vs_tp(tF1, tF2, book)
 
     if dump_ge_1:
         printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
@@ -259,6 +292,8 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
         book.fill(nPerChannel(nonMatched12, iChannel),
                   "NonMatchedFibersCh%d" % iChannel,
                   *bins, title=title.replace("matched", "non-matched"))
+
+    book.fill(len(tMatched12), "MatchedTriggerTowers", 24, -0.5, 23.5, title=";no. matched TPs;Events / bin")
 
     # histogram some deltas
     fed1 = filter(lambda x: x is not None, sorted(raw1.keys()))[0]
@@ -336,7 +371,7 @@ def dataMap(raw={}, skipErrF=[]):
 
         utca = d["header"]["utca"]
         fiberMap = configuration.fiberMap(fedId)
-        for key, block in d["htrBlocks"].iteritems():
+        for block in d["htrBlocks"].values():
             for channelData in block["channelData"].values():
                 channel = channelData["FibCh"]
                 fiber = channelData["Fiber"]
@@ -357,4 +392,22 @@ def dataMap(raw={}, skipErrF=[]):
                 # print coords, matchRange, [hex(d) for d in data]
                 forward[coords] = data
                 backward[data] = coords
+    return forward, backward, skipped
+
+
+def tpMap(raw={}, skipErrF=[]):
+    forward = {}
+    backward = {}
+    skipped = []
+
+    for fedId, d in raw.iteritems():
+        if fedId is None:
+            continue
+
+        utca = d["header"]["utca"]
+        for block in d["htrBlocks"].values():
+            for key, triggerData in block["triggerData"].iteritems():
+                coords = (block["Crate"], block["Slot"], block["Top"], key)
+                forward[coords] = [x & 0xff for x in triggerData["TP"]]  # ignore fine-grain bit
+
     return forward, backward, skipped

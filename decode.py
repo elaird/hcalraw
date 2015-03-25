@@ -263,17 +263,22 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
         del l["ModuleId"]
 
 
-def htrTps(l={}, w=None):
+def htrTps(l={}, w=None, bot=None):
     tag = (w >> 11) & 0x1f
     slb = (tag >> 2) & 0x7
     ch = tag & 0x3
+    if bot:
+        ch += 4
     key = (slb, ch)
     if key not in l["triggerData"]:
-        l["triggerData"][key] = []
-    l["triggerData"][key].append({"Z": (w >> 10) & 0x1,
-                                  "SOI": (w >> 9) & 0x1,
-                                  "TP": w & 0x1ff,
-                              })
+        l["triggerData"][key] = {"Z": [],
+                                 "SOI": [],
+                                 "TP": [],
+                                 }
+    dct = l["triggerData"][key]
+    dct["Z"].append((w >> 10) & 0x1)
+    dct["SOI"].append((w >> 9) & 0x1)
+    dct["TP"].append(w & 0x1ff)
 
 
 def htrExtra(l={}, w=None, i=None):
@@ -399,7 +404,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
     else:
         if not utca:
             if i < 8 + l["nWord16Tp"]:
-                htrTps(l, word16)
+                htrTps(l, word16, bot=l["Top"]=="b")
                 return
 
             if (3 <= k <= 4):
@@ -480,7 +485,6 @@ def clearChannel(d):
 def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
     channelId = word16 & 0xff
     channelHeader = {"Flavor": flavor,
-                     "CapId0": (word16 >> 8) & 0x3,
                      "ErrF":   (word16 >> 10) & 0x3,
                      "iWord16": iWord16,
                      }
@@ -488,10 +492,11 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
     if flavor == 4:
         dataKey = "triggerData"
         for key in ["SOI", "OK", "TP"]:
-            channelHeader[key] = {}
+            channelHeader[key] = []
 
     elif 5 <= flavor <= 6:
         dataKey = "channelData"
+        channelHeader["CapId0"] = (word16 >> 8) & 0x3
         channelHeader["Fiber"] = channelId / 4
         if not utca:
             channelHeader["Fiber"] += 1
@@ -535,9 +540,9 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
         dct["words"].append(word16)
 
     elif dct["Flavor"] == 4:
-        dct["SOI"][j] = (word16 >> 14) & 0x1
-        dct["OK"][j] = (word16 >> 13) & 0x1
-        dct["TP"][j] = word16 & 0x1fff
+        dct["SOI"].append((word16 >> 14) & 0x1)
+        dct["OK"].append((word16 >> 13) & 0x1)
+        dct["TP"].append(word16 & 0x1fff)
     elif dct["Flavor"] == 5:
         dct["QIE"][2*j] = word16 & 0x7f
         dct["QIE"][2*j+1] = (word16 >> 8) & 0x7f
