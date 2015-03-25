@@ -208,12 +208,14 @@ def adc_vs_adc(mapF1, mapF2, book=None):
             else:
                 rx = "bt".find(top2)
 
+            xMin = -10.5
+            xMax = 127.5
+            nBins = int(xMax - xMin)
             for i, s1 in enumerate(samples1):
                 s2 = samples2[i]
-                book.fill((s1, s2),
+                book.fill((s1, s2), "adc_vs_adc",
                           #"adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
-                          "adc_vs_adc",
-                          (129, 129), (-1.5, -1.5), (127.5, 127.5),
+                          (nBins, nBins), (xMin, xMin), (xMax, xMax),
                           title=";ADC;ADC;samples / bin")
     return matched, nonMatched
 
@@ -238,11 +240,13 @@ def tp_vs_tp(mapF1, mapF2, book=None):
             nonMatched.append(coords1)
 
         if book:
+            xMin = -25.5
+            xMax = 255.5
+            nBins = int(xMax - xMin)
             for i, s1 in enumerate(samples1):
                 s2 = samples2[i]
-                book.fill((s1, s2),
-                          "tp_vs_tp",
-                          (257, 257), (-1.5, -1.5), (255.5, 255.5),
+                book.fill((s1, s2), "tp_vs_tp",
+                          (nBins, nBins), (xMin, xMin), (xMax, xMax),
                           title=";TP;TP;samples / bin")
     return matched, nonMatched
 
