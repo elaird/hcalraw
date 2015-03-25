@@ -293,7 +293,7 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
                   "NonMatchedFibersCh%d" % iChannel,
                   *bins, title=title.replace("matched", "non-matched"))
 
-    book.fill(len(tMatched12), "MatchedTriggerTowers", 24, -0.5, 23.5, title=";no. matched TPs;Events / bin")
+    book.fill(len(tMatched12), "MatchedTriggerTowers", 49, -0.5, 48.5, title=";no. matched TPs;Events / bin")
 
     # histogram some deltas
     fed1 = filter(lambda x: x is not None, sorted(raw1.keys()))[0]
