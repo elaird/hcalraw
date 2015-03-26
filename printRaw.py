@@ -182,13 +182,16 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
 
         if 5 <= dump:
             skipZero = dump <= 5
+            kargs = {"skipZero": skipZero,
+                     "crate": p["Crate"],
+                     "slot": p["Slot"],
+                     "top": p["Top"],
+                     "nonMatched": nonMatchedTp,
+                     }
             if utca:
-                td = uhtrTriggerData(p["triggerData"], skipZero=skipZero)
+                td = uhtrTriggerData(p["triggerData"], **kargs)
             else:
-                td = htrTriggerData(p["triggerData"],
-                                    skipZero=skipZero,
-                                    zs=zs,
-                                    )
+                td = htrTriggerData(p["triggerData"], zs=zs, **kargs)
 
             if len(td) >= 2:
                 printer.yellow(td[0])
@@ -196,6 +199,10 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
                 anyHtrDataPrinted = True
 
     return anyHtrDataPrinted
+
+
+def makeRed(s):
+    return '\033[91m' + s + '\033[0m'
 
 
 def qieString(qieData={}, red=False):
@@ -208,16 +215,17 @@ def qieString(qieData={}, red=False):
 
     out = " ".join(l)
     if red:
-        out = '\033[91m' + out + '\033[0m'
+        out = makeRed(out)
     return out
 
 
-def htrTriggerData(d={}, skipZero=False, zs={}):
+def htrTriggerData(d={}, skipZero=False, crate=None, slot=None, top="", nonMatched=[], zs={}):
     columns = ["SLB-ch", "Peak", "SofI", "TP(hex)  0   1   2   3"]
     if zs:
         columns.append("  ZS?")
     out = ["  ".join(columns)]
-    for (slb, ch), dct in sorted(d.iteritems()):
+    for key, dct in sorted(d.iteritems()):
+        slb, ch = key
         z = ""
         soi = ""
         tp = ""
@@ -238,15 +246,19 @@ def htrTriggerData(d={}, skipZero=False, zs={}):
                 m = " "
             tp += " "*5 + m
 
-        out.append("  ".join(["  %1d- %1d" % (slb, ch),
-                              "%4s" % z,
-                              "%4s" % soi,
-                              " "*4,
-                              tp]))
+        one = "  ".join(["  %1d- %1d" % (slb, ch),
+                         "%4s" % z,
+                         "%4s" % soi,
+                         " "*4,
+                         tp])
+        if (crate, slot, top, key) in nonMatched:
+            one = makeRed(one)
+        out.append(one)
+
     return out
 
 
-def uhtrTriggerData(d={}, skipZero=False):
+def uhtrTriggerData(d={}, skipZero=False, crate=None, slot=None, top="", nonMatched=[]):
     out = []
     out.append("  ".join([" TPid",
                           "Fl",
