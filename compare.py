@@ -259,6 +259,8 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
         mapF2, mapB2, _ = dataMap(raw2, skipErrF=skipErrF)
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
+        tMatched12 = tNonMatched12 = []
+
         if printEmap:
            reportMatched(matched12)
            reportFailed(nonMatched12)
@@ -274,8 +276,8 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
         tMatched12, tNonMatched12 = tp_vs_tp(tF1, tF2, book)
 
     if dump_ge_1:
-        printRaw.oneEvent(raw1, nonMatched=nonMatched12 if raw2 else [])
-        printRaw.oneEvent(raw2, nonMatched=nonMatched21)
+        printRaw.oneEvent(raw1, nonMatchedQie=nonMatched12, nonMatchedTp=tNonMatched12)
+        printRaw.oneEvent(raw2, nonMatchedQie=nonMatched21)
 
     okFeds = loop_over_feds(raw1, book, adcPlots, adcTag="feds1")
 

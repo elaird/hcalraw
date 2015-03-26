@@ -3,7 +3,7 @@ import printer
 import utils
 
 
-def oneEvent(d={}, nonMatched=[]):
+def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[]):
     if None not in d:
         return
 
@@ -30,7 +30,7 @@ def oneEvent(d={}, nonMatched=[]):
                    patternMode=aux["patternMode"],
                    dump=dump,
                    crateslots=aux["crateslots"],
-                   nonMatched=nonMatched,
+                   nonMatchedQie=nonMatchedQie,
                    printHeaders=(2 <= dump) or first,
                    )
         first = False
@@ -85,7 +85,8 @@ def oneHtrPatterns(p={}, patternMode={}, fedId=None, iOffset=None, utca=None):
         print "\n".join(lines)  # skip printer to facilitate diff
 
 
-def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, nonMatched=[]):
+def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
+           nonMatchedQie=[], nonMatchedTp=[]):
     zs = p.get("ZS")
 
     if "nWord16Qie" in p:
@@ -157,7 +158,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None, n
     anyHtrDataPrinted = False
     if 4 <= dump:
         kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2],
-                 "nonMatched": nonMatched,
+                 "nonMatched": nonMatchedQie,
                  "latency": p.get("Latency"),
                  "zs": p.get("ZS"),
                  "skipErrF": [3],
@@ -389,7 +390,9 @@ def patternString(patterns=[], key=""):
     return configuration.patternString(codes)
 
 
-def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[], nonMatched=[], printHeaders=None):
+def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[],
+               nonMatchedQie=[], nonMatchedTp=[],
+               printHeaders=None):
     h = d["header"]
     t = d["trailer"]
     if (not patternMode["active"]) and (1 <= dump):
@@ -453,7 +456,9 @@ def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[], nonMatched=[],
                                         dump=dump,
                                         crateslots=crateslots,
                                         utca=h["utca"],
-                                        nonMatched=nonMatched)
+                                        nonMatchedQie=nonMatchedQie,
+                                        nonMatchedTp=nonMatchedTp,
+                                        )
 
 
 def oneFedMol(d):
