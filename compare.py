@@ -274,10 +274,11 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
         tF1 = tpMap(raw1, skipErrF=skipErrF)[0]
         tF2 = tpMap(raw2, skipErrF=skipErrF)[0]
         tMatched12, tNonMatched12 = tp_vs_tp(tF1, tF2, book)
+        tMatched21 = tNonMatched21 = []  # tp_vs_tp(tF2, tF1, book)  # FIXME
 
     if dump_ge_1:
         printRaw.oneEvent(raw1, nonMatchedQie=nonMatched12, nonMatchedTp=tNonMatched12)
-        printRaw.oneEvent(raw2, nonMatchedQie=nonMatched21)
+        printRaw.oneEvent(raw2, nonMatchedQie=nonMatched21, nonMatchedTp=tNonMatched21)
 
     okFeds = loop_over_feds(raw1, book, adcPlots, adcTag="feds1")
 
