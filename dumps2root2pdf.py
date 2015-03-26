@@ -38,7 +38,7 @@ def command(dat):
     root2 = root1.replace("data/badcoffee_", "output/")
     opts = " --".join(["", "progress", "no-warn-unpack", "nevents=100"])
 
-    cmds = ["cat %s | rooter/badcoffee %s" % (dat, fed),
+    cmds = ["cat %s | cpp/badcoffee %s" % (dat, fed),
             "mv badcoffee%d.root %s" % (fed, root1),
             "./oneRun.py --file1=%s --feds1=%d --output-file=%s %s" % (root1, fed, root2, opts)
             ]
