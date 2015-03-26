@@ -122,6 +122,13 @@ def eventMaps(s={}, options={}):
                            headerOnly=True)
             orn, bcn, evn = coords(raw)
 
+        elif name == "BC":
+            tree.GetEntry(iEvent)
+            raw = unpacked(fedData=wordsOneBranch(tree=tree, branch=branch0),
+                           nBytesPer=8,
+                           headerOnly=True)
+            orn, bcn, evn = coords(raw)
+
         elif name == "MOL":
             tree.GetEntry(iEvent)
             rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
@@ -224,6 +231,9 @@ def collectedRaw(tree=None, specs={}):
         elif specs["name"] == "DB":
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=4, **kargs)
+        elif specs["name"] == "BC":
+            rawThisFed = wordsOneBranch(tree=tree, branch=branch)
+            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
         elif specs["name"] == "MOL":
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
             mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)

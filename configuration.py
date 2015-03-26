@@ -268,6 +268,11 @@ def format(treeName=""):
                "branch": lambda fedId: "db%d" % fedId,
                }
 
+    if treeName == "badcoffeetree":
+        out = {"name": "BC",
+               "branch": lambda fedId: "bc%d" % fedId,
+               }
+
     if treeName == "Events":
         out = {"name": "CMS",
                "auxBranch": False,
