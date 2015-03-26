@@ -3,6 +3,7 @@ import collections
 import configuration
 import printer
 import utils
+import adc_vs_adc
 r = utils.ROOT()
 
 
@@ -354,7 +355,7 @@ def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
     return keep
 
 
-def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf"):
+def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf", scatter=False):
     r.gROOT.SetStyle("Plain")
 
     canvas = r.TCanvas()
@@ -375,3 +376,7 @@ def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf"):
         canvas.Print(pdf)
         f.Close()
     canvas.Print(pdf + "]")
+
+    if scatter:
+        for prefix in ["adc_vs_adc", "tp_vs_tp"]:
+            adc_vs_adc.go(fileName=inputFiles[0], feds1=feds1, feds2=feds2, prefix=prefix)
