@@ -3,8 +3,6 @@
 *.pdf
 output
 bin
-rooter/deadbeef
-rooter/rooter
 cpp/*.d
 cpp/*.so
 cpp/*.pcm
