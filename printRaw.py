@@ -31,6 +31,7 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[]):
                    dump=dump,
                    crateslots=aux["crateslots"],
                    nonMatchedQie=nonMatchedQie,
+                   nonMatchedTp=nonMatchedTp,
                    printHeaders=(2 <= dump) or first,
                    )
         first = False
