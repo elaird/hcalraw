@@ -279,7 +279,6 @@ def draw_graph(graph, pad1, title="", rate=False):
         h.SetMinimum(5.0e1)
         h.SetMaximum(2.0e5)
         h.GetYaxis().SetTitle("L1A rate (Hz)")
-        h.GetYaxis().SetTitleOffset(0.4)
         r.gPad.SetLogy()
         r.gPad.SetGridy()
     else:
@@ -290,6 +289,7 @@ def draw_graph(graph, pad1, title="", rate=False):
 
     magnify(h, factor=3.0)
     h.GetXaxis().SetTitleOffset(0.75)
+    h.GetYaxis().SetTitleOffset(0.4)
     return graph, h
 
 
