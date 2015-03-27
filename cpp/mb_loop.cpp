@@ -9,7 +9,7 @@
 #define SAVE_HEADER 0  // switch to store the header word into the root file
 
 
-int NDataInBlock(WORD buf){
+int NDataInBlock(uint64_t buf){
   int nData = (buf>>56);
   nData += (buf>>40) & 0x300;
   return nData;
