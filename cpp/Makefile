@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=-Wall -Wextra
 ROOT=`root-config --cflags` -L`root-config --libdir` -lCore -lTree -lRIO
 
-all: mol deadbeef badcoffee
+all: mol deadbeef badcoffee install
 
 mol: mol.cpp rooter.cpp
 	$(CC) $(CFLAGS) $(ROOT) $< -o $@
