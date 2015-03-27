@@ -1,4 +1,7 @@
-// NOTE! the function below requires four #defines; see e.g. badcoffee.cpp
+/* NOTE!
+   The function below requires some #defines
+   See e.g. badcoffee.cpp
+*/
 
 #include "TFile.h"
 #include "TTree.h"
@@ -13,6 +16,11 @@ int NDataInBlock(uint64_t buf){
   int nData = (buf>>56);
   nData += (buf>>40) & 0x300;
   return nData;
+}
+
+
+int read_word(WORD& buf) {
+  return fread(&buf, sizeof(buf), 1, stdin);
 }
 
 
@@ -39,24 +47,25 @@ int main(int argc, char* argv[]) {
   int nWordsInBlock = 0;
 
   WORD buf;
-  int success = fread(&buf, sizeof(buf), 1, stdin);  // read a word!
+  int success = read_word(buf);
 
   while (success) {
     if (debug) std::cout << iWordInBlock;
 
     if ((buf & MASK) == MAGIC) {
       if((iWordInBlock - NHEADER != nWordsInBlock) && nWordsInBlock)
-        std::cout << "Warning::Found magic number in data with iWords = " << iWordInBlock << " nWordsInBlock = " << nWordsInBlock << std::endl;
+        std::cerr << "Warning: found magic number in data with iWords = " << iWordInBlock << " nWordsInBlock = " << nWordsInBlock << std::endl;
       else if (iWordInBlock){
-        tree.Fill();  //Save
-
-        //Clear Counters
-        iWordInBlock = 1;
-	vec.clear();
 	if (debug) std::cout << " filling/clearing" << std::endl;
 
+        tree.Fill();
+
+        iWordInBlock = 1;
+	vec.clear();
         //Get nWords
-        if(fread(&buf, sizeof(buf), 1, stdin)) nWordsInBlock = buf; //read next word which contains nWords
+        if(read_word(buf)) {
+	  nWordsInBlock = buf; //read next word which contains nWords
+	}
       }
     }
 
@@ -67,7 +76,7 @@ int main(int argc, char* argv[]) {
     else if(debug) std::cout << std::endl;
 
     iWordInBlock++;
-    success = fread(&buf, sizeof(buf), 1, stdin);  // read another word!
+    success = read_word(buf);
   }
 
   tree.Fill();
