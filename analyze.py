@@ -55,9 +55,8 @@ def eventMaps(s={}, options={}):
     assert fileName
     assert treeName
 
-    name = s["name"]
     nEventsMax = s["nEventsMax"]
-    if name != "CMS":
+    if treeName != "Events":
         fedId0 = s["fedIds"][0]
         branch0 = s["branch"](fedId0)
 
@@ -82,7 +81,7 @@ def eventMaps(s={}, options={}):
     for iEvent in range(nEvents(tree, nEventsMax)):
         orn = bcn = evn = None
 
-        if name == "CMS":
+        if treeName == "Events":  # CMS CDAQ
             fedId0 = s["fedIds"][0]
             tree.GetEntry(iEvent)
             raw = unpacked(fedData=wordsOneFed(tree=tree,
@@ -93,28 +92,28 @@ def eventMaps(s={}, options={}):
                            headerOnly=True)
             orn, bcn, evn = coords(raw)
 
-        elif name == "HCAL":
+        elif treeName == "CMSRAW":  # HCAL local
             tree.GetEntry(iEvent)
             raw = unpacked(fedData=wordsOneChunk(tree=tree, branch=branch0),
                            nBytesPer=8,
                            headerOnly=True)
             orn, bcn, evn = coords(raw)
 
-        elif name == "DB":
+        elif treeName == "deadbeef":
             tree.GetEntry(iEvent)
             raw = unpacked(fedData=wordsOneBranch(tree=tree, branch=branch0),
                            nBytesPer=4,
                            headerOnly=True)
             orn, bcn, evn = coords(raw)
 
-        elif name == "BC":
+        elif treeName == "badcoffee":
             tree.GetEntry(iEvent)
             raw = unpacked(fedData=wordsOneBranch(tree=tree, branch=branch0),
                            nBytesPer=8,
                            headerOnly=True)
             orn, bcn, evn = coords(raw)
 
-        elif name == "MOL":
+        elif treeName == "mol":
             tree.GetEntry(iEvent)
             rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
             mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
@@ -125,7 +124,7 @@ def eventMaps(s={}, options={}):
             orn, bcn, evn = coords(raw)
 
         else:
-            sys.exit("name %s not found." % name)
+            sys.exit("treeName %s not found." % treeName)
 
         if not raw["nBytesSW"]:
             printer.error("FED0 %d has zero bytes." % fedId0)
@@ -211,19 +210,19 @@ def collectedRaw(tree=None, specs={}):
         if "branch" in specs:
             branch = specs["branch"](fedId)
 
-        if specs["name"] == "CMS":
+        if specs["treeName"] == "Events":
             rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"])
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
-        elif specs["name"] == "HCAL":
+        elif specs["treeName"] == "CMSRAW":
             rawThisFed = wordsOneChunk(tree, branch)
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
-        elif specs["name"] == "DB":
+        elif specs["treeName"] == "deadbeef":
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=4, **kargs)
-        elif specs["name"] == "BC":
+        elif specs["treeName"] == "badcoffee":
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
-        elif specs["name"] == "MOL":
+        elif specs["treeName"] == "mol":
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
             mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8,
