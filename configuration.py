@@ -255,7 +255,6 @@ def format(treeName=""):
     if treeName == "CMSRAW":
         out = {"name":  "HCAL",
                "branch": lambda fedId: "%s%d" % ("HCAL_DCC" if __isVme(fedId) else "Chunk", fedId),
-               "auxBranch": False,
                }
 
     if treeName == "moltree":
@@ -275,7 +274,6 @@ def format(treeName=""):
 
     if treeName == "Events":
         out = {"name": "CMS",
-               "auxBranch": False,
                "rawCollection": "FEDRawDataCollection_rawDataCollector__LHC",
                }
     if out:

@@ -57,7 +57,7 @@ def eventMaps(s={}, options={}):
 
     name = s["name"]
     nEventsMax = s["nEventsMax"]
-    if name != "CMS" and not s.get("auxBranch"):
+    if name != "CMS":
         fedId0 = s["fedIds"][0]
         branch0 = s["branch"](fedId0)
 
@@ -83,36 +83,22 @@ def eventMaps(s={}, options={}):
         orn = bcn = evn = None
 
         if name == "CMS":
-            if s["auxBranch"] and (not filterEvn):
-                tree.GetBranch("EventAuxiliary").GetEntry(iEvent)
-                orn = tree.EventAuxiliary.orbitNumber()
-                bcn = tree.EventAuxiliary.bunchCrossing()
-                sys.exit("auxBranch lacks EvN.")
-            else:
-                fedId0 = s["fedIds"][0]
-                tree.GetEntry(iEvent)
-                raw = unpacked(fedData=wordsOneFed(tree=tree,
-                                                   fedId=fedId0,
-                                                   collection=s["rawCollection"],
-                                                   ),
-                               nBytesPer=8,
-                               headerOnly=True)
-                if not raw["nBytesSW"]:
-                    printer.error("FED0 %d has zero bytes." % fedId0)
-                    sys.exit()
-                orn, bcn, evn = coords(raw)
+            fedId0 = s["fedIds"][0]
+            tree.GetEntry(iEvent)
+            raw = unpacked(fedData=wordsOneFed(tree=tree,
+                                               fedId=fedId0,
+                                               collection=s["rawCollection"],
+                                               ),
+                           nBytesPer=8,
+                           headerOnly=True)
+            orn, bcn, evn = coords(raw)
 
         elif name == "HCAL":
-            if s["auxBranch"] and (not filterEvn):
-                tree.GetBranch("CDFEventInfo").GetEntry(iEvent)
-                orn = tree.CDFEventInfo.getOrbitNumber()
-                bcn = tree.CDFEventInfo.getBunchNumber()
-            else:
-                tree.GetEntry(iEvent)
-                raw = unpacked(fedData=wordsOneChunk(tree=tree, branch=branch0),
-                               nBytesPer=8,
-                               headerOnly=True)
-                orn, bcn, evn = coords(raw)
+            tree.GetEntry(iEvent)
+            raw = unpacked(fedData=wordsOneChunk(tree=tree, branch=branch0),
+                           nBytesPer=8,
+                           headerOnly=True)
+            orn, bcn, evn = coords(raw)
 
         elif name == "DB":
             tree.GetEntry(iEvent)
@@ -140,6 +126,10 @@ def eventMaps(s={}, options={}):
 
         else:
             sys.exit("name %s not found." % name)
+
+        if not raw["nBytesSW"]:
+            printer.error("FED0 %d has zero bytes." % fedId0)
+            sys.exit()
 
         if s["progress"]:
             iMask = progress(iEvent, iMask)
