@@ -534,7 +534,7 @@ def fileSpec(fileName=""):
             specs.append(spec)
 
     if len(specs) != 1:
-        msg = "found multiple known TTrees in file %s\n" % fileName
+        msg = "found %s != 1 known TTrees in file %s\n" % (len(specs), fileName)
         msg += str(specs)
         sys.exit(msg)
     else:
