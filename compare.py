@@ -260,6 +260,7 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
         tMatched12 = tNonMatched12 = []
+        tMatched21 = tNonMatched21 = []
 
         if printEmap:
            reportMatched(matched12)
