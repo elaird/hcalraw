@@ -267,9 +267,9 @@ def format(treeName=""):
                "branch": lambda fedId: "%s%d" % ("HCAL_DCC" if __isVme(fedId) else "Chunk", fedId),
                }
 
-    if treeName == "moltree":
+    if treeName == "mol":
         out = {"name": "MOL",
-               "branch": lambda fedId: "vec%d" % fedId,
+               "branch": lambda fedId: "%d" % fedId,
                }
 
     if treeName == "deadbeef":
