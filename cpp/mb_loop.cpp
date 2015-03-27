@@ -24,25 +24,7 @@ int read_word(WORD& buf) {
 }
 
 
-int main(int argc, char* argv[]) {
-  gROOT->ProcessLine("#include <vector>; #pragma link C++ class vector<uint32_t>+; #pragma link C++ class vector<uint64_t>+;");
-  
-  if (argc != 2){
-    std::cerr << "Usage: cat a.dat | " << argv[0] << " FEDnumber" << std::endl;
-    return 1;
-  }
-
-  bool debug = false;
-
-  TFile a(Form("%s%s.root", TAG, argv[1]), "RECREATE");
-  TTree tree(TAG,"");
-  
-
-  std::vector<WORD> vec(1 << 13);
-  vec.clear();
-
-  tree.Branch(Form("%s", argv[1]), &vec);
-
+void loop(TTree& tree, std::vector<WORD>& vec, bool debug=false) {
   int iWordInBlock = 0;
   int nWordsInBlock = 0;
 
@@ -54,12 +36,11 @@ int main(int argc, char* argv[]) {
 
     if ((buf & MASK) == MAGIC) {
       if((iWordInBlock - NHEADER != nWordsInBlock) && nWordsInBlock)
-        std::cerr << "Warning: found magic number in data with iWords = " << iWordInBlock << " nWordsInBlock = " << nWordsInBlock << std::endl;
-      else if (iWordInBlock){
+        std::cerr << "Warning: found magic number in data with iWord = " << iWordInBlock << " nWordsInBlock = " << nWordsInBlock << std::endl;
+      else if (iWordInBlock){  // found new blog
 	if (debug) std::cout << " filling/clearing" << std::endl;
 
         tree.Fill();
-
         iWordInBlock = 1;
 	vec.clear();
         //Get nWords
@@ -78,10 +59,26 @@ int main(int argc, char* argv[]) {
     iWordInBlock++;
     success = read_word(buf);
   }
+}
+
+int main(int argc, char* argv[]) {
+  if (argc != 2){
+    std::cout << "Usage: cat a.dat | " << argv[0] << " FEDnumber" << std::endl;
+    return 1;
+  }
+
+  std::vector<WORD> vec(1 << 13);
+  vec.clear();
+
+  gROOT->ProcessLine("#include <vector>; #pragma link C++ class vector<uint32_t>+; #pragma link C++ class vector<uint64_t>+;");
+  TFile a(Form("%s%s.root", TAG, argv[1]), "RECREATE");
+  TTree tree(TAG,"");
+  tree.Branch(Form("%s", argv[1]), &vec);
+
+  loop(tree, vec);
 
   tree.Fill();
   tree.Write();
   a.Close();
-
   return 0;
 }
