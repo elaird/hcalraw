@@ -265,12 +265,12 @@ def format(treeName=""):
 
     if treeName == "deadbeef":
         out = {"name": "DB",
-               "branch": lambda fedId: "db%d" % fedId,
+               "branch": lambda fedId: "%d" % fedId,
                }
 
     if treeName == "badcoffee":
         out = {"name": "BC",
-               "branch": lambda fedId: "bc%d" % fedId,
+               "branch": lambda fedId: "%d" % fedId,
                }
 
     if treeName == "Events":
