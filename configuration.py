@@ -97,9 +97,6 @@ def matchRange_LS1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=Non
 
     assert type(shiftFibCh2) is bool
 
-    global __utcaBcnDelta
-    __utcaBcnDelta = -119
-
     # exceptions for Jan. 2013 slice-test (HF)
     if fedId == 990 or (fedId == 989 and 5 <= slot):
         return range(1, 10)
@@ -118,14 +115,27 @@ def matchRange_LS1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=Non
 
 
 def matchRange_v0(fedId=None, slot=None, fibCh=None, utca=None):
+    global __utcaBcnDelta
+    __utcaBcnDelta = -119
+
     return matchRange_LS1(fedId, slot, fibCh, utca, True)
 
 
 def matchRange_v1(fedId=None, slot=None, fibCh=None, utca=None):
+    global __utcaBcnDelta
+    __utcaBcnDelta = -119
+
     return matchRange_LS1(fedId, slot, fibCh, utca, False)
 
 
 def matchRange_v2(fedId=None, slot=None, fibCh=None, utca=None):
+    global __utcaBcnDelta
+    __utcaBcnDelta = -131
+
+    return matchRange_LS1(fedId, slot, fibCh, utca, False)
+
+
+def matchRange_v3(fedId=None, slot=None, fibCh=None, utca=None):
     """global runs from Feb. 2015 - Mar. 16, 2015"""
 
     global __utcaBcnDelta
@@ -137,7 +147,7 @@ def matchRange_v2(fedId=None, slot=None, fibCh=None, utca=None):
         return range(6)
 
 
-def matchRange_v3(fedId=None, slot=None, fibCh=None, utca=None):
+def matchRange_v4(fedId=None, slot=None, fibCh=None, utca=None):
     """global runs from March 16, 2015"""
 
     global __utcaBcnDelta
