@@ -15,3 +15,8 @@ badcoffee: badcoffee.cpp rooter.cpp
 
 clean:
 	rm -f mol deadbeef badcoffee
+
+install:
+	mv mol       ../bin/mol
+	mv deadbeef  ../bin/deadbeef
+	mv badcoffee ../bin/badcoffee
