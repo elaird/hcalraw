@@ -261,33 +261,11 @@ def transformed_tp(crate, slot, top, key):
 
 
 def format(treeName=""):
-    out = None
-    if treeName == "CMSRAW":
-        out = {"name":  "HCAL",
-               "branch": lambda fedId: "%s%d" % ("HCAL_DCC" if __isVme(fedId) else "Chunk", fedId),
-               }
+    out = {"CMSRAW": {"branch": lambda fedId: "%s%d" % ("HCAL_DCC" if __isVme(fedId) else "Chunk", fedId)},
+           "Events": {"rawCollection": "FEDRawDataCollection_rawDataCollector__LHC"},
+           }.get(treeName, {"branch": lambda fedId: "%d" % fedId})
 
-    if treeName == "mol":
-        out = {"name": "MOL",
-               "branch": lambda fedId: "%d" % fedId,
-               }
-
-    if treeName == "deadbeef":
-        out = {"name": "DB",
-               "branch": lambda fedId: "%d" % fedId,
-               }
-
-    if treeName == "badcoffee":
-        out = {"name": "BC",
-               "branch": lambda fedId: "%d" % fedId,
-               }
-
-    if treeName == "Events":
-        out = {"name": "CMS",
-               "rawCollection": "FEDRawDataCollection_rawDataCollector__LHC",
-               }
-    if out:
-        out["treeName"] = treeName
+    out["treeName"] = treeName
     return out
 
 
