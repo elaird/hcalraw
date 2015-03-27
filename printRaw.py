@@ -10,14 +10,12 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[]):
     aux = d[None]
     dump = aux["dump"]
 
-    if dump <= 0:
-        return
-
     if not aux["patternMode"]["active"]:
+        if dump <= 0:
+            return
+
         printer.purple("-"*85)
-        printer.purple("%4s iEntry 0x%08x (%d)" % (aux["label"],
-                                                   aux["iEntry"],
-                                                   aux["iEntry"]))
+        printer.purple("%4s iEntry 0x%08x (%d)" % (aux["label"], aux["iEntry"], aux["iEntry"]))
 
     first = True
     for fedId, data in sorted(d.iteritems()):
