@@ -36,7 +36,7 @@ def command(dat):
 
     root1 = "data/badcoffee_%s_%d.root" % (prefix, fed)
     root2 = root1.replace("data/badcoffee_", "output/")
-    opts = " --".join(["", "progress", "no-warn-unpack", "nevents=100"])
+    opts = " --".join(["", "progress", "no-warn-unpack", "nevents=100"][:-1])
 
     cmds = ["cat %s | cpp/badcoffee %s" % (dat, fed),
             "mv badcoffee%d.root %s" % (fed, root1),
