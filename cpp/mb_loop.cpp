@@ -9,8 +9,6 @@
 #include <iostream>
 #include <stdint.h>
 
-#define SAVE_HEADER 0  // switch to store the header word into the root file
-
 
 int NDataInBlock(uint64_t buf){
   int nData = (buf>>56);
@@ -37,22 +35,32 @@ void loop(TTree& tree, std::vector<WORD>& vec, bool debug=false) {
     if ((buf & MASK) == MAGIC) {
       if((iWordInBlock - NHEADER != nWordsInBlock) && nWordsInBlock)
         std::cerr << "Warning: found magic number in data with iWord = " << iWordInBlock << " nWordsInBlock = " << nWordsInBlock << std::endl;
-      else if (iWordInBlock){  // found new blog
+      else if (iWordInBlock){  // found new block
 	if (debug) std::cout << " filling/clearing" << std::endl;
 
-        tree.Fill();
-        iWordInBlock = 1;
-	vec.clear();
-        //Get nWords
-        if(read_word(buf)) {
-	  nWordsInBlock = buf; //read next word which contains nWords
+        if(!START_FLAG) {  // not MOL
+	  tree.Fill();
+	  iWordInBlock = 1;
+	  vec.clear();
+
+	  if (read_word(buf)) {
+	    nWordsInBlock = buf;
+	  }
 	}
-      }
-    }
+	else {  // MOL
+	  iWordInBlock = 0;
+	  nWordsInBlock = NDataInBlock(buf);
+	  if ((buf & START_MASK) == START_FLAG && vec.size()) {  // new fragment
+	    tree.Fill();
+	    vec.clear();
+	  }
+	}
+      }  // end new block
+    }  // end magic word
 
     if(SAVE_HEADER || (NHEADER <= iWordInBlock)){
+      vec.push_back(buf);
       if(debug) std::cout << " pushing_back " << std::hex << buf << std::dec << std::endl;
-      vec.push_back(buf);  // store the word into vector
     }
     else if(debug) std::cout << std::endl;
 
