@@ -252,7 +252,7 @@ def tp_vs_tp(mapF1, mapF2, book=None):
 
 
 def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=False, adcPlots=False):
-    dump_ge_1 = 1 <= raw1[None]["dump"]
+    dump = (1 <= raw1[None]["dump"]) or raw1[None]["patternMode"].get("active")
 
     if anyEmap:
         mapF1, mapB1, _ = dataMap(raw1, skipErrF=skipErrF)
@@ -268,7 +268,7 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
         mapF1 = dataMap(raw1, skipErrF=skipErrF)[0]
         mapF2 = dataMap(raw2, skipErrF=skipErrF)[0]
         matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book)
-        if dump_ge_1:
+        if dump:
             matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1)
 
         tF1 = tpMap(raw1, skipErrF=skipErrF)[0]
@@ -276,7 +276,7 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
         tMatched12, tNonMatched12 = tp_vs_tp(tF1, tF2, book)
         tMatched21 = tNonMatched21 = []  # tp_vs_tp(tF2, tF1, book)  # FIXME
 
-    if dump_ge_1:
+    if dump:
         printRaw.oneEvent(raw1, nonMatchedQie=nonMatched12, nonMatchedTp=tNonMatched12)
         printRaw.oneEvent(raw2, nonMatchedQie=nonMatched21, nonMatchedTp=tNonMatched21)
 
