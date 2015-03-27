@@ -1,4 +1,4 @@
-// SEE WARNING!!
+// NOTE! the function below requires four #defines; see e.g. badcoffee.cpp
 
 #include "TFile.h"
 #include "TTree.h"
