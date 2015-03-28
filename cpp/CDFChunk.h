@@ -2,6 +2,7 @@
 #define CDFChunk_h_included 1
 
 #include "TObject.h"
+#include "TString.h"
 
 class CDFChunk : public TObject {
 public:
