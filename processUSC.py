@@ -195,12 +195,6 @@ def compare(inputFile="", outputDir="", run=0, stem="compare", moreArgs=[]):
     return commandOutput(cmd)
 
 
-def compareLoose(**kargs):
-    return compare(stem="compareLoose",
-                   moreArgs=["--skipErrF=3", "--skipAllZero"],
-                   **kargs)
-
-
 def report(d={}, subject=""):
     print subject
     if d.get("stderr") or d.get("returncode"):
@@ -328,7 +322,6 @@ if __name__ == "__main__":
                  dumpEvents,
                  dumpEventsNoColor,
                  compare,
-                 compareLoose,
                  ]:
         go(baseDir=utcaDir,
            process=func,
