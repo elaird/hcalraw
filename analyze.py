@@ -32,6 +32,8 @@ def setup():
         r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
     else:
         r.gSystem.Load("cpp/cms.so")
+        # TClass::TClass:0: RuntimeWarning: no dictionary for class x::y::z is available
+        r.gErrorIgnoreLevel = r.kError
 
 setup()
 
