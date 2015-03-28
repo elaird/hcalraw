@@ -14,7 +14,8 @@ import printer
 
 def setup():
     r.gROOT.SetBatch(True)
-    r.gROOT.LoadMacro("cpp/cdf.cxx+")
+    os.system("cd cpp && make -s")
+    r.gSystem.Load("cpp/cdf.so")
     r.gROOT.LoadMacro("cpp/cms.cxx+")
 
     if utils.cmssw():
@@ -377,9 +378,8 @@ def wordsOneFed(tree=None, fedId=None, collection=""):
 
 
 def wordsOneChunk(tree=None, branch=""):
-    #Common Data Format
+    # cpp/cdf.h
     chunk = wordsOneBranch(tree, branch)
-    #wrapper class creates std::vector<ULong64_t>
     return r.CDFChunk2(chunk)
 
 
