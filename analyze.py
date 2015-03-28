@@ -15,8 +15,7 @@ import printer
 def setup():
     r.gROOT.SetBatch(True)
     os.system("cd cpp && make -s")
-    r.gSystem.Load("cpp/cdf.so")
-    r.gROOT.LoadMacro("cpp/cms.cxx+")
+    r.gSystem.Load("cpp/formats.so")
 
     if utils.cmssw():
         #enable convenient use of CMSSW classes
