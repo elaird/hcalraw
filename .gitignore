@@ -2,7 +2,3 @@
 *.pyc
 *.pdf
 output
-bin
-cpp/*.d
-cpp/*.so
-cpp/*.pcm
