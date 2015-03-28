@@ -265,12 +265,12 @@ def transformed_tp(crate, slot, top, key):
 
 
 def format(treeName=""):
-    out = {"CMSRAW": {"branch": lambda fedId: "%s%d" % ("HCAL_DCC" if __isVme(fedId) else "Chunk", fedId)},
+    dct = {"CMSRAW": {"branch": lambda fedId: "%s%d" % ("HCAL_DCC" if __isVme(fedId) else "Chunk", fedId)},
            "Events": {"rawCollection": "FEDRawDataCollection_rawDataCollector__LHC"},
-           }.get(treeName, {"branch": lambda fedId: "%d" % fedId})
-
-    out["treeName"] = treeName
-    return out
+       }
+    for item in ["LuminosityBlocks", "MetaData", "ParameterSets", "Parentage", "Runs"]:
+        dct[item] = None
+    return dct.get(treeName, {"branch": lambda fedId: "%d" % fedId})
 
 
 def d2c():
