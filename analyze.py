@@ -17,7 +17,7 @@ def setup():
     os.system("cd cpp && make -s")
     r.gSystem.Load("cpp/formats.so")
 
-    if utils.cmssw():
+    if configuration.use_fwlite and utils.cmssw():
         #enable convenient use of CMSSW classes
         r.gSystem.Load("libFWCoreFWLite.so")
         r.AutoLibraryLoader.enable()
@@ -87,6 +87,7 @@ def eventMaps(s={}, options={}):
             raw = unpacked(fedData=wordsOneFed(tree=tree,
                                                fedId=fedId0,
                                                collection=s["rawCollection"],
+                                               product=s["product"]
                                                ),
                            nBytesPer=8,
                            headerOnly=True)
@@ -211,7 +212,7 @@ def collectedRaw(tree=None, specs={}):
             branch = specs["branch"](fedId)
 
         if specs["treeName"] == "Events":
-            rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"])
+            rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"], specs["product"])
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
         elif specs["treeName"] == "CMSRAW":
             rawThisFed = wordsOneChunk(tree, branch)
@@ -364,20 +365,21 @@ def unpackedMolHeader(fedData=None):
     return MOLheader, BlockHeaders
 
 
-def charsOneFed(tree=None, fedId=None, collection=""):
-    # cpp/cms.cxx
-    FEDRawData = getattr(tree, collection).product().FEDData(fedId)
-    return r.FEDRawDataChars(FEDRawData)
+def charsOneFed(tree=None, fedId=None, collection="", product=None):
+    FEDRawData = getattr(tree, collection)
+    if product:
+        FEDRawData = FEDRawData.product()
+    return r.FEDRawDataChars(FEDRawData.FEDData(fedId))
 
 
-def wordsOneFed(tree=None, fedId=None, collection=""):
-    # cpp/cms.cxx
-    FEDRawData = getattr(tree, collection).product().FEDData(fedId)
-    return r.FEDRawDataWords(FEDRawData)
+def wordsOneFed(tree=None, fedId=None, collection="", product=None):
+    FEDRawData = getattr(tree, collection)
+    if product:
+        FEDRawData = FEDRawData.product()
+    return r.FEDRawDataWords(FEDRawData.FEDData(fedId))
 
 
 def wordsOneChunk(tree=None, branch=""):
-    # cpp/cdf.h
     chunk = wordsOneBranch(tree, branch)
     return r.CDFChunk2(chunk)
 
