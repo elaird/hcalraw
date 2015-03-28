@@ -5,6 +5,7 @@ pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 compressedPatterns = True
 
 # these value may be overwritten by configuration.matchRange_*
+matchSkipErrF = [1, 3]
 __utcaBcnDelta = 0
 __vmeBcnDelta = 0
 
@@ -117,6 +118,9 @@ def matchRange_LS1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=Non
 def matchRange_v0(fedId=None, slot=None, fibCh=None, utca=None):
     global __utcaBcnDelta
     __utcaBcnDelta = -119
+
+    global matchSkipErrF
+    matchSkipErrF = [3]
 
     return matchRange_LS1(fedId, slot, fibCh, utca, True)
 
