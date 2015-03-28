@@ -15,7 +15,7 @@ import printer
 def setup():
     r.gROOT.SetBatch(True)
     os.system("cd cpp && make -s")
-    r.gSystem.Load("cpp/formats.so")
+    r.gSystem.Load("cpp/cdf.so")
 
     if configuration.use_fwlite and utils.cmssw():
         #enable convenient use of CMSSW classes
@@ -30,7 +30,8 @@ def setup():
             base = os.environ["CMSSW_BASE"]
         libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
         r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
-
+    else:
+        r.gSystem.Load("cpp/cms.so")
 
 setup()
 
