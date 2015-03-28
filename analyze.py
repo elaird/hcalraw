@@ -504,6 +504,22 @@ def go(outer={}, inner={}, outputFile="",
             print
 
 
+def bail(specs, fileName):
+    n = max([len(spec["treeName"]) for spec in specs])
+    fmt = "%" + str(n) + "s: %s\n"
+
+    lst = []
+    for spec in specs:
+        name = spec["treeName"]
+        del spec["treeName"]
+        lst.append((name, spec))
+
+    msg = "found %s != 1 known TTrees in file %s\n" % (len(specs), fileName)
+    for name, spec in sorted(lst):
+        msg += fmt % (name, str(spec))
+    sys.exit(msg)
+
+
 def fileSpec(fileName=""):
     f = r.TFile.Open(fileName)
     if (not f) or f.IsZombie():
@@ -519,12 +535,11 @@ def fileSpec(fileName=""):
     for treeName in set(treeNames):  # set accomodate cycles, e.g. CMSRAW;3 CMSRAW;4
         spec = configuration.format(treeName)
         if spec:
+            spec["treeName"] = treeName
             specs.append(spec)
 
     if len(specs) != 1:
-        msg = "found %s != 1 known TTrees in file %s\n" % (len(specs), fileName)
-        msg += str(specs)
-        sys.exit(msg)
+        bail(specs, fileName)
     else:
         return specs[0]
     f.Close()
