@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=-Wall -Wextra
 ROOT=`root-config --cflags` -L`root-config --libdir` -lCore -lTree -lRIO
 SO=-shared -fPIC
-HS=CDFChunk.h CDFEventInfo.h CDFRunInfo.h
+HS=CDFChunk.h CDFEventInfo.h CDFRunInfo.h cdf.h
 
 TMP=tmp.cpp
 RV=$(shell root-config --version | cut -c 1)
@@ -24,9 +24,9 @@ deadbeef: deadbeef.cpp rooter.cpp
 badcoffee: badcoffee.cpp rooter.cpp
 	$(CC) $(CFLAGS) $(ROOT) $< -o $@
 
-cdf.so: $(HS) cdf.cxx
+cdf.so: $(HS)
 	$(RC)
-	$(CC) $(CFLAGS) $(SO) $(ROOT) $(TMP) cdf.cxx -o $@
+	$(CC) $(CFLAGS) $(SO) $(ROOT) $(TMP) -o $@
 
 clean:
 	rm -f mol deadbeef badcoffee *.pcm *.d *.so $(TMP)
