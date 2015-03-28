@@ -2,16 +2,18 @@ CC=g++
 CFLAGS=-Wall -Wextra
 ROOT=`root-config --cflags` -L`root-config --libdir` -lCore -lTree -lRIO
 SO=-shared -fPIC
-HS=CDFChunk.h CDFEventInfo.h CDFRunInfo.h cdf.h FEDRawData.h cms.h
+
+# NOTE! LinkDef.h must come last
+HS=CDFChunk.h CDFEventInfo.h CDFRunInfo.h cdf.h FEDRawData.h FEDRawDataCollection.h cms.h LinkDef.h
 CXXS=FEDRawData.cc
 
 TMP=tmp.cpp
 RV=$(shell root-config --version | cut -c 1)
 ifeq ($(RV), 6)
-	RC=rootcling -f $(TMP) $(HS) CDFROOTLinkDef.h
+	RC=rootcling -f $(TMP) $(HS)
 endif
 ifeq ($(RV), 5)
-	RC=rootcint -f $(TMP) -c $(HS) CDFROOTLinkDef.h
+	RC=rootcint -f $(TMP) -c $(HS)
 endif
 
 all: mol deadbeef badcoffee formats.so
