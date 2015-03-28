@@ -4,5 +4,5 @@ badcoffee
 *.d
 *.so
 *.pcm
-tmp.h
-tmp.cpp
+tmp*.h
+tmp*.cpp
