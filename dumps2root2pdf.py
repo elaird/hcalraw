@@ -53,15 +53,16 @@ def looped(dats=[], options=None):
     
     for dat in dats:
         prefix, fed, root1, root2, cmd = command(dat)
-        options.file1 = root1
-        options.feds1 = str(fed)
-        options.outputFile = root2
-
         prefixes.append(prefix)
         feds.append(fed)
         roots.append(root2)
+
         # print cmd
         os.system(cmd)
+
+        options.file1 = root1
+        options.feds1 = str(fed)
+        options.outputFile = root2
         oneRun.main(options)
 
     return prefixes, feds, roots
