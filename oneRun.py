@@ -31,12 +31,11 @@ def main(options):
     printOptions["crateslots"] = configuration.fedList(options.crateslots)
 
     kargs = subset(options, ["feds1", "feds2", "unpackSkipFlavors"], process=True)
-    kargs.update(subset(options, ["file1", "file2", "nEvents", "nEventsSkip", "outputFile"]))
-    kargs["patternMode"] = subset(options, ["rmRibbon", "nTs", "patternB"]) if options.patterns else None
+    kargs.update(subset(options, ["file1", "file2", "nEvents", "nEventsSkip", "outputFile", "noUnpack"]))
     kargs["printOptions"] = printOptions
+    kargs["patternMode"] = subset(options, ["rmRibbon", "nTs", "patternB"]) if options.patterns else None
     kargs["compareOptions"] = subset(options, ["adcPlots", "anyEmap", "printEmap"])
     kargs["mapOptions"] = subset(options, ["filterEvn", "printEventMap", "identityMap"])
-    kargs["unpack"] = not options.noUnpack
 
     def go():
         analyze.oneRun(**kargs)
