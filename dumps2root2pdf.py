@@ -3,6 +3,7 @@
 import os
 import sys
 import graphs
+import oneRun
 
 
 def bail(dat, fields, tag):
@@ -36,27 +37,31 @@ def command(dat):
 
     root1 = "data/badcoffee_%s_%d.root" % (prefix, fed)
     root2 = root1.replace("data/badcoffee_", "output/")
-    opts = " --".join(["", "progress", "no-warn-unpack", "nevents=100"][:-1])
 
-    cmds = ["cat %s | cpp/badcoffee %s" % (dat, fed),
-            "mv badcoffee%d.root %s" % (fed, root1),
-            "./oneRun.py --file1=%s --feds1=%d --output-file=%s %s" % (root1, fed, root2, opts)
-            ]
-    return prefix, fed, root2, " && ".join(cmds)
+    cmd = " && ".join(["cat %s | cpp/badcoffee %s" % (dat, fed),
+                       "mv badcoffee%d.root %s" % (fed, root1),
+                   ])
+
+    return prefix, fed, root1, root2, cmd
 
 
-def looped(dats=[]):
+def looped(dats=[], options=None):
     prefixes = []
     feds = []
     roots = []
     
     for dat in dats:
-        prefix, fed, root2, cmd = command(dat)
+        prefix, fed, root1, root2, cmd = command(dat)
+        options.file1 = root1
+        options.feds1 = str(fed)
+        options.outputFile = root2
+
         prefixes.append(prefix)
         feds.append(fed)
         roots.append(root2)
         # print cmd
         os.system(cmd)
+        oneRun.main(options)
 
     return prefixes, feds, roots
 
@@ -75,5 +80,7 @@ def plot(prefixes, feds, roots):
                           pdf=rootFile.replace(".root", ".pdf"),
                           )
 
+
 if __name__ == "__main__":
-    plot(*looped(sys.argv[1:]))
+    options, args = oneRun.opts(check=False)
+    plot(*looped(args, options))
