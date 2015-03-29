@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-def opts():
+def opts(check=True):
     import optparse
     import sys
     parser = optparse.OptionParser()
@@ -169,6 +169,11 @@ def opts():
     parser.add_option_group(patterns)
 
     options, args = parser.parse_args()
+
+    if not check:
+        return options, args
+
+
     if not all([options.file1, options.feds1]):
         parser.print_help()
         sys.exit(1)
@@ -192,31 +197,20 @@ def integer(value="", tag=""):
         sys.exit("%s '%s' cannot be converted to an int." % (tag, value))
 
 
-def fedList(s=""):
-    d = configuration.fedMap()
-    if not s:
-        return []
-    if s in d:
-        return d[s]
-
-    out = [int(x) for x in s.split(",")]
-    return out
-
-
 def checkModules():
     import types
     names = []
     for key, value in globals().iteritems():
         if isinstance(value, types.ModuleType):
             names.append(key)
-    if names != ["__builtins__"]:
+    if names  not in [[], ["__builtins__"]]:
         print names
         print "Please put imports after this block, to prevent PyROOT from stealing '--help'."
 
 
-if __name__ == "__main__":
-    options = opts()
-    checkModules()
+def main(options, check=True):
+    if check:
+        checkModules()
 
     import analyze
     import configuration
@@ -249,11 +243,11 @@ if __name__ == "__main__":
     printOptions = {"dump": integer(options.dump, "dump"),
                     "warn": not options.noWarnUnpack,
                     "progress": options.progress,
-                    "crateslots": fedList(options.crateslots),
+                    "crateslots": configuration.fedList(options.crateslots),
                     }
 
-    feds1 = fedList(options.feds1)
-    feds2 = fedList(options.feds2)
+    feds1 = configuration.fedList(options.feds1)
+    feds2 = configuration.fedList(options.feds2)
 
     def go():
         analyze.oneRun(file1=options.file1,
@@ -268,7 +262,7 @@ if __name__ == "__main__":
                        printOptions=printOptions,
                        compareOptions=compareOptions,
                        unpack=not options.noUnpack,
-                       unpackSkipFlavors=fedList(options.unpackSkipFlavors),
+                       unpackSkipFlavors=configuration.fedList(options.unpackSkipFlavors),
                        )
 
     if not options.noLoop:
@@ -283,3 +277,7 @@ if __name__ == "__main__":
                           pdf=options.outputFile.replace(".root", ".pdf"),
                           scatter=feds2 and not options.anyEmap,
                           )
+
+
+if __name__ == "__main__":
+    main(opts())
