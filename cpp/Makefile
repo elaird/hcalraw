@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-Wall -Wextra
-ROOT=`root-config --cflags` -L`root-config --libdir` -lCore -lTree -lRIO
+ROOT=$(shell root-config --cflags) -L$(shell root-config --libdir) -lCore -lTree -lRIO
 SO=-shared -fPIC
 
 # NOTE! LinkDefs must come last
