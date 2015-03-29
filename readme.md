@@ -19,10 +19,10 @@ source env/lxplus6.sh
 ./oneRun.py --file1=data/USC_209150.root --feds1=989 --file2=data/209151.HLTSkim.root --feds2=714,722 --dump=0 --match=v0 --any-emap
 
 # analyze FE pattern runs
-# (before HO refibering) ./oneRun.py --file1=$LS1/USC_235576.root --feds1=HCAL --nevents=1 --patterns | ./diff.py --ref=data/ref_2014.txt
-# (before move to uTCA ) ./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --nevents=1 --patterns | ./diff.py --ref=data/ref_vme_G.txt
-./oneRun.py --file1=$LS1/USC_239099.root --feds1=HCAL --nevents=1 --patterns | ./diff.py --ref=data/ref_vme_G.txt
-./oneRun.py --file1=$LS1/USC_239099.root --feds1=uHF  --nevents=1 --patterns | ./diff.py --ref=data/ref_utca_G.txt
+# (before HO refibering) ./oneRun.py --file1=$LS1/USC_235576.root --feds1=HCAL --nevents=1 --patterns | ./diff.py data/ref_2014.txt
+# (before move to uTCA ) ./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --nevents=1 --patterns | ./diff.py data/ref_vme_G.txt
+./oneRun.py --file1=$LS1/USC_239099.root --feds1=HCAL --nevents=1 --patterns | ./diff.py data/ref_vme_G.txt
+./oneRun.py --file1=$LS1/USC_239099.root --feds1=uHF  --nevents=1 --patterns | ./diff.py data/ref_utca_G.txt
 
 # analyze global runs
 ./oneRun.py --file1=$GR2/Cosmics/RAW/v1/000/235/316/00000/9CE27CCC-5EBB-E411-AF2C-02163E0127C8.root --feds1=718,719 --feds2=1118  --match=v3 --skip-flavors=0,2 --dump=0 --nevents=10
@@ -39,30 +39,30 @@ source env/lxplus6.sh
 ####Dependencies
 * python (2.x, x>=6)
 * ROOT (>=5.32)
-* CMSSW is required to analyze files written by the CMS central DAQ; whereas
-* CMSSW is *not* required to analyze data from HCAL local runs
 
 ####Environment (SLC6/AFS)
 (use exactly one of these)
-* `env/lxplus6.sh` sets up CMSSW and EOS
+* `env/lxplus6.sh` sets up CMSSW and the environment vars LS1,GR2
 * `env/slc6-cmssw.sh` sets up a CMSSW environment
 * `env/slc6-pypy.sh` sets up pypyROOT (outside of CMSSW)
 * `env/slc6-root6.sh` sets up a ROOT 6 environment (outside of CMSSW)
 
 ####Files
 * `cpp/CDF*.h` are copied from CMSSW (IORawData/HcalTBInputService/src)
-* `cpp/cdf.cxx` defines a helper class for reading data from HCAL local DAQ
-* `cpp/cms.cxx` defines a helper class for reading data from the CMS DAQ
-* `adc_vs_adc.py` reads histograms from output/Runxxx.root and outputs a .pdf
+* `cpp/FED*` are copied from CMSSW (DataFormats/FEDRawData)
+* `cpp/[cdf,cms].h` define helper functions
+* `cpp/[mol,deadbeef,badcoffee,rooter].cpp` make .root files from binary event dumps
 * `analyze.py` loops over .root file(s) for one run and produces output/Runxxx.root
 * `autoBook.py` is copied from github.com/elaird/supy/`__autoBook__.py`
 * `compare.py` compares the payloads within two .root files for a given event
 * `configuration.py` holds some settings that are used by analyze.py
 * `decode.py` interprets a FED's bytes in an event (called by analyze.unpacked)
 * `diff.py` compares the decoded output of a FiberID run to data/ref.txt
+* `dumps2root2pdf.py` converts binary event dumps to .root files and analyzes them using `oneRun.py`
 * `graphs.py` reads in output/Runxxx.root, makes plots, and outputs a .pdf
 * `make_fiberid_references.py` produces FiberID reference files from HCAL logical maps
 * `oneRun.py` is used to analyze one run (see examples above)
+* `options.py` parses command line options for `oneRun.py` or `dumps2root2pdf.py`
 * `printRaw.py` dumps to stdout the payload(s) in an event
 * `printer.py` contains a utility class for printing messages
 * `processUSC.py` loops over available USC local runs and processes them
