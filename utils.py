@@ -52,6 +52,7 @@ def ROOT():
             exec("import %s as r" % moduleName)
             if moduleName != "ROOT":
                 printer.msg("Using "+moduleName)
+            r.PyConfig.IgnoreCommandLineOptions = True
             return r
         except ImportError:
             continue
@@ -59,6 +60,7 @@ def ROOT():
     findROOT()
     try:
         import ROOT as r
+        r.PyConfig.IgnoreCommandLineOptions = True
         return r
     except ImportError:
         bail()
