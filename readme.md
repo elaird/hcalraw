@@ -58,7 +58,7 @@ source env/lxplus6.sh
 * `configuration.py` holds some settings that are used by analyze.py
 * `decode.py` interprets a FED's bytes in an event (called by analyze.unpacked)
 * `diff.py` compares the decoded output of a FiberID run to data/ref.txt
-* `dumps2root2pdf.py` converts binary event dumps to .root files and analyzes them using `oneRun.py`
+* `dumps2root2pdf.py` converts binary event dumps to .root files and analyzes them
 * `graphs.py` reads in output/Runxxx.root, makes plots, and outputs a .pdf
 * `make_fiberid_references.py` produces FiberID reference files from HCAL logical maps
 * `oneRun.py` is used to analyze one run (see examples above)
