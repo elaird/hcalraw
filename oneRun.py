@@ -3,8 +3,6 @@
 import analyze
 import configuration
 import printer
-import sys
-import cProfile
 import graphs
 from options import opts
 
@@ -41,6 +39,7 @@ def main(options):
 
     if not options.noLoop:
         if options.profile:
+            import cProfile
             cProfile.run("go()", sort="time")
         else:
             go()
