@@ -69,15 +69,30 @@ def htrSummary(blocks=[], book=None, fedId=None,
     return nBadHtrs, ErrF, caps, adcs
 
 
+def htrOverviewBits(d={}, book={}, fedId=None):
+    abbr = "HTR" if "HTR0" in d else "uHTR"
+    for iHtr in range(15):
+        key = "%s%d" % (abbr, iHtr)
+        if key not in d:
+            continue
+        h = d[key]
+
+        for i, l in enumerate("LMSEPVC"):
+            if not h.get(l):
+                continue
+            book.fill(i, "LMSEPVC_%d" % fedId, 7, -0.5, 6.5,
+                      title="FED %d;LMPSEPVC;HTRs / bin" % fedId)
+
+
 def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
     book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 16, -0.5, 15.5,
-              title="FED %d; nWord16 skipped during unpacking;Events / bin" % fedId)
+              title="FED %d;nWord16 skipped during unpacking;Events / bin" % fedId)
 
     h = d["header"]
     t = d["trailer"]
     if "TTS" in t:
         book.fill(t["TTS"], "TTS_%d" % fedId, 16, -0.5, 15.5,
-                  title="FED %d; TTS state;Events / bin" % fedId)
+                  title="FED %d;TTS state;Events / bin" % fedId)
 
     if "BcN" in h:
         book.fill(h["BcN"]/100.0, "BcN_%d" % fedId, 99, 0, 35.64,  # = 0.36 * 99
@@ -91,8 +106,10 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
     if fedEvn is not None:
         msg += " event %d" % fedEvn
     else:
-        msg2 = " header lacks EvN.  Keys: %s" % str(d["header"].keys())
+        msg2 = " header lacks EvN.  Keys: %s" % str(h.keys())
         printer.error(msg + msg2)
+
+    htrOverviewBits(h, book, fedId)
 
     nBadHtrs, ErrF, caps, adcs = htrSummary(blocks=d["htrBlocks"].values(),
                                             book=book,
