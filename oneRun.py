@@ -26,16 +26,13 @@ def main(options):
     if options.noColor:
         printer.__color = False
 
-    patternOptions = subset(options, ["rmRibbon", "nTs", "patternB"])
-    patternOptions["active"] = options.patterns
-
     printOptions = subset(options, ["dump", "progress"])
     printOptions["warn"] = not options.noWarnUnpack
     printOptions["crateslots"] = configuration.fedList(options.crateslots)
 
     kargs = subset(options, ["feds1", "feds2", "unpackSkipFlavors"], process=True)
     kargs.update(subset(options, ["file1", "file2", "nEvents", "nEventsSkip", "outputFile"]))
-    kargs["patternMode"] = patternOptions
+    kargs["patternMode"] = subset(options, ["rmRibbon", "nTs", "patternB"]) if options.patterns else None
     kargs["printOptions"] = printOptions
     kargs["compareOptions"] = subset(options, ["adcPlots", "anyEmap", "printEmap"])
     kargs["mapOptions"] = subset(options, ["filterEvn", "printEventMap", "identityMap"])
