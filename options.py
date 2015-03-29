@@ -22,13 +22,15 @@ def opts(alsoArgs=False):
     common = optparse.OptionGroup(parser, "Misc options")
     common.add_option("--nevents",
                       dest="nevents",
-                      default="",
+                      default=None,
                       metavar="N",
+                      type="int",
                       help="Stop after N events (including skipped events).")
     common.add_option("--nevents-skip",
                       dest="neventsSkip",
                       default=0,
                       metavar="M",
+                      type="int",
                       help="Skip the first M events.")
     common.add_option("--output-file",
                       dest="outputFile",
@@ -100,6 +102,7 @@ def opts(alsoArgs=False):
                         dest="dump",
                         default=-1,
                         metavar="D",
+                        type="int",
                         help=" ".join([d.ljust(60) for d in dump]))
     parser.add_option_group(printing)
 
@@ -157,6 +160,7 @@ def opts(alsoArgs=False):
                         dest="nts",
                         default=10,
                         metavar="N",
+                        type="int",
                         help="No. of time slices to consider (default is 10).")
     patterns.add_option("--patternB",
                         dest="patternB",

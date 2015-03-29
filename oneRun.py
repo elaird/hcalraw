@@ -1,16 +1,6 @@
 #!/usr/bin/env python
 
 
-def integer(value="", tag=""):
-    if value == '':
-        return None
-
-    try:
-        return int(value)
-    except ValueError:
-        sys.exit("%s '%s' cannot be converted to an int." % (tag, value))
-
-
 def checkModules():
     import types
     names = []
@@ -45,7 +35,7 @@ def main(options, check=True):
         compareOptions[item] = getattr(options, item)
 
     patternOptions = {"rmRibbon": options.rmRibbon,
-                      "nTs": integer(options.nts, "nts"),
+                      "nTs": options.nts,
                       "pureFibersOnly": not options.patternB,
                       "active": options.patterns,
                       }
@@ -54,7 +44,7 @@ def main(options, check=True):
     for key in ["filterEvn", "printEventMap", "identityMap"]:
         mapOptions[key] = getattr(options, key)
 
-    printOptions = {"dump": integer(options.dump, "dump"),
+    printOptions = {"dump": options.dump,
                     "warn": not options.noWarnUnpack,
                     "progress": options.progress,
                     "crateslots": configuration.fedList(options.crateslots),
@@ -68,8 +58,8 @@ def main(options, check=True):
                        feds1=feds1,
                        file2=options.file2,
                        feds2=feds2,
-                       nEvents=integer(options.nevents, "nevents"),
-                       nEventsSkip=integer(options.neventsSkip, "neventsSkip"),
+                       nEvents=options.nevents,
+                       nEventsSkip=options.neventsSkip,
                        patternMode=patternOptions,
                        mapOptions=mapOptions,
                        outputFile=options.outputFile,
