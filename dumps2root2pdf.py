@@ -2,7 +2,6 @@
 
 import os
 import sys
-import graphs
 import oneRun
 
 
@@ -75,6 +74,7 @@ def plot(prefixes, feds, roots):
     # print cmd
     # os.system(cmd)
 
+    import graphs
     graphs.makeSummaryPdf(inputFiles=roots,
                           feds1=feds,
                           pdf=rootFile.replace(".root", ".pdf"),
@@ -82,5 +82,5 @@ def plot(prefixes, feds, roots):
 
 
 if __name__ == "__main__":
-    options, args = oneRun.opts(check=False)
+    options, args = oneRun.opts(alsoArgs=True)
     plot(*looped(args, options))
