@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
 
-def opts(check=True):
+def opts(alsoArgs=False):
     import optparse
     import sys
-    parser = optparse.OptionParser()
+
+    if alsoArgs:
+        parser = optparse.OptionParser(usage="usage: %prog [options] args")
+    else:
+        parser = optparse.OptionParser()
 
     reqd = optparse.OptionGroup(parser, "REQUIRED")
     reqd.add_option("--file1",
@@ -170,7 +174,7 @@ def opts(check=True):
 
     options, args = parser.parse_args()
 
-    if not check:
+    if alsoArgs:
         return options, args
 
 
