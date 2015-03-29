@@ -204,6 +204,7 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         h = f.Get(name)
         if not h:
             print "ERROR: could not find histogram %s." % name
+            continue
 
         shiftFlows(h)
         h.Draw(gopts)
