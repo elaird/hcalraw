@@ -4,6 +4,7 @@ ssh lxplus.cern.ch
 git clone https://github.com/elaird/hcalraw.git
 cd hcalraw
 source env/lxplus6.sh
+cd cpp; make; cd -
 
 # read about usage
 ./oneRun.py --help
