@@ -1,28 +1,16 @@
 #!/usr/bin/env python
 
 
-def checkModules():
-    import types
-    names = []
-    for key, value in globals().iteritems():
-        if isinstance(value, types.ModuleType):
-            names.append(key)
-    if names  not in [[], ["__builtins__"]]:
-        print names
-        print "Please put imports after this block, to prevent PyROOT from stealing '--help'."
+import analyze
+import configuration
+import printer
+import sys
+import cProfile
+import graphs
+from options import opts
 
 
-def main(options, check=True):
-    if check:
-        checkModules()
-
-    import analyze
-    import configuration
-    import printer
-    import sys
-    import cProfile
-    import graphs
-
+def main(options):
     if options.match:
         configuration.matchRange = getattr(configuration, "matchRange_%s" % options.match)
         configuration.matchRange()  # call once to set utcaBcnDelta
@@ -84,5 +72,4 @@ def main(options, check=True):
 
 
 if __name__ == "__main__":
-    from options import opts
     main(opts())
