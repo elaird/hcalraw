@@ -154,21 +154,20 @@ def go(fileName="", nMissingMax=None):
 
 
 def opts():
-    parser = optparse.OptionParser()
-    parser.add_option("--ref",
-                      dest="ref",
-                      default="data/ref.txt",
-                      help="file to use for reference")
-
+    parser = optparse.OptionParser(usage="usage: %prog [options] reference_file.txt")
     parser.add_option("--nMissingMax",
                       dest="nMissingMax",
                       default="2",
-                      help="maximum number of missing fibers per RBX to print in detailed table")
+                      metavar="n",
+                      help="maximum number of missing fibers per RBX to print in detailed table (default is 2)")
 
     options, args = parser.parse_args()
-    return options
+    if not args:
+        parser.print_help()
+        sys.exit(1)
+    return options, args[0]
 
 
 if __name__ == "__main__":
-    options = opts()
-    go(options.ref, int(options.nMissingMax))
+    options, ref = opts()
+    go(ref, int(options.nMissingMax))
