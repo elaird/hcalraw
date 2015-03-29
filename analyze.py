@@ -296,7 +296,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
 
         if iWord64 < header["iWordPayload0"]:
             decode.header(header, iWord64, word64)
-            if header["utca"] is not None:
+            if header["utca"] is not None and patternMode:
                 patternMode["nFibers"] = configuration.nFibers(header["utca"])
             if header.get("uFoV"):
                 nWord64Trailer = 2  # accommodate block trailer
@@ -599,7 +599,7 @@ def oneRun(file1="",
        outputFile=outputFile,
        mapOptions=mapOptions,
        compareOptions=compareOptions,
-       printEventSummary=(not patternMode["active"]) and (file1 != file2) and 0 <= common["dump"],
+       printEventSummary=(not patternMode) and (file1 != file2) and 0 <= common["dump"],
        printChannelSummary=file2 and 0 <= common["dump"],
        )
 

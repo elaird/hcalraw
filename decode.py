@@ -331,7 +331,7 @@ def htrPreTrailer(l={}, w=None, k=None):
 
 def end(d, l, patternMode):
     d["htrIndex"] += 1
-    if patternMode["active"]:
+    if patternMode:
         storePatternData(l, **patternMode)
     clearChannel(d)  # in case event is malformed
 

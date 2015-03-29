@@ -10,7 +10,7 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[]):
     aux = d[None]
     dump = aux["dump"]
 
-    if not aux["patternMode"]["active"]:
+    if not aux["patternMode"]:
         if dump <= 0:
             return
 
@@ -406,7 +406,7 @@ def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[],
                printHeaders=None):
     h = d["header"]
     t = d["trailer"]
-    if (not patternMode["active"]) and (1 <= dump):
+    if (not patternMode) and (1 <= dump):
         fields = [" FEDid",
                   "  EvN",
                   "       OrN",

@@ -186,7 +186,7 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
             return
 
         okFeds.add(fedId)
-        if (None in raw) and raw[None]["patternMode"]["active"]:
+        if (None in raw) and raw[None]["patternMode"]:
             if not raw[fedId]["header"]["utca"]:
                 checkHtrModules(fedId=fedId, htrBlocks=raw[fedId]["htrBlocks"])
 
@@ -269,7 +269,7 @@ def tp_vs_tp(mapF1, mapF2, book=None):
 
 
 def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots=False):
-    dump = (1 <= raw1[None]["dump"]) or raw1[None]["patternMode"].get("active")
+    dump = (1 <= raw1[None]["dump"]) or raw1[None]["patternMode"]
 
     if anyEmap:
         mapF1, mapB1, _ = dataMap(raw1)
