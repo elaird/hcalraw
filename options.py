@@ -157,7 +157,7 @@ def opts(alsoArgs=False):
                         action="store_true",
                         help="interpret QIE data as FE patterns")
     patterns.add_option("--nts",
-                        dest="nts",
+                        dest="nTs",
                         default=10,
                         metavar="N",
                         type="int",
