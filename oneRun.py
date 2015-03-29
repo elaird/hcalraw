@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 import analyze
 import configuration
 import printer
@@ -8,6 +7,15 @@ import sys
 import cProfile
 import graphs
 from options import opts
+
+
+def subset(options, l, process=False):
+    out = {}
+    for item in l:
+        out[item] = getattr(options, item)
+        if process:
+            out[item] = configuration.fedList(out[item])
+    return out
 
 
 def main(options):
@@ -18,44 +26,23 @@ def main(options):
     if options.noColor:
         printer.__color = False
 
-    compareOptions = {}
-    for item in ["adcPlots", "anyEmap", "printEmap"]:
-        compareOptions[item] = getattr(options, item)
+    patternOptions = subset(options, ["rmRibbon", "nTs", "patternB"])
+    patternOptions["active"] = options.patterns
 
-    patternOptions = {"rmRibbon": options.rmRibbon,
-                      "nTs": options.nts,
-                      "pureFibersOnly": not options.patternB,
-                      "active": options.patterns,
-                      }
+    printOptions = subset(options, ["dump", "progress"])
+    printOptions["warn"] = not options.noWarnUnpack
+    printOptions["crateslots"] = configuration.fedList(options.crateslots)
 
-    mapOptions = {}
-    for key in ["filterEvn", "printEventMap", "identityMap"]:
-        mapOptions[key] = getattr(options, key)
-
-    printOptions = {"dump": options.dump,
-                    "warn": not options.noWarnUnpack,
-                    "progress": options.progress,
-                    "crateslots": configuration.fedList(options.crateslots),
-                    }
-
-    feds1 = configuration.fedList(options.feds1)
-    feds2 = configuration.fedList(options.feds2)
+    kargs = subset(options, ["feds1", "feds2", "unpackSkipFlavors"], process=True)
+    kargs.update(subset(options, ["file1", "file2", "nEvents", "nEventsSkip", "outputFile"]))
+    kargs["patternMode"] = patternOptions
+    kargs["printOptions"] = printOptions
+    kargs["compareOptions"] = subset(options, ["adcPlots", "anyEmap", "printEmap"])
+    kargs["mapOptions"] = subset(options, ["filterEvn", "printEventMap", "identityMap"])
+    kargs["unpack"] = not options.noUnpack
 
     def go():
-        analyze.oneRun(file1=options.file1,
-                       feds1=feds1,
-                       file2=options.file2,
-                       feds2=feds2,
-                       nEvents=options.nevents,
-                       nEventsSkip=options.neventsSkip,
-                       patternMode=patternOptions,
-                       mapOptions=mapOptions,
-                       outputFile=options.outputFile,
-                       printOptions=printOptions,
-                       compareOptions=compareOptions,
-                       unpack=not options.noUnpack,
-                       unpackSkipFlavors=configuration.fedList(options.unpackSkipFlavors),
-                       )
+        analyze.oneRun(**kargs)
 
     if not options.noLoop:
         if options.profile:
@@ -64,10 +51,9 @@ def main(options):
             go()
 
     graphs.makeSummaryPdf(inputFiles=[options.outputFile],
-                          feds1=feds1,
-                          feds2=feds2,
+                          feds1=kargs["feds1"],
+                          feds2=kargs["feds2"],
                           pdf=options.outputFile.replace(".root", ".pdf"),
-                          scatter=feds2 and not options.anyEmap,
                           )
 
 
