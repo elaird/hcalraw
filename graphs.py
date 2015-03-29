@@ -109,7 +109,6 @@ def stylize(h, color=r.kBlack, style=1, width=1):
     #r.gStyle.SetOptStat(110010)
     h.SetStats(False)
     h.SetMinimum(0.5)
-    magnify(h, factor=1.8)
     h.SetLineColor(color)
     h.SetLineStyle(style)
     h.SetLineWidth(width)
@@ -164,6 +163,7 @@ def histoLoop(f, lst, func):
         shiftFlows(h)
         h.Draw(gopts)
         stylize(h, color, style)
+        magnify(h, factor=1.8)
         out.append(h)
 
         s = "MatchedFibers"
@@ -193,50 +193,62 @@ def fedString(lst=[]):
     return ",".join(["%d" % i for i in lst])
 
 
-def plotList(f, pad2, offset=None, names=[], logY=True, logX=False, logZ=False, gopts="hist", feds1=[], feds2=[]):
+def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True, gopts="colz", feds1=[], feds2=[]):
     keep = []
 
     for iHisto, name in enumerate(names):
         if not name:
             continue
-        pad2.cd(offset + iHisto)
+        pad.cd(offset + iHisto)
         adjustPad(logX=logX, logY=logY, logZ=logZ)
         h = f.Get(name)
-        if h:
-            shiftFlows(h)
-            h.Draw(gopts)
-            stylize(h)
-            keep.append(h)
+        if not h:
+            print "ERROR: could not find histogram %s." % name
 
-            P = name[:name.find("_vs_")].upper()
-            h.GetXaxis().SetTitle("%s (%s)" % (P, fedString(feds1)))
-            h.GetYaxis().SetTitle("%s (%s)" % (P, fedString(feds2)))
-            h.GetZaxis().SetTitle("samples / bin")
+        shiftFlows(h)
+        h.Draw(gopts)
+        stylize(h)
+        magnify(h, factor=1.8)
 
-            yx = r.TF1("yx", "x", h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
-            yx.SetLineColor(r.kBlack)
-            yx.SetLineWidth(1)
-            yx.SetLineStyle(3)
-            yx.Draw("same")
+        P = name[:name.find("_vs_")].upper()
+        h.GetXaxis().SetTitle("%s (%s)" % (P, fedString(feds1)))
+        h.GetYaxis().SetTitle("%s (%s)" % (P, fedString(feds2)))
+        h.GetZaxis().SetTitle("samples / bin")
 
-            leg = r.TLegend(0.2, 0.75, 0.5, 0.85)
-            leg.SetBorderSize(0)
-            leg.SetFillStyle(0)
-            leg.AddEntry(yx, "y = x", "l")
-            leg.Draw()
-            keep += [yx, leg]
-        else:
-            names = []
-            color = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kMagenta]
-            feds = (feds1 + feds2)[:5]
-            color += [r.kBlack] * (len(feds) - len(color))
-            style = [1, 2, 3, 4, 5]
-            style += [1] * (len(feds) - len(style))
+        yx = r.TF1("yx", "x", h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
+        yx.SetLineColor(r.kBlack)
+        yx.SetLineWidth(1)
+        yx.SetLineStyle(3)
+        yx.Draw("same")
 
-            for iFed, fed in enumerate(sorted(feds)):
-                names.append((fed, color[iFed], style[iFed]))
+        leg = r.TLegend(0.2, 0.75, 0.5, 0.85)
+        leg.SetBorderSize(0)
+        leg.SetFillStyle(0)
+        leg.AddEntry(yx, "y = x", "l")
+        leg.Draw()
+        keep += [h, yx, leg]
+    return keep
 
-            keep += histoLoop(f, names, lambda x: "%s_%d" % (name, x))
+
+def plotList(f, pad, offset=None, names=[], logY=True, logX=False, logZ=False, gopts="hist", feds1=[], feds2=[]):
+    fedList = (feds1 + feds2)[:5]
+    color = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kMagenta]
+    color += [r.kBlack] * (len(fedList) - len(color))
+    style = [1, 2, 3, 4, 5]
+    style += [1] * (len(fedList) - len(style))
+
+    keep = []
+    for iHisto, name in enumerate(names):
+        if not name:
+            continue
+        pad.cd(offset + iHisto)
+        adjustPad(logX=logX, logY=logY, logZ=logZ)
+
+        feds = []
+        for iFed, fed in enumerate(sorted(fedList)):
+            feds.append((fed, color[iFed], style[iFed]))
+
+        keep += histoLoop(f, feds, lambda x: "%s_%d" % (name, x))
     return keep
 
 
@@ -358,13 +370,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     pad0.Divide(2, 1)
     pad0.Draw()
 
-    kargs = {"offset": 1, "logY": False, "logZ": True, "gopts": "colz",
-             "feds1": feds1, "feds2": feds2,}
-
-    keep = []
-    for i, name in enumerate(["adc_vs_adc", "tp_vs_tp"]):
-        pad0.cd(1 + i)
-        keep += plotList(f, r.gPad, names=[name], **kargs)
+    keep = plotGlobal(f, pad0, offset=1, names=["adc_vs_adc", "tp_vs_tp"], feds1=feds1, feds2=feds2)
     canvas.Print(pdf)
 
 
