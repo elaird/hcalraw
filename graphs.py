@@ -302,8 +302,15 @@ def draw_graph(graph, pad1, title="", rate=False):
     return graph, h
 
 
-def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
-    keep = []
+def pageOne(f=None, feds1=[], feds2=[]):
+    pad1 = r.TPad("pad1", "pad1", 0.00, 0.75, 0.75, 1.00)
+    pad2 = r.TPad("pad2", "pad2", 0.00, 0.00, 1.00, 1.00)
+
+    pad2.Divide(5, 4, 0.001, 0.001)
+    pad2.Draw()
+    pad1.Draw()
+
+    keep = [pad1, pad2]
 
     # category/rate graph
     r.gStyle.SetTitleBorderSize(0)
@@ -324,13 +331,9 @@ def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
     keep += plotList(f, pad2, offset=5,
                      names=["BcN",
                             "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples", "ErrF0",
-                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", # "LMSEPVC", "TTS",
+                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "LMSEPVC", "TTS",
                             # "PopCapFrac",
                             ], feds1=feds1, feds2=feds2)
-
-    # agreement
-    keep += plotList(f, pad2, offset=14, names=["adc_vs_adc", "tp_vs_tp"],
-                     logY=False, logZ=True, gopts="colz", feds1=feds1, feds2=feds2)
 
     # EvN, OrN, BcN agreement
     fed1 = sorted(feds1)[0]
@@ -364,6 +367,22 @@ def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
     return keep
 
 
+def pageTwo(f=None, feds1=[], feds2=[]):
+    pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
+    pad0.Divide(2, 1)
+    pad0.Draw()
+
+    keep = [pad0]
+
+    kargs = {"offset": 1, "logY": False, "logZ": True, "gopts": "colz",
+             "feds1": feds1, "feds2": feds2,}
+
+    for i, name in enumerate(["adc_vs_adc", "tp_vs_tp"]):
+        pad0.cd(1 + i)
+        keep += plotList(f, r.gPad, names=[name], **kargs)
+    return keep
+
+
 def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf", scatter=False):
     r.gROOT.SetBatch(True)
     r.gROOT.SetStyle("Plain")
@@ -372,19 +391,20 @@ def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf", scatter
     canvas = r.TCanvas()
     canvas.Print(pdf + "[")
 
-    pad1 = r.TPad("pad1", "pad1", 0.00, 0.75, 0.75, 1.00)
-    pad2 = r.TPad("pad2", "pad2", 0.00, 0.00, 1.00, 1.00)
-
-    pad2.Divide(5, 4, 0.001, 0.001)
-    pad2.Draw()
-    pad1.Draw()
-
     for fileName in inputFiles:
         f = r.TFile(fileName)
         if (not f) or f.IsZombie():
             continue
-        junk = onePage(f, pad1, pad2, feds1, feds2)
+
+        canvas.cd(0)
+        junk = pageOne(f, feds1, feds2)
         canvas.Print(pdf)
+
+        if feds2:
+            canvas.cd(0)
+            junk += pageTwo(f, feds1, feds2)
+            canvas.Print(pdf)
+
         f.Close()
     canvas.Print(pdf + "]")
 
