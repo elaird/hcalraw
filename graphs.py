@@ -301,7 +301,7 @@ def draw_graph(graph, pad1, title="", rate=False):
     return graph, h
 
 
-def pageOne(f=None, feds1=[], feds2=[]):
+def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     pad1 = r.TPad("pad1", "pad1", 0.00, 0.75, 0.75, 1.00)
     pad2 = r.TPad("pad2", "pad2", 0.00, 0.00, 1.00, 1.00)
 
@@ -309,7 +309,7 @@ def pageOne(f=None, feds1=[], feds2=[]):
     pad2.Draw()
     pad1.Draw()
 
-    keep = [pad1, pad2]
+    keep = []
 
     # category/rate graph
     r.gStyle.SetTitleBorderSize(0)
@@ -363,23 +363,22 @@ def pageOne(f=None, feds1=[], feds2=[]):
     adjustPad(logY=True)
     keep += histoLoop(f, [("MatchedTriggerTowers", r.kBlack, 1)], lambda x: x)
 
-    return keep
+    canvas.Print(pdf)
 
 
-def pageTwo(f=None, feds1=[], feds2=[]):
+def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
     pad0.Divide(2, 1)
     pad0.Draw()
 
-    keep = [pad0]
-
     kargs = {"offset": 1, "logY": False, "logZ": True, "gopts": "colz",
              "feds1": feds1, "feds2": feds2,}
 
+    keep = []
     for i, name in enumerate(["adc_vs_adc", "tp_vs_tp"]):
         pad0.cd(1 + i)
         keep += plotList(f, r.gPad, names=[name], **kargs)
-    return keep
+    canvas.Print(pdf)
 
 
 def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf", scatter=False):
@@ -395,14 +394,10 @@ def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf", scatter
         if (not f) or f.IsZombie():
             continue
 
-        canvas.cd(0)
-        junk = pageOne(f, feds1, feds2)
-        canvas.Print(pdf)
-
+        pageOne(f, feds1, feds2, canvas, pdf)
         if feds2:
             canvas.cd(0)
-            junk += pageTwo(f, feds1, feds2)
-            canvas.Print(pdf)
+            pageTwo(f, feds1, feds2, canvas, pdf)
 
         f.Close()
     canvas.Print(pdf + "]")
