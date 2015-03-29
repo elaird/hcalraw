@@ -147,13 +147,20 @@ def histoLoop(f, lst, func):
     legEntries = []
     h0 = None
 
-    for i, (x, color, style) in enumerate(lst):
+    bcn = False
+    for x, color, style in lst:
         h = f.Get(func(x))
         if not h:
             continue
 
         if not h.GetEntries():
             continue
+
+        if func(x).startswith("BcN_"):
+            if bcn:
+                continue
+            else:
+                bcn = True
 
         if h.GetName().startswith("ChannelFlavor"):
             labelXAxis(h, labels=configuration.flavorLabels())
@@ -235,10 +242,8 @@ def plotList(f, pad2, offset=None, names=[], logY=True, logX=False, logZ=False, 
             color += [r.kBlack] * (len(feds) - len(color))
             style = [1, 2, 3, 4, 5]
             style += [1] * (len(feds) - len(style))
-            for iFed, fed in enumerate(sorted(feds)):
-                if name == "BcN" and iFed:
-                    continue
 
+            for iFed, fed in enumerate(sorted(feds)):
                 names.append((fed, color[iFed], style[iFed]))
 
             keep += histoLoop(f, names, lambda x: "%s_%d" % (name, x))
