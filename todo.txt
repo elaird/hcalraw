@@ -1,5 +1,4 @@
 TChain support
 improve storage structures
-HLT path filter in analyze.py
 check match binning
 cp old skim
