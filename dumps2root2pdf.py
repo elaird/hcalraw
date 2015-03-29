@@ -68,17 +68,9 @@ def looped(dats=[], options=None):
 
 
 def plot(prefixes, feds, roots):
-    if len(set(prefixes)) != 1:
-        return
-
-    rootFile = "output/%s.root" % prefixes[0]
-    # cmd = "hadd -f %s %s" % (rootFile, " ".join(roots))
-    # print cmd
-    # os.system(cmd)
-
     graphs.makeSummaryPdf(inputFiles=roots,
                           feds1=feds,
-                          pdf=rootFile.replace(".root", ".pdf"),
+                          pdf="output/%s.pdf" % sorted(list(prefixes))[0]
                           )
 
 
