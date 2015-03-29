@@ -1,8 +1,7 @@
 mol
 deadbeef
 badcoffee
-*.d
-*.so
-*.pcm
-tmp*.h
-tmp*.cpp
+cdf.so
+cms.so
+tmp[1-2].h
+tmp[1-2].cpp
