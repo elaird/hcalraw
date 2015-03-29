@@ -38,7 +38,15 @@ void loop(TTree& tree, std::vector<WORD>& vec, bool debug=false) {
       else if (iWordInBlock){  // found new block
 	if (debug) std::cout << " filling/clearing" << std::endl;
 
-        if(!START_FLAG) {  // not MOL
+	if(START_FLAG) {  // MOL
+	  iWordInBlock = 0;
+	  nWordsInBlock = NDataInBlock(buf);
+	  if ((buf & START_MASK) == START_FLAG && vec.size()) {  // new fragment
+	    tree.Fill();
+	    vec.clear();
+	  }
+	}
+        else {  // not MOL
 	  tree.Fill();
 	  iWordInBlock = 1;
 	  vec.clear();
@@ -47,14 +55,7 @@ void loop(TTree& tree, std::vector<WORD>& vec, bool debug=false) {
 	    nWordsInBlock = buf;
 	  }
 	}
-	else {  // MOL
-	  iWordInBlock = 0;
-	  nWordsInBlock = NDataInBlock(buf);
-	  if ((buf & START_MASK) == START_FLAG && vec.size()) {  // new fragment
-	    tree.Fill();
-	    vec.clear();
-	  }
-	}
+
       }  // end new block
     }  // end magic word
 
@@ -75,10 +76,11 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  std::vector<WORD> vec(1 << 13);
+  std::vector<WORD> vec;
+  vec.reserve(1 << 13);
   vec.clear();
 
-  gROOT->ProcessLine("#include <vector>; #pragma link C++ class vector<uint32_t>+; #pragma link C++ class vector<uint64_t>+;");
+  gROOT->ProcessLine("#include <vector>\n #pragma link C++ class vector<uint32_t>+; #pragma link C++ class vector<uint64_t>+;");
   TFile a(Form("%s%s.root", TAG, argv[1]), "RECREATE");
   TTree tree(TAG,"");
   tree.Branch(Form("%s", argv[1]), &vec);
