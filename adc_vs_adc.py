@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import ROOT as r
 
 
@@ -102,7 +100,3 @@ def go(fileName="output/latest.root", exclude=None, feds1=[], feds2=[], prefix="
         r.gPad.Print(pdf)
     else:
         print "No histograms matching selection (prefix %s) were found." % prefix
-
-
-if __name__ == "__main__":
-    go(prefix="adc_vs_adc")
