@@ -141,13 +141,18 @@ def legends(legEntries=[]):
     return out
 
 
+def justOne(s):
+    fields = s.split("_")
+    return 2 <= len(fields) and fields[0] == "BcN" and fields[1] != "HTRs"
+
+
 def histoLoop(f, lst, func):
     out = []
     maxes = []
     legEntries = []
     h0 = None
 
-    bcn = False
+    didOne = False
     for x, color, style in lst:
         h = f.Get(func(x))
         if not h:
@@ -156,11 +161,10 @@ def histoLoop(f, lst, func):
         if not h.GetEntries():
             continue
 
-        if func(x).startswith("BcN_"):
-            if bcn:
+        if justOne(func(x)):
+            if didOne:
                 continue
-            else:
-                bcn = True
+            didOne = True
 
         if h.GetName().startswith("ChannelFlavor"):
             labelXAxis(h, labels=configuration.flavorLabels())
@@ -187,7 +191,7 @@ def histoLoop(f, lst, func):
         else:
             t = h.GetTitle().replace("FED ", "")
 
-        if len(lst) == 1 and  func(x).startswith("BcN"):
+        if justOne(func(x)):
             t += "   (%d entries)" % h.GetEntries()
 
         legEntries.append((h, t))
@@ -320,8 +324,8 @@ def onePage(f=None, pad1=None, pad2=None, feds1=[], feds2=[]):
     keep += plotList(f, pad2, offset=5,
                      names=["BcN",
                             "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples", "ErrF0",
-                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs",
-                            #"TTS", "PopCapFrac",
+                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", # "LMSEPVC", "TTS",
+                            # "PopCapFrac",
                             ], feds1=feds1, feds2=feds2)
 
     # agreement
