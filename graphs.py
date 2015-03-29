@@ -1,6 +1,5 @@
 import math
 import collections
-import configuration
 import printer
 import utils
 r = utils.ROOT()
@@ -31,22 +30,12 @@ def shiftFlows(histo=None):
     histo.SetEntries(entries)
 
 
-def labelXAxis(h=None, labels={}):
-    h.SetStats(False)
-    axis = h.GetXaxis()
-    for iBin in range(1, 1 + axis.GetNbins()):
-        x = int(axis.GetBinCenter(iBin))
-        axis.SetBinLabel(iBin, labels.get(x, "%d" % x))
-    axis.SetLabelSize(1.5*axis.GetLabelSize())
-    axis.SetLabelOffset(1.5*axis.GetLabelOffset())
-
-
 def labelYAxis(h=None, labels={}):
     h.SetStats(False)
     yaxis = h.GetYaxis()
     for iBin, label in sorted(labels.iteritems()):
         yaxis.SetBinLabel(iBin, label)
-    yaxis.SetLabelSize(2.0*yaxis.GetLabelSize())
+    yaxis.SetLabelSize(2.0 * 0.035)
 
 
 def xMin_xMax(graph=None):
@@ -91,9 +80,10 @@ def magnify(h, factor=1.0):
     h.GetYaxis().SetTitleOffset(1.2)
     h.GetZaxis().SetTitleOffset(1.2)
 
+    default = 0.035
     for axis in [h.GetXaxis(), h.GetYaxis(), h.GetZaxis()][:2]:
-        axis.SetLabelSize(factor*axis.GetLabelSize())
-        axis.SetTitleSize(factor*axis.GetTitleSize())
+        axis.SetLabelSize(factor * default)
+        axis.SetTitleSize(factor * default)
 
 
 
@@ -164,9 +154,6 @@ def histoLoop(f, lst, func):
             if didOne:
                 continue
             didOne = True
-
-        if h.GetName().startswith("ChannelFlavor"):
-            labelXAxis(h, labels=configuration.flavorLabels())
 
         gopts = "hist"
         if h0:
