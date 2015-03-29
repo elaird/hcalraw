@@ -70,6 +70,17 @@ def fedMap():
     return d
 
 
+def fedList(s=""):
+    d = fedMap()
+    if not s:
+        return []
+    if s in d:
+        return d[s]
+
+    out = [int(x) for x in s.split(",")]
+    return out
+
+
 def rbxes():
     hbe  = range(1, 19)
     hfo  = range(1, 13)
