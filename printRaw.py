@@ -79,7 +79,7 @@ def oneHtrPatterns(p={}, patternMode={}, fedId=None, iOffset=None, utca=None):
         lines = patternData(p["patternData"],
                             moduleId=moduleId,
                             utca=utca,
-                            slim=patternMode["pureFibersOnly"],
+                            slim=not patternMode["patternB"],
                             )
         print "\n".join(lines)  # skip printer to facilitate diff
 
