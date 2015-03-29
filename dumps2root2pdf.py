@@ -82,5 +82,6 @@ def plot(prefixes, feds, roots):
 
 
 if __name__ == "__main__":
-    options, args = oneRun.opts(alsoArgs=True)
+    from options import opts
+    options, args = opts(alsoArgs=True)
     plot(*looped(args, options))
