@@ -21,13 +21,13 @@ def opts(alsoArgs=False):
 
     common = optparse.OptionGroup(parser, "Misc options")
     common.add_option("--nevents",
-                      dest="nevents",
+                      dest="nEvents",
                       default=None,
                       metavar="N",
                       type="int",
                       help="Stop after N events (including skipped events).")
     common.add_option("--nevents-skip",
-                      dest="neventsSkip",
+                      dest="nEventsSkip",
                       default=0,
                       metavar="M",
                       type="int",
