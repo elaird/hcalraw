@@ -2,7 +2,9 @@
 
 import os
 import sys
+import graphs
 import oneRun
+from options import opts
 
 
 def bail(dat, fields, tag):
@@ -74,7 +76,6 @@ def plot(prefixes, feds, roots):
     # print cmd
     # os.system(cmd)
 
-    import graphs
     graphs.makeSummaryPdf(inputFiles=roots,
                           feds1=feds,
                           pdf=rootFile.replace(".root", ".pdf"),
@@ -82,6 +83,5 @@ def plot(prefixes, feds, roots):
 
 
 if __name__ == "__main__":
-    from options import opts
     options, args = opts(alsoArgs=True)
     plot(*looped(args, options))
