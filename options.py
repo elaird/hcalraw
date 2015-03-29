@@ -177,6 +177,9 @@ def opts(alsoArgs=False):
     options, args = parser.parse_args()
 
     if alsoArgs:
+        if not args:
+            parser.print_help()
+            sys.exit(1)
         return options, args
     else:
         check(parser, options)
