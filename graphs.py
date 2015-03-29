@@ -3,7 +3,6 @@ import collections
 import configuration
 import printer
 import utils
-import adc_vs_adc
 r = utils.ROOT()
 
 
@@ -409,5 +408,6 @@ def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf", scatter
     canvas.Print(pdf + "]")
 
     if scatter:
+        import adc_vs_adc
         for prefix in ["adc_vs_adc", "tp_vs_tp"]:
             adc_vs_adc.go(fileName=inputFiles[0], feds1=feds1, feds2=feds2, prefix=prefix)
