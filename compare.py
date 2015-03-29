@@ -5,7 +5,8 @@ import printRaw
 
 def flavor(book, d, fedId):
     book.fill(d["Flavor"], "ChannelFlavor_%d" % fedId, 8, -0.5, 7.5,
-              title="FED %d;channel flavor;Channels / bin" % fedId)
+              title="FED %d;channel flavor;Channels / bin" % fedId,
+              xAxisLabels=["0", "1", "2", "3", "utp", "cpt", "vrb", "tch"])
 
 
 def htrSummary(blocks=[], book=None, fedId=None,
