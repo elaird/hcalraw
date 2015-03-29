@@ -14,10 +14,10 @@ import printer
 
 def setup():
     r.gROOT.SetBatch(True)
-    r.gROOT.LoadMacro("cpp/cdf.cxx+")
-    r.gROOT.LoadMacro("cpp/cms.cxx+")
+    os.system("cd cpp && make -s")
+    r.gSystem.Load("cpp/cdf.so")
 
-    if utils.cmssw():
+    if configuration.use_fwlite and utils.cmssw():
         #enable convenient use of CMSSW classes
         r.gSystem.Load("libFWCoreFWLite.so")
         r.AutoLibraryLoader.enable()
@@ -30,7 +30,10 @@ def setup():
             base = os.environ["CMSSW_BASE"]
         libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
         r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
-
+    else:
+        r.gSystem.Load("cpp/cms.so")
+        # TClass::TClass:0: RuntimeWarning: no dictionary for class x::y::z is available
+        r.gErrorIgnoreLevel = r.kError
 
 setup()
 
@@ -87,6 +90,7 @@ def eventMaps(s={}, options={}):
             raw = unpacked(fedData=wordsOneFed(tree=tree,
                                                fedId=fedId0,
                                                collection=s["rawCollection"],
+                                               product=s["product"]
                                                ),
                            nBytesPer=8,
                            headerOnly=True)
@@ -211,7 +215,7 @@ def collectedRaw(tree=None, specs={}):
             branch = specs["branch"](fedId)
 
         if specs["treeName"] == "Events":
-            rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"])
+            rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"], specs["product"])
             raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
         elif specs["treeName"] == "CMSRAW":
             rawThisFed = wordsOneChunk(tree, branch)
@@ -364,22 +368,22 @@ def unpackedMolHeader(fedData=None):
     return MOLheader, BlockHeaders
 
 
-def charsOneFed(tree=None, fedId=None, collection=""):
-    # cpp/cms.cxx
-    FEDRawData = getattr(tree, collection).product().FEDData(fedId)
-    return r.FEDRawDataChars(FEDRawData)
+def charsOneFed(tree=None, fedId=None, collection="", product=None):
+    FEDRawData = getattr(tree, collection)
+    if product:
+        FEDRawData = FEDRawData.product()
+    return r.FEDRawDataChars(FEDRawData.FEDData(fedId))
 
 
-def wordsOneFed(tree=None, fedId=None, collection=""):
-    # cpp/cms.cxx
-    FEDRawData = getattr(tree, collection).product().FEDData(fedId)
-    return r.FEDRawDataWords(FEDRawData)
+def wordsOneFed(tree=None, fedId=None, collection="", product=None):
+    FEDRawData = getattr(tree, collection)
+    if product:
+        FEDRawData = FEDRawData.product()
+    return r.FEDRawDataWords(FEDRawData.FEDData(fedId))
 
 
 def wordsOneChunk(tree=None, branch=""):
-    #Common Data Format
     chunk = wordsOneBranch(tree, branch)
-    #wrapper class creates std::vector<ULong64_t>
     return r.CDFChunk2(chunk)
 
 
@@ -505,6 +509,22 @@ def go(outer={}, inner={}, outputFile="",
             print
 
 
+def bail(specs, fileName):
+    n = max([len(spec["treeName"]) for spec in specs])
+    fmt = "%" + str(n) + "s: %s\n"
+
+    lst = []
+    for spec in specs:
+        name = spec["treeName"]
+        del spec["treeName"]
+        lst.append((name, spec))
+
+    msg = "found %s != 1 known TTrees in file %s\n" % (len(specs), fileName)
+    for name, spec in sorted(lst):
+        msg += fmt % (name, str(spec))
+    sys.exit(msg)
+
+
 def fileSpec(fileName=""):
     f = r.TFile.Open(fileName)
     if (not f) or f.IsZombie():
@@ -520,12 +540,11 @@ def fileSpec(fileName=""):
     for treeName in set(treeNames):  # set accomodate cycles, e.g. CMSRAW;3 CMSRAW;4
         spec = configuration.format(treeName)
         if spec:
+            spec["treeName"] = treeName
             specs.append(spec)
 
     if len(specs) != 1:
-        msg = "found %s != 1 known TTrees in file %s\n" % (len(specs), fileName)
-        msg += str(specs)
-        sys.exit(msg)
+        bail(specs, fileName)
     else:
         return specs[0]
     f.Close()

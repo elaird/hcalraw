@@ -1,4 +1,4 @@
-#include "CDFROOTLinkDef.h"
+#include "CDFChunk.h"
 
 std::vector<ULong64_t> CDFChunk2(CDFChunk& in) {
   ULong64_t* data = in.getData();

@@ -251,12 +251,12 @@ def tp_vs_tp(mapF1, mapF2, book=None):
     return matched, nonMatched
 
 
-def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=False, adcPlots=False):
+def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots=False):
     dump = (1 <= raw1[None]["dump"]) or raw1[None]["patternMode"].get("active")
 
     if anyEmap:
-        mapF1, mapB1, _ = dataMap(raw1, skipErrF=skipErrF)
-        mapF2, mapB2, _ = dataMap(raw2, skipErrF=skipErrF)
+        mapF1, mapB1, _ = dataMap(raw1)
+        mapF2, mapB2, _ = dataMap(raw2)
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
         tMatched12 = tNonMatched12 = []
@@ -266,14 +266,14 @@ def compare(raw1={}, raw2={}, book={}, skipErrF=[], anyEmap=False,  printEmap=Fa
            reportMatched(matched12)
            reportFailed(nonMatched12)
     else:
-        mapF1 = dataMap(raw1, skipErrF=skipErrF)[0]
-        mapF2 = dataMap(raw2, skipErrF=skipErrF)[0]
+        mapF1 = dataMap(raw1)[0]
+        mapF2 = dataMap(raw2)[0]
         matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book)
         if dump:
             matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1)
 
-        tF1 = tpMap(raw1, skipErrF=skipErrF)[0]
-        tF2 = tpMap(raw2, skipErrF=skipErrF)[0]
+        tF1 = tpMap(raw1)[0]
+        tF2 = tpMap(raw2)[0]
         tMatched12, tNonMatched12 = tp_vs_tp(tF1, tF2, book)
         tMatched21 = tNonMatched21 = []  # tp_vs_tp(tF2, tF1, book)  # FIXME
 
@@ -368,7 +368,9 @@ def matchStats(f={}, b={}):
     return matched, failed
 
 
-def dataMap(raw={}, skipErrF=[]):
+def dataMap(raw={}):
+    skipErrF = configuration.matchSkipErrF
+
     forward = {}
     backward = {}
     skipped = []
@@ -403,7 +405,9 @@ def dataMap(raw={}, skipErrF=[]):
     return forward, backward, skipped
 
 
-def tpMap(raw={}, skipErrF=[]):
+def tpMap(raw={}):
+    skipErrF = configuration.matchSkipErrF
+
     forward = {}
     backward = {}
     skipped = []

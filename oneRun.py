@@ -133,11 +133,6 @@ def opts():
                        default="",
                        metavar="s",
                        help="choose configuration.matchRange_s")
-    matchCh.add_option("--skip-errfs",
-                       dest="skipErrF",
-                       default="1,3",
-                       metavar="s",
-                       help="Skip channels with these ErrF values (default is 1,3).")
     matchCh.add_option("--any-emap",
                        dest="anyEmap",
                        default=False,
@@ -237,7 +232,7 @@ if __name__ == "__main__":
     if options.noColor:
         printer.__color = False
 
-    compareOptions = {"skipErrF": fedList(options.skipErrF)}
+    compareOptions = {}
     for item in ["adcPlots", "anyEmap", "printEmap"]:
         compareOptions[item] = getattr(options, item)
 

@@ -1,4 +1,5 @@
-#include "FEDRawData.cc"
+#include "FEDRawData.h"
+#include <iostream>
 #include <stdint.h>
 
 const std::vector<unsigned char> FEDRawDataChars(const FEDRawData& in) {

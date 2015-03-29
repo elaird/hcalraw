@@ -3,8 +3,10 @@ import re
 
 pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 compressedPatterns = True
+use_fwlite = False
 
 # these value may be overwritten by configuration.matchRange_*
+matchSkipErrF = [1, 3]
 __utcaBcnDelta = 0
 __vmeBcnDelta = 0
 
@@ -117,6 +119,9 @@ def matchRange_LS1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=Non
 def matchRange_v0(fedId=None, slot=None, fibCh=None, utca=None):
     global __utcaBcnDelta
     __utcaBcnDelta = -119
+
+    global matchSkipErrF
+    matchSkipErrF = [3]
 
     return matchRange_LS1(fedId, slot, fibCh, utca, True)
 
@@ -261,12 +266,16 @@ def transformed_tp(crate, slot, top, key):
 
 
 def format(treeName=""):
-    out = {"CMSRAW": {"branch": lambda fedId: "%s%d" % ("HCAL_DCC" if __isVme(fedId) else "Chunk", fedId)},
-           "Events": {"rawCollection": "FEDRawDataCollection_rawDataCollector__LHC"},
-           }.get(treeName, {"branch": lambda fedId: "%d" % fedId})
+    dct = {"CMSRAW": {"branch": lambda fedId: "%s%d" % ("HCAL_DCC" if __isVme(fedId) else "Chunk", fedId)}}
 
-    out["treeName"] = treeName
-    return out
+    if use_fwlite:
+        dct["Events"] = {"rawCollection": "FEDRawDataCollection_rawDataCollector__LHC", "product": True}
+    else:
+        dct["Events"] = {"rawCollection": "FEDRawDataCollection_rawDataCollector__LHC.obj", "product": False}
+
+    for item in ["LuminosityBlocks", "MetaData", "ParameterSets", "Parentage", "Runs"]:
+        dct[item] = None
+    return dct.get(treeName, {"branch": lambda fedId: "%d" % fedId})
 
 
 def d2c():

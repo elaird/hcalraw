@@ -1,7 +1,3 @@
-#include "TString.h"
-#include "CDFChunk.h"
-#include "CDFEventInfo.h"
-
 #ifdef __CINT__
 
 #pragma link off all globals;
@@ -10,5 +6,6 @@
 
 #pragma link C++ class CDFChunk+;
 #pragma link C++ class CDFEventInfo+;
+#pragma link C++ function CDFChunk2;
 
 #endif
