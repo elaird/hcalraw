@@ -3,7 +3,7 @@ import re
 
 pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 compressedPatterns = True
-use_fwlite = False
+use_fwlite = True
 
 # these value may be overwritten by configuration.matchRange_*
 matchSkipErrF = [1, 3]
