@@ -229,8 +229,9 @@ def collectedRaw(tree=None, specs={}):
             raw[fedId]["MOL"] = mol
 
         if not raw[fedId]["nBytesSW"]:
-            printer.error("skipping FED %d (read zero bytes)." % fedId)
+            printer.error("removing FED %d from spec (read zero bytes)." % fedId)
             del raw[fedId]
+            specs["fedIds"].remove(fedId)
             continue
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
