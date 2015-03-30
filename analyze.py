@@ -14,8 +14,8 @@ import printer
 
 def setup():
     r.gROOT.SetBatch(True)
-    os.system("cd cpp && make -s")
     r.gSystem.Load("cpp/cdf.so")
+    r.gSystem.Load("cpp/cms.so")
 
     if configuration.use_fwlite and utils.cmssw():
         #enable convenient use of CMSSW classes
@@ -30,12 +30,6 @@ def setup():
             base = os.environ["CMSSW_BASE"]
         libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
         r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
-    else:
-        r.gSystem.Load("cpp/cms.so")
-        # TClass::TClass:0: RuntimeWarning: no dictionary for class x::y::z is available
-        r.gErrorIgnoreLevel = r.kError
-
-setup()
 
 
 def nEvents(tree, nMax):
