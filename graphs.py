@@ -162,6 +162,7 @@ def histoLoop(f, lst, func):
     h0 = None
 
     didOne = False
+    twoLines = False
     for x, color, style in lst:
         h = f.Get(func(x))
         if not h:
@@ -196,7 +197,6 @@ def histoLoop(f, lst, func):
             t = "%s  %d#pm%d" % (ch, h.GetMean(), h.GetRMS())
             h.GetXaxis().SetTitle("no. matched")
         else:
-            twoLines = False
             t = h.GetTitle().replace("FED ", "")
 
         if justOne(func(x)):
