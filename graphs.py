@@ -203,7 +203,6 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         adjustPad(logX=logX, logY=logY, logZ=logZ)
         h = f.Get(name)
         if not h:
-            print "ERROR: could not find histogram %s." % name
             continue
 
         shiftFlows(h)
@@ -370,7 +369,6 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
     pad0.Divide(2, 1)
     pad0.Draw()
-
     keep = plotGlobal(f, pad0, offset=1, names=["adc_vs_adc", "tp_vs_tp"], feds1=feds1, feds2=feds2)
     canvas.Print(pdf)
 
@@ -390,7 +388,6 @@ def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf", scatter
 
         pageOne(f, feds1, feds2, canvas, pdf)
         if feds2:
-            canvas.cd(0)
             pageTwo(f, feds1, feds2, canvas, pdf)
 
         f.Close()
