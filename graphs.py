@@ -186,6 +186,8 @@ def histoLoop(f, lst, func):
         h.Draw(gopts)
         stylize(h, color, style)
         magnify(h, factor=1.8)
+        if not h.GetXaxis().GetTitle():
+            h.GetXaxis().SetLabelSize(0.13)
         out.append(h)
 
         s = "Matched"
