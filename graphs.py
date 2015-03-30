@@ -114,18 +114,39 @@ def stylize(h, color=r.kBlack, style=1, width=1):
     h.SetLineWidth(width)
 
 
-def legends(legEntries=[]):
+def legends(legEntries=[], twoLines=False):
     out = []
-    dx = 0.8/max(1, len(legEntries))
+    dx = 0.8 / max(1, len(legEntries))
+    dx *= 2 if twoLines else 1
+    if twoLines:
+        max1 = len(legEntries)/2
+        y = 0.95
+    else:
+        max1 = len(legEntries)
+        y = 0.91
+
     x0 = 0.1
-    for iLeg, (h, desc) in enumerate(legEntries):
-        leg = r.TLegend(x0, 0.91, x0+dx, 1.0)
+    for iLeg in range(max1):
+        h, desc = legEntries[iLeg]
+        leg = r.TLegend(x0, y, x0+dx, 1.0)
         x0 += dx
         leg.SetBorderSize(0)
         leg.SetFillStyle(0)
         leg.AddEntry(h, desc, "l")
         leg.Draw()
         out.append(leg)
+
+    x0 = 0.1
+    for iLeg in range(max1, len(legEntries)):
+        h, desc = legEntries[iLeg]
+        leg2 = r.TLegend(x0, 0.90, x0+dx, y)
+        x0 += dx
+        leg2.SetBorderSize(0)
+        leg2.SetFillStyle(0)
+        leg2.AddEntry(h, desc, "l")
+        leg2.Draw()
+        out.append(leg2)
+
     return out
 
 
@@ -166,15 +187,16 @@ def histoLoop(f, lst, func):
         magnify(h, factor=1.8)
         out.append(h)
 
-        s = "MatchedFibers"
+        s = "Matched"
         if func(x).startswith(s):
-            ch = func(x).replace(s, "")[-1]
-            #t = "#splitline{%s}{%s}" % ("Ch " + ch, "%d#pm%d" % (h.GetMean(), h.GetRMS()))
-            t = "Ch%s  (%d#pm%d)" % (ch, h.GetMean(), h.GetRMS())
-            h.GetXaxis().SetTitle(h.GetXaxis().GetTitle()[:-6])
-        elif func(x).startswith("MatchedTriggerTowers"):
-            t = "%d#pm%d" % (h.GetMean(), h.GetRMS())
+            twoLines = True
+            ch = func(x).replace(s, "").replace("Fibers", "").replace("TriggerTowers", "")
+            if not ch:
+                ch = "TP  "
+            t = "%s  %d#pm%d" % (ch, h.GetMean(), h.GetRMS())
+            h.GetXaxis().SetTitle("no. matched")
         else:
+            twoLines = False
             t = h.GetTitle().replace("FED ", "")
 
         if justOne(func(x)):
@@ -185,7 +207,7 @@ def histoLoop(f, lst, func):
 
     if maxes and h0:
         h0.SetMaximum(2.0*max(maxes))
-    out += legends(legEntries)
+    out += legends(legEntries, twoLines=twoLines)
     return out
 
 
@@ -353,14 +375,10 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
                       [("MatchedFibersCh0", r.kBlue, 1),
                        ("MatchedFibersCh1", r.kCyan, 2),
                        ("MatchedFibersCh2", r.kBlack, 3),
+                       ("MatchedTriggerTowers", r.kGreen, 4),
                        ],
                       lambda x: x,
                       )
-
-    # tps
-    pad2.cd(20)
-    adjustPad(logY=True)
-    keep += histoLoop(f, [("MatchedTriggerTowers", r.kBlack, 1)], lambda x: x)
 
     canvas.Print(pdf)
 
