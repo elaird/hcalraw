@@ -18,11 +18,9 @@ def setup():
     r.gSystem.Load("cpp/cms.so")
 
     if configuration.use_fwlite and utils.cmssw():
-        #enable convenient use of CMSSW classes
         r.gSystem.Load("libFWCoreFWLite.so")
         r.AutoLibraryLoader.enable()
 
-        #define helper classes
         libs = ["DataFormatsFEDRawData"]
         if os.environ["CMSSW_RELEASE_BASE"]:
             base = os.environ["CMSSW_RELEASE_BASE"]
@@ -30,6 +28,9 @@ def setup():
             base = os.environ["CMSSW_BASE"]
         libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
         r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
+    else:
+        # TClass::TClass:0: RuntimeWarning: no dictionary for class x::y::z is available
+        r.gErrorIgnoreLevel = r.kError
 
 
 def nEvents(tree, nMax):
