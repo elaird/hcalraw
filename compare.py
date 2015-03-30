@@ -49,6 +49,9 @@ def htrSummary(blocks=[], book=None, fedId=None,
             if "Flavor" in triggerData:
                 flavor(book, triggerData, fedId)
 
+            book.fill(len(triggerData["TP"]), "nTpSamples_%d" % fedId, 14, -0.5, 13.5,
+                      title="FED %d;number of TP samples;Towers / bin" % fedId)
+
         for channelData in block["channelData"].values():
             flavor(book, channelData, fedId)
 

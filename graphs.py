@@ -329,9 +329,9 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     # single FED
     keep += plotList(f, pad2, offset=5,
                      names=["BcN",
-                            "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples", "ErrF0",
-                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "LMSEPVC", "TTS",
-                            # "PopCapFrac",
+                            "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples", "nTpSamples",
+                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "LMSEPVC", "ErrF0",
+                            # "TTS", "PopCapFrac",
                             ], feds1=feds1, feds2=feds2)
 
     # EvN, OrN, BcN agreement
