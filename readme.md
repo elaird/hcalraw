@@ -26,12 +26,8 @@ cd cpp; make; cd -
 ./oneRun.py --file1=$LS1/USC_239099.root --feds1=uHF  --nevents=1 --patterns | ./diff.py data/ref_utca_G.txt
 
 # analyze global runs
-./oneRun.py --file1=$GR2/Cosmics/RAW/v1/000/235/316/00000/9CE27CCC-5EBB-E411-AF2C-02163E0127C8.root --feds1=718,719 --feds2=1118  --match=v3 --skip-flavors=0,2 --dump=0 --nevents=10
-./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/237/318/00000/24F11386-94C6-E411-96AC-02163E012078.root --feds1=717,1118,1120,1122 --match=v3 --nevents=3
-./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/238/159/00000/666E2367-C0CC-E411-A1DC-02163E012152.root --feds1=718,719 --feds2=1118,1120,1122 --match=v4 --progress --output-file=output/238159.root
-./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/238/194/00000/22CB97E4-ECCC-E411-BB27-02163E011D5F.root --feds1=718,719 --feds2=1118,1120,1122 --match=v4 --progress --output-file=output/238194.root --nevents=2000 --no-warn-unpack
-./oneRun.py --file1=$GR2/MinimumBias/RAW/v1/000/238/243/00000/B0B8B34A-71CD-E411-A042-02163E0126A1.root --feds1=718,719 --feds2=1120,1122 --match=v4 --progress --output-file=output/238243.root --nevents=20
-./oneRun.py --file1=root://eoscms.cern.ch//store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1/000/238/534/00000/56900444-EECE-E411-B693-02163E0123FC.root
+./oneRun.py --file1=$GR2/Cosmics/RAW/v1/000/235/316/00000/9CE27CCC-5EBB-E411-AF2C-02163E0127C8.root --output-file=output/235316.root --feds1=718,719 --feds2=1118  --match=v3 --no-warn-unpack --dump=0 --nevents=10
+./oneRun.py --file1=$GR2/Cosmics/RAW/v1/000/239/201/00000/0012EAD3-77D6-E411-8052-02163E01351E.root --output-file=output/239201.root --feds1=718,719 --feds2=uHF  --match=v4 --dump=0 --no-warn-unpack --nevents=10
 ```
 
 ####License
