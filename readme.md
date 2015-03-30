@@ -13,7 +13,7 @@ cd cpp; make; cd -
 ./oneRun.py --file1=data/B904_Integration_000050.root --feds1=702,931 --nevents=1 --dump=4
 
 # compare payloads of different sets of FEDs, within one file
-./oneRun.py --file1=$LS1/USC_239097.root --feds1=718,719 --feds2=uHF --match=v2 --dump=0 --output-file=output/239097.root --progress
+./oneRun.py --file1=$LS1/USC_239292.root --feds1=718,719 --feds2=uHF --match=v2 --dump=0 --output-file=output/239292.root --progress
 
 # compare payloads of different sets of FEDs, across two files
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --any-emap
