@@ -38,6 +38,7 @@ def main(options):
         analyze.oneRun(**kargs)
 
     if not options.noLoop:
+        analyze.setup()
         if options.profile:
             import cProfile
             cProfile.run("go()", sort="time")
