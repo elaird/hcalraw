@@ -39,7 +39,11 @@ def nEvents(tree, nMax):
     return min(nEntries, nMax) if (nMax is not None) else nEntries
 
 
-def coords(d):
+def coords(d, fedId0):
+    if not d["nBytesSW"]:
+        printer.error("FED %d has zero bytes." % fedId0)
+        sys.exit(1)
+
     h = d["header"]
     return h["OrN"], h["BcN"], h["EvN"]
 
@@ -89,28 +93,28 @@ def eventMaps(s={}, options={}):
                                                ),
                            nBytesPer=8,
                            headerOnly=True)
-            orn, bcn, evn = coords(raw)
+            orn, bcn, evn = coords(raw, fedId0)
 
         elif treeName == "CMSRAW":  # HCAL local
             tree.GetEntry(iEvent)
             raw = unpacked(fedData=wordsOneChunk(tree=tree, branch=branch0),
                            nBytesPer=8,
                            headerOnly=True)
-            orn, bcn, evn = coords(raw)
+            orn, bcn, evn = coords(raw, fedId0)
 
         elif treeName == "deadbeef":
             tree.GetEntry(iEvent)
             raw = unpacked(fedData=wordsOneBranch(tree=tree, branch=branch0),
                            nBytesPer=4,
                            headerOnly=True)
-            orn, bcn, evn = coords(raw)
+            orn, bcn, evn = coords(raw, fedId0)
 
         elif treeName == "badcoffee":
             tree.GetEntry(iEvent)
             raw = unpacked(fedData=wordsOneBranch(tree=tree, branch=branch0),
                            nBytesPer=8,
                            headerOnly=True)
-            orn, bcn, evn = coords(raw)
+            orn, bcn, evn = coords(raw, fedId0)
 
         elif treeName == "mol":
             tree.GetEntry(iEvent)
@@ -120,7 +124,7 @@ def eventMaps(s={}, options={}):
                            skipWords64=skipWords64,
                            nBytesPer=8,
                            headerOnly=True)
-            orn, bcn, evn = coords(raw)
+            orn, bcn, evn = coords(raw, fedId0)
 
         else:
             sys.exit("treeName %s not found." % treeName)
@@ -229,7 +233,7 @@ def collectedRaw(tree=None, specs={}):
             raw[fedId]["MOL"] = mol
 
         if not raw[fedId]["nBytesSW"]:
-            printer.error("removing FED %d from spec (read zero bytes)." % fedId)
+            printer.warning("removing FED %d from spec (read zero bytes)." % fedId)
             del raw[fedId]
             specs["fedIds"].remove(fedId)
             continue
