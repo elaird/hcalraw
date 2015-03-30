@@ -192,6 +192,7 @@ def htrHeaderV1(l={}, w=None, i=None, utca=None):
     l["IsTTP"] = False
     l["channelData"] = {}
     l["triggerData"] = {}
+    l["technicalData"] = {}
     l["otherData"] = {}
 
 
@@ -232,6 +233,7 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
     if i == 5:
         l["channelData"] = {}
         l["triggerData"] = {}
+        l["technicalData"] = {}
         l["otherData"] = {}
         if utca:
             #l["nWord16Payload"] = w & 0x1fff  # !document
@@ -485,17 +487,18 @@ def clearChannel(d):
 def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
     channelId = word16 & 0xff
     channelHeader = {"Flavor": flavor,
-                     "ErrF":   (word16 >> 10) & 0x3,
                      "iWord16": iWord16,
                      }
 
     if flavor == 4:
+        channelHeader["ErrF"] = (word16 >> 10) & 0x3
         dataKey = "triggerData"
         for key in ["SOI", "OK", "TP"]:
             channelHeader[key] = []
 
     elif 5 <= flavor <= 6:
         dataKey = "channelData"
+        channelHeader["ErrF"] = (word16 >> 10) & 0x3
         channelHeader["CapId0"] = (word16 >> 8) & 0x3
         channelHeader["Fiber"] = channelId / 4
         if not utca:
@@ -512,6 +515,11 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
         #     for key in ["SOI", "OK", "TDCRise", "TDCFall"]:
         #         channelHeader[key] = {}
 
+    elif flavor == 7:
+        dataKey = "technicalData"
+        channelHeader["channelId"] = channelId
+        channelHeader["technicalDataType"] = (word16 >> 8) & 0xf
+        channelHeader["words"] = []
     else:
         dataKey = "otherData"
         channelHeader["words"] = []
