@@ -4,7 +4,7 @@ import os
 import sys
 import utils
 import oneRun
-from options import opts, check
+from options import opts
 
 
 def main(options, args):
@@ -37,7 +37,6 @@ def main(options, args):
         pass
 
     if options.file1:
-        check(None, options)
         oneRun.main(options)
 
 
