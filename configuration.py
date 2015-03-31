@@ -164,6 +164,18 @@ def matchRange_v4(fedId=None, slot=None, fibCh=None, utca=None):
     return range(6)
 
 
+def matchRange_v4a(fedId=None, slot=None, fibCh=None, utca=None):
+    """hack"""
+
+    global __utcaBcnDelta
+    __utcaBcnDelta = -131
+
+    if __isVme(fedId):
+        return [0, 1]
+    else:
+        return [4, 5]
+
+
 def fiberMap(fedId=None):
     if 989 <= fedId <= 990:  # mCTR2d
         return d2c()
