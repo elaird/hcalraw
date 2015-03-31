@@ -14,10 +14,16 @@ def minutes(orn):
 
 
 def commandOutput(cmd=""):
-    return subprocess.Popen(cmd, shell=True,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            ).communicate()[0].split()
+    return commandOutputFull(cmd="")["stdout"].split()
+
+
+def commandOutputFull(cmd=""):
+    p = subprocess.Popen(cmd, shell=True,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE,
+                         )
+    stdout, stderr = p.communicate()
+    return {"stdout": stdout, "stderr": stderr, "returncode": p.returncode}
 
 
 def Swap64(i64 = ""): #//To flip edianness 
