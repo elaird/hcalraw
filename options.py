@@ -176,23 +176,8 @@ def opts(alsoArgs=False):
 
     options, args = parser.parse_args()
 
-    if alsoArgs:
-        if not args:
-            parser.print_help()
-            sys.exit(1)
-        return options, args
-    else:
-        check(parser, options)
-        return options
-
-
-def check(parser, options):
-    if not all([options.file1, options.feds1]):
+    if alsoArgs and not args:
         parser.print_help()
         sys.exit(1)
-    if not options.outputFile.endswith(".root"):
-        sys.exit("--output-file must end with .root (%s)" % options.outputFile)
-    if options.feds2 and not options.file2:
-        print "INFO: using --file1 also for --file2; also using identity map"
-        options.file2 = options.file1
-        options.identityMap = True
+
+    return options, args

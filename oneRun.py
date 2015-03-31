@@ -16,7 +16,20 @@ def subset(options, l, process=False):
     return out
 
 
+def check(options):
+    if not all([options.file1, options.feds1]):
+        sys.exit("--file1 and --feds1 are required.")
+    if not options.outputFile.endswith(".root"):
+        sys.exit("--output-file must end with .root (%s)" % options.outputFile)
+    if options.feds2 and not options.file2:
+        print "INFO: using --file1 also for --file2; also using identity map"
+        options.file2 = options.file1
+        options.identityMap = True
+
+
 def main(options):
+    check(options)
+
     if options.match:
         configuration.matchRange = getattr(configuration, "matchRange_%s" % options.match)
         configuration.matchRange()  # call once to set utcaBcnDelta
@@ -53,4 +66,4 @@ def main(options):
 
 
 if __name__ == "__main__":
-    main(opts())
+    main(opts()[0])
