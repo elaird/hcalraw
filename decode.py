@@ -159,8 +159,12 @@ def other(d={}, words64=[]):
         if len(words64) != 1:
             printer.warning("other header has %d != 1 words" % len(words64))
         else:
-            d["magic"] = words64[0] & 0xffffffff
-            d["nWord64"] = words64[0] >> 33
+            w = words64[0]
+            d["magic"] = w & 0xffffffff
+            n32 = w >> 32
+            if n32 & 0x1:
+                printer.warning("found odd number of 32bit words: %d" % n32)
+            d["nWord64"] = n32 >> 1
 
 
 def swapped64(i64):  # endian flip
