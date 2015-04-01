@@ -401,7 +401,7 @@ def patternString(patterns=[], key=""):
     for p in patterns:
         for k in [key+"0", key+"1"]:
             codes.append(p[k])
-    return configuration_patterns.patternString(codes)
+    return configuration_patterns.string(codes)
 
 
 def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],

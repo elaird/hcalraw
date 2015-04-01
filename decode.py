@@ -572,7 +572,7 @@ def channelId(fiber=None, fibCh=None):
 
 def storePatternData(l={}, nFibers=None):
     nTs = configuration_patterns.nTs
-    compressed = configuration_patterns.compressedPatterns
+    compressed = configuration_patterns.compressed
     offset = 1 if configuration_patterns.rmRibbon else 0
 
     l["patternData"] = {}
@@ -601,7 +601,7 @@ def storePatternData(l={}, nFibers=None):
                             cap = d[key]["CapId"][iTs]
                         elif not compressed:
                             sys.exit("\n".join(["Cap-ids per time-slice not found.",
-                                                "Either set 'configuration_patterns.compressedPatterns = True'",
+                                                "Either set 'configuration_patterns.compressed = True'",
                                                 "or do not pass '--patterns'.",
                                             ]))
                         else:

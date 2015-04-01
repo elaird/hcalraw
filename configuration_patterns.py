@@ -1,20 +1,21 @@
 import re
 
 
-nTs = 10                     # number of time slices to consider
-patternB = False             # consider also patterns mixed across fibers
-rmRibbon = False             # pair central 6 fibers (of 8 or 12)
-compressedPatterns = True    # handle lack of per-TS capids
+nTs = 10             # number of time slices to consider
+patternB = False     # consider also patterns mixed across fibers
+rmRibbon = False     # pair central 6 fibers (of 8 or 12)
+compressed = True    # handle lack of per-TS capids
+
+pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 
 
-def patternString(codes=[], asciifyPatterns=True, regMatchPatterns=True):
-    pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
+def string(codes=[], asciifyPatterns=True, regMatchPatterns=True):
     if not any(codes):
         return None
 
     l = []
     for code in codes:
-        if compressedPatterns:
+        if compressed:
             code = (code >> 1) & 0x3f
             code += 32
 
