@@ -48,7 +48,7 @@ def main(options, args):
     if options.file1:
         oneRun.main(options)
     else:
-        sys.exit("Did not find a matching file.  Perhaps try 'source env/lxplus6.sh'")
+        sys.exit("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
 
 
 if __name__ == "__main__":
