@@ -78,6 +78,8 @@ def eventMaps(s={}, options={}):
 
     kargs = {"headerOnly": True,
              "nBytesPer": s["nBytesPer"]}
+    if treeName == "mol":
+        kargs["skipWords64"] = [0, 1]
 
     for iEvent in range(nEvents(tree, nEventsMax)):
         tree.GetEntry(iEvent)
@@ -92,19 +94,12 @@ def eventMaps(s={}, options={}):
                                  )
         elif treeName == "CMSRAW":  # HCAL local
             rawThisFed = wordsOneChunk(tree=tree, branch=branch0)
-        elif treeName == "deadbeef":
-            rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
-        elif treeName == "badcoffee":
-            rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
-        elif treeName == "mol":
-            rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
-            kargs["skipWords64"] = [0, 1]
         else:
-            sys.exit("treeName %s not found." % treeName)
+            rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
 
         raw = unpacked(fedData=rawThisFed, **kargs)
         if not raw["nBytesSW"]:
-            printer.error("FED0 %d has zero bytes." % fedId0)
+            printer.error("tree %s FED0 %d has zero bytes." % (treeName, fedId0))
             sys.exit()
 
         if s["progress"]:
@@ -185,6 +180,10 @@ def collectedRaw(tree=None, specs={}):
     for item in ["patternMode", "warn", "dump", "unpack", "nBytesPer"]:
         kargs[item] = specs[item]
 
+    if specs["treeName"] == "mol":
+        kargs["skipWords64"] = [0, 1]
+        kargs["decodeSkipped64"] = decode.molHeader
+
     for fedId in specs["fedIds"]:
         if "branch" in specs:
             branch = specs["branch"](fedId)
@@ -193,14 +192,8 @@ def collectedRaw(tree=None, specs={}):
             rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"], specs["product"])
         elif specs["treeName"] == "CMSRAW":
             rawThisFed = wordsOneChunk(tree, branch)
-        elif specs["treeName"] == "deadbeef":
+        else:
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
-        elif specs["treeName"] == "badcoffee":
-            rawThisFed = wordsOneBranch(tree=tree, branch=branch)
-        elif specs["treeName"] == "mol":
-            rawThisFed = wordsOneBranch(tree=tree, branch=branch)
-            kargs["skipWords64"] = [0, 1]
-            kargs["decodeSkipped64"] = decode.molHeader
 
         raw[fedId] = unpacked(fedData=rawThisFed, **kargs)
 
