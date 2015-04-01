@@ -99,8 +99,8 @@ def eventMaps(s={}, options={}):
 
         raw = unpacked(fedData=rawThisFed, **kargs)
         if not raw["nBytesSW"]:
-            printer.error("tree %s FED0 %d has zero bytes." % (treeName, fedId0))
-            sys.exit()
+            printer.error("the first listed FED (%d) has zero bytes in tree '%s'." % (fedId0, treeName))
+            sys.exit(2)
 
         if s["progress"]:
             iMask = progress(iEvent, iMask)
