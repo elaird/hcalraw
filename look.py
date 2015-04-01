@@ -25,7 +25,7 @@ def main(options, args):
 
     local1 = "data/USC_%d.root" % run
     local2 = "%s/USC_%d.root" % (os.environ.get("LS1", ""), run)
-    gdir1 = "%s/Cosmics/RAW/v1/000/%d/%d/00000/" % (os.environ.get("GR2", ""), run/1000, run % 1000)
+    gdir1 = "%s/Cosmics/RAW/v1/000/%3d/%3d/00000/" % (os.environ.get("GR2", ""), run/1000, run % 1000)
     eos = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select"
     stem = "root://eoscms.cern.ch/"
 
