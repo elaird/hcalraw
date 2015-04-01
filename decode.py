@@ -155,6 +155,12 @@ def other(d={}, words64=[]):
             printer.warning("badcoffee header has %d != 2 words" % len(words64))
         else:
             d["nWord64"] = words64[1]
+    else:
+        if len(words64) != 1:
+            printer.warning("other header has %d != 1 words" % len(words64))
+        else:
+            d["magic"] = words64[0] & 0xffffffff
+            d["nWord64"] = words64[0] >> 33
 
 
 def swapped64(i64):  # endian flip
