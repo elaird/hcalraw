@@ -13,7 +13,8 @@ cd cpp; make; cd -
 ./oneRun.py --file1=data/B904_Integration_000050.root --feds1=702,931 --nevents=1 --dump=4
 
 # compare payloads of different sets of FEDs, within one file
-./oneRun.py --file1=$LS1/USC_239292.root --feds1=718,719 --feds2=uHF --match=v2 --dump=0 --output-file=output/239292.root --progress
+./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF --match=v2 --dump=0 --output-file=output/239480.root --progress
+./look.py 239480
 
 # compare payloads of different sets of FEDs, across two files
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --any-emap
@@ -57,6 +58,7 @@ cd cpp; make; cd -
 * `diff.py` compares the decoded output of a FiberID run to data/ref.txt
 * `dumps2root2pdf.py` converts binary event dumps to .root files and analyzes them
 * `graphs.py` reads in output/Runxxx.root, makes plots, and outputs a .pdf
+* `look.py` shall be documented
 * `make_fiberid_references.py` produces FiberID reference files from HCAL logical maps
 * `oneRun.py` is used to analyze one run (see examples above)
 * `options.py` parses command line options for `oneRun.py` or `dumps2root2pdf.py`

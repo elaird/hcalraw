@@ -4,6 +4,7 @@ import analyze
 import configuration
 import printer
 import graphs
+import sys
 from options import opts
 
 
@@ -18,13 +19,27 @@ def subset(options, l, process=False):
 
 def check(options):
     if not all([options.file1, options.feds1]):
-        sys.exit("--file1 and --feds1 are required.")
+        sys.exit("--file1 and --feds1 are required (see './oneRun.py --help').")
     if not options.outputFile.endswith(".root"):
         sys.exit("--output-file must end with .root (%s)" % options.outputFile)
     if options.feds2 and not options.file2:
         print "INFO: using --file1 also for --file2; also using identity map"
         options.file2 = options.file1
         options.identityMap = True
+
+
+def go(options):
+    kargs = subset(options, ["feds1", "feds2"], process=True)
+    kargs.update(subset(options, ["file1", "file2", "nEvents", "nEventsSkip", "outputFile", "noUnpack"]))
+
+    kargs["patternMode"] = subset(options, ["rmRibbon", "nTs", "patternB"]) if options.patterns else None
+    kargs["compareOptions"] = subset(options, ["adcPlots", "anyEmap", "printEmap"])
+    kargs["mapOptions"] = subset(options, ["printEventMap", "identityMap"])
+    kargs["printOptions"] = subset(options, ["dump", "progress"])
+    kargs["printOptions"]["warn"] = not options.noWarnUnpack
+    kargs["printOptions"]["crateslots"] = configuration.fedList(options.crateslots)
+
+    analyze.oneRun(**kargs)
 
 
 def main(options):
@@ -37,30 +52,17 @@ def main(options):
     if options.noColor:
         printer.__color = False
 
-    kargs = subset(options, ["feds1", "feds2", "unpackSkipFlavors"], process=True)
-    kargs.update(subset(options, ["file1", "file2", "nEvents", "nEventsSkip", "outputFile", "noUnpack"]))
-
-    kargs["patternMode"] = subset(options, ["rmRibbon", "nTs", "patternB"]) if options.patterns else None
-    kargs["compareOptions"] = subset(options, ["adcPlots", "anyEmap", "printEmap"])
-    kargs["mapOptions"] = subset(options, ["filterEvn", "printEventMap", "identityMap"])
-    kargs["printOptions"] = subset(options, ["dump", "progress"])
-    kargs["printOptions"]["warn"] = not options.noWarnUnpack
-    kargs["printOptions"]["crateslots"] = configuration.fedList(options.crateslots)
-
-    def go():
-        analyze.oneRun(**kargs)
-
     if not options.noLoop:
         analyze.setup()
         if options.profile:
             import cProfile
-            cProfile.run("go()", sort="time")
+            cProfile.runctx("go(options)", globals(), locals(), sort="time")
         else:
-            go()
+            go(options)
 
     graphs.makeSummaryPdf(inputFiles=[options.outputFile],
-                          feds1=kargs["feds1"],
-                          feds2=kargs["feds2"],
+                          feds1=configuration.fedList(options.feds1),
+                          feds2=configuration.fedList(options.feds2),
                           pdf=options.outputFile.replace(".root", ".pdf"),
                           )
 

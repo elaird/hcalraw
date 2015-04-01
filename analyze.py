@@ -39,11 +39,7 @@ def nEvents(tree, nMax):
     return min(nEntries, nMax) if (nMax is not None) else nEntries
 
 
-def coords(d, fedId0):
-    if not d["nBytesSW"]:
-        printer.error("FED %d has zero bytes." % fedId0)
-        sys.exit(1)
-
+def coords(d):
     h = d["header"]
     return h["OrN"], h["BcN"], h["EvN"]
 
@@ -62,8 +58,6 @@ def eventMaps(s={}, options={}):
         fedId0 = s["fedIds"][0]
         branch0 = s["branch"](fedId0)
 
-    filterEvn = options.get('filterEvn', False)
-
     forward = {}
     backward = {}
 
@@ -80,65 +74,38 @@ def eventMaps(s={}, options={}):
         iMask = 0
         print "Mapping %s:" % s["label"]
 
+    kargs = {"headerOnly": True,
+             "nBytesPer": s["nBytesPer"]}
+    if treeName == "mol":
+        kargs["skipWords64"] = [0, 1]
+
     for iEvent in range(nEvents(tree, nEventsMax)):
+        tree.GetEntry(iEvent)
         orn = bcn = evn = None
 
         if treeName == "Events":  # CMS CDAQ
             fedId0 = s["fedIds"][0]
-            tree.GetEntry(iEvent)
-            raw = unpacked(fedData=wordsOneFed(tree=tree,
-                                               fedId=fedId0,
-                                               collection=s["rawCollection"],
-                                               product=s["product"]
-                                               ),
-                           nBytesPer=8,
-                           headerOnly=True)
-            orn, bcn, evn = coords(raw, fedId0)
-
+            rawThisFed = wordsOneFed(tree=tree,
+                                     fedId=fedId0,
+                                     collection=s["rawCollection"],
+                                     product=s["product"]
+                                 )
         elif treeName == "CMSRAW":  # HCAL local
-            tree.GetEntry(iEvent)
-            raw = unpacked(fedData=wordsOneChunk(tree=tree, branch=branch0),
-                           nBytesPer=8,
-                           headerOnly=True)
-            orn, bcn, evn = coords(raw, fedId0)
-
-        elif treeName == "deadbeef":
-            tree.GetEntry(iEvent)
-            raw = unpacked(fedData=wordsOneBranch(tree=tree, branch=branch0),
-                           nBytesPer=4,
-                           headerOnly=True)
-            orn, bcn, evn = coords(raw, fedId0)
-
-        elif treeName == "badcoffee":
-            tree.GetEntry(iEvent)
-            raw = unpacked(fedData=wordsOneBranch(tree=tree, branch=branch0),
-                           nBytesPer=8,
-                           headerOnly=True)
-            orn, bcn, evn = coords(raw, fedId0)
-
-        elif treeName == "mol":
-            tree.GetEntry(iEvent)
-            rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
-            mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
-            raw = unpacked(fedData=rawThisFed,
-                           skipWords64=skipWords64,
-                           nBytesPer=8,
-                           headerOnly=True)
-            orn, bcn, evn = coords(raw, fedId0)
-
+            rawThisFed = wordsOneChunk(tree=tree, branch=branch0)
         else:
-            sys.exit("treeName %s not found." % treeName)
+            rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
 
+        raw = unpacked(fedData=rawThisFed, **kargs)
         if not raw["nBytesSW"]:
-            printer.error("FED0 %d has zero bytes." % fedId0)
-            sys.exit()
+            printer.error("the first listed FED (%d) has zero bytes in tree '%s'." % (fedId0, treeName))
+            sys.exit(2)
 
         if s["progress"]:
             iMask = progress(iEvent, iMask)
 
+        orn, bcn, evn = coords(raw)
+
         t = (orn, evn)
-        if filterEvn and (evn & 0x1fff):
-            continue
 
         forward[iEvent] = t
         backward[t] = iEvent
@@ -206,8 +173,12 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}, cacheSiz
 def collectedRaw(tree=None, specs={}):
     raw = {}
     kargs = {}
-    for item in ["patternMode", "warn", "dump", "unpack", "skipFlavors"]:
+    for item in ["patternMode", "warn", "dump", "unpack", "nBytesPer"]:
         kargs[item] = specs[item]
+
+    if specs["treeName"] == "mol":
+        kargs["skipWords64"] = [0, 1]
+        kargs["decodeSkipped64"] = decode.molHeader
 
     for fedId in specs["fedIds"]:
         if "branch" in specs:
@@ -215,22 +186,12 @@ def collectedRaw(tree=None, specs={}):
 
         if specs["treeName"] == "Events":
             rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"], specs["product"])
-            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
         elif specs["treeName"] == "CMSRAW":
             rawThisFed = wordsOneChunk(tree, branch)
-            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
-        elif specs["treeName"] == "deadbeef":
+        else:
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
-            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=4, **kargs)
-        elif specs["treeName"] == "badcoffee":
-            rawThisFed = wordsOneBranch(tree=tree, branch=branch)
-            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
-        elif specs["treeName"] == "mol":
-            rawThisFed = wordsOneBranch(tree=tree, branch=branch)
-            mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
-            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8,
-                                  skipWords64=skipWords64, **kargs)
-            raw[fedId]["MOL"] = mol
+
+        raw[fedId] = unpacked(fedData=rawThisFed, **kargs)
 
         if not raw[fedId]["nBytesSW"]:
             printer.warning("removing FED %d from spec (read zero bytes)." % fedId)
@@ -262,13 +223,14 @@ def w64(fedData, jWord64, nBytesPer):
 
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
-             warn=True, skipFlavors=[], skipWords64=[], patternMode={}, dump=-99):
+             warn=True, skipWords64=[], decodeSkipped64=None, patternMode={}, dump=-99):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
               "utca": None,
               }  # modified by decode.header
     trailer = {}
+    other = {}
     htrBlocks = {}
 
     nWord64Trailer = 1
@@ -277,14 +239,16 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
     nWord16Skipped = 0
 
     nToSkip = len(set(skipWords64))
-    nSkipped64 = 0
+    skipped64 = []
+
     for jWord64 in range(nWord64):
         word64 = w64(fedData, jWord64, nBytesPer)
 
         if jWord64 in skipWords64:
-            nSkipped64 += 1
+            skipped64.append(word64)
             continue
-        iWord64 = jWord64 - nSkipped64
+
+        iWord64 = jWord64 - len(skipped64)
 
         if 7 <= dump:
             if not iWord64:
@@ -313,7 +277,6 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
                                             word16Counts=header["word16Counts"],
                                             utca=header["utca"],
                                             fedId=header["FEDid"],
-                                            skipFlavors=skipFlavors,
                                             patternMode=patternMode,
                                             warn=warn,
                                             dump=dump)
@@ -343,29 +306,16 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
             else:
                 decode.trailer(trailer, iWord64, word64)
 
+    if decodeSkipped64:
+        decodeSkipped64(other, skipped64)
+
     return {"header": header,
             "trailer": trailer,
             "htrBlocks": htrBlocks,
+            "other": other,
             "nBytesSW": 8*nWord64,
             "nWord16Skipped": nWord16Skipped,
             }
-
-
-#FEROL https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
-def unpackedMolHeader(fedData=None):
-    MOLheader = {}
-    BlockHeaders = []  # list for storing block header word numbers
-
-    for iWord64 in range(fedData.size()-1):
-        word64 = fedData.at(iWord64)
-
-        #If it's a new block, the first two lines are the blockheaders
-        if word64 & 0xffff == 0x5A47:
-            decode.MOLheader(MOLheader, utils.Swap64(word64), utils.Swap64(fedData.at(iWord64+1)))  # endian flip for block headers
-            BlockHeaders.append(iWord64)
-            BlockHeaders.append(iWord64+1)
-
-    return MOLheader, BlockHeaders
 
 
 def charsOneFed(tree=None, fedId=None, collection="", product=None):
@@ -508,6 +458,10 @@ def go(outer={}, inner={}, outputFile="",
             printHisto(outputFile, histoName="MatchedFibersCh%d" % iChannel)
             print
 
+        print "TPs:"
+        printHisto(outputFile, histoName="MatchedTriggerTowers")
+        print
+
 
 def bail(specs, fileName):
     n = max([len(spec["treeName"]) for spec in specs])
@@ -559,7 +513,6 @@ def oneRun(file1="",
            compareOptions={},
            printOptions={},
            noUnpack=False,
-           unpackSkipFlavors=[],
            nEvents=None,
            nEventsSkip=None,
            outputFile="",
@@ -572,7 +525,6 @@ def oneRun(file1="",
               "nEventsSkip": nEventsSkip,
               "patternMode": patternMode,
               "unpack": not noUnpack,
-              "skipFlavors": unpackSkipFlavors,
               }
     common.update(printOptions)
 
@@ -604,16 +556,23 @@ def oneRun(file1="",
        )
 
 
-def printHisto(fileName="", histoName="MatchedFibers"):
+def printHisto(fileName="", histoName=""):
     f = r.TFile(fileName)
     h = f.Get(histoName)
     if not h:
         printer.error("histogram %s not found." % histoName)
         return
     for iBinX in range(0, 2+h.GetNbinsX()):
+        w = h.GetBinWidth(iBinX)
+        if 1.0e-6 < abs(w - 1.0):
+            printer.warning("Histogram %s bin %d has width %g" % (histoName, iBinX, w))
+
         x = h.GetBinCenter(iBinX)
         c = h.GetBinContent(iBinX)
-        msg = "%d matched fibers: %d events" % (x, c)
+        stem = histoName.replace("Matched", "")
+        if "Ch" in stem:
+            stem = stem[:stem.find("Ch")]
+        msg = "%3d matched %s: %d events" % (x, stem.ljust(13), c)
         if c:
             if iBinX == 0:
                 msg = "<=" + msg

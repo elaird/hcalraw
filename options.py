@@ -47,11 +47,6 @@ def opts(alsoArgs=False):
                       default=False,
                       action="store_true",
                       help="Loop over raw data, but do not unpack it.")
-    common.add_option("--skip-flavors",
-                      dest="unpackSkipFlavors",
-                      default="",
-                      metavar="s",
-                      help="Do not unpack channels with these flavors (e.g. 2,7).")
     common.add_option("--adc-plots",
                       dest="adcPlots",
                       default=False,
@@ -115,11 +110,6 @@ def opts(alsoArgs=False):
                      dest="feds2",
                      default="",
                      help="FEDs to use in file2, e.g. 931")
-    match.add_option("--filter-evn",
-                     dest="filterEvn",
-                     default=False,
-                     action="store_true",
-                     help="Consider only EvN with (EvN & 0x1fff) == 0.")
     match.add_option("--identity-map",
                      dest="identityMap",
                      default=False,

@@ -45,8 +45,10 @@ def htrSummary(blocks=[], book=None, fedId=None,
         for otherData in block["otherData"].values():
             flavor(book, otherData, fedId)
 
-        for otherData in block["technicalData"].values():
-            flavor(book, otherData, fedId)
+        for techData in block["technicalData"].values():
+            # remove uHTR pad words from flavor histogram
+            if techData["technicalDataType"] or techData["channelId"] or techData["words"]:
+                flavor(book, techData, fedId)
 
         for triggerData in block["triggerData"].values():
             if "Flavor" in triggerData:
@@ -326,7 +328,8 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
                   "NonMatchedFibersCh%d" % iChannel,
                   *bins, title=title.replace("matched", "non-matched"))
 
-    book.fill(len(tMatched12), "MatchedTriggerTowers", 60, -0.5, 59.5, title=";no. matched TPs;Events / bin")
+    book.fill(len(tMatched12), "MatchedTriggerTowers", *bins,
+              title=";no. matched TPs;Events / bin")
 
     # histogram some deltas
     fed1 = filter(lambda x: x is not None, sorted(raw1.keys()))[0]

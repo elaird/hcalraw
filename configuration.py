@@ -290,7 +290,10 @@ def format(treeName=""):
 
     for item in ["LuminosityBlocks", "MetaData", "ParameterSets", "Parentage", "Runs"]:
         dct[item] = None
-    return dct.get(treeName, {"branch": lambda fedId: "%d" % fedId})
+    out = dct.get(treeName, {"branch": lambda fedId: "%d" % fedId})
+    if out:
+        out["nBytesPer"] = 4 if treeName == "deadbeef" else 8
+    return out
 
 
 def d2c():
