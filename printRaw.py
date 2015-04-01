@@ -21,8 +21,8 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[]):
     for fedId, data in sorted(d.iteritems()):
         if fedId is None:
             continue
-        if "MOL" in data:
-            oneFedMol(data["MOL"])
+        if data["other"]:
+            oneFedMol(data["other"])
 
         oneFedHcal(data,
                    patternMode=aux["patternMode"],
@@ -473,16 +473,19 @@ def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[],
 
 
 def oneFedMol(d):
-    printer.blue("--MOL"+("-"*34))
-    printer.blue("   ".join([" FEDid  ",
+    header = "   ".join([" FEDid  ",
                              "EvN ",
                              "   iBlock",
                              "  nWord64",
-                             ]))
+                             "  GZ",
+                             ])
+    printer.blue("--MOL" + ("-" * len(header)))
+    printer.blue(header)
 
-    for iBlock in sorted(d.keys()):
-        value = d[iBlock]
+    for iBlock, value in sorted(d.iteritems()):
         printer.blue("   ".join(["  %3d" % value["FEDid"],
                                  "0x%07x" % value["Trigger"],
                                  "%5d" % iBlock,
-                                 "    %5d" % value["nWord64"]]))
+                                 "    %5d" % value["nWord64"],
+                                 "   %4x" % value["GZ"],
+                             ]))
