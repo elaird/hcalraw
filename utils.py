@@ -26,11 +26,10 @@ def commandOutputFull(cmd=""):
     return {"stdout": stdout, "stderr": stderr, "returncode": p.returncode}
 
 
-def Swap64(i64 = ""): #//To flip edianness 
-    tmp64 = (i64>>56);
-    for i in range(1,8):
-        tmp64 += ((i64>>(56-8*i)) & 0xff)<<(8*i)
-  
+def swapped64(i64):  # endian flip
+    tmp64 = i64 >> 56
+    for i in range(1, 8):
+        tmp64 += ((i64 >> (56 - 8 * i)) & 0xff) << (8*i)
     return tmp64
 
 
