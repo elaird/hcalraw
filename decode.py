@@ -459,27 +459,23 @@ def ttpData(l={}, iDataMod6=None, word16=None):
         l["ttpOutput"][-1] = (word16 >> 12) & 0xf
 
 
-def htrData(d={}, l={}, iWord16=None, word16=None, skipFlavors=[],
+def htrData(d={}, l={}, iWord16=None, word16=None,
             patternMode={}, utca=None, fedId=None, warn=True):
 
     if (word16 >> 15):
         flavor = (word16 >> 12) & 0x7
-        if flavor in skipFlavors:
-            clearChannel(d)
-        else:
-            dataKey, channelId, channelHeader = channelInit(iWord16=iWord16,
-                                                            word16=word16,
-                                                            flavor=flavor,
-                                                            utca=utca,
-                                                            )
-            if warn and dataKey == "otherData":
-                coords = "FED %4d crate %2d slot %2d" % (fedId, l["Crate"], l["Slot"])
-                evn = "(EvN %d, iWord16 %d, word16 0x%04x)" % (l["EvN"], iWord16, word16)
-                printer.warning("unknown flavor %d: %s %s." % (flavor, coords, evn))
+        dataKey, channelId, channelHeader = channelInit(iWord16=iWord16,
+                                                        word16=word16,
+                                                        flavor=flavor,
+                                                        utca=utca)
+        if warn and dataKey == "otherData":
+            coords = "FED %4d crate %2d slot %2d" % (fedId, l["Crate"], l["Slot"])
+            evn = "(EvN %d, iWord16 %d, word16 0x%04x)" % (l["EvN"], iWord16, word16)
+            printer.warning("unknown flavor %d: %s %s." % (flavor, coords, evn))
 
-            d["dataKey"] = dataKey
-            d["channelId"] = channelId
-            l[d["dataKey"]][d["channelId"]] = channelHeader
+        d["dataKey"] = dataKey
+        d["channelId"] = channelId
+        l[d["dataKey"]][d["channelId"]] = channelHeader
 
     elif "channelId" in d:
         storeChannelData(dct=l[d["dataKey"]][d["channelId"]],
