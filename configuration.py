@@ -210,14 +210,12 @@ def format(treeName=""):
     for item in ["LuminosityBlocks", "MetaData", "ParameterSets", "Parentage", "Runs"]:
         dct[item] = None
 
-    out = dct.get(treeName, {"branch": lambda fedId: "%d" % fedId})
+    out = dct.get(treeName, {"branch": lambda fedId: "%d" % fedId, "skipWords64": [0, 1]})
 
     if out:
         if treeName == "deadbeef":
             out["nBytesPer"] = 4
-        elif treeName == "mol":
-            out["skipWords64"] = [0, 1]
-
+            out["skipWords64"] = []
 
         if "nBytesPer" not in out:
             out["nBytesPer"] = 8
