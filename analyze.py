@@ -173,7 +173,7 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}, cacheSiz
 def collectedRaw(tree=None, specs={}):
     raw = {}
     kargs = {}
-    for item in ["patternMode", "warn", "dump", "unpack", "nBytesPer"]:
+    for item in ["patterns", "warn", "dump", "unpack", "nBytesPer"]:
         kargs[item] = specs[item]
 
     if specs["treeName"] == "mol":
@@ -200,7 +200,7 @@ def collectedRaw(tree=None, specs={}):
             continue
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
-    for key in ["label", "patternMode", "dump", "crateslots"]:
+    for key in ["label", "patterns", "dump", "crateslots"]:
         raw[None][key] = specs[key]
 
     return raw
@@ -223,7 +223,7 @@ def w64(fedData, jWord64, nBytesPer):
 
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
-             warn=True, skipWords64=[], decodeSkipped64=None, patternMode={}, dump=-99):
+             warn=True, skipWords64=[], decodeSkipped64=None, patterns=False, dump=-99):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
@@ -260,8 +260,6 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
 
         if iWord64 < header["iWordPayload0"]:
             decode.header(header, iWord64, word64)
-            if header["utca"] is not None and patternMode:
-                patternMode["nFibers"] = configuration.nFibers(header["utca"])
             if header.get("uFoV"):
                 nWord64Trailer = 2  # accommodate block trailer
             iWordTrailer0 = nWord64 - nToSkip - nWord64Trailer
@@ -277,7 +275,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
                                             word16Counts=header["word16Counts"],
                                             utca=header["utca"],
                                             fedId=header["FEDid"],
-                                            patternMode=patternMode,
+                                            patterns=patterns,
                                             warn=warn,
                                             dump=dump)
                 if returnCode is None:
@@ -508,7 +506,7 @@ def oneRun(file1="",
            feds1=[],
            file2="",
            feds2=[],
-           patternMode={},
+           patterns=False,
            mapOptions={},
            compareOptions={},
            printOptions={},
@@ -523,7 +521,7 @@ def oneRun(file1="",
 
     common = {"nEventsMax": nEvents,
               "nEventsSkip": nEventsSkip,
-              "patternMode": patternMode,
+              "patterns": patterns,
               "unpack": not noUnpack,
               }
     common.update(printOptions)
@@ -551,7 +549,7 @@ def oneRun(file1="",
        outputFile=outputFile,
        mapOptions=mapOptions,
        compareOptions=compareOptions,
-       printEventSummary=(not patternMode) and (file1 != file2) and 0 <= common["dump"],
+       printEventSummary=(not patterns) and (file1 != file2) and 0 <= common["dump"],
        printChannelSummary=file2 and 0 <= common["dump"],
        )
 

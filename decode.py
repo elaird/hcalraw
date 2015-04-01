@@ -343,15 +343,15 @@ def htrPreTrailer(l={}, w=None, k=None):
         l["CRC"] = w
 
 
-def end(d, l, patternMode):
+def end(d, l, utca, patterns):
     d["htrIndex"] += 1
-    if patternMode:
-        storePatternData(l, **patternMode)
+    if patterns:
+        storePatternData(l, configuration.nFibers(utca))
     clearChannel(d)  # in case event is malformed
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, fedId=None, patternMode={},
+            utca=None, fedId=None, patterns={},
             warn=True, dump=-99):
 
     if 8 <= dump:
@@ -402,14 +402,14 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             l["CRC"] = word16
         if k == 1:
             l["CRC"] |= word16 << 16
-            end(d, l, patternMode)
+            end(d, l, utca, patterns)
 
         return
 
     if (not l["V1"]) and k <= 2:
         if k == 1:
             l["EvN8"] = word16 >> 8
-            end(d, l, patternMode)
+            end(d, l, utca, patterns)
         return
 
 
@@ -433,7 +433,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
                 l=l,
                 iWord16=iWord16,
                 word16=word16,
-                patternMode=patternMode,
+                patterns=patterns,
                 utca=utca,
                 fedId=fedId,
                 warn=warn,
@@ -461,7 +461,7 @@ def ttpData(l={}, iDataMod6=None, word16=None):
 
 
 def htrData(d={}, l={}, iWord16=None, word16=None,
-            patternMode={}, utca=None, fedId=None, warn=True):
+            patterns={}, utca=None, fedId=None, warn=True):
 
     if (word16 >> 15):
         flavor = (word16 >> 12) & 0x7
@@ -570,9 +570,10 @@ def channelId(fiber=None, fibCh=None):
     return 4*fiber + fibCh
 
 
-def storePatternData(l={}, nFibers=None, nTs=None, rmRibbon=None, **_):
-    offset = 1 if rmRibbon else 0
+def storePatternData(l={}, nFibers=None):
+    nTs = configuration_patterns.nTs
     compressed = configuration_patterns.compressedPatterns
+    offset = 1 if configuration_patterns.rmRibbon else 0
 
     l["patternData"] = {}
     d = l["channelData"]
