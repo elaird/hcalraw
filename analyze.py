@@ -77,7 +77,7 @@ def eventMaps(s={}, options={}):
         print "Mapping %s:" % s["label"]
 
     kargs = {"headerOnly": True,
-             "nBytesPer": 8}
+             "nBytesPer": s["nBytesPer"]}
 
     for iEvent in range(nEvents(tree, nEventsMax)):
         tree.GetEntry(iEvent)
@@ -94,7 +94,6 @@ def eventMaps(s={}, options={}):
             rawThisFed = wordsOneChunk(tree=tree, branch=branch0)
         elif treeName == "deadbeef":
             rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
-            kargs["nBytesPer"] = 4
         elif treeName == "badcoffee":
             rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
         elif treeName == "mol":
@@ -183,10 +182,9 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}, cacheSiz
 def collectedRaw(tree=None, specs={}):
     raw = {}
     kargs = {}
-    for item in ["patternMode", "warn", "dump", "unpack"]:
+    for item in ["patternMode", "warn", "dump", "unpack", "nBytesPer"]:
         kargs[item] = specs[item]
 
-    kargs["nBytesPer"] = 8
     for fedId in specs["fedIds"]:
         if "branch" in specs:
             branch = specs["branch"](fedId)
@@ -196,7 +194,6 @@ def collectedRaw(tree=None, specs={}):
         elif specs["treeName"] == "CMSRAW":
             rawThisFed = wordsOneChunk(tree, branch)
         elif specs["treeName"] == "deadbeef":
-            kargs["nBytesPer"] = 4
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
         elif specs["treeName"] == "badcoffee":
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
