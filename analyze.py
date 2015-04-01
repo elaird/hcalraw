@@ -39,11 +39,7 @@ def nEvents(tree, nMax):
     return min(nEntries, nMax) if (nMax is not None) else nEntries
 
 
-def coords(d, fedId0):
-    if not d["nBytesSW"]:
-        printer.error("FED %d has zero bytes." % fedId0)
-        sys.exit(1)
-
+def coords(d):
     h = d["header"]
     return h["OrN"], h["BcN"], h["EvN"]
 
@@ -80,61 +76,42 @@ def eventMaps(s={}, options={}):
         iMask = 0
         print "Mapping %s:" % s["label"]
 
+    kargs = {"headerOnly": True,
+             "nBytesPer": 8}
+
     for iEvent in range(nEvents(tree, nEventsMax)):
+        tree.GetEntry(iEvent)
         orn = bcn = evn = None
 
         if treeName == "Events":  # CMS CDAQ
             fedId0 = s["fedIds"][0]
-            tree.GetEntry(iEvent)
-            raw = unpacked(fedData=wordsOneFed(tree=tree,
-                                               fedId=fedId0,
-                                               collection=s["rawCollection"],
-                                               product=s["product"]
-                                               ),
-                           nBytesPer=8,
-                           headerOnly=True)
-            orn, bcn, evn = coords(raw, fedId0)
-
+            rawThisFed = wordsOneFed(tree=tree,
+                                     fedId=fedId0,
+                                     collection=s["rawCollection"],
+                                     product=s["product"]
+                                 )
         elif treeName == "CMSRAW":  # HCAL local
-            tree.GetEntry(iEvent)
-            raw = unpacked(fedData=wordsOneChunk(tree=tree, branch=branch0),
-                           nBytesPer=8,
-                           headerOnly=True)
-            orn, bcn, evn = coords(raw, fedId0)
-
+            rawThisFed = wordsOneChunk(tree=tree, branch=branch0)
         elif treeName == "deadbeef":
-            tree.GetEntry(iEvent)
-            raw = unpacked(fedData=wordsOneBranch(tree=tree, branch=branch0),
-                           nBytesPer=4,
-                           headerOnly=True)
-            orn, bcn, evn = coords(raw, fedId0)
-
-        elif treeName == "badcoffee":
-            tree.GetEntry(iEvent)
-            raw = unpacked(fedData=wordsOneBranch(tree=tree, branch=branch0),
-                           nBytesPer=8,
-                           headerOnly=True)
-            orn, bcn, evn = coords(raw, fedId0)
-
-        elif treeName == "mol":
-            tree.GetEntry(iEvent)
             rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
-            mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
-            raw = unpacked(fedData=rawThisFed,
-                           skipWords64=skipWords64,
-                           nBytesPer=8,
-                           headerOnly=True)
-            orn, bcn, evn = coords(raw, fedId0)
-
+            kargs["nBytesPer"] = 4
+        elif treeName == "badcoffee":
+            rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
+        elif treeName == "mol":
+            rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
+            kargs["skipWords64"] = [0, 1]
         else:
             sys.exit("treeName %s not found." % treeName)
 
+        raw = unpacked(fedData=rawThisFed, **kargs)
         if not raw["nBytesSW"]:
             printer.error("FED0 %d has zero bytes." % fedId0)
             sys.exit()
 
         if s["progress"]:
             iMask = progress(iEvent, iMask)
+
+        orn, bcn, evn = coords(raw)
 
         t = (orn, evn)
         if filterEvn and (evn & 0x1fff):
@@ -209,28 +186,26 @@ def collectedRaw(tree=None, specs={}):
     for item in ["patternMode", "warn", "dump", "unpack", "skipFlavors"]:
         kargs[item] = specs[item]
 
+    kargs["nBytesPer"] = 8
     for fedId in specs["fedIds"]:
         if "branch" in specs:
             branch = specs["branch"](fedId)
 
         if specs["treeName"] == "Events":
             rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"], specs["product"])
-            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
         elif specs["treeName"] == "CMSRAW":
             rawThisFed = wordsOneChunk(tree, branch)
-            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
         elif specs["treeName"] == "deadbeef":
+            kargs["nBytesPer"] = 4
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
-            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=4, **kargs)
         elif specs["treeName"] == "badcoffee":
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
-            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8, **kargs)
         elif specs["treeName"] == "mol":
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
-            mol, skipWords64 = unpackedMolHeader(fedData=rawThisFed)
-            raw[fedId] = unpacked(fedData=rawThisFed, nBytesPer=8,
-                                  skipWords64=skipWords64, **kargs)
-            raw[fedId]["MOL"] = mol
+            kargs["skipWords64"] = [0, 1]
+            # kargs["decodeSkipped"] = xxx
+
+        raw[fedId] = unpacked(fedData=rawThisFed, **kargs)
 
         if not raw[fedId]["nBytesSW"]:
             printer.warning("removing FED %d from spec (read zero bytes)." % fedId)
@@ -349,23 +324,6 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
             "nBytesSW": 8*nWord64,
             "nWord16Skipped": nWord16Skipped,
             }
-
-
-#FEROL https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
-def unpackedMolHeader(fedData=None):
-    MOLheader = {}
-    BlockHeaders = []  # list for storing block header word numbers
-
-    for iWord64 in range(fedData.size()-1):
-        word64 = fedData.at(iWord64)
-
-        #If it's a new block, the first two lines are the blockheaders
-        if word64 & 0xffff == 0x5A47:
-            decode.MOLheader(MOLheader, utils.Swap64(word64), utils.Swap64(fedData.at(iWord64+1)))  # endian flip for block headers
-            BlockHeaders.append(iWord64)
-            BlockHeaders.append(iWord64+1)
-
-    return MOLheader, BlockHeaders
 
 
 def charsOneFed(tree=None, fedId=None, collection="", product=None):
