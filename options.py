@@ -110,11 +110,6 @@ def opts(alsoArgs=False):
                      dest="feds2",
                      default="",
                      help="FEDs to use in file2, e.g. 931")
-    match.add_option("--filter-evn",
-                     dest="filterEvn",
-                     default=False,
-                     action="store_true",
-                     help="Consider only EvN with (EvN & 0x1fff) == 0.")
     match.add_option("--identity-map",
                      dest="identityMap",
                      default=False,

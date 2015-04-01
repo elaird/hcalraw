@@ -34,7 +34,7 @@ def go(options):
 
     kargs["patternMode"] = subset(options, ["rmRibbon", "nTs", "patternB"]) if options.patterns else None
     kargs["compareOptions"] = subset(options, ["adcPlots", "anyEmap", "printEmap"])
-    kargs["mapOptions"] = subset(options, ["filterEvn", "printEventMap", "identityMap"])
+    kargs["mapOptions"] = subset(options, ["printEventMap", "identityMap"])
     kargs["printOptions"] = subset(options, ["dump", "progress"])
     kargs["printOptions"]["warn"] = not options.noWarnUnpack
     kargs["printOptions"]["crateslots"] = configuration.fedList(options.crateslots)

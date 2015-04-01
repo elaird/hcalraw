@@ -58,8 +58,6 @@ def eventMaps(s={}, options={}):
         fedId0 = s["fedIds"][0]
         branch0 = s["branch"](fedId0)
 
-    filterEvn = options.get('filterEvn', False)
-
     forward = {}
     backward = {}
 
@@ -108,8 +106,6 @@ def eventMaps(s={}, options={}):
         orn, bcn, evn = coords(raw)
 
         t = (orn, evn)
-        if filterEvn and (evn & 0x1fff):
-            continue
 
         forward[iEvent] = t
         backward[t] = iEvent
