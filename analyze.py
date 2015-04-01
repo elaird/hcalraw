@@ -203,7 +203,7 @@ def collectedRaw(tree=None, specs={}):
         elif specs["treeName"] == "mol":
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
             kargs["skipWords64"] = [0, 1]
-            # kargs["decodeSkipped"] = xxx
+            kargs["decodeSkipped64"] = decode.molHeader
 
         raw[fedId] = unpacked(fedData=rawThisFed, **kargs)
 
@@ -237,13 +237,14 @@ def w64(fedData, jWord64, nBytesPer):
 
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
-             warn=True, skipWords64=[], patternMode={}, dump=-99):
+             warn=True, skipWords64=[], decodeSkipped64=None, patternMode={}, dump=-99):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
               "utca": None,
               }  # modified by decode.header
     trailer = {}
+    other = {}
     htrBlocks = {}
 
     nWord64Trailer = 1
@@ -252,14 +253,16 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
     nWord16Skipped = 0
 
     nToSkip = len(set(skipWords64))
-    nSkipped64 = 0
+    skipped64 = []
+
     for jWord64 in range(nWord64):
         word64 = w64(fedData, jWord64, nBytesPer)
 
         if jWord64 in skipWords64:
-            nSkipped64 += 1
+            skipped64.append(word64)
             continue
-        iWord64 = jWord64 - nSkipped64
+
+        iWord64 = jWord64 - len(skipped64)
 
         if 7 <= dump:
             if not iWord64:
@@ -317,9 +320,13 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
             else:
                 decode.trailer(trailer, iWord64, word64)
 
+    if decodeSkipped64:
+        decodeSkipped64(other, skipped64)
+
     return {"header": header,
             "trailer": trailer,
             "htrBlocks": htrBlocks,
+            "other": other,
             "nBytesSW": 8*nWord64,
             "nWord16Skipped": nWord16Skipped,
             }
