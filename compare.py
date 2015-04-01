@@ -45,8 +45,10 @@ def htrSummary(blocks=[], book=None, fedId=None,
         for otherData in block["otherData"].values():
             flavor(book, otherData, fedId)
 
-        for otherData in block["technicalData"].values():
-            flavor(book, otherData, fedId)
+        for techData in block["technicalData"].values():
+            # remove uHTR pad words from flavor histogram
+            if techData["technicalDataType"] or techData["channelId"] or techData["words"]:
+                flavor(book, techData, fedId)
 
         for triggerData in block["triggerData"].values():
             if "Flavor" in triggerData:
