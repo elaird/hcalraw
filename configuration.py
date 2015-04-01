@@ -215,7 +215,7 @@ def format(treeName=""):
     if out:
         if treeName == "deadbeef":
             out["nBytesPer"] = 4
-            out["skipWords64"] = []
+            out["skipWords64"] = [0]
 
         if "nBytesPer" not in out:
             out["nBytesPer"] = 8
