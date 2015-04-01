@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-import configuration
+from configuration_patterns import rbxes
 
 #Generates .txt file in format same with oneRun.py from a list of RBXs
 
@@ -70,7 +70,7 @@ def ReformMap(iMapfile = "", ofile = "", oFileOpenMode = "w"):
     lines = open(iMapfile, "r").readlines() #opens & read the file
     output = open(ofile, oFileOpenMode)  #opens & write the file
 
-    RBXnameRange = configuration.rbxes()
+    RBXnameRange = rbxes()
 
     rmRange = ['1','2','3','4']
     if "CALIB" in iMapfile: rmRange = ['4','5']

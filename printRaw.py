@@ -1,4 +1,5 @@
 import configuration
+import configuration_patterns
 import printer
 import utils
 
@@ -10,7 +11,7 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[]):
     aux = d[None]
     dump = aux["dump"]
 
-    if not aux["patternMode"]:
+    if not aux["patterns"]:
         if dump <= 0:
             return
 
@@ -25,7 +26,7 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[]):
             oneFedMol(data["other"])
 
         oneFedHcal(data,
-                   patternMode=aux["patternMode"],
+                   patterns=aux["patterns"],
                    dump=dump,
                    crateslots=aux["crateslots"],
                    nonMatchedQie=nonMatchedQie,
@@ -62,7 +63,7 @@ def htrOverview(d={}):
     printer.cyan(hyphens)
 
 
-def oneHtrPatterns(p={}, patternMode={}, fedId=None, iOffset=None, utca=None):
+def oneHtrPatterns(p={}, patterns={}, fedId=None, iOffset=None, utca=None):
     if p["IsTTP"]:
         cd = []
     else:
@@ -79,7 +80,6 @@ def oneHtrPatterns(p={}, patternMode={}, fedId=None, iOffset=None, utca=None):
         lines = patternData(p["patternData"],
                             moduleId=moduleId,
                             utca=utca,
-                            slim=not patternMode["patternB"],
                             )
         print "\n".join(lines)  # skip printer to facilitate diff
 
@@ -360,17 +360,19 @@ def ttpData(ttpInput=[], ttpOutput=[], ttpAlgoDep=[]):
     return l
 
 
-def patternData(d={}, moduleId="", utca=None, slim=False):
-    if slim:
-        out = [""]
-    else:
+def patternData(d={}, moduleId="", utca=None):
+    patternB = configuration_patterns.patternB
+
+    if patternB:
         headers = ["ModuleId", "Fibers", "Pattern"]
         chars = " ".join(["%2d" % i for i in range(20)])
         out = ["  ".join(headers+[chars])]
+    else:
+        out = [""]
 
     for fiber1, lst in sorted(d.iteritems()):
         for key in ["A", "B", "C"]:
-            if slim and key == "B":
+            if (not patternB) and key == "B":
                 continue
 
             ps = patternString(lst, key)
@@ -385,11 +387,12 @@ def patternData(d={}, moduleId="", utca=None, slim=False):
             elif key == "C":
                 fibers = "     %2d" % (1 + fiber1_)
 
-            if slim:
+            if patternB:
+                out.append("   ".join([moduleId, fibers, "  %s" % key, "  "]) + ps)
+            else:
                 fiberNum = int(fibers)
                 out.append("%s %2d:  %s" % (moduleId, int(fibers), ps))
-            else:
-                out.append("   ".join([moduleId, fibers, "  %s" % key, "  "]) + ps)
+
     return out
 
 
@@ -398,15 +401,15 @@ def patternString(patterns=[], key=""):
     for p in patterns:
         for k in [key+"0", key+"1"]:
             codes.append(p[k])
-    return configuration.patternString(codes)
+    return configuration_patterns.patternString(codes)
 
 
-def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[],
+def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
                nonMatchedQie=[], nonMatchedTp=[],
                printHeaders=None):
     h = d["header"]
     t = d["trailer"]
-    if (not patternMode) and (1 <= dump):
+    if (not patterns) and (1 <= dump):
         fields = [" FEDid",
                   "  EvN",
                   "       OrN",
@@ -457,7 +460,7 @@ def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[],
         p = d["htrBlocks"][offset]
         if "patternData" in p:
             oneHtrPatterns(p=p,
-                           patternMode=patternMode,
+                           patterns=patterns,
                            fedId=d["header"]["FEDid"],
                            iOffset=iOffset,
                            utca=h["utca"])

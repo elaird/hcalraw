@@ -1,4 +1,5 @@
 import configuration
+import configuration_patterns
 import printer
 import printRaw
 
@@ -156,7 +157,7 @@ def checkHtrModules(fedId=None, htrBlocks={}):
     for spigot, block in htrBlocks.iteritems():
         if block["IsTTP"]:
             continue
-        expected = configuration.expectedHtr(fedId, spigot)
+        expected = configuration_patterns.expectedHtr(fedId, spigot)
         crates.append(block["Crate"])
         bad = [block["Top"] != expected["Top"],
                block["Slot"] != expected["Slot"],
@@ -196,7 +197,7 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
             return
 
         okFeds.add(fedId)
-        if (None in raw) and raw[None]["patternMode"]:
+        if (None in raw) and raw[None]["patterns"]:
             if not raw[fedId]["header"]["utca"]:
                 checkHtrModules(fedId=fedId, htrBlocks=raw[fedId]["htrBlocks"])
 
@@ -279,7 +280,7 @@ def tp_vs_tp(mapF1, mapF2, book=None):
 
 
 def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots=False):
-    dump = (1 <= raw1[None]["dump"]) or raw1[None]["patternMode"]
+    dump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
 
     if anyEmap:
         mapF1, mapB1, _ = dataMap(raw1)

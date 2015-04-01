@@ -30,9 +30,8 @@ def check(options):
 
 def go(options):
     kargs = subset(options, ["feds1", "feds2"], process=True)
-    kargs.update(subset(options, ["file1", "file2", "nEvents", "nEventsSkip", "outputFile", "noUnpack"]))
+    kargs.update(subset(options, ["file1", "file2", "nEvents", "nEventsSkip", "outputFile", "noUnpack", "patterns"]))
 
-    kargs["patternMode"] = subset(options, ["rmRibbon", "nTs", "patternB"]) if options.patterns else None
     kargs["compareOptions"] = subset(options, ["adcPlots", "anyEmap", "printEmap"])
     kargs["mapOptions"] = subset(options, ["printEventMap", "identityMap"])
     kargs["printOptions"] = subset(options, ["dump", "progress"])
