@@ -4,6 +4,7 @@ import analyze
 import configuration
 import printer
 import graphs
+import sys
 from options import opts
 
 
@@ -18,7 +19,7 @@ def subset(options, l, process=False):
 
 def check(options):
     if not all([options.file1, options.feds1]):
-        sys.exit("--file1 and --feds1 are required.")
+        sys.exit("--file1 and --feds1 are required (see './oneRun.py --help').")
     if not options.outputFile.endswith(".root"):
         sys.exit("--output-file must end with .root (%s)" % options.outputFile)
     if options.feds2 and not options.file2:
