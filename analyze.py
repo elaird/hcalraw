@@ -508,6 +508,10 @@ def go(outer={}, inner={}, outputFile="",
             printHisto(outputFile, histoName="MatchedFibersCh%d" % iChannel)
             print
 
+        print "TPs:"
+        printHisto(outputFile, histoName="MatchedTriggerTowers")
+        print
+
 
 def bail(specs, fileName):
     n = max([len(spec["treeName"]) for spec in specs])
@@ -604,7 +608,7 @@ def oneRun(file1="",
        )
 
 
-def printHisto(fileName="", histoName="MatchedFibers"):
+def printHisto(fileName="", histoName=""):
     f = r.TFile(fileName)
     h = f.Get(histoName)
     if not h:
@@ -613,7 +617,10 @@ def printHisto(fileName="", histoName="MatchedFibers"):
     for iBinX in range(0, 2+h.GetNbinsX()):
         x = h.GetBinCenter(iBinX)
         c = h.GetBinContent(iBinX)
-        msg = "%d matched fibers: %d events" % (x, c)
+        stem = histoName.replace("Matched", "")
+        if "Ch" in stem:
+            stem = stem[:stem.find("Ch")]
+        msg = "%3d matched %s: %d events" % (x, stem.ljust(13), c)
         if c:
             if iBinX == 0:
                 msg = "<=" + msg
