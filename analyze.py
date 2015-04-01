@@ -183,7 +183,7 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}, cacheSiz
 def collectedRaw(tree=None, specs={}):
     raw = {}
     kargs = {}
-    for item in ["patternMode", "warn", "dump", "unpack", "skipFlavors"]:
+    for item in ["patternMode", "warn", "dump", "unpack"]:
         kargs[item] = specs[item]
 
     kargs["nBytesPer"] = 8
@@ -237,7 +237,7 @@ def w64(fedData, jWord64, nBytesPer):
 
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
-             warn=True, skipFlavors=[], skipWords64=[], patternMode={}, dump=-99):
+             warn=True, skipWords64=[], patternMode={}, dump=-99):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
@@ -288,7 +288,6 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
                                             word16Counts=header["word16Counts"],
                                             utca=header["utca"],
                                             fedId=header["FEDid"],
-                                            skipFlavors=skipFlavors,
                                             patternMode=patternMode,
                                             warn=warn,
                                             dump=dump)
@@ -521,7 +520,6 @@ def oneRun(file1="",
            compareOptions={},
            printOptions={},
            noUnpack=False,
-           unpackSkipFlavors=[],
            nEvents=None,
            nEventsSkip=None,
            outputFile="",
@@ -534,7 +532,6 @@ def oneRun(file1="",
               "nEventsSkip": nEventsSkip,
               "patternMode": patternMode,
               "unpack": not noUnpack,
-              "skipFlavors": unpackSkipFlavors,
               }
     common.update(printOptions)
 
