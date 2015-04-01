@@ -615,6 +615,10 @@ def printHisto(fileName="", histoName=""):
         printer.error("histogram %s not found." % histoName)
         return
     for iBinX in range(0, 2+h.GetNbinsX()):
+        w = h.GetBinWidth(iBinX)
+        if 1.0e-6 < abs(w - 1.0):
+            printer.warning("Histogram %s bin %d has width %g" % (histoName, iBinX, w))
+
         x = h.GetBinCenter(iBinX)
         c = h.GetBinContent(iBinX)
         stem = histoName.replace("Matched", "")
