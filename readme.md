@@ -28,7 +28,7 @@ cd cpp; make; cd -
 
 # analyze global runs
 ./oneRun.py --file1=$GR2/Cosmics/RAW/v1/000/235/316/00000/9CE27CCC-5EBB-E411-AF2C-02163E0127C8.root --output-file=output/235316.root --feds1=718,719 --feds2=1118  --match=v3 --no-warn-unpack --dump=0 --nevents=10
-./oneRun.py --file1=$GR2/Cosmics/RAW/v1/000/239/201/00000/0012EAD3-77D6-E411-8052-02163E01351E.root --output-file=output/239201.root --feds1=718,719 --feds2=uHF  --match=v4 --dump=0 --no-warn-unpack --nevents=10
+./look.py 239342
 ```
 
 ####License
@@ -58,7 +58,7 @@ cd cpp; make; cd -
 * `diff.py` compares the decoded output of a FiberID run to data/ref.txt
 * `dumps2root2pdf.py` converts binary event dumps to .root files and analyzes them
 * `graphs.py` reads in output/Runxxx.root, makes plots, and outputs a .pdf
-* `look.py` shall be documented
+* `look.py` will find a file in EOS (or locally) for a given run and loop over it
 * `make_fiberid_references.py` produces FiberID reference files from HCAL logical maps
 * `oneRun.py` is used to analyze one run (see examples above)
 * `options.py` parses command line options for `oneRun.py` or `dumps2root2pdf.py`
