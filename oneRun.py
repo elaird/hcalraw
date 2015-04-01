@@ -37,7 +37,7 @@ def main(options):
     if options.noColor:
         printer.__color = False
 
-    kargs = subset(options, ["feds1", "feds2", "unpackSkipFlavors"], process=True)
+    kargs = subset(options, ["feds1", "feds2"], process=True)
     kargs.update(subset(options, ["file1", "file2", "nEvents", "nEventsSkip", "outputFile", "noUnpack"]))
 
     kargs["patternMode"] = subset(options, ["rmRibbon", "nTs", "patternB"]) if options.patterns else None
