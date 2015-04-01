@@ -176,9 +176,6 @@ def collectedRaw(tree=None, specs={}):
     for item in ["patterns", "warn", "dump", "unpack", "nBytesPer", "skipWords64"]:
         kargs[item] = specs[item]
 
-    if specs["treeName"] == "mol":
-        kargs["decodeSkipped64"] = decode.molHeader
-
     for fedId in specs["fedIds"]:
         if "branch" in specs:
             branch = specs["branch"](fedId)
@@ -222,7 +219,7 @@ def w64(fedData, jWord64, nBytesPer):
 
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
-             warn=True, skipWords64=[], decodeSkipped64=None, patterns=False, dump=-99):
+             warn=True, skipWords64=[], patterns=False, dump=-99):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
@@ -303,8 +300,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
             else:
                 decode.trailer(trailer, iWord64, word64)
 
-    if decodeSkipped64:
-        decodeSkipped64(other, skipped64)
+    decode.other(other, skipped64)
 
     return {"header": header,
             "trailer": trailer,

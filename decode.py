@@ -144,6 +144,19 @@ def header_ufov0(d={}, iWord64=None, word64=None):
                 d["HTR%d" % (j+1)] = htrDict(w >> 32, d["word16Counts"])
 
 
+def other(d={}, words64=[]):
+    if not words64:
+        return
+    if words64[0] & 0xffff == 0x5a47:
+        molHeader(d, words64)
+    elif words64[0] == 0xbadc0ffeebadcafe:
+        d["magic"] = words64[0]
+        if len(words64) != 2:
+            printer.warning("badcoffee header has %d != 2 words" % len(words64))
+        else:
+            d["nWord64"] = words64[1]
+
+
 def swapped64(i64):  # endian flip
     tmp64 = i64 >> 56
     for i in range(1, 8):
