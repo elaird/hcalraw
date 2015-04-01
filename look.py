@@ -27,11 +27,17 @@ def main(options, args):
     if options.dump == -1:
         options.dump = 0
 
+    LS1 = "root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/LS1"
+    GR2 = "root://eoscms.cern.ch//store/data/Commissioning2015"
+
     local1 = "data/USC_%d.root" % run
-    local2 = "%s/USC_%d.root" % (os.environ.get("LS1", ""), run)
-    gdir1 = "%s/Cosmics/RAW/v1/000/%3d/%3d/00000/" % (os.environ.get("GR2", ""), run/1000, run % 1000)
+    local2 = "%s/USC_%d.root" % (LS1, run)
+    gdir1 = "%s/Cosmics/RAW/v1/000/%3d/%3d/00000/" % (GR2, run/1000, run % 1000)
     eos = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select"
     stem = "root://eoscms.cern.ch/"
+
+    if not os.path.exists(eos):
+        eos = "eos"
 
     if os.path.exists(local1):
         options.file1 = local1
