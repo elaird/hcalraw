@@ -236,8 +236,12 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
 
         P = name[:name.find("_vs_")].upper()
         h.GetXaxis().SetTitle("%s (%s)" % (P, fedString(feds1)))
+        if h.GetTitle():
+            h.GetXaxis().SetTitle(h.GetXaxis().GetTitle().replace(")", "  w/%s)" % h.GetTitle()))
+
         h.GetYaxis().SetTitle("%s (%s)" % (P, fedString(feds2)))
         h.GetZaxis().SetTitle("samples / bin")
+        h.SetTitle("")
 
         xMin = h.GetXaxis().GetXmin()
         xMax = h.GetXaxis().GetXmax()
@@ -397,11 +401,15 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     canvas.Print(pdf)
 
 
-def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
+def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=["adc_vs_adc", "tp_vs_tp"]):
+    # don't print blank page
+    if not any([f.Get(name) for name in names]):
+        return
+
     pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
     pad0.Divide(2, 1)
     pad0.Draw()
-    keep = plotGlobal(f, pad0, offset=1, names=["adc_vs_adc", "tp_vs_tp"], feds1=feds1, feds2=feds2)
+    keep = plotGlobal(f, pad0, offset=1, names=names, feds1=feds1, feds2=feds2)
     canvas.Print(pdf)
 
 
