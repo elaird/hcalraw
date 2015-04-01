@@ -413,7 +413,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=["adc_vs_adc"
     canvas.Print(pdf)
 
 
-def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf", scatter=False):
+def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf"):
     r.gROOT.SetBatch(True)
     r.gROOT.SetStyle("Plain")
     r.gErrorIgnoreLevel = r.kWarning
@@ -432,8 +432,3 @@ def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf", scatter
 
         f.Close()
     canvas.Print(pdf + "]")
-
-    if scatter:
-        import adc_vs_adc
-        for prefix in ["adc_vs_adc", "tp_vs_tp"]:
-            adc_vs_adc.go(fileName=inputFiles[0], feds1=feds1, feds2=feds2, prefix=prefix)
