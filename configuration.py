@@ -1,6 +1,3 @@
-import re
-
-
 use_fwlite = True
 
 # these value may be overwritten by configuration.matchRange_*
