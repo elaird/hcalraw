@@ -20,7 +20,7 @@ def main(options, args):
     options.progress = True
     options.outputFile = "output/%d.root" % run
 
-    # override two defaults
+    # override three defaults: nEvents, dump, match
     if not options.nEvents:
         options.nEvents = 10
 
@@ -35,15 +35,18 @@ def main(options, args):
 
     if os.path.exists(local1):
         options.file1 = local1
-        options.match = "v2"
+        if not options.match:
+            options.match = "v2"
     elif not utils.commandOutputFull("%s stat %s" % (eos, local2.replace(stem, "")))["returncode"]:
         options.file1 = local2
-        options.match = "v2"
+        if not options.match:
+            options.match = "v2"
     elif not utils.commandOutputFull("%s stat %s" % (eos, gdir1.replace(stem, "")))["returncode"]:
-        options.match = "v4"
         files = utils.commandOutputFull("%s ls %s" % (eos, gdir1.replace(stem, "")))["stdout"].split("\n")
         if files:
             options.file1 = "%s/%s" % (gdir1, files[0])
+        if not options.match:
+            options.match = "v4"
 
     if options.file1:
         oneRun.main(options)
