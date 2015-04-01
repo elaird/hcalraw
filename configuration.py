@@ -4,7 +4,7 @@ import re
 use_fwlite = True
 
 # these value may be overwritten by configuration.matchRange_*
-matchSkipErrF = [1, 3]
+matchErrF = [0]
 __utcaBcnDelta = 0
 __vmeBcnDelta = 0
 
@@ -73,8 +73,8 @@ def matchRange_v0(fedId=None, slot=None, fibCh=None, utca=None):
     global __utcaBcnDelta
     __utcaBcnDelta = -119
 
-    global matchSkipErrF
-    matchSkipErrF = [3]
+    global matchErrF
+    matchErrF = [0, 1]
 
     return matchRange_LS1(fedId, slot, fibCh, utca, True)
 

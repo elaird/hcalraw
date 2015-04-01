@@ -211,6 +211,9 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
 def adc_vs_adc(mapF1, mapF2, book=None):
     matched = []
     nonMatched = []
+
+    title = "ErrF == %s;ADC;ADC;samples / bin" % ",".join(["%d" % x for x in configuration.matchErrF])
+
     for coords1, samples1 in mapF1.iteritems():
         coords2 = configuration.transformed_qie(*coords1)
         if coords2 is None:
@@ -244,7 +247,7 @@ def adc_vs_adc(mapF1, mapF2, book=None):
                 book.fill((s1, s2), "adc_vs_adc",
                           #"adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
                           (nBins, nBins), (xMin, xMin), (xMax, xMax),
-                          title=";ADC;ADC;samples / bin")
+                          title=title)
     return matched, nonMatched
 
 
@@ -398,7 +401,7 @@ def matchStats(f={}, b={}):
 
 
 def dataMap(raw={}):
-    skipErrF = configuration.matchSkipErrF
+    okErrF = configuration.matchErrF
 
     forward = {}
     backward = {}
@@ -417,7 +420,7 @@ def dataMap(raw={}):
                 fiber = fiberMap.get(fiber, fiber)
                 coords = (block["Crate"], block["Slot"], block["Top"], fiber, channel)
 
-                if channelData["ErrF"] in skipErrF:
+                if channelData["ErrF"] not in okErrF:
                     skipped.append(coords)
                     continue
 
@@ -435,8 +438,6 @@ def dataMap(raw={}):
 
 
 def tpMap(raw={}):
-    skipErrF = configuration.matchSkipErrF
-
     forward = {}
     backward = {}
     skipped = []
