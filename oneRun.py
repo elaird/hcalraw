@@ -27,16 +27,7 @@ def check(options):
         options.identityMap = True
 
 
-def main(options):
-    check(options)
-
-    if options.match:
-        configuration.matchRange = getattr(configuration, "matchRange_%s" % options.match)
-        configuration.matchRange()  # call once to set utcaBcnDelta
-
-    if options.noColor:
-        printer.__color = False
-
+def go(options):
     kargs = subset(options, ["feds1", "feds2"], process=True)
     kargs.update(subset(options, ["file1", "file2", "nEvents", "nEventsSkip", "outputFile", "noUnpack"]))
 
@@ -47,20 +38,30 @@ def main(options):
     kargs["printOptions"]["warn"] = not options.noWarnUnpack
     kargs["printOptions"]["crateslots"] = configuration.fedList(options.crateslots)
 
-    def go():
-        analyze.oneRun(**kargs)
+    analyze.oneRun(**kargs)
+
+
+def main(options):
+    check(options)
+
+    if options.match:
+        configuration.matchRange = getattr(configuration, "matchRange_%s" % options.match)
+        configuration.matchRange()  # call once to set utcaBcnDelta
+
+    if options.noColor:
+        printer.__color = False
 
     if not options.noLoop:
         analyze.setup()
         if options.profile:
             import cProfile
-            cProfile.run("go()", sort="time")
+            cProfile.runctx("go(options)", globals(), locals(), sort="time")
         else:
-            go()
+            go(options)
 
     graphs.makeSummaryPdf(inputFiles=[options.outputFile],
-                          feds1=kargs["feds1"],
-                          feds2=kargs["feds2"],
+                          feds1=configuration.fedList(options.feds1),
+                          feds2=configuration.fedList(options.feds2),
                           pdf=options.outputFile.replace(".root", ".pdf"),
                           )
 
