@@ -47,6 +47,11 @@ def opts(alsoArgs=False):
                       default=False,
                       action="store_true",
                       help="Loop over raw data, but do not unpack it.")
+    common.add_option("--patterns",
+                        dest="patterns",
+                        default=False,
+                        action="store_true",
+                        help="interpret QIE data as FE patterns: see configuration_patterns.py")
     common.add_option("--adc-plots",
                       dest="adcPlots",
                       default=False,
@@ -139,30 +144,6 @@ def opts(alsoArgs=False):
                        action="store_true",
                        help="Print emap found with --any-emap.")
     parser.add_option_group(matchCh)
-
-    patterns = optparse.OptionGroup(parser, "Options for decoding patterns")
-    patterns.add_option("--patterns",
-                        dest="patterns",
-                        default=False,
-                        action="store_true",
-                        help="interpret QIE data as FE patterns")
-    patterns.add_option("--nts",
-                        dest="nTs",
-                        default=10,
-                        metavar="N",
-                        type="int",
-                        help="No. of time slices to consider (default is 10).")
-    patterns.add_option("--patternB",
-                        dest="patternB",
-                        default=False,
-                        action="store_true",
-                        help="Consider also patterns mixed across fibers.")
-    patterns.add_option("--rm-ribbon",
-                        dest="rmRibbon",
-                        default=False,
-                        action="store_true",
-                        help="Pair central 6 fibers (of 8 or 12).")
-    parser.add_option_group(patterns)
 
     options, args = parser.parse_args()
 

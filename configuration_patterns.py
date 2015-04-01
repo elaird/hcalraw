@@ -1,7 +1,10 @@
 import re
 
 
-compressedPatterns = True
+nTs = 10                     # number of time slices to consider
+patternB = False             # consider also patterns mixed across fibers
+rmRibbon = False             # pair central 6 fibers (of 8 or 12)
+compressedPatterns = True    # handle lack of per-TS capids
 
 
 def patternString(codes=[], asciifyPatterns=True, regMatchPatterns=True):
