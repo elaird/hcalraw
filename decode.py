@@ -4,6 +4,7 @@
 # DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 # HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
 # TTP http://cmsdoc.cern.ch/cms/HCAL/document/Aux/HcalTechTriggerProcessor/dataformat.html
+# MOL/FEROL https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
 
 
 import configuration
@@ -142,11 +143,21 @@ def header_ufov0(d={}, iWord64=None, word64=None):
                 d["HTR%d" % (j+1)] = htrDict(w >> 32, d["word16Counts"])
 
 
-def MOLheader(d={}, word64_1=None, word64_2=None):
-    w1 = word64_1
-    w2 = word64_2
+def swapped64(i64):  # endian flip
+    tmp64 = i64 >> 56
+    for i in range(1, 8):
+        tmp64 += ((i64 >> (56 - 8 * i)) & 0xff) << (8*i)
+    return tmp64
+
+
+def molHeader(d={}, words64=[]):
+    if len(words64) != 2:
+        printer.warning("molHeader has %d != 2 words" % len(words64))
+    w1 = swapped64(words64[0])
+    w2 = swapped64(words64[1])
     iblock = (w1 >> 32) & 0x7ff
     d[iblock] = {}
+    d[iblock]["GZ"] = w1 & 0xffff
     d[iblock]["isFirstBlock"] = w1 & (1L << 31)
     d[iblock]["isLastBlock"] = w1 & (1L << 30)
     d[iblock]["nWord64"] = w1 & 0x3ff
@@ -339,7 +350,7 @@ def end(d, l, patternMode):
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, fedId=None, skipFlavors=[], patternMode={},
+            utca=None, fedId=None, patternMode={},
             warn=True, dump=-99):
 
     if 8 <= dump:
@@ -421,7 +432,6 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
                 l=l,
                 iWord16=iWord16,
                 word16=word16,
-                skipFlavors=skipFlavors,
                 patternMode=patternMode,
                 utca=utca,
                 fedId=fedId,
