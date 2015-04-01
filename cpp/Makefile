@@ -41,4 +41,4 @@ cms.so: $(HS2) $(CXXS2)
 	$(CC) $(CFLAGS) $(SO) $(ROOT) $(CXXS2) $(TMP2) -o $@
 
 clean:
-	rm -f mol deadbeef badcoffee *.pcm *.d *.so tmp*
+	$(shell rm -f `cat .gitignore`)
