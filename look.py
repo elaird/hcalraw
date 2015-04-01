@@ -17,11 +17,15 @@ def main(options, args):
 
     options.feds1 = "718,719"
     options.feds2 = "uHF"
-    options.dump = 0
     options.progress = True
     options.outputFile = "output/%d.root" % run
+
+    # override two defaults
     if not options.nEvents:
         options.nEvents = 10
+
+    if options.dump == -1:
+        options.dump = 0
 
     local1 = "data/USC_%d.root" % run
     local2 = "%s/USC_%d.root" % (os.environ.get("LS1", ""), run)
