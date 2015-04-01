@@ -38,8 +38,9 @@ void loop(TTree& tree, std::vector<WORD>& vec, bool debug=false) {
       else if (iWordInBlock){  // found new block
 	if (debug) std::cout << " filling/clearing" << std::endl;
 
+	iWordInBlock = 0;
+
 	if(START_FLAG) {  // MOL
-	  iWordInBlock = 0;
 	  nWordsInBlock = NDataInBlock(buf);
 	  if ((buf & START_MASK) == START_FLAG && vec.size()) {  // new fragment
 	    tree.Fill();
@@ -48,16 +49,15 @@ void loop(TTree& tree, std::vector<WORD>& vec, bool debug=false) {
 	}
         else {  // not MOL
 	  tree.Fill();
-	  iWordInBlock = 1;
 	  vec.clear();
-
-	  if (read_word(buf)) {
-	    nWordsInBlock = buf;
-	  }
 	}
 
       }  // end new block
     }  // end magic word
+
+    if((!START_FLAG) && (iWordInBlock == 1)) {  // not MOL
+      nWordsInBlock = buf;
+    }
 
     if(SAVE_HEADER || (NHEADER <= iWordInBlock)){
       vec.push_back(buf);
