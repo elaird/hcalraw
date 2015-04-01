@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import configuration
+import configuration_patterns as conf
 import optparse
 import sys
 
@@ -50,8 +50,8 @@ def pretty(be=None, fe=None):
             slot = sp
             s = "    %2s     %2s   %2s:  " % (crate, slot, fi)
         else:
-            crate = configuration.expectedCrate(int(dcc))
-            exp = configuration.expectedHtr(int(dcc), int(sp))
+            crate = conf.expectedCrate(int(dcc))
+            exp = conf.expectedHtr(int(dcc), int(sp))
             htr = "%2d%1s" % (exp["Slot"], exp["Top"])
             s = "%2s(%2d) %2s(%3s) %2s:  " % (dcc, crate, sp, htr, fi)
     else:
@@ -82,7 +82,7 @@ def printTable(rbxes={}, header="", zero="  "):
         print header
         print "-"*len(header)
 
-    rbxList = configuration.rbxes()
+    rbxList = conf.rbxes()
     boxes = sorted(list(set([rbx[-2:] for rbx in rbxList])))
     dets  = sorted(list(set([rbx[:-2] for rbx in rbxList])))
 

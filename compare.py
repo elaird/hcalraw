@@ -1,4 +1,5 @@
 import configuration
+import configuration_patterns
 import printer
 import printRaw
 
@@ -156,7 +157,7 @@ def checkHtrModules(fedId=None, htrBlocks={}):
     for spigot, block in htrBlocks.iteritems():
         if block["IsTTP"]:
             continue
-        expected = configuration.expectedHtr(fedId, spigot)
+        expected = configuration_patterns.expectedHtr(fedId, spigot)
         crates.append(block["Crate"])
         bad = [block["Top"] != expected["Top"],
                block["Slot"] != expected["Slot"],

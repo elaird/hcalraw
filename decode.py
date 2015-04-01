@@ -8,6 +8,7 @@
 
 
 import configuration
+import configuration_patterns
 import printer
 import sys
 
@@ -571,7 +572,7 @@ def channelId(fiber=None, fibCh=None):
 
 def storePatternData(l={}, nFibers=None, nTs=None, rmRibbon=None, **_):
     offset = 1 if rmRibbon else 0
-    compressed = configuration.compressedPatterns
+    compressed = configuration_patterns.compressedPatterns
 
     l["patternData"] = {}
     d = l["channelData"]
@@ -599,7 +600,7 @@ def storePatternData(l={}, nFibers=None, nTs=None, rmRibbon=None, **_):
                             cap = d[key]["CapId"][iTs]
                         elif not compressed:
                             sys.exit("\n".join(["Cap-ids per time-slice not found.",
-                                                "Either set 'configuration.compressedPatterns = True'",
+                                                "Either set 'configuration_patterns.compressedPatterns = True'",
                                                 "or do not pass '--patterns'.",
                                             ]))
                         else:

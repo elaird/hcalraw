@@ -1,4 +1,5 @@
 import configuration
+import configuration_patterns
 import printer
 import utils
 
@@ -398,7 +399,7 @@ def patternString(patterns=[], key=""):
     for p in patterns:
         for k in [key+"0", key+"1"]:
             codes.append(p[k])
-    return configuration.patternString(codes)
+    return configuration_patterns.patternString(codes)
 
 
 def oneFedHcal(d={}, patternMode=False, dump=None, crateslots=[],
