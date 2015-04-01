@@ -38,14 +38,13 @@ def main(options, args):
     elif not utils.commandOutputFull("%s stat %s" % (eos, gdir1.replace(stem, "")))["returncode"]:
         options.match = "v4"
         files = utils.commandOutputFull("%s ls %s" % (eos, gdir1.replace(stem, "")))["stdout"].split("\n")
-        print files
-        # global --file1=$GR2/Cosmics/RAW/v1/000/239/201/00000/0012EAD3-77D6-E411-8052-02163E01351E.root
-    else:
-        sys.exit("Did not find a matching file.  Perhaps try 'source env/lxplus6.sh'")
+        if files:
+            options.file1 = "%s/%s" % (gdir1, files[0])
 
     if options.file1:
         oneRun.main(options)
-
+    else:
+        sys.exit("Did not find a matching file.  Perhaps try 'source env/lxplus6.sh'")
 
 
 if __name__ == "__main__":
