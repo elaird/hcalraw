@@ -410,7 +410,7 @@ def go(outer={}, inner={}, outputFile="",
             for key in innerEvent.keys():
                 innerEvent[key] = key
         if set(innerEvent.values()) == set([None]):
-            sys.exit("No common events found.  Consider either passing --identity-map or increasing --orn-tolerance.")
+            sys.exit("No common events found.  Consider passing --identity-map.")
         if mapOptions.get('printEventMap', False):
             for oEvent, iEvent in sorted(innerEvent.iteritems()):
                 printer.msg(", ".join(["oEvent = %s" % str(oEvent),
