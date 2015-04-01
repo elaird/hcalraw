@@ -239,18 +239,30 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         h.GetYaxis().SetTitle("%s (%s)" % (P, fedString(feds2)))
         h.GetZaxis().SetTitle("samples / bin")
 
-        yx = r.TF1("yx", "x", h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
+        xMin = h.GetXaxis().GetXmin()
+        xMax = h.GetXaxis().GetXmax()
+
+        line = r.TLine()
+        line.SetLineWidth(1)
+        line.SetLineStyle(2)
+        x0 = line.DrawLine(0.0, xMin, 0.0, xMax)
+        y0 = line.DrawLine(xMin, 0.0, xMax, 0.0)
+
+        h.Draw(gopts + "same")  # draw again to be on top of dashed lines
+
+        yx = r.TF1("yx", "x", xMin, xMax)
         yx.SetLineColor(r.kBlack)
         yx.SetLineWidth(1)
         yx.SetLineStyle(3)
         yx.Draw("same")
 
-        leg = r.TLegend(0.2, 0.75, 0.5, 0.85)
+        leg = r.TLegend(0.25, 0.75, 0.55, 0.88)
         leg.SetBorderSize(0)
         leg.SetFillStyle(0)
         leg.AddEntry(yx, "y = x", "l")
+        leg.AddEntry(x0, "zero", "l")
         leg.Draw()
-        keep += [h, yx, leg]
+        keep += [h, yx, x0, y0, leg]
     return keep
 
 
