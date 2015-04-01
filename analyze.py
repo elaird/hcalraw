@@ -75,9 +75,9 @@ def eventMaps(s={}, options={}):
         print "Mapping %s:" % s["label"]
 
     kargs = {"headerOnly": True,
-             "nBytesPer": s["nBytesPer"]}
-    if treeName == "mol":
-        kargs["skipWords64"] = [0, 1]
+             "nBytesPer": s["nBytesPer"],
+             "skipWords64": s["skipWords64"],
+             }
 
     for iEvent in range(nEvents(tree, nEventsMax)):
         tree.GetEntry(iEvent)
@@ -173,11 +173,10 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}, cacheSiz
 def collectedRaw(tree=None, specs={}):
     raw = {}
     kargs = {}
-    for item in ["patterns", "warn", "dump", "unpack", "nBytesPer"]:
+    for item in ["patterns", "warn", "dump", "unpack", "nBytesPer", "skipWords64"]:
         kargs[item] = specs[item]
 
     if specs["treeName"] == "mol":
-        kargs["skipWords64"] = [0, 1]
         kargs["decodeSkipped64"] = decode.molHeader
 
     for fedId in specs["fedIds"]:
