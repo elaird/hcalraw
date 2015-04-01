@@ -1,6 +1,6 @@
 #define START_FLAG 0  // only for MOL
 #define START_MASK 0  // only for MOL
-#define SAVE_HEADER 0
+#define SAVE_HEADER 1
 
 #define WORD uint64_t
 #define NHEADER 2
