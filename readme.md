@@ -18,7 +18,6 @@ cd cpp; make; cd -
 
 # compare payloads of different sets of FEDs, across two files
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --any-emap
-./oneRun.py --file1=data/USC_209150.root --feds1=989 --file2=data/209151.HLTSkim.root --feds2=714,722 --dump=0 --match=v0 --any-emap
 
 # analyze FE pattern runs
 # (before HO refibering) ./oneRun.py --file1=$LS1/USC_235576.root --feds1=HCAL --nevents=1 --patterns | ./diff.py data/ref_2014.txt
@@ -27,7 +26,7 @@ cd cpp; make; cd -
 ./oneRun.py --file1=$LS1/USC_239099.root --feds1=uHF  --nevents=1 --patterns | ./diff.py data/ref_utca_G.txt
 
 # analyze global runs
-./oneRun.py --file1=$GR2/Cosmics/RAW/v1/000/235/316/00000/9CE27CCC-5EBB-E411-AF2C-02163E0127C8.root --output-file=output/235316.root --feds1=718,719 --feds2=1118  --match=v3 --no-warn-unpack --dump=0 --nevents=10
+./look.py 235316 --match=v3 --no-warn-unpack
 ./look.py 239342
 ```
 
