@@ -51,6 +51,9 @@ def main(options):
     if options.noColor:
         printer.__color = False
 
+    if options.patterns:
+        options.nEvents = 1
+
     if not options.noLoop:
         analyze.setup()
         if options.profile:
