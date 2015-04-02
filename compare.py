@@ -1,5 +1,4 @@
-import configuration
-import configuration_patterns
+from configuration import hw, matching, patterns
 import printer
 import printRaw
 
@@ -157,7 +156,7 @@ def checkHtrModules(fedId=None, htrBlocks={}):
     for spigot, block in htrBlocks.iteritems():
         if block["IsTTP"]:
             continue
-        expected = configuration_patterns.expectedHtr(fedId, spigot)
+        expected = patterns.expectedHtr(fedId, spigot)
         crates.append(block["Crate"])
         bad = [block["Top"] != expected["Top"],
                block["Slot"] != expected["Slot"],
@@ -212,10 +211,10 @@ def adc_vs_adc(mapF1, mapF2, book=None):
     matched = []
     nonMatched = []
 
-    title = "ErrF == %s;ADC;ADC;samples / bin" % ",".join(["%d" % x for x in configuration.matchErrF])
+    title = "ErrF == %s;ADC;ADC;samples / bin" % ",".join(["%d" % x for x in matching.matchErrF])
 
     for coords1, samples1 in mapF1.iteritems():
-        coords2 = configuration.transformed_qie(*coords1)
+        coords2 = hw.transformed_qie(*coords1)
         if coords2 is None:
             continue
 
@@ -256,7 +255,7 @@ def tp_vs_tp(mapF1, mapF2, book=None):
     nonMatched = []
 
     for coords1, samples1 in mapF1.iteritems():
-        coords2 = configuration.transformed_tp(*coords1)
+        coords2 = hw.transformed_tp(*coords1)
         if coords2 is None:
             continue
 
@@ -344,7 +343,7 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
 
         utca1 = d1["header"]["utca"]
         utca2 = d2["header"]["utca"]
-        bcnDelta = configuration.bcnDelta(utca1) - configuration.bcnDelta(utca2)
+        bcnDelta = matching.bcnDelta(utca1) - matching.bcnDelta(utca2)
 
         if (fed1 in okFeds) and (fed2 in okFeds):
             for x in ["BcN", "OrN", "EvN"]:
@@ -401,7 +400,7 @@ def matchStats(f={}, b={}):
 
 
 def dataMap(raw={}):
-    okErrF = configuration.matchErrF
+    okErrF = matching.matchErrF
 
     forward = {}
     backward = {}
@@ -412,7 +411,7 @@ def dataMap(raw={}):
             continue
 
         utca = d["header"]["utca"]
-        fiberMap = configuration.fiberMap(fedId)
+        fiberMap = hw.fiberMap(fedId)
         for block in d["htrBlocks"].values():
             for channelData in block["channelData"].values():
                 channel = channelData["FibCh"]
@@ -424,7 +423,7 @@ def dataMap(raw={}):
                     skipped.append(coords)
                     continue
 
-                matchRange = configuration.matchRange(fedId, block["Slot"], channel, utca)
+                matchRange = matching.matchRange(fedId, block["Slot"], channel, utca)
                 qie = channelData["QIE"]
                 if len(qie) < len(matchRange):
                     skipped.append(coords)

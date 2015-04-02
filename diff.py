@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import configuration_patterns as conf
+from configuration import patterns as conf
 import optparse
 import sys
 

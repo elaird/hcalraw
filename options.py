@@ -51,7 +51,7 @@ def opts(alsoArgs=False):
                         dest="patterns",
                         default=False,
                         action="store_true",
-                        help="interpret QIE data as FE patterns: see configuration_patterns.py")
+                        help="interpret QIE data as FE patterns: see configuration/patterns.py")
     common.add_option("--adc-plots",
                       dest="adcPlots",
                       default=False,
@@ -132,7 +132,7 @@ def opts(alsoArgs=False):
                        dest="match",
                        default="",
                        metavar="s",
-                       help="choose configuration.matchRange_s")
+                       help="choose configuration.matching.matchRange_s")
     matchCh.add_option("--any-emap",
                        dest="anyEmap",
                        default=False,

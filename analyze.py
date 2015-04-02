@@ -7,7 +7,7 @@ import utils
 r = utils.ROOT()
 import autoBook
 import compare
-import configuration
+from configuration import sw
 import decode
 import printer
 
@@ -17,7 +17,7 @@ def setup():
     r.gSystem.Load("cpp/cdf.so")
     r.gSystem.Load("cpp/cms.so")
 
-    if configuration.use_fwlite and utils.cmssw():
+    if sw.use_fwlite and utils.cmssw():
         r.gSystem.Load("libFWCoreFWLite.so")
         r.AutoLibraryLoader.enable()
 
@@ -485,7 +485,7 @@ def fileSpec(fileName=""):
 
     specs = []
     for treeName in set(treeNames):  # set accomodate cycles, e.g. CMSRAW;3 CMSRAW;4
-        spec = configuration.format(treeName)
+        spec = sw.format(treeName)
         if spec:
             spec["treeName"] = treeName
             specs.append(spec)

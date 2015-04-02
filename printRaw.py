@@ -1,5 +1,4 @@
-import configuration
-import configuration_patterns
+import configuration.patterns
 import printer
 import utils
 
@@ -364,7 +363,7 @@ def ttpData(ttpInput=[], ttpOutput=[], ttpAlgoDep=[]):
 
 
 def patternData(d={}, moduleId="", utca=None):
-    patternB = configuration_patterns.patternB
+    patternB = configuration.patterns.patternB
 
     if patternB:
         headers = ["ModuleId", "Fibers", "Pattern"]
@@ -404,7 +403,7 @@ def patternString(patterns=[], key=""):
     for p in patterns:
         for k in [key+"0", key+"1"]:
             codes.append(p[k])
-    return configuration_patterns.string(codes)
+    return configuration.patterns.string(codes)
 
 
 def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],

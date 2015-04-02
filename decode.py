@@ -7,14 +7,13 @@
 # MOL/FEROL https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
 
 
-import configuration
-import configuration_patterns
+from configuration import hw, matching, patterns
 import printer
 import sys
 
 
 def ornBcn(ornIn, bcnIn, utca):
-    bcnDelta = configuration.bcnDelta(utca)
+    bcnDelta = matching.bcnDelta(utca)
 
     if not bcnDelta:
         return ornIn, bcnIn
@@ -369,7 +368,7 @@ def htrPreTrailer(l={}, w=None, k=None):
 def end(d, l, utca, patterns):
     d["htrIndex"] += 1
     if patterns:
-        storePatternData(l, configuration.nFibers(utca))
+        storePatternData(l, hw.nFibers(utca))
     clearChannel(d)  # in case event is malformed
 
 
@@ -594,9 +593,9 @@ def channelId(fiber=None, fibCh=None):
 
 
 def storePatternData(l={}, nFibers=None):
-    nTs = configuration_patterns.nTs
-    compressed = configuration_patterns.compressed
-    offset = 1 if configuration_patterns.rmRibbon else 0
+    nTs = patterns.nTs
+    compressed = patterns.compressed
+    offset = 1 if patterns.rmRibbon else 0
 
     l["patternData"] = {}
     d = l["channelData"]
@@ -624,7 +623,7 @@ def storePatternData(l={}, nFibers=None):
                             cap = d[key]["CapId"][iTs]
                         elif not compressed:
                             sys.exit("\n".join(["Cap-ids per time-slice not found.",
-                                                "Either set 'configuration_patterns.compressed = True'",
+                                                "Either set 'configuration.patterns.compressed = True'",
                                                 "or do not pass '--patterns'.",
                                             ]))
                         else:

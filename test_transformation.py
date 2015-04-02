@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-from configuration import transformed_qie, transformed_tp
+from configuration.hw import transformed_qie, transformed_tp
 
 
 def check(l):

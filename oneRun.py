@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import analyze
-import configuration
 import printer
 import graphs
 import sys
+from configuration import hw, matching
 from options import opts
 
 
@@ -13,7 +13,7 @@ def subset(options, l, process=False):
     for item in l:
         out[item] = getattr(options, item)
         if process:
-            out[item] = configuration.fedList(out[item])
+            out[item] = hw.fedList(out[item])
     return out
 
 
@@ -36,7 +36,7 @@ def go(options):
     kargs["mapOptions"] = subset(options, ["printEventMap", "identityMap"])
     kargs["printOptions"] = subset(options, ["dump", "progress"])
     kargs["printOptions"]["warn"] = not options.noWarnUnpack
-    kargs["printOptions"]["crateslots"] = configuration.fedList(options.crateslots)
+    kargs["printOptions"]["crateslots"] = hw.fedList(options.crateslots)
 
     analyze.oneRun(**kargs)
 
@@ -45,8 +45,8 @@ def main(options):
     check(options)
 
     if options.match:
-        configuration.matchRange = getattr(configuration, "matchRange_%s" % options.match)
-        configuration.matchRange()  # call once to set utcaBcnDelta
+        matching.matchRange = getattr(matching, "matchRange_%s" % options.match)
+        matching.matchRange()  # call once to set utcaBcnDelta
 
     if options.noColor:
         printer.__color = False
@@ -63,8 +63,8 @@ def main(options):
             go(options)
 
     graphs.makeSummaryPdf(inputFiles=[options.outputFile],
-                          feds1=configuration.fedList(options.feds1),
-                          feds2=configuration.fedList(options.feds2),
+                          feds1=hw.fedList(options.feds1),
+                          feds2=hw.fedList(options.feds2),
                           pdf=options.outputFile.replace(".root", ".pdf"),
                           )
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from configuration_patterns import rbxes
+from configuration.patterns import rbxes
 
 #Generates .txt file in format same with oneRun.py from a list of RBXs
 
