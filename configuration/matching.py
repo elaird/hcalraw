@@ -1,10 +1,10 @@
-# these value may be overwritten by configuration.matchRange_*
-matchErrF = [0]
+# these value may be overwritten by configuration.matching.tsRange_*
+okErrF = [0]
 __utcaBcnDelta = 0
 __vmeBcnDelta = 0
 
 # this function is overwritten by oneRun.py
-def matchRange(fedId=None, slot=None, fibCh=None, utca=None):
+def tsRange(fedId=None, slot=None, fibCh=None, utca=None):
     return []
 
 
@@ -12,7 +12,7 @@ def bcnDelta(utca):
     return __utcaBcnDelta if utca else __vmeBcnDelta
 
 
-def matchRange_LS1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=None):
+def tsRange_LS1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=None):
     """DO NOT USE THIS ONE; USE EITHER v0 or v1 BELOW"""
     """local runs; global runs before Feb. 2015"""
 
@@ -35,31 +35,31 @@ def matchRange_LS1(fedId=None, slot=None, fibCh=None, utca=None, shiftFibCh2=Non
     return range(10)
 
 
-def matchRange_v0(fedId=None, slot=None, fibCh=None, utca=None):
+def tsRange_v0(fedId=None, slot=None, fibCh=None, utca=None):
     global __utcaBcnDelta
     __utcaBcnDelta = -119
 
-    global matchErrF
-    matchErrF = [0, 1]
+    global okErrF
+    okErrF = [0, 1]
 
-    return matchRange_LS1(fedId, slot, fibCh, utca, True)
+    return tsRange_LS1(fedId, slot, fibCh, utca, True)
 
 
-def matchRange_v1(fedId=None, slot=None, fibCh=None, utca=None):
+def tsRange_v1(fedId=None, slot=None, fibCh=None, utca=None):
     global __utcaBcnDelta
     __utcaBcnDelta = -119
 
-    return matchRange_LS1(fedId, slot, fibCh, utca, False)
+    return tsRange_LS1(fedId, slot, fibCh, utca, False)
 
 
-def matchRange_v2(fedId=None, slot=None, fibCh=None, utca=None):
+def tsRange_v2(fedId=None, slot=None, fibCh=None, utca=None):
     global __utcaBcnDelta
     __utcaBcnDelta = -131
 
-    return matchRange_LS1(fedId, slot, fibCh, utca, False)
+    return tsRange_LS1(fedId, slot, fibCh, utca, False)
 
 
-def matchRange_v3(fedId=None, slot=None, fibCh=None, utca=None):
+def tsRange_v3(fedId=None, slot=None, fibCh=None, utca=None):
     """global runs from Feb. 2015 - Mar. 16, 2015"""
 
     global __utcaBcnDelta
@@ -71,7 +71,7 @@ def matchRange_v3(fedId=None, slot=None, fibCh=None, utca=None):
         return range(6)
 
 
-def matchRange_v4(fedId=None, slot=None, fibCh=None, utca=None):
+def tsRange_v4(fedId=None, slot=None, fibCh=None, utca=None):
     """global runs from March 16, 2015"""
 
     global __utcaBcnDelta
@@ -80,7 +80,7 @@ def matchRange_v4(fedId=None, slot=None, fibCh=None, utca=None):
     return range(6)
 
 
-def matchRange_v4a(fedId=None, slot=None, fibCh=None, utca=None):
+def tsRange_v4a(fedId=None, slot=None, fibCh=None, utca=None):
     """hack"""
 
     global __utcaBcnDelta
