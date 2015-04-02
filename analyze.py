@@ -124,19 +124,20 @@ def progress(iEvent, iMask):
         return iMask
 
 
-def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}, cacheSizeMB=None):
-    if inner:
-        fI = r.TFile.Open(inner["fileName"])
-        treeI = fI.Get(inner["treeName"])
-        assert treeI, inner["treeName"]
-        if cacheSizeMB:
-            treeI.SetCacheSize(cacheSizeMB * 1024**2)
-
-    f = r.TFile.Open(outer["fileName"])
-    tree = f.Get(outer["treeName"])
-    assert tree, outer["treeName"]
+def openedFile(spec, cacheSizeMB=None):
+    f = r.TFile.Open(spec["fileName"])
+    tree = f.Get(spec["treeName"])
+    assert tree, spec["treeName"]
     if cacheSizeMB:
         tree.SetCacheSize(cacheSizeMB * 1024**2)
+    return f, tree
+
+
+def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
+    if inner:
+        fI, treeI = openedFile(inner)
+
+    f, tree = openedFile(outer)
 
     if outer["progress"]:
         iMask = 0
@@ -145,25 +146,28 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}, cacheSiz
     kargs = {"book": book}
     kargs.update(compareOptions)
 
-    for iOuterEvent in range(outer["nEventsSkip"],
-                             nEvents(tree, outer["nEventsMax"])):
-        nb = tree.GetEntry(iOuterEvent)
-        if nb <= 0:
-            continue
-
-        if outer["progress"]:
-            iMask = progress(iOuterEvent, iMask)
-
-        kargs["raw1"] = collectedRaw(tree=tree, specs=outer)
-
-        if inner:
-            iInnerEvent = innerEvent[iOuterEvent]
-            if (iInnerEvent is None) or (treeI.GetEntry(iInnerEvent) <= 0):
+    try:
+        for iOuterEvent in range(outer["nEventsSkip"], nEvents(tree, outer["nEventsMax"])):
+            nb = tree.GetEntry(iOuterEvent)
+            if nb <= 0:
                 continue
-            kargs["raw2"] = collectedRaw(tree=treeI, specs=inner)
 
-        if outer["unpack"]:
-            compare.compare(**kargs)
+            if outer["progress"]:
+                iMask = progress(iOuterEvent, iMask)
+
+            kargs["raw1"] = collectedRaw(tree=tree, specs=outer)
+
+            if inner:
+                iInnerEvent = innerEvent[iOuterEvent]
+                if (iInnerEvent is None) or (treeI.GetEntry(iInnerEvent) <= 0):
+                    continue
+                kargs["raw2"] = collectedRaw(tree=treeI, specs=inner)
+
+            if outer["unpack"]:
+                compare.compare(**kargs)
+
+    except KeyboardInterrupt:
+        printer.warning("KeyboardInterrupt after %d events." % iOuterEvent)
 
     f.Close()
     if inner:
