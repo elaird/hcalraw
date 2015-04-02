@@ -18,6 +18,7 @@ cd cpp; make; cd -
 
 # compare payloads of different sets of FEDs, across two files
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --any-emap
+./oneRun.py --file1=$USC/USC_211154.root --feds1=714,722 --file2=$USC/USC_211155.root --feds2=989 --dump=0 --match=v0 --any-emap --nevents=25
 
 # analyze FE pattern runs
 # (before HO refibering) ./oneRun.py --file1=$LS1/USC_235576.root --feds1=HCAL --patterns | ./diff.py data/ref_2014.txt
