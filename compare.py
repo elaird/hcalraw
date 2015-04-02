@@ -207,11 +207,19 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
     return okFeds
 
 
-def adc_vs_adc(mapF1, mapF2, book=None):
+def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None):
     matched = []
     nonMatched = []
 
-    title = "ErrF == %s;ADC;ADC;samples / bin" % ",".join(["%d" % x for x in matching.okErrF])
+    if len(nPre1) == len(nPre2) == 1:
+        nPre1 = list(nPre1)[0]
+        nPre2 = list(nPre2)[0]
+    else:
+        printer.warning("nPresamples is not uniform: %s, %s" % (str(nPre1), str(nPre2)))
+        nPre1 = nPre2 = None
+
+    title1 = "ErrF == %s;ADC;ADC;samples / bin" % ",".join(["%d" % x for x in matching.okErrF])
+    title2 = "SOI#semicolon %s" % title1
 
     for coords1, samples1 in mapF1.iteritems():
         coords2 = hw.transformed_qie(*coords1)
@@ -246,7 +254,12 @@ def adc_vs_adc(mapF1, mapF2, book=None):
                 book.fill((s1, s2), "adc_vs_adc",
                           #"adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
                           (nBins, nBins), (xMin, xMin), (xMax, xMax),
-                          title=title)
+                          title=title1)
+                if i == nPre1 == nPre2:
+                    book.fill((s1, s2), "adc_vs_adc_both_soi",
+                              #"adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
+                              (nBins, nBins), (xMin, xMin), (xMax, xMax),
+                              title=title2)
     return matched, nonMatched
 
 
@@ -285,8 +298,8 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
     dump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
 
     if anyEmap:
-        mapF1, mapB1, _ = dataMap(raw1)
-        mapF2, mapB2, _ = dataMap(raw2)
+        mapF1, mapB1, _, _ = dataMap(raw1)
+        mapF2, mapB2, _, _ = dataMap(raw2)
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
         tMatched12 = tNonMatched12 = []
@@ -296,11 +309,11 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
            reportMatched(matched12)
            reportFailed(nonMatched12)
     else:
-        mapF1 = dataMap(raw1)[0]
-        mapF2 = dataMap(raw2)[0]
-        matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book)
+        mapF1, _, _, nPre1 = dataMap(raw1)
+        mapF2, _, _, nPre2 = dataMap(raw2)
+        matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book)
         if dump:
-            matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1)
+            matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1, nPre2, nPre1)
 
         tF1 = tpMap(raw1)[0]
         tF2 = tpMap(raw2)[0]
@@ -406,6 +419,7 @@ def dataMap(raw={}):
     backward = {}
     skipped = []
 
+    nPre = set()
     for fedId, d in raw.iteritems():
         if fedId is None:
             continue
@@ -413,6 +427,7 @@ def dataMap(raw={}):
         utca = d["header"]["utca"]
         fiberMap = hw.fiberMap(fedId)
         for block in d["htrBlocks"].values():
+            nPre.add(block["nPreSamples"])
             for channelData in block["channelData"].values():
                 channel = channelData["FibCh"]
                 fiber = channelData["Fiber"]
@@ -433,7 +448,7 @@ def dataMap(raw={}):
                 # print coords, tsRange, [hex(d) for d in data]
                 forward[coords] = data
                 backward[data] = coords
-    return forward, backward, skipped
+    return forward, backward, skipped, nPre
 
 
 def tpMap(raw={}):
