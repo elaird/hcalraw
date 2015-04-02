@@ -36,7 +36,6 @@ def command(dat):
 
     prefix = prefix2[1 + prefix2.rfind("/"):]
     fed = __feds[crate]
-    print prefix, fed
 
     tag = "deadbeef" if fed < 1000 else "badcoffee"
 
@@ -50,35 +49,70 @@ def command(dat):
     return prefix, fed, root1, root2, cmd
 
 
-def looped(dats=[], options=None):
+def rooted(dats=[], options=None, split=1118):
+    feds = {}
+
     prefixes = []
-    feds = []
-    roots = []
-    
     for dat in dats:
         prefix, fed, root1, root2, cmd = command(dat)
         prefixes.append(prefix)
-        feds.append(fed)
-        roots.append(root2)
+        feds[fed] = (root1, root2)
 
+        print "%s %4d: %s" % (prefix, fed, root1)
         # print cmd; continue
         os.system(cmd)
 
-        options.file1 = root1
-        options.feds1 = str(fed)
-        options.outputFile = root2
-        oneRun.main(options)
+    comp = []
+    if split in feds:
+        for i in [718, 719]:
+            if i in feds:
+                comp.append(i)
 
-    return prefixes, feds, roots
+    return sorted(list(prefixes))[0], feds, comp, split
 
 
-def plot(prefixes, feds, roots):
+def histogrammed(prefix, feds, comp, split):
+    roots = []
+
+    for fed, (root1, rootOut) in sorted(feds.iteritems()):
+        if fed in comp:
+            continue
+
+        if comp and fed == split:
+            for cfed in comp:
+                print "comparison of %4d to %4d:" % (cfed, fed)
+                options.feds1 = str(cfed)
+                options.file1 = feds[cfed][0]
+                options.outputFile = feds[cfed][1]
+
+                options.file2 = root1
+                options.feds2 = str(fed)
+
+                roots.append(options.outputFile)
+                oneRun.main(options)
+
+        else:
+            print "solo %4d:" % fed
+            options.feds1 = str(fed)
+            options.file1 = root1
+            options.outputFile = rootOut
+
+            options.feds2 = ""
+            options.file2 = ""
+
+            roots.append(options.outputFile)
+            oneRun.main(options)
+
+    return prefix, sorted(feds.keys()), roots
+
+
+def plot(prefix, fedList, roots):
     graphs.makeSummaryPdf(inputFiles=roots,
-                          feds1=feds,
-                          pdf="output/%s.pdf" % sorted(list(prefixes))[0]
+                          feds1=fedList,
+                          pdf="output/%s.pdf" % prefix,
                           )
 
 
 if __name__ == "__main__":
     options, args = opts(alsoArgs=True)
-    plot(*looped(args, options))
+    plot(*histogrammed(*rooted(args, options)))
