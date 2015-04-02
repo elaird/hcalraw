@@ -1,3 +1,4 @@
+loop over trees then entries
 skip file mapping when files1 == files2
 improve storage structures
 performance
