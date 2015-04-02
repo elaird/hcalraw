@@ -17,7 +17,7 @@ def subset(options, l, process=False):
     return out
 
 
-def check(options):
+def check_and_adjust(options):
     if not all([options.file1, options.feds1]):
         sys.exit("--file1 and --feds1 are required (see './oneRun.py --help').")
     if not options.outputFile.endswith(".root"):
@@ -26,6 +26,10 @@ def check(options):
         print "INFO: using --file1 also for --file2; also using identity map"
         options.file2 = options.file1
         options.identityMap = True
+
+    if options.patterns and options.nEvents is None:
+        print "INFO: setting nEvents=1 (--patterns + nEvents was unset)"
+        options.nEvents = 1
 
 
 def go(options):
@@ -42,7 +46,7 @@ def go(options):
 
 
 def main(options):
-    check(options)
+    check_and_adjust(options)
 
     if options.match:
         matching.tsRange = getattr(matching, "tsRange_%s" % options.match)
@@ -50,9 +54,6 @@ def main(options):
 
     if options.noColor:
         printer.__color = False
-
-    if options.patterns:
-        options.nEvents = 1
 
     if not options.noLoop:
         analyze.setup()
