@@ -1,5 +1,31 @@
 use_fwlite = True
 
+
+def fedMap():
+    d = {"HBHE": range(700, 718),
+         "HF": range(718, 724),
+         "HO": range(724, 732),
+         "uHF": [1118, 1120, 1122],
+         }
+
+    d["HBHEHF"] = d["HBHE"] + d["HF"]
+    d["HBEF"] = d["HBHEHF"]
+    d["HCAL"] = d["HBEF"] + d["HO"]
+    d["uHCAL"] = d["HCAL"] + d["uHF"]
+    return d
+
+
+def fedList(s=""):
+    d = fedMap()
+    if not s:
+        return []
+    if s in d:
+        return d[s]
+
+    out = [int(x) for x in s.split(",")]
+    return out
+
+
 def format(treeName=""):
     def __isVme(fedId=None):
         return 700 <= fedId <= 731

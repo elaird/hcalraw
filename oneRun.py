@@ -4,7 +4,7 @@ import analyze
 import printer
 import graphs
 import sys
-from configuration import hw, matching
+from configuration import sw, matching
 from options import opts
 
 
@@ -13,7 +13,7 @@ def subset(options, l, process=False):
     for item in l:
         out[item] = getattr(options, item)
         if process:
-            out[item] = hw.fedList(out[item])
+            out[item] = sw.fedList(out[item])
     return out
 
 
@@ -36,7 +36,7 @@ def go(options):
     kargs["mapOptions"] = subset(options, ["printEventMap", "identityMap"])
     kargs["printOptions"] = subset(options, ["dump", "progress"])
     kargs["printOptions"]["warn"] = not options.noWarnUnpack
-    kargs["printOptions"]["crateslots"] = hw.fedList(options.crateslots)
+    kargs["printOptions"]["crateslots"] = sw.fedList(options.crateslots)
 
     analyze.oneRun(**kargs)
 
@@ -63,8 +63,8 @@ def main(options):
             go(options)
 
     graphs.makeSummaryPdf(inputFiles=[options.outputFile],
-                          feds1=hw.fedList(options.feds1),
-                          feds2=hw.fedList(options.feds2),
+                          feds1=sw.fedList(options.feds1),
+                          feds2=sw.fedList(options.feds2),
                           pdf=options.outputFile.replace(".root", ".pdf"),
                           )
 
