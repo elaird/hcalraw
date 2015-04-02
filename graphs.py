@@ -236,11 +236,14 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
 
         P = name[:name.find("_vs_")].upper()
         h.GetXaxis().SetTitle("%s (%s)" % (P, fedString(feds1)))
-        if h.GetTitle():
-            h.GetXaxis().SetTitle(h.GetXaxis().GetTitle().replace(")", "  w/%s)" % h.GetTitle()))
-
         h.GetYaxis().SetTitle("%s (%s)" % (P, fedString(feds2)))
         h.GetZaxis().SetTitle("samples / bin")
+
+        if h.GetTitle():
+            h.GetXaxis().SetTitle(h.GetXaxis().GetTitle().replace(")", ": %s)" % h.GetTitle()))
+            if h.GetTitle().startswith("SOI"):
+                h.GetYaxis().SetTitle(h.GetYaxis().GetTitle().replace(")", ": SOI)"))
+
         h.SetTitle("")
 
         xMin = h.GetXaxis().GetXmin()
@@ -401,7 +404,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     canvas.Print(pdf)
 
 
-def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=["adc_vs_adc", "tp_vs_tp"]):
+def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[]):
     # don't print blank page
     if not any([f.Get(name) for name in names]):
         return
@@ -428,7 +431,8 @@ def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf"):
 
         pageOne(f, feds1, feds2, canvas, pdf)
         if feds2:
-            pageTwo(f, feds1, feds2, canvas, pdf)
+            pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc", "tp_vs_tp"])
+            pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc_both_soi"])
 
         f.Close()
     canvas.Print(pdf + "]")
