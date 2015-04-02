@@ -305,10 +305,7 @@ def draw_graph(graph, pad1, title="", rate=False):
     t = graph.GetTitle().split("_")
 
     pad1.cd()
-    if rate:
-        adjustPad(m={"Bottom": 0.2, "Left": 0.1, "Top": 0.2, "Right": 0.0})
-    else:
-        adjustPad(m={"Left": 0.2, "Bottom": 0.2, "Right": None, "Top": None})
+    adjustPad(m={"Bottom": 0.2, "Left": 0.1 if rate else 0.13, "Top": 0.2, "Right": 0.0})
 
     xMin, xMax = xMin_xMax(graph)
     delta = xMax - xMin
