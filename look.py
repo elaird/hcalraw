@@ -30,10 +30,12 @@ def main(options, args):
     stem = "root://eoscms.cern.ch/"
     LS1 = "%s/store/group/dpg_hcal/comm_hcal/LS1" % stem
     GR2 = "%s/store/data/Commissioning2015" % stem
+    SPL = "%s/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1/" % stem
 
     local1 = "data/USC_%d.root" % run
     local2 = "%s/USC_%d.root" % (LS1, run)
-    gdir1 = "%s/Cosmics/RAW/v1/000/%3d/%3d/00000/" % (GR2, run/1000, run % 1000)
+    # gdir1 = "%s/Cosmics/RAW/v1/000/%3d/%3d/00000/" % (GR2, run/1000, run % 1000)
+    gdir1 = "%s/000/%3d/%3d/00000/" % (SPL, run/1000, run % 1000)
     eos = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select"
 
     if not os.path.exists(eos):
@@ -52,8 +54,10 @@ def main(options, args):
             options.match = "v2"
     elif not utils.commandOutputFull("%s stat %s" % (eos, gdir1.replace(stem, "")))["returncode"]:
         files = utils.commandOutputFull("%s ls %s" % (eos, gdir1.replace(stem, "")))["stdout"].split("\n")
+        files = filter(lambda x: x, files)
         if files:
-            options.file1 = "%s/%s" % (gdir1, files[0])
+            # options.file1 = "%s/%s" % (gdir1, files[0])
+            options.file1 = ",".join(["%s/%s" % (gdir1, f) for f in files])
         if not options.match:
             options.match = "v4"
 
