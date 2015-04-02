@@ -211,7 +211,7 @@ def adc_vs_adc(mapF1, mapF2, book=None):
     matched = []
     nonMatched = []
 
-    title = "ErrF == %s;ADC;ADC;samples / bin" % ",".join(["%d" % x for x in matching.matchErrF])
+    title = "ErrF == %s;ADC;ADC;samples / bin" % ",".join(["%d" % x for x in matching.okErrF])
 
     for coords1, samples1 in mapF1.iteritems():
         coords2 = hw.transformed_qie(*coords1)
@@ -400,7 +400,7 @@ def matchStats(f={}, b={}):
 
 
 def dataMap(raw={}):
-    okErrF = matching.matchErrF
+    okErrF = matching.okErrF
 
     forward = {}
     backward = {}
@@ -423,14 +423,14 @@ def dataMap(raw={}):
                     skipped.append(coords)
                     continue
 
-                matchRange = matching.matchRange(fedId, block["Slot"], channel, utca)
+                tsRange = matching.tsRange(fedId, block["Slot"], channel, utca)
                 qie = channelData["QIE"]
-                if len(qie) < len(matchRange):
+                if len(qie) < len(tsRange):
                     skipped.append(coords)
                     continue
 
-                data = tuple([qie.get(i) for i in matchRange])
-                # print coords, matchRange, [hex(d) for d in data]
+                data = tuple([qie.get(i) for i in tsRange])
+                # print coords, tsRange, [hex(d) for d in data]
                 forward[coords] = data
                 backward[data] = coords
     return forward, backward, skipped

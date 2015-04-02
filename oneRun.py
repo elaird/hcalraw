@@ -45,8 +45,8 @@ def main(options):
     check(options)
 
     if options.match:
-        matching.matchRange = getattr(matching, "matchRange_%s" % options.match)
-        matching.matchRange()  # call once to set utcaBcnDelta
+        matching.tsRange = getattr(matching, "tsRange_%s" % options.match)
+        matching.tsRange()  # call once to set utcaBcnDelta
 
     if options.noColor:
         printer.__color = False
