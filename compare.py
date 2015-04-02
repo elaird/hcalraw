@@ -211,12 +211,13 @@ def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None):
     matched = []
     nonMatched = []
 
-    if len(nPre1) == len(nPre2) == 1:
-        nPre1 = list(nPre1)[0]
-        nPre2 = list(nPre2)[0]
-    else:
-        printer.warning("nPresamples is not uniform: %s, %s" % (str(nPre1), str(nPre2)))
-        nPre1 = nPre2 = None
+    if len(nPre1) and len(nPre2):
+        if len(nPre1) == len(nPre2) == 1:
+            nPre1 = list(nPre1)[0]
+            nPre2 = list(nPre2)[0]
+        else:
+            printer.warning("nPresamples is not uniform: %s, %s" % (str(nPre1), str(nPre2)))
+            nPre1 = nPre2 = None
 
     title1 = "ErrF == %s;ADC;ADC;samples / bin" % ",".join(["%d" % x for x in matching.okErrF])
     title2 = "SOI#semicolon %s" % title1
