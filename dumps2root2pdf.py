@@ -15,6 +15,8 @@ def command(dat):
     __feds = {22: 1118,
               29: 1120,
               32: 1122,
+              718: 718,
+              719: 719,
               }
 
     fields = dat.split("_")
@@ -36,11 +38,13 @@ def command(dat):
     fed = __feds[crate]
     print prefix, fed
 
-    root1 = "data/badcoffee_%s_%d.root" % (prefix, fed)
-    root2 = root1.replace("data/badcoffee_", "output/")
+    tag = "deadbeef" if fed < 1000 else "badcoffee"
 
-    cmd = " && ".join(["cat %s | cpp/badcoffee %s" % (dat, fed),
-                       "mv badcoffee%d.root %s" % (fed, root1),
+    root1 = "data/%s_%s_%d.root" % (tag, prefix, fed)
+    root2 = root1.replace("data/%s_" % tag, "output/")
+
+    cmd = " && ".join(["cat %s | cpp/%s %s" % (dat, tag, fed),
+                       "mv %s%d.root %s" % (tag, fed, root1),
                    ])
 
     return prefix, fed, root1, root2, cmd
@@ -57,7 +61,7 @@ def looped(dats=[], options=None):
         feds.append(fed)
         roots.append(root2)
 
-        # print cmd
+        # print cmd; continue
         os.system(cmd)
 
         options.file1 = root1
