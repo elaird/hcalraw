@@ -45,16 +45,16 @@ def find2(run):
 
 
 def find3(run):
-    express = "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1"
-    express += "/000/%3d/%3d/00000/" % (run/1000, run % 1000)
+    d = grdir
+    d += "/000/%3d/%3d/00000/" % (run/1000, run % 1000)
 
-    stat = "%s stat %s" % (eos(), express)
+    stat = "%s stat %s" % (eos(), d)
     ls = stat.replace(" stat ", " ls ")
 
     if not utils.commandOutputFull(stat)["returncode"]:
         files = filter(lambda x: x, utils.commandOutputFull(ls)["stdout"].split("\n"))
         if files:
-            l = ",".join(["%s/%s%s" % (eosprefix, express, f) for f in files])
+            l = ",".join(["%s/%s%s" % (eosprefix, d, f) for f in files])
             return l, "v4"
 
 
@@ -95,4 +95,6 @@ def main(options, args):
 
 if __name__ == "__main__":
     eosprefix = "root://eoscms.cern.ch/"
+    grdir = "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1"
+    # grdir = "/store/data/Commissioning2015/Cosmics/RAW/v1"
     main(*opts(alsoArgs=True))
