@@ -52,7 +52,7 @@ def find3(run):
     ls = stat.replace(" stat ", " ls ")
 
     if not utils.commandOutputFull(stat)["returncode"]:
-        files = filter(lambda x: x, utils.commandOutputFull(ls)["stdout"].split("\n"))[:1]
+        files = filter(lambda x: x, utils.commandOutputFull(ls)["stdout"].split("\n"))
         if files:
             l = ",".join(["%s/%s%s" % (eosprefix, express, f) for f in files])
             return l, "v4"
