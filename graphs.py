@@ -295,17 +295,24 @@ def plotList(f, pad, offset=None, names=[], logY=True, logX=False, logZ=False, g
     return keep
 
 
-def draw_graph(graph, pad, title="", rate=False):
+def draw_graph(graph, title="", rate=False):
     if not graph:
         return
+
+    padg = r.TPad("padg", "padg", 0.00, 0.75, 0.80, 1.00)
+    padg.Draw()
+    keep = [padg]
+
+    if rate:
+        split = 0.3
+        padg.Divide(1, 2)
+        padg.cd(1).SetPad(0.01, split, 0.99, 0.99 )
+        padg.cd(2).SetPad(0.01, 0.01 , 0.99, split)
 
     graph.SetMarkerStyle(20)
     graph.SetMarkerColor(r.gStyle.GetHistLineColor())
     graph.SetMarkerSize(0.5*graph.GetMarkerSize())
     t = graph.GetTitle().split("_")
-
-    pad.cd()
-    adjustPad(m={"Bottom": 0.2, "Left": 0.1 if rate else 0.13, "Top": 0.05, "Right": 0.0})
 
     xMin, xMax = xMin_xMax(graph)
     delta = xMax - xMin
@@ -322,22 +329,52 @@ def draw_graph(graph, pad, title="", rate=False):
         h = null.ProjectionX()
         fillRateHisto(h, graph)
         h.SetStats(False)
-        h.Draw()
-        h.SetMinimum(5.0e1)
-        h.SetMaximum(2.0e5)
-        h.GetYaxis().SetTitle("L1A rate (Hz)")
-        r.gPad.SetLogy()
+        h.SetMarkerStyle(20)
+        h.SetMarkerSize(0.5)
+        y = 10.0
+
+        padg.cd(1)
+        adjustPad(m={"Bottom": 0.0, "Left": 0.1, "Top": 0.03, "Right": 0.03})
+        r.gPad.SetLogy(True)
         r.gPad.SetGridy()
+        hu = h.DrawClone("pe")
+        hu.GetYaxis().SetTitle("L1A rate (Hz)")
+        hu.GetXaxis().SetLabelSize(0.0)
+        hu.GetXaxis().SetTickLength(0.0)
+        hu.SetMinimum(y)
+        hu.SetMaximum(2.0e5)
+        keep.append(hu)
+        magnify(hu, factor=3.0)
+
+        padg.cd(2)
+        adjustPad(m={"Bottom": 0.5, "Left": 0.1, "Top": 0.0, "Right": 0.03})
+        r.gPad.SetLogy(False)
+        r.gPad.SetTickx(0)
+        hl = h.DrawClone("pe")
+        hl.SetMinimum(0.0)
+        hl.SetMaximum(y)
+        keep.append(hl)
+        magnify(hl, factor=9.0)
+        hl.GetXaxis().SetTickLength(0.1)
+        hl.GetXaxis().SetTitleOffset(0.7)
+
+        hl.GetYaxis().SetTickLength(hu.GetYaxis().GetTickLength())
+        hl.GetYaxis().SetLabelSize(0.25)
+        hl.GetYaxis().SetNdivisions(402, True)
     else:
+        padg.Draw()
+        padg.cd()
+
+        adjustPad(m={"Bottom": 0.2, "Left": 0.13, "Top": 0.03, "Right": 0.03})
         h = null
         h.Draw()
+        magnify(h, factor=3.0)
         labelYAxis(h, labels={1: t[0], 2: t[1], 3: t[2]})
         graph.Draw("psame")
 
-    magnify(h, factor=3.0)
     h.GetXaxis().SetTitleOffset(0.75)
     h.GetYaxis().SetTitleOffset(0.4)
-    return graph, h
+    return graph, h, keep
 
 
 def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
@@ -345,17 +382,14 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     pad20.Divide(5, 4, 0.001, 0.001)
     pad20.Draw()
 
-    padg1 = r.TPad("padg1", "padg1", 0.00, 0.75, 0.75, 1.00)
-    padg1.Draw()
-
     keep = []
 
     title = f.GetPath()
     cats = f.Get("category_vs_time")
     if multiY(cats):
-        keep += draw_graph(cats, padg1, title)
+        keep += draw_graph(cats, title)
     else:
-        keep += draw_graph(f.Get("evn_vs_time"), padg1, title, rate=True)
+        keep += draw_graph(f.Get("evn_vs_time"), title, rate=True)
 
 
     # single FED
