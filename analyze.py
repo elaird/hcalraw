@@ -397,7 +397,11 @@ def go(outer={}, inner={}, outputFile="",
 
     if inner:
         chainI = tchain(inner)
-        iMapF, iMapB = eventMaps(chainI, inner)
+        if mapOptions["identityMap"]:
+            iMapF = oMapF
+            iMapB = oMapB
+        else:
+            iMapF, iMapB = eventMaps(chainI, inner)
 
         innerEvent = eventToEvent(oMapF, iMapB)
         if mapOptions.get('identityMap', False):
