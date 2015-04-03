@@ -45,6 +45,14 @@ def find2(run):
 
 
 def find3(run):
+    return find_gr(run, "/store/data/Commissioning2015/Cosmics/RAW/v1")
+
+
+def find4(run):
+    return find_gr(run, "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1")
+
+
+def find_gr(run, grdir):
     d = grdir
     d += "/000/%3d/%3d/00000/" % (run/1000, run % 1000)
 
@@ -78,7 +86,7 @@ def main(options, args):
     if options.dump == -1:
         options.dump = 0
 
-    for func in [find1, find2, find3]:
+    for func in [find1, find2, find3, find4]:
         ret = func(run)
         if not ret:
             continue
@@ -95,6 +103,4 @@ def main(options, args):
 
 if __name__ == "__main__":
     eosprefix = "root://eoscms.cern.ch/"
-    grdir = "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1"
-    # grdir = "/store/data/Commissioning2015/Cosmics/RAW/v1"
     main(*opts(alsoArgs=True))
