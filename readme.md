@@ -19,10 +19,6 @@ cd cpp; make -j 5; cd -
 ./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF --match=v2 --dump=0 --output-file=output/239480.root --progress
 
 
-# read about usage
-./oneRun.py --help
-
-
 # dump decoded data to stdout
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702,931 --nevents=1 --dump=4
 
@@ -37,6 +33,10 @@ cd cpp; make -j 5; cd -
 # (before move to uTCA ) ./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --patterns | ./diff.py data/ref_vme_G.txt
 ./oneRun.py --file1=$LS1/USC_239099.root --feds1=HCAL --patterns | ./diff.py data/ref_vme_G.txt
 ./oneRun.py --file1=$LS1/USC_239099.root --feds1=uHF  --patterns | ./diff.py data/ref_utca_G.txt
+
+
+# read about usage
+./oneRun.py --help
 ```
 
 ####License
