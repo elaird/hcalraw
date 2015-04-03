@@ -321,7 +321,7 @@ def draw_graph(graph, title="", rate=False):
     else:
         tenPercent = 0.1/60.0  # 1/10 second
 
-    null = r.TH2D("null", ";#color[46]{%s}%stime (minutes)" % (title, " " * 30),
+    null = r.TH2D("null", ";time (minutes);",
                   60, xMin - tenPercent, xMax + tenPercent,
                   3, 0.5, 3.5)
 
@@ -345,6 +345,8 @@ def draw_graph(graph, title="", rate=False):
         hu.SetMaximum(2.0e5)
         keep.append(hu)
         magnify(hu, factor=3.0)
+        hu.GetYaxis().SetTitleOffset(0.25)
+        hu.GetYaxis().SetTitleSize(0.15)
 
         padg.cd(2)
         adjustPad(m={"Bottom": 0.5, "Left": 0.1, "Top": 0.0, "Right": 0.03})
@@ -366,15 +368,16 @@ def draw_graph(graph, title="", rate=False):
         padg.cd()
 
         adjustPad(m={"Bottom": 0.2, "Left": 0.13, "Top": 0.03, "Right": 0.03})
-        h = null
-        h.Draw()
-        magnify(h, factor=3.0)
-        labelYAxis(h, labels={1: t[0], 2: t[1], 3: t[2]})
+        null.Draw()
+        magnify(null, factor=3.0)
+        labelYAxis(null, labels={1: t[0], 2: t[1], 3: t[2]})
         graph.Draw("psame")
+        keep += [null, graph]
+        null.GetXaxis().SetTitleOffset(0.75)
+        null.GetYaxis().SetLabelSize(0.1)
 
-    h.GetXaxis().SetTitleOffset(0.75)
-    h.GetYaxis().SetTitleOffset(0.4)
-    return graph, h, keep
+    print "#color[46]{%s}" % title
+    return keep
 
 
 def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
