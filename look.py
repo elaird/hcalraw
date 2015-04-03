@@ -53,7 +53,7 @@ def find4(run):
 
 
 def find_gr(run, grdir):
-    d = "%s/000/%3d/%3d/00000/" % (grdir, run/1000, run % 1000)
+    d = "%s/000/%03d/%03d/00000/" % (grdir, run/1000, run % 1000)
     stat = "%s stat %s" % (eos(), d)
     ls = stat.replace(" stat ", " ls ")
 
