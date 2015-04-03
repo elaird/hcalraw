@@ -207,7 +207,7 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
     return okFeds
 
 
-def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None):
+def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None, loud=False):
     matched = []
     nonMatched = []
 
@@ -238,6 +238,10 @@ def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None):
             matched.append(coords1)
         else:
             nonMatched.append(coords1)
+            if loud and coords2 in mapF2:
+                c = "%2d %2d%1s %2d %1d"
+                q = " ".join(["%2x"] * len(samples1))
+                print "%s  |  %s  :  %s  |  %s" % (c % coords1, c % coords2, q % samples1, q % tuple(samples2))
 
         if book is not None:
             crate2, slot2, top2, fiber2, _ = coords2
