@@ -6,29 +6,37 @@ cd hcalraw
 source env/lxplus6.sh
 cd cpp; make -j 5; cd -
 
-# read about usage
-./oneRun.py --help
 
-# dump decoded data to stdout
-./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702,931 --nevents=1 --dump=4
+# analyze global runs
+./look.py 235316 --match=v3 --no-warn-unpack
+./look.py 239342
+./look.py 239692
+./look.py 239694
+
 
 # compare payloads of different sets of FEDs, within one file
 ./look.py 239480
 ./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF --match=v2 --dump=0 --output-file=output/239480.root --progress
 
+
+# read about usage
+./oneRun.py --help
+
+
+# dump decoded data to stdout
+./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702,931 --nevents=1 --dump=4
+
+
 # compare payloads of different sets of FEDs, across two files
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --any-emap
 ./oneRun.py --file1=$USC/USC_211154.root --feds1=714,722 --file2=$USC/USC_211155.root --feds2=989 --dump=0 --match=v0 --any-emap --nevents=101 --progress
+
 
 # analyze FE pattern runs
 # (before HO refibering) ./oneRun.py --file1=$LS1/USC_235576.root --feds1=HCAL --patterns | ./diff.py data/ref_2014.txt
 # (before move to uTCA ) ./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --patterns | ./diff.py data/ref_vme_G.txt
 ./oneRun.py --file1=$LS1/USC_239099.root --feds1=HCAL --patterns | ./diff.py data/ref_vme_G.txt
 ./oneRun.py --file1=$LS1/USC_239099.root --feds1=uHF  --patterns | ./diff.py data/ref_utca_G.txt
-
-# analyze global runs
-./look.py 235316 --match=v3 --no-warn-unpack
-./look.py 239342
 ```
 
 ####License
