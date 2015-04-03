@@ -34,12 +34,19 @@ def main(options, args):
     local1 = "data/USC_%d.root" % run
     local2 = "%s/USC_%d.root" % (LS1, run)
     gdir1 = "%s/Cosmics/RAW/v1/000/%3d/%3d/00000/" % (GR2, run/1000, run % 1000)
-    eos = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select"
 
-    if not os.path.exists(eos):
-        eos = "eos"
+    eos = None
+    for _eos in ["eos",
+                 "%s/0.3.84-aquamarine/bin/eos.select" % "/afs/cern.ch/project/eos/installation",
+                 "%s/0.3.84-aquamarine/bin/eos.select" % os.environ["HOME"],
+                 ]:
+        if not os.path.exists(_eos):
+            continue
+        else:
+            eos = _eos
+            break
 
-    if not os.path.exists(eos):
+    if eos is None:
         sys.exit("ERROR: could not find eos.")
 
     if os.path.exists(local1):
