@@ -41,10 +41,14 @@ def find2(run):
 
 
 def find3(run):
-    return find_gr(run, "/store/data/Commissioning2015/Cosmics/RAW/v1")
+    return find_gr(run, "/store/data/Commissioning2015/HcalNZS/RAW/v1")
 
 
 def find4(run):
+    return find_gr(run, "/store/data/Commissioning2015/Cosmics/RAW/v1")
+
+
+def find5(run):
     return find_gr(run, "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1")
 
 
@@ -58,6 +62,14 @@ def find_gr(run, grdir):
         if files:
             l = ",".join(["%s/%s%s" % (eosprefix, d, f) for f in files])
             return l, "v4"
+
+
+def report(file1):
+    fileNames = file1.split(",")
+    pieces = [f.split("/") for f in fileNames]
+    bases = set(["/".join(piece[:-1]) for piece in pieces])
+    assert len(bases) == 1, bases
+    print "Found %d file(s) in %s" % (len(fileNames), "/".join(bases))
 
 
 def main(options, args):
@@ -80,7 +92,7 @@ def main(options, args):
     if options.dump == -1:
         options.dump = 0
 
-    for func in [find1, find2, find3, find4]:
+    for func in [find1, find2, find3, find4, find5]:
         ret = func(run)
         if not ret:
             continue
@@ -89,6 +101,7 @@ def main(options, args):
         if not options.match:
             options.match = match
 
+        report(options.file1)
         oneRun.main(options)
         return
 
