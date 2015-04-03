@@ -58,10 +58,17 @@ def multiY(graph=None):
 
 
 def fillRateHisto(h, g):
+    n = g.GetN()
     x = g.GetX()
     y = g.GetY()
+
+    # make histo coarser if needed
+    if 10 <= n:
+        while n < 2 * h.GetNbinsX():
+            h.Rebin(2)
+
     evn = collections.defaultdict(list)
-    for i in range(g.GetN()):
+    for i in range(n):
         iBin = h.FindBin(x[i])
         evn[iBin].append(y[i])
 
