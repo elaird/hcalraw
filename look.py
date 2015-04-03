@@ -18,11 +18,9 @@ def eos():
     # export EOSSYS=${HOME}/0.3.84-aquamarine
     # export EOS_MGM_URL=root://eoscms.cern.ch
     ################################################
-    aq = "0.3.84-aquamarine/bin/eos.select"
-    for f in ["eos",
-              "%s/%s" % ("/afs/cern.ch/project/eos/installation", aq),
-              "%s/%s" % (os.environ["HOME"], aq),
-              ]:
+
+    for d in ["/afs/cern.ch/project/eos/installation", os.environ["HOME"]]:
+        f = "%s/0.3.84-aquamarine/bin/eos.select" % d
         if os.path.exists(f):
             return f
 
