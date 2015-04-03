@@ -409,6 +409,8 @@ def go(outer={}, inner={}, outputFile="",
                                        "oOrnEvn = %s" % str(oMapF[oEvent]),
                                        "iEvent = %s" % str(iEvent),
                                        ]))
+    else:
+        chainI = None
 
     book = loop(chain=chain, chainI=chainI,
                 outer=outer, inner=inner,
