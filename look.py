@@ -36,6 +36,16 @@ def main(options, args):
     gdir1 = "%s/Cosmics/RAW/v1/000/%3d/%3d/00000/" % (GR2, run/1000, run % 1000)
 
     eos = None
+    #################################
+    # NOTES from local installation #
+    #################################
+    # rsync -av lxplus.cern.ch:/afs/cern.ch/project/eos/installation/0.3.84-aquamarine .
+    # emerge -av readline:5
+    # /usr/lib # ln -s libcrypto.so libcrypto.so.6
+    # edit 0.3.84-aquamarine/bin/eos.select :
+    # export EOSSYS=${HOME}/0.3.84-aquamarine
+    # export EOS_MGM_URL=root://eoscms.cern.ch
+    ################################################
     for _eos in ["eos",
                  "%s/0.3.84-aquamarine/bin/eos.select" % "/afs/cern.ch/project/eos/installation",
                  "%s/0.3.84-aquamarine/bin/eos.select" % os.environ["HOME"],
