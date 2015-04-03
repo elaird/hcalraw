@@ -33,12 +33,6 @@ def setup():
         r.gErrorIgnoreLevel = r.kError
 
 
-def nEvents(tree, nMax):
-    assert tree
-    nEntries = tree.GetEntries()
-    return min(nEntries, nMax) if (nMax is not None) else nEntries
-
-
 def coords(d):
     h = d["header"]
     return h["OrN"], h["BcN"], h["EvN"]
@@ -88,8 +82,12 @@ def eventMaps(s={}, options={}):
 
 
     chain = tchain(s)
-    for iEvent in range(nEvents(chain, s["nEventsMax"])):
-        chain.GetEntry(iEvent)
+
+    iEvent = 0
+    while iEvent != s["nEventsMax"]:
+        if chain.GetEntry(iEvent) <= 0:
+            break
+
         orn = bcn = evn = None
 
         if treeName == "Events":  # CMS CDAQ
@@ -118,6 +116,9 @@ def eventMaps(s={}, options={}):
         forward[iEvent] = t
         backward[t] = iEvent
 
+        iEvent += 1
+
+
     if s["progress"]:
         print
     return forward, backward
@@ -132,11 +133,6 @@ def progress(iEvent, iMask):
 
 
 def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
-    if inner:
-        treeI = tchain(inner)
-
-    tree = tchain(outer)
-
     if outer["progress"]:
         iMask = 0
         print "Looping:"
@@ -144,26 +140,33 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
     kargs = {"book": book}
     kargs.update(compareOptions)
 
+    chainI = tchain(inner) if inner else None
+    chain = tchain(outer)
+
     try:
-        for iOuterEvent in range(outer["nEventsSkip"], nEvents(tree, outer["nEventsMax"])):
-            nb = tree.GetEntry(iOuterEvent)
-            if nb <= 0:
-                continue
+        iOuterEvent = outer["nEventsSkip"]
+        while iOuterEvent != outer["nEventsMax"]:
+            if chain.GetEntry(iOuterEvent) <= 0:
+                break
 
             if outer["progress"]:
                 iMask = progress(iOuterEvent, iMask)
 
-            kargs["raw1"] = collectedRaw(tree=tree, specs=outer)
+            kargs["raw1"] = collectedRaw(tree=chain, specs=outer)
 
             if inner:
                 iInnerEvent = innerEvent[iOuterEvent]
-                if (iInnerEvent is None) or (treeI.GetEntry(iInnerEvent) <= 0):
+                if iInnerEvent is None:
                     continue
-                kargs["raw2"] = collectedRaw(tree=treeI, specs=inner)
+                if chainI.GetEntry(iInnerEvent) <= 0:
+                    break
+
+                kargs["raw2"] = collectedRaw(tree=chainI, specs=inner)
 
             if outer["unpack"]:
                 compare.compare(**kargs)
 
+            iOuterEvent += 1
     except KeyboardInterrupt:
         printer.warning("KeyboardInterrupt after %d events." % iOuterEvent)
 
