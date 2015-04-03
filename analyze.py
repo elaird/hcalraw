@@ -59,7 +59,13 @@ def eventMaps(s={}, options={}):
     fedId0 = s["fedIds"][0]
     if treeName == "Events":  # CMS CDAQ
         chain.SetBranchStatus("*", 0)
-        chain.SetBranchStatus(s["rawCollection"], 1)
+        branch = s["rawCollection"]
+        if s["product"]:
+            # chain.SetBranchStatus(branch + ".", 1)
+            chain.SetBranchStatus(branch + ".obj", 1)
+            chain.SetBranchStatus(branch + ".present", 1)
+        else:
+            chain.SetBranchStatus(branch, 1)
     else:
         branch0 = s["branch"](fedId0)
 
