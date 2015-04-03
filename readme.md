@@ -48,7 +48,7 @@ cd cpp; make -j 5; cd -
 
 ####Environment (SLC6/AFS)
 (use exactly one of these)
-* `env/lxplus6.sh` sets up CMSSW, EOS, and the environment vars LS1,GR2
+* `env/lxplus6.sh` sets up CMSSW, EOS, and the environment vars LS1,USC
 * `env/slc6-pypy.sh` sets up pypyROOT (outside of CMSSW)
 * `env/slc6-root6.sh` sets up a ROOT 6 environment (outside of CMSSW)
 
