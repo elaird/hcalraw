@@ -151,7 +151,9 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOpti
             if inner:
                 iInnerEvent = innerEvent[iOuterEvent]
                 if iInnerEvent is None:
+                    iOuterEvent += 1
                     continue
+
                 if chainI.GetEntry(iInnerEvent) <= 0:
                     break
 
