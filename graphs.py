@@ -410,6 +410,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
                      names=["BcN",
                             "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples", "nTpSamples",
                             "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "LMSEPVC", "ErrF0",
+                            "", "", "", "", "nTS_for_matching",
                             # "TTS", "PopCapFrac",
                             ], feds1=feds1, feds2=feds2)
 
