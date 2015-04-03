@@ -23,9 +23,7 @@ def eos():
               "%s/%s" % ("/afs/cern.ch/project/eos/installation", aq),
               "%s/%s" % (os.environ["HOME"], aq),
               ]:
-        if not os.path.exists(f):
-            continue
-        else:
+        if os.path.exists(f):
             return f
 
     sys.exit("ERROR: could not find eos.")
