@@ -48,22 +48,20 @@ def coords(d):
 # one maps TTree entry to (orn, evn)
 # the other maps the reverse
 def eventMaps(s={}, options={}):
-    fileNames = s["fileNames"]
-    treeName = s["treeName"]
-    assert fileNames
-    assert treeName
-
-    nEventsMax = s["nEventsMax"]
-    if treeName != "Events":
-        fedId0 = s["fedIds"][0]
-        branch0 = s["branch"](fedId0)
-
     forward = {}
     backward = {}
 
+    treeName = s["treeName"]
     chain = r.TChain(treeName)
-    for fileName in fileNames:
+    for fileName in s["fileNames"]:
         chain.Add(fileName)
+
+    fedId0 = s["fedIds"][0]
+    if treeName == "Events":  # CMS CDAQ
+        chain.SetBranchStatus("*", 0)
+        chain.SetBranchStatus(s["rawCollection"], 1)
+    else:
+        branch0 = s["branch"](fedId0)
 
     if s["progress"]:
         iMask = 0
@@ -74,12 +72,11 @@ def eventMaps(s={}, options={}):
              "skipWords64": s["skipWords64"],
              }
 
-    for iEvent in range(nEvents(chain, nEventsMax)):
+    for iEvent in range(nEvents(chain, s["nEventsMax"])):
         chain.GetEntry(iEvent)
         orn = bcn = evn = None
 
         if treeName == "Events":  # CMS CDAQ
-            fedId0 = s["fedIds"][0]
             rawThisFed = wordsOneFed(tree=chain,
                                      fedId=fedId0,
                                      collection=s["rawCollection"],
