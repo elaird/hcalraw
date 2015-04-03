@@ -305,7 +305,7 @@ def draw_graph(graph, pad1, title="", rate=False):
     t = graph.GetTitle().split("_")
 
     pad1.cd()
-    adjustPad(m={"Bottom": 0.2, "Left": 0.1 if rate else 0.13, "Top": 0.2, "Right": 0.0})
+    adjustPad(m={"Bottom": 0.2, "Left": 0.1 if rate else 0.13, "Top": 0.05, "Right": 0.0})
 
     xMin, xMax = xMin_xMax(graph)
     delta = xMax - xMin
@@ -314,7 +314,7 @@ def draw_graph(graph, pad1, title="", rate=False):
     else:
         tenPercent = 0.1/60.0  # 1/10 second
 
-    null = r.TH2D("null", "%s;time (minutes)" % title,
+    null = r.TH2D("null", ";#color[46]{%s}%stime (minutes)" % (title, " " * 30),
                   60, xMin - tenPercent, xMax + tenPercent,
                   3, 0.5, 3.5)
 
@@ -349,13 +349,6 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     pad1.Draw()
 
     keep = []
-
-    # category/rate graph
-    r.gStyle.SetTitleBorderSize(0)
-    r.gStyle.SetTitleX(0.53)
-    r.gStyle.SetTitleY(0.9)
-    r.gStyle.SetTitleFontSize(0.12)
-    r.gStyle.SetTitleAlign(22)
 
     title = f.GetPath()
     cats = f.Get("category_vs_time")
