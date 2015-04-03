@@ -345,8 +345,9 @@ def draw_graph(graph, title="", rate=False):
         hu.SetMaximum(2.0e5)
         keep.append(hu)
         magnify(hu, factor=3.0)
-        hu.GetYaxis().SetTitleOffset(0.25)
         hu.GetYaxis().SetTitleSize(0.15)
+        hu.GetYaxis().SetTitleOffset(0.2)
+        hu.GetYaxis().SetLabelOffset(0.001)
 
         padg.cd(2)
         adjustPad(m={"Bottom": 0.5, "Left": 0.1, "Top": 0.0, "Right": 0.03})
@@ -367,7 +368,7 @@ def draw_graph(graph, title="", rate=False):
         padg.Draw()
         padg.cd()
 
-        adjustPad(m={"Bottom": 0.2, "Left": 0.13, "Top": 0.03, "Right": 0.03})
+        adjustPad(m={"Bottom": 0.2, "Left": 0.15, "Top": 0.03, "Right": 0.03})
         null.Draw()
         magnify(null, factor=3.0)
         labelYAxis(null, labels={1: t[0], 2: t[1], 3: t[2]})
@@ -376,7 +377,14 @@ def draw_graph(graph, title="", rate=False):
         null.GetXaxis().SetTitleOffset(0.75)
         null.GetYaxis().SetLabelSize(0.1)
 
-    print "#color[46]{%s}" % title
+    padg.cd(0)
+    latex = r.TLatex()
+    latex.SetNDC()
+    latex.SetTextAngle(90)
+    latex.SetTextSize(0.18)
+    latex.SetTextAlign(33)
+    title = title.replace("output/", "").replace(".root:/", "")
+    keep.append(latex.DrawLatex(0.01, 0.98, "#color[46]{Run %s}" % title))
     return keep
 
 
