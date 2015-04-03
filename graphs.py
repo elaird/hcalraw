@@ -346,7 +346,7 @@ def draw_graph(graph, title="", rate=False):
         keep.append(hu)
         magnify(hu, factor=3.0)
         hu.GetYaxis().SetTitleSize(0.15)
-        hu.GetYaxis().SetTitleOffset(0.2)
+        hu.GetYaxis().SetTitleOffset(0.18)
         hu.GetYaxis().SetLabelOffset(0.001)
 
         padg.cd(2)
@@ -384,7 +384,9 @@ def draw_graph(graph, title="", rate=False):
     latex.SetTextSize(0.18)
     latex.SetTextAlign(33)
     title = title.replace("output/", "").replace(".root:/", "")
-    keep.append(latex.DrawLatex(0.01, 0.98, "#color[46]{Run %s}" % title))
+    #fmt = "#color[46]{#frac{#lower[-0.15]{|}Run %s}{}}"
+    fmt = "#color[46]{Run %s}"
+    keep.append(latex.DrawLatex(0.01, 0.98, fmt % title))
     return keep
 
 
