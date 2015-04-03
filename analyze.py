@@ -62,7 +62,7 @@ def tchain(spec, cacheSizeMB=None):
 # this function returns two dictionaries,
 # one maps TTree entry to (orn, evn)
 # the other maps the reverse
-def eventMaps(s={}, options={}):
+def eventMaps(chain, s={}):
     forward = {}
     backward = {}
 
@@ -79,9 +79,6 @@ def eventMaps(s={}, options={}):
              "nBytesPer": s["nBytesPer"],
              "skipWords64": s["skipWords64"],
              }
-
-
-    chain = tchain(s)
 
     iEvent = 0
     while iEvent != s["nEventsMax"]:
@@ -132,16 +129,13 @@ def progress(iEvent, iMask):
         return iMask
 
 
-def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
+def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOptions={}):
     if outer["progress"]:
         iMask = 0
         print "Looping:"
 
-    kargs = {"book": book}
+    kargs = {"book": autoBook.autoBook("book")}
     kargs.update(compareOptions)
-
-    chainI = tchain(inner) if inner else None
-    chain = tchain(outer)
 
     try:
         iOuterEvent = outer["nEventsSkip"]
@@ -169,6 +163,7 @@ def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
             iOuterEvent += 1
     except KeyboardInterrupt:
         printer.warning("KeyboardInterrupt after %d events." % iOuterEvent)
+    return kargs["book"]
 
 
 def collectedRaw(tree=None, specs={}):
@@ -377,7 +372,7 @@ def graph(d={}):
     return gr
 
 
-def eventToEvent(mapF={}, mapB={}, options={}):
+def eventToEvent(mapF={}, mapB={}):
     out = {}
     for oEvent, ornEvn in mapF.iteritems():
         out[oEvent] = None
@@ -394,12 +389,15 @@ def go(outer={}, inner={}, outputFile="",
     innerEvent = {}
     deltaOrn = {}
 
-    oMapF, oMapB = eventMaps(outer)
+    chain = tchain(outer)
+    oMapF, oMapB = eventMaps(chain, outer)
     iMapF = iMapB = {}
 
     if inner:
-        iMapF, iMapB = eventMaps(inner)
-        innerEvent = eventToEvent(oMapF, iMapB, options=mapOptions)
+        chainI = tchain(inner)
+        iMapF, iMapB = eventMaps(chainI, inner)
+
+        innerEvent = eventToEvent(oMapF, iMapB)
         if mapOptions.get('identityMap', False):
             for key in innerEvent.keys():
                 innerEvent[key] = key
@@ -412,9 +410,10 @@ def go(outer={}, inner={}, outputFile="",
                                        "iEvent = %s" % str(iEvent),
                                        ]))
 
-    book = autoBook.autoBook("book")
-    loop(inner=inner, outer=outer, innerEvent=innerEvent,
-         book=book, compareOptions=compareOptions)
+    book = loop(chain=chain, chainI=chainI,
+                outer=outer, inner=inner,
+                innerEvent=innerEvent,
+                compareOptions=compareOptions)
 
     #write results to a ROOT file
     dirName = os.path.dirname(outputFile)
