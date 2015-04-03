@@ -303,8 +303,8 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
     dump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
 
     if anyEmap:
-        mapF1, mapB1, _, _ = dataMap(raw1)
-        mapF2, mapB2, _, _ = dataMap(raw2)
+        mapF1, mapB1, _, _ = dataMap(raw1, book)
+        mapF2, mapB2, _, _ = dataMap(raw2, book)
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
         tMatched12 = tNonMatched12 = []
@@ -314,8 +314,8 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
            reportMatched(matched12)
            reportFailed(nonMatched12)
     else:
-        mapF1, _, _, nPre1 = dataMap(raw1)
-        mapF2, _, _, nPre2 = dataMap(raw2)
+        mapF1, _, _, nPre1 = dataMap(raw1, book)
+        mapF2, _, _, nPre2 = dataMap(raw2, book)
         matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book)
         if dump:
             matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1, nPre2, nPre1)
@@ -417,7 +417,7 @@ def matchStats(f={}, b={}):
     return matched, failed
 
 
-def dataMap(raw={}):
+def dataMap(raw={}, book=None):
     okErrF = matching.okErrF
 
     forward = {}
@@ -449,6 +449,8 @@ def dataMap(raw={}):
                     skipped.append(coords)
                     continue
 
+                book.fill(len(tsRange), "nTS_for_matching_%d" % fedId, 12, -0.5, 11.5,
+                          title="FED %d;no. TS used for ADC-matching;Channels / bin" % fedId)
                 data = tuple([qie.get(i) for i in tsRange])
                 # print coords, tsRange, [hex(d) for d in data]
                 forward[coords] = data
