@@ -7,6 +7,29 @@ import oneRun
 from options import opts
 
 
+def find_eos():
+    #################################
+    # NOTES from local installation #
+    #################################
+    # rsync -av lxplus.cern.ch:/afs/cern.ch/project/eos/installation/0.3.84-aquamarine .
+    # emerge -av readline:5
+    # /usr/lib # ln -s libcrypto.so libcrypto.so.6
+    # edit 0.3.84-aquamarine/bin/eos.select :
+    # export EOSSYS=${HOME}/0.3.84-aquamarine
+    # export EOS_MGM_URL=root://eoscms.cern.ch
+    ################################################
+    for eos in ["eos",
+                 "%s/0.3.84-aquamarine/bin/eos.select" % "/afs/cern.ch/project/eos/installation",
+                 "%s/0.3.84-aquamarine/bin/eos.select" % os.environ["HOME"],
+                 ]:
+        if not os.path.exists(eos):
+            continue
+        else:
+            return eos
+
+    sys.exit("ERROR: could not find eos.")
+
+
 def main(options, args):
     if len(args) != 1:
         sys.exit("Please provide a run number as the argument.")
@@ -27,6 +50,7 @@ def main(options, args):
     if options.dump == -1:
         options.dump = 0
 
+    eos = find_eos()
     stem = "root://eoscms.cern.ch/"
     LS1 = "%s/store/group/dpg_hcal/comm_hcal/LS1" % stem
     GR2 = "%s/store/data/Commissioning2015" % stem
@@ -36,13 +60,6 @@ def main(options, args):
     local2 = "%s/USC_%d.root" % (LS1, run)
     # gdir1 = "%s/Cosmics/RAW/v1/000/%3d/%3d/00000/" % (GR2, run/1000, run % 1000)
     gdir1 = "%s/000/%3d/%3d/00000/" % (SPL, run/1000, run % 1000)
-    eos = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select"
-
-    if not os.path.exists(eos):
-        eos = "eos"
-
-    if not os.path.exists(eos):
-        sys.exit("ERROR: could not find eos.")
 
     if os.path.exists(local1):
         options.file1 = local1
