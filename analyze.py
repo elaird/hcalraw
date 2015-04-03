@@ -525,7 +525,8 @@ def oneRun(files1=[],
     inner = {}
 
     if files2:
-        assert feds2
+        if not feds2:
+            sys.exit("files2 '%s' but feds2 %s" % (files2, feds2))
         spec2 = fileSpec(files2)
         spec2.update(common)
         spec2.update({"fedIds": feds2,
