@@ -44,6 +44,27 @@ def coords(d):
     return h["OrN"], h["BcN"], h["EvN"]
 
 
+def tchain(spec, cacheSizeMB=None):
+    chain = r.TChain(spec["treeName"])
+    for fileName in spec["fileNames"]:
+        chain.Add(fileName)
+
+    if cacheSizeMB:
+        chain.SetCacheSize(cacheSizeMB * 1024**2)
+
+    if spec["treeName"] == "Events":  # CMS CDAQ
+        chain.SetBranchStatus("*", 0)
+        branch = spec["rawCollection"]
+        if spec["product"]:
+            # chain.SetBranchStatus(branch + ".", 1)
+            chain.SetBranchStatus(branch + ".obj", 1)
+            chain.SetBranchStatus(branch + ".present", 1)
+        else:
+            chain.SetBranchStatus(branch, 1)
+
+    return chain
+
+
 # this function returns two dictionaries,
 # one maps TTree entry to (orn, evn)
 # the other maps the reverse
@@ -52,21 +73,8 @@ def eventMaps(s={}, options={}):
     backward = {}
 
     treeName = s["treeName"]
-    chain = r.TChain(treeName)
-    for fileName in s["fileNames"]:
-        chain.Add(fileName)
-
     fedId0 = s["fedIds"][0]
-    if treeName == "Events":  # CMS CDAQ
-        chain.SetBranchStatus("*", 0)
-        branch = s["rawCollection"]
-        if s["product"]:
-            # chain.SetBranchStatus(branch + ".", 1)
-            chain.SetBranchStatus(branch + ".obj", 1)
-            chain.SetBranchStatus(branch + ".present", 1)
-        else:
-            chain.SetBranchStatus(branch, 1)
-    else:
+    if treeName != "Events":
         branch0 = s["branch"](fedId0)
 
     if s["progress"]:
@@ -78,6 +86,8 @@ def eventMaps(s={}, options={}):
              "skipWords64": s["skipWords64"],
              }
 
+
+    chain = tchain(s)
     for iEvent in range(nEvents(chain, s["nEventsMax"])):
         chain.GetEntry(iEvent)
         orn = bcn = evn = None
@@ -119,16 +129,6 @@ def progress(iEvent, iMask):
         return iMask + 1
     else:
         return iMask
-
-
-def tchain(spec, cacheSizeMB=None):
-    chain = r.TChain(spec["treeName"])
-    for fileName in spec["fileNames"]:
-        chain.Add(fileName)
-
-    if cacheSizeMB:
-        chain.SetCacheSize(cacheSizeMB * 1024**2)
-    return chain
 
 
 def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
