@@ -7,6 +7,63 @@ import oneRun
 from options import opts
 
 
+def eos():
+    #################################
+    # NOTES from local installation #
+    #################################
+    # rsync -av lxplus.cern.ch:/afs/cern.ch/project/eos/installation/0.3.84-aquamarine .
+    # emerge -av readline:5
+    # /usr/lib # ln -s libcrypto.so libcrypto.so.6
+    # edit 0.3.84-aquamarine/bin/eos.select :
+    # export EOSSYS=${HOME}/0.3.84-aquamarine
+    # export EOS_MGM_URL=root://eoscms.cern.ch
+    ################################################
+    aq = "0.3.84-aquamarine/bin/eos.select"
+    for f in ["eos",
+              "%s/%s" % ("/afs/cern.ch/project/eos/installation", aq),
+              "%s/%s" % (os.environ["HOME"], aq),
+              ]:
+        if not os.path.exists(f):
+            continue
+        else:
+            return f
+
+    sys.exit("ERROR: could not find eos.")
+
+
+def find1(run):
+    for local in ["tmp/USC_%d.root" % run, "data/USC_%d.root" % run]:
+        if os.path.exists(local):
+            return local, "v2"
+
+
+def find2(run):
+    LS1 = "/store/group/dpg_hcal/comm_hcal/LS1/USC_%d.root" % run
+    stat = "%s stat %s" % (eos(), LS1)
+    if not utils.commandOutputFull(stat)["returncode"]:
+        return "%s/%s" % (eosprefix, LS1), "v2"
+
+
+def find3(run):
+    return find_gr(run, "/store/data/Commissioning2015/Cosmics/RAW/v1")
+
+
+def find4(run):
+    return find_gr(run, "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1")
+
+
+def find_gr(run, grdir):
+    d = "%s/000/%03d/%03d/00000/" % (grdir, run/1000, run % 1000)
+    stat = "%s stat %s" % (eos(), d)
+    ls = stat.replace(" stat ", " ls ")
+
+    if not utils.commandOutputFull(stat)["returncode"]:
+        files = filter(lambda x: x, utils.commandOutputFull(ls)["stdout"].split("\n"))
+        if files:
+            l = ",".join(["%s/%s%s" % (eosprefix, d, f) for f in files])
+            return l, "v4"
+
+
 def main(options, args):
     if len(args) != 1:
         sys.exit("Please provide a run number as the argument.")
@@ -27,58 +84,21 @@ def main(options, args):
     if options.dump == -1:
         options.dump = 0
 
-    stem = "root://eoscms.cern.ch/"
-    LS1 = "%s/store/group/dpg_hcal/comm_hcal/LS1" % stem
-    GR2 = "%s/store/data/Commissioning2015" % stem
-
-    local1 = "data/USC_%d.root" % run
-    local2 = "%s/USC_%d.root" % (LS1, run)
-    gdir1 = "%s/Cosmics/RAW/v1/000/%3d/%3d/00000/" % (GR2, run/1000, run % 1000)
-
-    eos = None
-    #################################
-    # NOTES from local installation #
-    #################################
-    # rsync -av lxplus.cern.ch:/afs/cern.ch/project/eos/installation/0.3.84-aquamarine .
-    # emerge -av readline:5
-    # /usr/lib # ln -s libcrypto.so libcrypto.so.6
-    # edit 0.3.84-aquamarine/bin/eos.select :
-    # export EOSSYS=${HOME}/0.3.84-aquamarine
-    # export EOS_MGM_URL=root://eoscms.cern.ch
-    ################################################
-    for _eos in ["eos",
-                 "%s/0.3.84-aquamarine/bin/eos.select" % "/afs/cern.ch/project/eos/installation",
-                 "%s/0.3.84-aquamarine/bin/eos.select" % os.environ["HOME"],
-                 ]:
-        if not os.path.exists(_eos):
+    for func in [find1, find2, find3, find4]:
+        ret = func(run)
+        if not ret:
             continue
-        else:
-            eos = _eos
-            break
 
-    if eos is None:
-        sys.exit("ERROR: could not find eos.")
+        options.file1, match = ret
+        if not options.match:
+            options.match = match
 
-    if os.path.exists(local1):
-        options.file1 = local1
-        if not options.match:
-            options.match = "v2"
-    elif not utils.commandOutputFull("%s stat %s" % (eos, local2.replace(stem, "")))["returncode"]:
-        options.file1 = local2
-        if not options.match:
-            options.match = "v2"
-    elif not utils.commandOutputFull("%s stat %s" % (eos, gdir1.replace(stem, "")))["returncode"]:
-        files = utils.commandOutputFull("%s ls %s" % (eos, gdir1.replace(stem, "")))["stdout"].split("\n")
-        if files:
-            options.file1 = "%s/%s" % (gdir1, files[0])
-        if not options.match:
-            options.match = "v4"
-
-    if options.file1:
         oneRun.main(options)
-    else:
-        sys.exit("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
+        return
+
+    sys.exit("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
 
 
 if __name__ == "__main__":
+    eosprefix = "root://eoscms.cern.ch/"
     main(*opts(alsoArgs=True))

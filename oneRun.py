@@ -34,13 +34,17 @@ def check_and_adjust(options):
 
 def go(options):
     kargs = subset(options, ["feds1", "feds2"], process=True)
-    kargs.update(subset(options, ["file1", "file2", "nEvents", "nEventsSkip", "outputFile", "noUnpack", "patterns"]))
-
+    kargs.update(subset(options, ["nEvents", "nEventsSkip", "outputFile", "noUnpack", "patterns"]))
     kargs["compareOptions"] = subset(options, ["adcPlots", "anyEmap", "printEmap"])
     kargs["mapOptions"] = subset(options, ["printEventMap", "identityMap"])
     kargs["printOptions"] = subset(options, ["dump", "progress"])
     kargs["printOptions"]["warn"] = not options.noWarnUnpack
     kargs["printOptions"]["crateslots"] = sw.fedList(options.crateslots)
+
+    for iFile in [1, 2]:
+        value = getattr(options, "file%d" % iFile)
+        if value:
+            kargs["files%d" % iFile] = value.split(",")
 
     analyze.oneRun(**kargs)
 

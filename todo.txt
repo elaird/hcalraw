@@ -1,4 +1,6 @@
-TChain support
+skip file mapping when files1 == files2
 improve storage structures
 performance
 cp old deadbeef
+split compare
+L1A rate plot

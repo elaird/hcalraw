@@ -33,42 +33,43 @@ def setup():
         r.gErrorIgnoreLevel = r.kError
 
 
-def nEvents(tree, nMax):
-    assert tree
-    nEntries = tree.GetEntries()
-    return min(nEntries, nMax) if (nMax is not None) else nEntries
-
-
 def coords(d):
     h = d["header"]
     return h["OrN"], h["BcN"], h["EvN"]
 
 
+def tchain(spec, cacheSizeMB=None):
+    chain = r.TChain(spec["treeName"])
+    for fileName in spec["fileNames"]:
+        chain.Add(fileName)
+
+    if cacheSizeMB:
+        chain.SetCacheSize(cacheSizeMB * 1024**2)
+
+    if spec["treeName"] == "Events":  # CMS CDAQ
+        chain.SetBranchStatus("*", 0)
+        branch = spec["rawCollection"]
+        if spec["product"]:
+            # chain.SetBranchStatus(branch + ".", 1)
+            chain.SetBranchStatus(branch + ".obj", 1)
+            chain.SetBranchStatus(branch + ".present", 1)
+        else:
+            chain.SetBranchStatus(branch, 1)
+
+    return chain
+
+
 # this function returns two dictionaries,
 # one maps TTree entry to (orn, evn)
 # the other maps the reverse
-def eventMaps(s={}, options={}):
-    fileName = s["fileName"]
-    treeName = s["treeName"]
-    assert fileName
-    assert treeName
-
-    nEventsMax = s["nEventsMax"]
-    if treeName != "Events":
-        fedId0 = s["fedIds"][0]
-        branch0 = s["branch"](fedId0)
-
+def eventMaps(chain, s={}):
     forward = {}
     backward = {}
 
-    f = r.TFile.Open(fileName)
-    if (not f) or f.IsZombie():
-        sys.exit("File %s could not be opened." % fileName)
-
-    tree = f.Get(treeName)
-    if not tree:
-        f.ls()
-        sys.exit("tree %s not found.  The above objects are available." % treeName)
+    treeName = s["treeName"]
+    fedId0 = s["fedIds"][0]
+    if treeName != "Events":
+        branch0 = s["branch"](fedId0)
 
     if s["progress"]:
         iMask = 0
@@ -79,21 +80,23 @@ def eventMaps(s={}, options={}):
              "skipWords64": s["skipWords64"],
              }
 
-    for iEvent in range(nEvents(tree, nEventsMax)):
-        tree.GetEntry(iEvent)
+    iEvent = 0
+    while iEvent != s["nEventsMax"]:
+        if chain.GetEntry(iEvent) <= 0:
+            break
+
         orn = bcn = evn = None
 
         if treeName == "Events":  # CMS CDAQ
-            fedId0 = s["fedIds"][0]
-            rawThisFed = wordsOneFed(tree=tree,
+            rawThisFed = wordsOneFed(tree=chain,
                                      fedId=fedId0,
                                      collection=s["rawCollection"],
                                      product=s["product"]
                                  )
         elif treeName == "CMSRAW":  # HCAL local
-            rawThisFed = wordsOneChunk(tree=tree, branch=branch0)
+            rawThisFed = wordsOneChunk(tree=chain, branch=branch0)
         else:
-            rawThisFed = wordsOneBranch(tree=tree, branch=branch0)
+            rawThisFed = wordsOneBranch(tree=chain, branch=branch0)
 
         raw = unpacked(fedData=rawThisFed, **kargs)
         if not raw["nBytesSW"]:
@@ -110,7 +113,9 @@ def eventMaps(s={}, options={}):
         forward[iEvent] = t
         backward[t] = iEvent
 
-    f.Close()
+        iEvent += 1
+
+
     if s["progress"]:
         print
     return forward, backward
@@ -124,54 +129,41 @@ def progress(iEvent, iMask):
         return iMask
 
 
-def openedFile(spec, cacheSizeMB=None):
-    f = r.TFile.Open(spec["fileName"])
-    tree = f.Get(spec["treeName"])
-    assert tree, spec["treeName"]
-    if cacheSizeMB:
-        tree.SetCacheSize(cacheSizeMB * 1024**2)
-    return f, tree
-
-
-def loop(inner={}, outer={}, innerEvent={}, book={}, compareOptions={}):
-    if inner:
-        fI, treeI = openedFile(inner)
-
-    f, tree = openedFile(outer)
-
+def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOptions={}):
     if outer["progress"]:
         iMask = 0
         print "Looping:"
 
-    kargs = {"book": book}
+    kargs = {"book": autoBook.autoBook("book")}
     kargs.update(compareOptions)
 
     try:
-        for iOuterEvent in range(outer["nEventsSkip"], nEvents(tree, outer["nEventsMax"])):
-            nb = tree.GetEntry(iOuterEvent)
-            if nb <= 0:
-                continue
+        iOuterEvent = outer["nEventsSkip"]
+        while iOuterEvent != outer["nEventsMax"]:
+            if chain.GetEntry(iOuterEvent) <= 0:
+                break
 
             if outer["progress"]:
                 iMask = progress(iOuterEvent, iMask)
 
-            kargs["raw1"] = collectedRaw(tree=tree, specs=outer)
+            kargs["raw1"] = collectedRaw(tree=chain, specs=outer)
 
             if inner:
                 iInnerEvent = innerEvent[iOuterEvent]
-                if (iInnerEvent is None) or (treeI.GetEntry(iInnerEvent) <= 0):
+                if iInnerEvent is None:
                     continue
-                kargs["raw2"] = collectedRaw(tree=treeI, specs=inner)
+                if chainI.GetEntry(iInnerEvent) <= 0:
+                    break
+
+                kargs["raw2"] = collectedRaw(tree=chainI, specs=inner)
 
             if outer["unpack"]:
                 compare.compare(**kargs)
 
+            iOuterEvent += 1
     except KeyboardInterrupt:
         printer.warning("KeyboardInterrupt after %d events." % iOuterEvent)
-
-    f.Close()
-    if inner:
-        fI.Close()
+    return kargs["book"]
 
 
 def collectedRaw(tree=None, specs={}):
@@ -380,7 +372,7 @@ def graph(d={}):
     return gr
 
 
-def eventToEvent(mapF={}, mapB={}, options={}):
+def eventToEvent(mapF={}, mapB={}):
     out = {}
     for oEvent, ornEvn in mapF.iteritems():
         out[oEvent] = None
@@ -397,12 +389,15 @@ def go(outer={}, inner={}, outputFile="",
     innerEvent = {}
     deltaOrn = {}
 
-    oMapF, oMapB = eventMaps(outer)
+    chain = tchain(outer)
+    oMapF, oMapB = eventMaps(chain, outer)
     iMapF = iMapB = {}
 
     if inner:
-        iMapF, iMapB = eventMaps(inner)
-        innerEvent = eventToEvent(oMapF, iMapB, options=mapOptions)
+        chainI = tchain(inner)
+        iMapF, iMapB = eventMaps(chainI, inner)
+
+        innerEvent = eventToEvent(oMapF, iMapB)
         if mapOptions.get('identityMap', False):
             for key in innerEvent.keys():
                 innerEvent[key] = key
@@ -414,10 +409,13 @@ def go(outer={}, inner={}, outputFile="",
                                        "oOrnEvn = %s" % str(oMapF[oEvent]),
                                        "iEvent = %s" % str(iEvent),
                                        ]))
+    else:
+        chainI = None
 
-    book = autoBook.autoBook("book")
-    loop(inner=inner, outer=outer, innerEvent=innerEvent,
-         book=book, compareOptions=compareOptions)
+    book = loop(chain=chain, chainI=chainI,
+                outer=outer, inner=inner,
+                innerEvent=innerEvent,
+                compareOptions=compareOptions)
 
     #write results to a ROOT file
     dirName = os.path.dirname(outputFile)
@@ -476,34 +474,35 @@ def bail(specs, fileName):
     sys.exit(msg)
 
 
-def fileSpec(fileName=""):
-    f = r.TFile.Open(fileName)
+def fileSpec(fileNames=[]):
+    f = r.TFile.Open(fileNames[0])
     if (not f) or f.IsZombie():
-        sys.exit("File %s could not be opened." % fileName)
+        sys.exit("File %s could not be opened." % fileNames[0])
 
     treeNames = []
     for tkey in f.GetListOfKeys():
         obj = f.Get(tkey.GetName())
         if obj.ClassName() == "TTree":
             treeNames.append(obj.GetName())
+    f.Close()
 
     specs = []
     for treeName in set(treeNames):  # set accomodate cycles, e.g. CMSRAW;3 CMSRAW;4
         spec = sw.format(treeName)
         if spec:
+            spec["fileNames"] = fileNames
             spec["treeName"] = treeName
             specs.append(spec)
 
     if len(specs) != 1:
-        bail(specs, fileName)
+        bail(specs, fileName[0])
     else:
         return specs[0]
-    f.Close()
 
 
-def oneRun(file1="",
+def oneRun(files1=[],
            feds1=[],
-           file2="",
+           files2=[],
            feds2=[],
            patterns=False,
            mapOptions={},
@@ -515,7 +514,7 @@ def oneRun(file1="",
            outputFile="",
            ):
 
-    assert file1
+    assert files1
     assert feds1
 
     common = {"nEventsMax": nEvents,
@@ -525,21 +524,20 @@ def oneRun(file1="",
               }
     common.update(printOptions)
 
-    spec1 = fileSpec(file1)
+    spec1 = fileSpec(files1)
     spec1.update(common)
-    spec1.update({"fileName": file1,
-                  "fedIds": feds1,
-                  "label": "file1",
+    spec1.update({"fedIds": feds1,
+                  "label": "files1",
                   })
     inner = {}
 
-    if file2:
-        assert feds2
-        spec2 = fileSpec(file2)
+    if files2:
+        if not feds2:
+            sys.exit("files2 '%s' but feds2 %s" % (files2, feds2))
+        spec2 = fileSpec(files2)
         spec2.update(common)
-        spec2.update({"fileName": file2,
-                      "fedIds": feds2,
-                      "label": "file2",
+        spec2.update({"fedIds": feds2,
+                      "label": "files2",
                       })
         inner = spec2
 
@@ -548,8 +546,8 @@ def oneRun(file1="",
        outputFile=outputFile,
        mapOptions=mapOptions,
        compareOptions=compareOptions,
-       printEventSummary=(not patterns) and (file1 != file2) and 0 <= common["dump"],
-       printChannelSummary=file2 and 0 <= common["dump"],
+       printEventSummary=(not patterns) and (files1 != files2) and 0 <= common["dump"],
+       printChannelSummary=files2 and 0 <= common["dump"],
        )
 
 
