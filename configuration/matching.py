@@ -86,7 +86,7 @@ def tsRange_v4a(fedId=None, slot=None, fibCh=None, utca=None):
     global __utcaBcnDelta
     __utcaBcnDelta = -131
 
-    if fed < 1000:
+    if fedId < 1000:
         return [0, 1]
     else:
         return [4, 5]
