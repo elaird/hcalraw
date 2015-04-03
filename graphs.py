@@ -295,7 +295,7 @@ def plotList(f, pad, offset=None, names=[], logY=True, logX=False, logZ=False, g
     return keep
 
 
-def draw_graph(graph, pad1, title="", rate=False):
+def draw_graph(graph, pad, title="", rate=False):
     if not graph:
         return
 
@@ -304,7 +304,7 @@ def draw_graph(graph, pad1, title="", rate=False):
     graph.SetMarkerSize(0.5*graph.GetMarkerSize())
     t = graph.GetTitle().split("_")
 
-    pad1.cd()
+    pad.cd()
     adjustPad(m={"Bottom": 0.2, "Left": 0.1 if rate else 0.13, "Top": 0.05, "Right": 0.0})
 
     xMin, xMax = xMin_xMax(graph)
@@ -341,25 +341,25 @@ def draw_graph(graph, pad1, title="", rate=False):
 
 
 def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
-    pad1 = r.TPad("pad1", "pad1", 0.00, 0.75, 0.75, 1.00)
-    pad2 = r.TPad("pad2", "pad2", 0.00, 0.00, 1.00, 1.00)
+    pad20 = r.TPad("pad20", "pad20", 0.00, 0.00, 1.00, 1.00)
+    pad20.Divide(5, 4, 0.001, 0.001)
+    pad20.Draw()
 
-    pad2.Divide(5, 4, 0.001, 0.001)
-    pad2.Draw()
-    pad1.Draw()
+    padg1 = r.TPad("padg1", "padg1", 0.00, 0.75, 0.75, 1.00)
+    padg1.Draw()
 
     keep = []
 
     title = f.GetPath()
     cats = f.Get("category_vs_time")
     if multiY(cats):
-        keep += draw_graph(cats, pad1, title)
+        keep += draw_graph(cats, padg1, title)
     else:
-        keep += draw_graph(f.Get("evn_vs_time"), pad1, title, rate=True)
+        keep += draw_graph(f.Get("evn_vs_time"), padg1, title, rate=True)
 
 
     # single FED
-    keep += plotList(f, pad2, offset=5,
+    keep += plotList(f, pad20, offset=5,
                      names=["BcN",
                             "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples", "nTpSamples",
                             "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "LMSEPVC", "ErrF0",
@@ -369,7 +369,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     # EvN, OrN, BcN agreement
     fed1 = sorted(feds1)[0]
     for i, fed2 in enumerate(feds2[:3]):
-        pad2.cd(16 + i)
+        pad20.cd(16 + i)
         adjustPad(logY=True)
         keep += histoLoop(f,
                           [("OrN", r.kBlue, 1),
@@ -380,7 +380,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
                           )
 
     # fibers
-    pad2.cd(19)
+    pad20.cd(19)
     adjustPad(logY=True)
     keep += histoLoop(f,
                       [("MatchedFibersCh0", r.kBlue, 1),
