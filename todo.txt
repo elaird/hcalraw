@@ -4,3 +4,5 @@ cp old deadbeef
 split compare
 bcn vs. fed
 unc. on zero rate
+git grep -in fixme
+zcat
