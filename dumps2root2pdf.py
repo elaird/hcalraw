@@ -54,6 +54,9 @@ def rooted(dats=[], options=None):
 
     prefixes = []
     for dat in dats:
+        if not os.path.exists(dat):
+            sys.exit("file %s does not exist." % dat)
+
         prefix, fed, root1, root2, cmd = command(dat)
         prefixes.append(prefix)
         feds[fed] = (root1, root2)
