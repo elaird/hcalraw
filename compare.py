@@ -244,12 +244,11 @@ def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None, loud=False):
                 print "%s  |  %s  :  %s  |  %s" % (c % coords1, c % coords2, q % samples1, q % tuple(samples2))
 
         if book is not None:
-            crate2, slot2, top2, fiber2, _ = coords2
-
-            if top2 == " ":
-                rx = 12 <= fiber2
-            else:
-                rx = "bt".find(top2)
+            # crate2, slot2, top2, fiber2, _ = coords2
+            # if top2 == " ":
+            #     rx = 12 <= fiber2
+            # else:
+            #     rx = "bt".find(top2)
 
             xMin = -10.5
             xMax = 127.5
@@ -257,12 +256,10 @@ def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None, loud=False):
             for i, s1 in enumerate(samples1):
                 s2 = samples2[i]
                 book.fill((s1, s2), "adc_vs_adc",
-                          #"adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
                           (nBins, nBins), (xMin, xMin), (xMax, xMax),
                           title=title1)
                 if i == nPre2:  # FIXME
                     book.fill((s1, s2), "adc_vs_adc_both_soi",
-                              #"adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
                               (nBins, nBins), (xMin, xMin), (xMax, xMax),
                               title=title2)
     return matched, nonMatched
