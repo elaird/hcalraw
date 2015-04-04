@@ -60,7 +60,10 @@ def tsRange_v2(fedId=None, slot=None, fibCh=None, utca=None):
 
 
 def tsRange_v3(fedId=None, slot=None, fibCh=None, utca=None):
-    """global runs from Feb. 2015 - Mar. 16, 2015"""
+    """global runs from
+    Feb.    2015 - Mar. 16, 2015;
+    Apr. 4, 2015 - 
+    """
 
     global __utcaBcnDelta
     __utcaBcnDelta = -131
@@ -71,17 +74,10 @@ def tsRange_v3(fedId=None, slot=None, fibCh=None, utca=None):
         return range(6)
 
 
-def tsRange_v4(fedId=None, slot=None, fibCh=None, utca=None):
-    """global runs from March 16, 2015"""
-
-    global __utcaBcnDelta
-    __utcaBcnDelta = -131
-
-    return range(6)
-
-
 def tsRange_v4a(fedId=None, slot=None, fibCh=None, utca=None):
-    """hack"""
+    """global runs from
+    Mar. 16, 2015 - Apr. 3, 2015
+    """
 
     global __utcaBcnDelta
     __utcaBcnDelta = -131
@@ -90,3 +86,12 @@ def tsRange_v4a(fedId=None, slot=None, fibCh=None, utca=None):
         return [0, 1]
     else:
         return [4, 5]
+
+
+def tsRange_v5(fedId=None, slot=None, fibCh=None, utca=None):
+    """future global runs"""
+
+    global __utcaBcnDelta
+    __utcaBcnDelta = -131
+
+    return range(6)
