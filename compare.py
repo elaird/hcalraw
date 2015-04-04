@@ -260,7 +260,7 @@ def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None, loud=False):
                           #"adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
                           (nBins, nBins), (xMin, xMin), (xMax, xMax),
                           title=title1)
-                if i == nPre1 == nPre2:
+                if i == nPre2:  # FIXME
                     book.fill((s1, s2), "adc_vs_adc_both_soi",
                               #"adc_vs_adc_cr%02d_sl%02d_rx%1d" % (crate2, slot2, rx),
                               (nBins, nBins), (xMin, xMin), (xMax, xMax),
