@@ -74,8 +74,10 @@ def toCompare(feds, split1, split2):
 
 def histogrammed(prefix, feds, split=1118):
     roots = []
-    comp = toCompare(feds, split, [718, 719])
+    feds1s = []
+    feds2s = []
 
+    comp = toCompare(feds, split, [718, 719])
     for fed, (root1, rootOut) in sorted(feds.iteritems()):
         if fed in comp:
             continue
@@ -91,6 +93,8 @@ def histogrammed(prefix, feds, split=1118):
                 options.feds2 = str(fed)
 
                 roots.append(options.outputFile)
+                feds1s.append([cfed])
+                feds2s.append([fed])
                 oneRun.main(options)
 
         else:
@@ -103,16 +107,19 @@ def histogrammed(prefix, feds, split=1118):
             options.file2 = ""
 
             roots.append(options.outputFile)
+            feds1s.append([fed])
+            feds2s.append([])
             oneRun.main(options)
 
-    return prefix, sorted(feds.keys()), roots
+    return prefix, roots, feds1s, feds2s
 
 
-def plot(prefix, fedList, roots):
-    graphs.makeSummaryPdf(inputFiles=roots,
-                          feds1=fedList,
-                          pdf="output/%s.pdf" % prefix,
-                          )
+def plot(prefix, roots, feds1s, feds2s):
+    graphs.makeSummaryPdfMulti(inputFiles=roots,
+                               feds1s=feds1s,
+                               feds2s=feds2s,
+                               pdf="output/%s.pdf" % prefix,
+                               )
 
 
 if __name__ == "__main__":
