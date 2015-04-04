@@ -69,7 +69,8 @@ def report(file1):
     pieces = [f.split("/") for f in fileNames]
     bases = set(["/".join(piece[:-1]) for piece in pieces])
     assert len(bases) == 1, bases
-    print "Found %d file(s) in %s" % (len(fileNames), "/".join(bases))
+    msg = "matching file" if len(fileNames) == 1 else "files"
+    print "Found %d %s in %s/" % (len(fileNames), msg, "/".join(bases))
 
 
 def main(options, args):
