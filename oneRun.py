@@ -67,7 +67,7 @@ def main(options):
         else:
             go(options)
 
-    graphs.makeSummaryPdf(inputFiles=[options.outputFile],
+    graphs.makeSummaryPdf(inputFile=options.outputFile,
                           feds1=sw.fedList(options.feds1),
                           feds2=sw.fedList(options.feds2),
                           pdf=options.outputFile.replace(".root", ".pdf"),
