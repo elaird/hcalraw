@@ -14,6 +14,10 @@ cd cpp; make -j 5; cd -
 ./look.py 239694 --match=v4a
 
 
+# analyze AMC13/DCC2 monitor buffer dumps
+./dumps2root2pdf.py data/239713_*.dat --match=v3 --nevents=100
+
+
 # compare payloads of different sets of FEDs, within one file
 ./look.py 239480
 ./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF --match=v2 --dump=0 --output-file=output/239480.root --progress
