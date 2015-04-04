@@ -388,12 +388,12 @@ def draw_graph(graph, title="", rate=False):
     latex = r.TLatex()
     latex.SetNDC()
     latex.SetTextAngle(90)
-    latex.SetTextSize(0.18)
+    latex.SetTextSize(0.17)
     latex.SetTextAlign(33)
     title = title.replace("output/", "").replace(".root:/", "")
-    #fmt = "#color[46]{#frac{#lower[-0.15]{|}Run %s}{}}"
-    fmt = "#color[46]{Run %s}"
-    keep.append(latex.DrawLatex(0.01, 0.98, fmt % title))
+    if "_" not in title:
+        title = "Run %s" % title
+    keep.append(latex.DrawLatex(0.01, 0.98, "#color[46]{%s}" % title))
     return keep
 
 
