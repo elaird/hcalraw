@@ -49,7 +49,7 @@ def command(dat):
     return prefix, fed, root1, root2, cmd
 
 
-def rooted(dats=[], options=None, split=1118):
+def rooted(dats=[], options=None):
     feds = {}
 
     prefixes = []
@@ -62,17 +62,19 @@ def rooted(dats=[], options=None, split=1118):
         # print cmd; continue
         os.system(cmd)
 
-    comp = []
-    if split in feds:
-        for i in [718, 719]:
-            if i in feds:
-                comp.append(i)
-
-    return sorted(list(prefixes))[0], feds, comp, split
+    return sorted(list(prefixes))[0], feds
 
 
-def histogrammed(prefix, feds, comp, split):
+def toCompare(feds, split1, split2):
+    if split1 in feds:
+        return filter(lambda x: x in feds, split2)
+    else:
+        return []
+
+
+def histogrammed(prefix, feds, split=1118):
     roots = []
+    comp = toCompare(feds, split, [718, 719])
 
     for fed, (root1, rootOut) in sorted(feds.iteritems()):
         if fed in comp:
