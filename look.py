@@ -61,7 +61,7 @@ def find_gr(run, grdir):
         files = filter(lambda x: x, utils.commandOutputFull(ls)["stdout"].split("\n"))
         if files:
             l = ",".join(["%s/%s%s" % (eosprefix, d, f) for f in files])
-            return l, "v4"
+            return l, "v3"
 
 
 def report(file1):
