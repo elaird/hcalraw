@@ -461,7 +461,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[]):
     canvas.Print(pdf)
 
 
-def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf"):
+def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
     r.gROOT.SetBatch(True)
     r.gROOT.SetStyle("Plain")
     r.gErrorIgnoreLevel = r.kWarning
@@ -469,7 +469,7 @@ def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf"):
     canvas = r.TCanvas()
     canvas.Print(pdf + "[")
 
-    for fileName in inputFiles:
+    for fileName, feds1, feds2 in zip(inputFiles, feds1s, feds2s):
         f = r.TFile(fileName)
         if (not f) or f.IsZombie():
             continue
@@ -481,3 +481,7 @@ def makeSummaryPdf(inputFiles=[], feds1=[], feds2=[], pdf="summary.pdf"):
 
         f.Close()
     canvas.Print(pdf + "]")
+
+
+def makeSummaryPdf(inputFile="", feds1=[], feds2=[], pdf="summary.pdf"):
+    makeSummaryPdfMulti(inputFiles=[inputFile], feds1s=[feds1], feds2s=[feds2], pdf=pdf)
