@@ -312,6 +312,20 @@ def plotList(f, pad, offset=None, names=[], logY=True, logX=False, logZ=False, g
     return keep
 
 
+def resyncs(graph=None, maximum=None):
+    n = graph.GetN()
+    x = graph.GetX()
+    y = graph.GetY()
+
+    i2 = 0
+    gr2 = r.TGraph()
+    for i in range(n):
+        if not y[i]:
+            gr2.SetPoint(i2, x[i], maximum)
+            i2 += 1
+    return gr2
+
+
 def anyVisible(graph=None, maximum=None):
     n = graph.GetN()
     y = graph.GetY()
@@ -321,7 +335,7 @@ def anyVisible(graph=None, maximum=None):
     return False
 
 
-def draw_graph(graph=None, title="", rate=False, graph2=None):
+def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None):
     if not graph:
         return
 
@@ -329,7 +343,7 @@ def draw_graph(graph=None, title="", rate=False, graph2=None):
     padg.Draw()
     keep = [padg]
 
-    if rate:
+    if ratemax:
         split = 0.3
         padg.Divide(1, 2)
         padg.cd(1).SetPad(0.01, split, 0.99, 0.99 )
@@ -353,7 +367,9 @@ def draw_graph(graph=None, title="", rate=False, graph2=None):
 
     rateColor = 602
     bxColor = r.kRed
-    if rate:
+    resyncColor = r.kGreen
+
+    if ratemax:
         h = null.ProjectionX()
         fillRateHisto(h, graph)
         h.SetStats(False)
@@ -368,16 +384,17 @@ def draw_graph(graph=None, title="", rate=False, graph2=None):
         r.gPad.SetLogy(True)
         r.gPad.SetGridy()
         hu = h.DrawClone("pe")
-        hu.GetYaxis().SetTitle("L1A rate (Hz)")
-        hu.GetYaxis().SetTitleColor(rateColor)
+        RColor = resyncColor if (graph3 and graph3.GetN()) else 0
+        yTitle = "#color[%d]{L1A rate (Hz)} #color[%d]{R}" % (rateColor, RColor)
+        hu.GetYaxis().SetTitle(yTitle)
         hu.GetXaxis().SetLabelSize(0.0)
         hu.GetXaxis().SetTickLength(0.0)
         hu.SetMinimum(y)
-        hu.SetMaximum(2.0e5)
+        hu.SetMaximum(ratemax)
         keep.append(hu)
         magnify(hu, factor=3.0)
-        hu.GetYaxis().SetTitleSize(0.15)
-        hu.GetYaxis().SetTitleOffset(0.18)
+        hu.GetYaxis().SetTitleSize(0.13)
+        hu.GetYaxis().SetTitleOffset(0.22)
         hu.GetYaxis().SetLabelOffset(0.001)
 
         if graph2:
@@ -386,6 +403,14 @@ def draw_graph(graph=None, title="", rate=False, graph2=None):
                 graph2.SetMarkerColor(bxColor)
                 graph2.SetMarkerSize(0.3)
                 graph2.Draw("psame")
+                keep.append(graph2)
+
+        if graph3 and graph3.GetN():
+            graph3.SetMarkerStyle(20)
+            graph3.SetMarkerColor(resyncColor)
+            graph3.SetMarkerSize(0.5)
+            graph3.Draw("psame")
+            keep.append(graph3)
 
         padg.cd(2)
         adjustPad(m={"Bottom": 0.5, "Left": 0.1, "Top": 0.0, "Right": 0.03})
@@ -407,8 +432,9 @@ def draw_graph(graph=None, title="", rate=False, graph2=None):
             graph2.Draw("psame")
             hl.GetYaxis().SetTitle("#DeltaBX")
             hl.GetYaxis().SetTitleColor(bxColor)
-            hl.GetYaxis().SetTitleOffset(0.08)
+            hl.GetYaxis().SetTitleOffset(0.09)
             r.gPad.SetGridy()
+
     else:
         padg.Draw()
         padg.cd()
@@ -447,9 +473,11 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     if multiY(cats):
         keep += draw_graph(cats, title=title)
     else:
+        ratemax = 2.0e5
         keep += draw_graph(graph=f.Get("evn_vs_time"),
-                           title=title, rate=True,
+                           title=title, ratemax=ratemax,
                            graph2=f.Get("bcn_delta_vs_time"),
+                           graph3=resyncs(f.Get("incr_evn_vs_time"), ratemax),
                            )
 
 
