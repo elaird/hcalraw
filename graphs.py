@@ -68,18 +68,28 @@ def fillRateHisto(h, g):
             h.Rebin(2)
 
     evn = collections.defaultdict(list)
+    time = collections.defaultdict(list)
     for i in range(n):
         iBin = h.FindBin(x[i])
+        time[iBin].append(x[i])
         evn[iBin].append(y[i])
 
-    for iBin, lst in evn.iteritems():
-        nL1A = 1 + max(lst) - min(lst)
-        deltaT = h.GetBinWidth(iBin)  # minutes
-        deltaT *= 60.0  # seconds
+
+    for iBin in evn.keys():
+        times = time[iBin]
+        evns = evn[iBin]
+        nL1A = 1 + max(evns) - min(evns)
+        if len(evns) == 1:
+            deltaT = h.GetBinWidth(iBin)
+        else:
+            deltaT = max(times) - min(times)
+            deltaT *= 1.0 + 1.0 / len(times)  # "wait" one event
+        deltaT *= 60.0  # minutes --> seconds
+
         c = nL1A / deltaT
         h.SetBinContent(iBin, c)
 
-        relErr = 1.0 / len(lst)  # +- 1 events
+        relErr = 1.0 / len(evns)  # +- 1 events
         h.SetBinError(iBin, c * relErr)
 
 
@@ -338,6 +348,8 @@ def draw_graph(graph, title="", rate=False):
         h.SetStats(False)
         h.SetMarkerStyle(20)
         h.SetMarkerSize(0.5)
+        h.SetMarkerColor(602)
+        h.SetLineColor(602)
         y = 10.0
 
         padg.cd(1)
