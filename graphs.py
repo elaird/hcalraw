@@ -312,7 +312,16 @@ def plotList(f, pad, offset=None, names=[], logY=True, logX=False, logZ=False, g
     return keep
 
 
-def draw_graph(graph, title="", rate=False):
+def anyVisible(graph=None, maximum=None):
+    n = graph.GetN()
+    y = graph.GetY()
+    for i in range(n):
+        if y[i] <= maximum:
+            return True
+    return False
+
+
+def draw_graph(graph=None, title="", rate=False, graph2=None):
     if not graph:
         return
 
@@ -342,14 +351,16 @@ def draw_graph(graph, title="", rate=False):
                   xMin - tenPercent, xMax + tenPercent,
                   3, 0.5, 3.5)
 
+    rateColor = 602
+    bxColor = r.kRed
     if rate:
         h = null.ProjectionX()
         fillRateHisto(h, graph)
         h.SetStats(False)
         h.SetMarkerStyle(20)
         h.SetMarkerSize(0.5)
-        h.SetMarkerColor(602)
-        h.SetLineColor(602)
+        h.SetMarkerColor(rateColor)
+        h.SetLineColor(rateColor)
         y = 10.0
 
         padg.cd(1)
@@ -358,6 +369,7 @@ def draw_graph(graph, title="", rate=False):
         r.gPad.SetGridy()
         hu = h.DrawClone("pe")
         hu.GetYaxis().SetTitle("L1A rate (Hz)")
+        hu.GetYaxis().SetTitleColor(rateColor)
         hu.GetXaxis().SetLabelSize(0.0)
         hu.GetXaxis().SetTickLength(0.0)
         hu.SetMinimum(y)
@@ -367,6 +379,13 @@ def draw_graph(graph, title="", rate=False):
         hu.GetYaxis().SetTitleSize(0.15)
         hu.GetYaxis().SetTitleOffset(0.18)
         hu.GetYaxis().SetLabelOffset(0.001)
+
+        if graph2:
+            anyVisible2 = anyVisible(graph2, hu.GetMaximum())
+            if anyVisible2:
+                graph2.SetMarkerColor(bxColor)
+                graph2.SetMarkerSize(0.3)
+                graph2.Draw("psame")
 
         padg.cd(2)
         adjustPad(m={"Bottom": 0.5, "Left": 0.1, "Top": 0.0, "Right": 0.03})
@@ -383,6 +402,13 @@ def draw_graph(graph, title="", rate=False):
         hl.GetYaxis().SetTickLength(hu.GetYaxis().GetTickLength())
         hl.GetYaxis().SetLabelSize(0.25)
         hl.GetYaxis().SetNdivisions(402, True)
+
+        if graph2 and anyVisible2:
+            graph2.Draw("psame")
+            hl.GetYaxis().SetTitle("#DeltaBX")
+            hl.GetYaxis().SetTitleColor(bxColor)
+            hl.GetYaxis().SetTitleOffset(0.08)
+            r.gPad.SetGridy()
     else:
         padg.Draw()
         padg.cd()
@@ -419,9 +445,12 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     title = f.GetPath()
     cats = f.Get("category_vs_time")
     if multiY(cats):
-        keep += draw_graph(cats, title)
+        keep += draw_graph(cats, title=title)
     else:
-        keep += draw_graph(f.Get("evn_vs_time"), title, rate=True)
+        keep += draw_graph(graph=f.Get("evn_vs_time"),
+                           title=title, rate=True,
+                           graph2=f.Get("bcn_delta_vs_time"),
+                           )
 
 
     # single FED
