@@ -374,6 +374,8 @@ def graphs(d={}):
         gr2.SetPoint(i, time, evn)
         if orn0 is not None:
             gr3.SetPoint(i, time, 3564 * (orn - orn0) + (bcn - bcn0))
+        else:
+            gr3.SetPoint(i, time, 1.0e30)
         orn0 = orn
         bcn0 = bcn
     return gr1, gr2, gr3
