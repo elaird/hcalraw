@@ -101,6 +101,11 @@ def main(options, args):
     if options.dump == -1:
         options.dump = 0
 
+    if options.noLoop:
+        options.file1 = "dummy"
+        oneRun.main(options)
+        return
+
     for iFind in range(1, 7):
         ret = find(iFind, run)
         if not ret:
