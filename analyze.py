@@ -338,25 +338,15 @@ def wordsOneBranch(tree=None, branch=""):
     return chunk
 
 
-def evn_vs_time(oMapF, oMapBcn):
-    gr = r.TGraph()
-    gr.SetName("evn_vs_time")
-    for i, iEntry in enumerate(sorted(oMapF.keys())):
-        evn, orn = oMapF[iEntry]
-        bcn = oMapBcn[iEntry]
-        gr.SetPoint(i, utils.minutes(orn, bcn), evn)
-    return gr
-
-
 def category_vs_time(oMap={}, oMapBcn={}, iMap={}, iMapBcn={}, innerEvent={}):
     d = {}
     for oEntry, (evn, orn) in oMap.iteritems():
         bcn = oMapBcn[oEntry]
         time = utils.minutes(orn, bcn)
         if oEntry in innerEvent and (innerEvent[oEntry] is not None):
-            d[time] = 3
+            d[time] = (3, evn, orn, bcn)
         else:
-            d[time] = 2
+            d[time] = (2, evn, orn, bcn)
 
     iEntries = innerEvent.values()
     for iEntry, (evn, orn) in iMap.iteritems():
@@ -364,17 +354,29 @@ def category_vs_time(oMap={}, oMapBcn={}, iMap={}, iMapBcn={}, innerEvent={}):
             continue
         bcn = iMapBcn[iEntry]
         time = utils.minutes(orn, bcn)
-        d[time] = 1
+        d[time] = (1, evn, orn, bcn)
 
     return d
 
 
-def graph(d={}):
-    gr = r.TGraph()
-    gr.SetName("category_vs_time")
+def graphs(d={}):
+    gr1 = r.TGraph()
+    gr2 = r.TGraph()
+    gr3 = r.TGraph()
+    gr1.SetName("category_vs_time")
+    gr2.SetName("evn_vs_time")
+    gr3.SetName("bcn_delta_vs_time")
+
+    orn0 = bcn0 = None
     for i, time in enumerate(sorted(d.keys())):
-        gr.SetPoint(i, time, d[time])
-    return gr
+        category, evn, orn, bcn = d[time]
+        gr1.SetPoint(i, time, category)
+        gr2.SetPoint(i, time, evn)
+        if orn0 is not None:
+            gr3.SetPoint(i, time, 3564 * (orn - orn0) + (bcn - bcn0))
+        orn0 = orn
+        bcn0 = bcn
+    return gr1, gr2, gr3
 
 
 def eventToEvent(mapF={}, mapB={}):
@@ -431,11 +433,10 @@ def go(outer={}, inner={}, outputFile="",
         os.mkdir(dirName)
 
     f = r.TFile(outputFile, "RECREATE")
-    evn_vs_time(oMapF, oMapBcn).Write()
 
-    gr = graph(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
-                                iMap=iMapF, iMapBcn=iMapBcn,
-                                innerEvent=innerEvent))
+    gr1, gr2, gr3 = graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
+                                            iMap=iMapF, iMapBcn=iMapBcn,
+                                            innerEvent=innerEvent))
     nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
     labels = ["only %s (%d)" % (inner["label"],
                                 len(iMapF)-nBoth) if inner else "",
@@ -443,8 +444,9 @@ def go(outer={}, inner={}, outputFile="",
                                 len(oMapF)-nBoth) if outer else "",
               "both (%d)" % nBoth if inner else "",
               ]
-    gr.SetTitle("_".join(labels))
-    gr.Write()
+    gr1.SetTitle("_".join(labels))
+    for gr in [gr1, gr2, gr3]:
+        gr.Write()
 
     for h in book.values():
         h.Write()
