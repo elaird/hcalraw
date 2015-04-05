@@ -328,8 +328,8 @@ def draw_graph(graph, title="", rate=False):
     else:
         tenPercent = 0.1/60.0  # 1/10 second
 
-    null = r.TH2D("null", ";time (minutes);",
-                  60, xMin - tenPercent, xMax + tenPercent,
+    null = r.TH2D("null", ";time (minutes);", 128,  # power of two for repeated rebin(2)
+                  xMin - tenPercent, xMax + tenPercent,
                   3, 0.5, 3.5)
 
     if rate:
