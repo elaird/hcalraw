@@ -35,7 +35,7 @@ def setup():
 
 def coords(d):
     h = d["header"]
-    return h["OrN"], h["BcN"], h["EvN"]
+    return h["EvN"], h["OrN"], h["BcN"]
 
 
 def tchain(spec, cacheSizeMB=None):
@@ -65,6 +65,7 @@ def tchain(spec, cacheSizeMB=None):
 def eventMaps(chain, s={}):
     forward = {}
     backward = {}
+    forwardBcn = {}
 
     treeName = s["treeName"]
     fedId0 = s["fedIds"][0]
@@ -80,12 +81,10 @@ def eventMaps(chain, s={}):
              "skipWords64": s["skipWords64"],
              }
 
-    iEvent = 0
-    while iEvent != s["nEventsMax"]:
-        if chain.GetEntry(iEvent) <= 0:
+    iEntry = 0
+    while iEntry != s["nEventsMax"]:
+        if chain.GetEntry(iEntry) <= 0:
             break
-
-        orn = bcn = evn = None
 
         if treeName == "Events":  # CMS CDAQ
             rawThisFed = wordsOneFed(tree=chain,
@@ -104,21 +103,21 @@ def eventMaps(chain, s={}):
             sys.exit(2)
 
         if s["progress"]:
-            iMask = progress(iEvent, iMask)
+            iMask = progress(iEntry, iMask)
 
-        orn, bcn, evn = coords(raw)
+        evn, orn, bcn = coords(raw)
+        evnOrn = (evn, orn)
 
-        t = (orn, evn)
+        forward[iEntry] = evnOrn
+        forwardBcn[iEntry] = bcn
+        backward[evnOrn] = iEntry
 
-        forward[iEvent] = t
-        backward[t] = iEvent
-
-        iEvent += 1
+        iEntry += 1
 
 
     if s["progress"]:
         print
-    return forward, backward
+    return forward, backward, forwardBcn
 
 
 def progress(iEvent, iMask):
@@ -138,23 +137,23 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOpti
     kargs.update(compareOptions)
 
     try:
-        iOuterEvent = outer["nEventsSkip"]
-        while iOuterEvent != outer["nEventsMax"]:
-            if chain.GetEntry(iOuterEvent) <= 0:
+        oEntry = outer["nEventsSkip"]
+        while oEntry != outer["nEventsMax"]:
+            if chain.GetEntry(oEntry) <= 0:
                 break
 
             if outer["progress"]:
-                iMask = progress(iOuterEvent, iMask)
+                iMask = progress(oEntry, iMask)
 
             kargs["raw1"] = collectedRaw(tree=chain, specs=outer)
 
             if inner:
-                iInnerEvent = innerEvent[iOuterEvent]
-                if iInnerEvent is None:
-                    iOuterEvent += 1
+                iEntry = innerEvent[oEntry]
+                if iEntry is None:
+                    oEntry += 1
                     continue
 
-                if chainI.GetEntry(iInnerEvent) <= 0:
+                if chainI.GetEntry(iEntry) <= 0:
                     break
 
                 kargs["raw2"] = collectedRaw(tree=chainI, specs=inner)
@@ -162,9 +161,9 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOpti
             if outer["unpack"]:
                 compare.compare(**kargs)
 
-            iOuterEvent += 1
+            oEntry += 1
     except KeyboardInterrupt:
-        printer.warning("KeyboardInterrupt after %d events." % iOuterEvent)
+        printer.warning("KeyboardInterrupt after %d events." % oEntry)
     return kargs["book"]
 
 
@@ -339,11 +338,13 @@ def wordsOneBranch(tree=None, branch=""):
     return chunk
 
 
-def evn_vs_time(values=[]):
+def evn_vs_time(oMapF, oMapBcn):
     gr = r.TGraph()
     gr.SetName("evn_vs_time")
-    for i, (orn, evn) in enumerate(sorted(values)):
-        gr.SetPoint(i, utils.minutes(orn), evn)
+    for i, iEntry in enumerate(sorted(oMapF.keys())):
+        evn, orn = oMapF[iEntry]
+        bcn = oMapBcn[iEntry]
+        gr.SetPoint(i, utils.minutes(orn, bcn), evn)
     return gr
 
 
@@ -369,18 +370,18 @@ def category_vs_orn(oMap={}, iMap={}, innerEvent={}):
 def graph(d={}):
     gr = r.TGraph()
     gr.SetName("category_vs_time")
-    for i, key in enumerate(sorted(d.keys())):
-        gr.SetPoint(i, utils.minutes(key), d[key])
+    for i, orn in enumerate(sorted(d.keys())):
+        bcn = 0
+        gr.SetPoint(i, utils.minutes(orn, bcn), d[orn])
     return gr
 
 
 def eventToEvent(mapF={}, mapB={}):
     out = {}
-    for oEvent, ornEvn in mapF.iteritems():
-        out[oEvent] = None
-        if ornEvn in mapB:
-            # fixme: check for multiple matches
-            out[oEvent] = mapB[ornEvn]
+    for oEntry, evnOrn in mapF.iteritems():
+        out[oEntry] = None
+        if evnOrn in mapB:
+            out[oEntry] = mapB[evnOrn]
     return out
 
 
@@ -392,7 +393,7 @@ def go(outer={}, inner={}, outputFile="",
     deltaOrn = {}
 
     chain = tchain(outer)
-    oMapF, oMapB = eventMaps(chain, outer)
+    oMapF, oMapB, oMapBcn = eventMaps(chain, outer)
     iMapF = iMapB = {}
 
     if inner:
@@ -401,19 +402,17 @@ def go(outer={}, inner={}, outputFile="",
             iMapF = oMapF
             iMapB = oMapB
         else:
-            iMapF, iMapB = eventMaps(chainI, inner)
+            iMapF, iMapB, _ = eventMaps(chainI, inner)
 
         innerEvent = eventToEvent(oMapF, iMapB)
-        if mapOptions.get('identityMap', False):
-            for key in innerEvent.keys():
-                innerEvent[key] = key
         if set(innerEvent.values()) == set([None]):
             sys.exit("No common events found.  Consider passing --identity-map.")
-        if mapOptions.get('printEventMap', False):
-            for oEvent, iEvent in sorted(innerEvent.iteritems()):
-                printer.msg(", ".join(["oEvent = %s" % str(oEvent),
-                                       "oOrnEvn = %s" % str(oMapF[oEvent]),
-                                       "iEvent = %s" % str(iEvent),
+
+        if mapOptions['printEventMap']:
+            for oEntry, iEntry in sorted(innerEvent.iteritems()):
+                printer.msg(", ".join(["oEntry = %s" % str(oEntry),
+                                       "oEvnOrn = %s" % str(oMapF[oEntry]),
+                                       "iEntry = %s" % str(iEntry),
                                        ]))
     else:
         chainI = None
@@ -430,7 +429,7 @@ def go(outer={}, inner={}, outputFile="",
         os.mkdir(dirName)
 
     f = r.TFile(outputFile, "RECREATE")
-    evn_vs_time(oMapF.values()).Write()
+    evn_vs_time(oMapF, oMapBcn).Write()
 
     gr = graph(category_vs_orn(oMap=oMapF, iMap=iMapF, innerEvent=innerEvent))
     nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
