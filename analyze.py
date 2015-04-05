@@ -348,21 +348,22 @@ def evn_vs_time(oMapF, oMapBcn):
     return gr
 
 
-def category_vs_orn(oMap={}, iMap={}, innerEvent={}):
+def category_vs_time(oMap={}, iMap={}, innerEvent={}, oMapBcn={}):
     d = {}
-    for oEvent, ornEvn in oMap.iteritems():
-        orn = ornEvn[0]
-        if oEvent in innerEvent and (innerEvent[oEvent] is not None):
-            d[orn] = 3
+    for oEntry, (evn, orn) in oMap.iteritems():
+        bcn = oMapBcn[oEntry]
+        time = utils.minutes(orn, bcn)
+        if oEntry in innerEvent and (innerEvent[oEntry] is not None):
+            d[time] = 3
         else:
-            d[orn] = 2
+            d[time] = 2
 
-    iEvents = innerEvent.values()
-    for iEvent, ornEvn in iMap.iteritems():
-        if iEvent in iEvents:
+    iEntries = innerEvent.values()
+    for iEntry, (evn, orn) in iMap.iteritems():
+        if iEntry in iEntries:
             continue
-        orn = ornEvn[0]
-        d[orn] = 1
+        time = utils.minutes(orn, 0)  # FIXME
+        d[time] = 1
 
     return d
 
@@ -370,9 +371,8 @@ def category_vs_orn(oMap={}, iMap={}, innerEvent={}):
 def graph(d={}):
     gr = r.TGraph()
     gr.SetName("category_vs_time")
-    for i, orn in enumerate(sorted(d.keys())):
-        bcn = 0
-        gr.SetPoint(i, utils.minutes(orn, bcn), d[orn])
+    for i, time in enumerate(sorted(d.keys())):
+        gr.SetPoint(i, time, d[time])
     return gr
 
 
@@ -431,7 +431,7 @@ def go(outer={}, inner={}, outputFile="",
     f = r.TFile(outputFile, "RECREATE")
     evn_vs_time(oMapF, oMapBcn).Write()
 
-    gr = graph(category_vs_orn(oMap=oMapF, iMap=iMapF, innerEvent=innerEvent))
+    gr = graph(category_vs_time(oMap=oMapF, iMap=iMapF, innerEvent=innerEvent, oMapBcn=oMapBcn))
     nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
     labels = ["only %s (%d)" % (inner["label"],
                                 len(iMapF)-nBoth) if inner else "",
