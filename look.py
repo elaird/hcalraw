@@ -101,7 +101,7 @@ def main(options, args):
     if options.dump == -1:
         options.dump = 0
 
-    if options.noLoop:
+    if options.noLoop:  # skip file finding
         options.file1 = "dummy"
         oneRun.main(options)
         return
