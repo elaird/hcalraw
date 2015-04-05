@@ -363,22 +363,28 @@ def graphs(d={}):
     gr1 = r.TGraph()
     gr2 = r.TGraph()
     gr3 = r.TGraph()
+    gr4 = r.TGraph()
+
     gr1.SetName("category_vs_time")
     gr2.SetName("evn_vs_time")
     gr3.SetName("bcn_delta_vs_time")
+    gr4.SetName("incr_evn_vs_time")
 
-    orn0 = bcn0 = None
+    evn0 = orn0 = bcn0 = None
     for i, time in enumerate(sorted(d.keys())):
         category, evn, orn, bcn = d[time]
         gr1.SetPoint(i, time, category)
         gr2.SetPoint(i, time, evn)
         if orn0 is not None:
             gr3.SetPoint(i, time, 3564 * (orn - orn0) + (bcn - bcn0))
+            gr4.SetPoint(i, time, evn0 < evn)
         else:
             gr3.SetPoint(i, time, 1.0e30)
+            gr4.SetPoint(i, time, 1)
+        evn0 = evn
         orn0 = orn
         bcn0 = bcn
-    return gr1, gr2, gr3
+    return gr1, gr2, gr3, gr4
 
 
 def eventToEvent(mapF={}, mapB={}):
@@ -436,9 +442,9 @@ def go(outer={}, inner={}, outputFile="",
 
     f = r.TFile(outputFile, "RECREATE")
 
-    gr1, gr2, gr3 = graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
-                                            iMap=iMapF, iMapBcn=iMapBcn,
-                                            innerEvent=innerEvent))
+    gr1, gr2, gr3, gr4 = graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
+                                                 iMap=iMapF, iMapBcn=iMapBcn,
+                                                 innerEvent=innerEvent))
     nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
     labels = ["only %s (%d)" % (inner["label"],
                                 len(iMapF)-nBoth) if inner else "",
@@ -447,7 +453,7 @@ def go(outer={}, inner={}, outputFile="",
               "both (%d)" % nBoth if inner else "",
               ]
     gr1.SetTitle("_".join(labels))
-    for gr in [gr1, gr2, gr3]:
+    for gr in [gr1, gr2, gr3, gr4]:
         gr.Write()
 
     for h in book.values():
