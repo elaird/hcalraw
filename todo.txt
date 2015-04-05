@@ -12,3 +12,6 @@ detect resyncs
 fix soi
 use bcn in event maps
 improve time label (orn ~ min)
+time-order loop
+peak l1a rate
+minutes range (min/max)
