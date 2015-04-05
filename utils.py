@@ -8,9 +8,11 @@ def cmssw():
     return "CMSSW_VERSION" in os.environ
 
 
-def minutes(orn):
+def minutes(orn, bcn):
+    bcnPerOrb = 3564.0
     orbPerSec = 11.1e3
-    return orn/orbPerSec/60.0
+    orn = bcn / bcnPerOrb + orn
+    return orn / orbPerSec / 60.0
 
 
 def commandOutput(cmd=""):
