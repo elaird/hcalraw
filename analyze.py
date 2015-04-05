@@ -81,8 +81,9 @@ def eventMaps(chain, s={}):
              "skipWords64": s["skipWords64"],
              }
 
-    iEntry = s["nEventsSkip"]
-    while iEntry != s["nEventsMax"]:
+    iEntry = 0  # start from beginning, even when skipping events in the loop
+    nMapMax = 2 * s["nEventsMax"]  # a guess for how far to look not to miss out-of-order events
+    while iEntry != nMapMax:
         if chain.GetEntry(iEntry) <= 0:
             break
 
