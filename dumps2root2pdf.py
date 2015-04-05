@@ -7,8 +7,8 @@ import oneRun
 from options import opts
 
 
-def bail(dat, fields, tag):
-    sys.exit("skipping %s (reason %s: %s)" % (dat, tag, str(fields)))
+def bail(dat, fields, reason):
+    sys.exit("problem with %s (%s): %s" % (dat, str(fields), reason))
 
 
 def command(dat):
@@ -21,18 +21,18 @@ def command(dat):
 
     fields = dat.split("_")
     if len(fields) != 3:
-        bail(dat, fields, "a")
+        bail(dat, fields, "nFields != 3")
 
     prefix2, crate, suffix = fields
-    if suffix not in [".txt", ".dat", "mb.txt", "mb.dat"]:
-        bail(dat, fields, "b")
+    if suffix not in [".dat", "mb.dat"]:
+        bail(dat, fields, "unknown suffix %s" % suffix)
 
     try:
         crate = int(crate)
         if crate not in __feds:
-            bail(dat, fields, "c")
+            bail(dat, fields, "%s not in hard-coded list %s" % (crate, sorted(__feds.keys())))
     except ValueError:
-        bail(dat, fields, "d")
+        bail(dat, fields, "crate '%s' could not converted to an integer" % crate)
 
     prefix = prefix2[1 + prefix2.rfind("/"):]
     fed = __feds[crate]
