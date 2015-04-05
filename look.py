@@ -27,6 +27,10 @@ def eos():
     sys.exit("ERROR: could not find eos.")
 
 
+def find(i, run):
+    return eval("find%d" % i)(run)
+
+
 def find1(run):
     for local in ["tmp/USC_%d.root" % run, "data/USC_%d.root" % run]:
         if os.path.exists(local):
@@ -49,6 +53,10 @@ def find4(run):
 
 
 def find5(run):
+    return find_gr(run, "/store/data/Commissioning2015/MinimumBias/RAW/v1")
+
+
+def find6(run):
     return find_gr(run, "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1")
 
 
@@ -93,8 +101,8 @@ def main(options, args):
     if options.dump == -1:
         options.dump = 0
 
-    for func in [find1, find2, find3, find4, find5]:
-        ret = func(run)
+    for iFind in range(1, 7):
+        ret = find(iFind, run)
         if not ret:
             continue
 
