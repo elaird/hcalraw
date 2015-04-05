@@ -10,3 +10,5 @@ fwlite
 compress matched channel output
 detect resyncs
 fix soi
+use bcn in event maps
+improve time label (orn ~ min)
