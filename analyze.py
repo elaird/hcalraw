@@ -348,7 +348,7 @@ def evn_vs_time(oMapF, oMapBcn):
     return gr
 
 
-def category_vs_time(oMap={}, iMap={}, innerEvent={}, oMapBcn={}):
+def category_vs_time(oMap={}, oMapBcn={}, iMap={}, iMapBcn={}, innerEvent={}):
     d = {}
     for oEntry, (evn, orn) in oMap.iteritems():
         bcn = oMapBcn[oEntry]
@@ -362,7 +362,8 @@ def category_vs_time(oMap={}, iMap={}, innerEvent={}, oMapBcn={}):
     for iEntry, (evn, orn) in iMap.iteritems():
         if iEntry in iEntries:
             continue
-        time = utils.minutes(orn, 0)  # FIXME
+        bcn = iMapBcn[iEntry]
+        time = utils.minutes(orn, bcn)
         d[time] = 1
 
     return d
@@ -394,15 +395,16 @@ def go(outer={}, inner={}, outputFile="",
 
     chain = tchain(outer)
     oMapF, oMapB, oMapBcn = eventMaps(chain, outer)
-    iMapF = iMapB = {}
+    iMapF = iMapB = iMapBcn = {}
 
     if inner:
         chainI = tchain(inner)
         if mapOptions["identityMap"]:
             iMapF = oMapF
             iMapB = oMapB
+            iMapBcn = oMapBcn
         else:
-            iMapF, iMapB, _ = eventMaps(chainI, inner)
+            iMapF, iMapB, iMapBcn = eventMaps(chainI, inner)
 
         innerEvent = eventToEvent(oMapF, iMapB)
         if set(innerEvent.values()) == set([None]):
@@ -431,7 +433,9 @@ def go(outer={}, inner={}, outputFile="",
     f = r.TFile(outputFile, "RECREATE")
     evn_vs_time(oMapF, oMapBcn).Write()
 
-    gr = graph(category_vs_time(oMap=oMapF, iMap=iMapF, innerEvent=innerEvent, oMapBcn=oMapBcn))
+    gr = graph(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
+                                iMap=iMapF, iMapBcn=iMapBcn,
+                                innerEvent=innerEvent))
     nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
     labels = ["only %s (%d)" % (inner["label"],
                                 len(iMapF)-nBoth) if inner else "",
