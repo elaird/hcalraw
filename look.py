@@ -27,49 +27,72 @@ def eos():
     sys.exit("ERROR: could not find eos.")
 
 
-def find(i, run):
-    return eval("find%d" % i)(run)
+def find(i, run, index, onward):
+    return eval("find%d" % i)(run, index, onward)
 
 
-def find1(run):
+def find1(run, _, __):
     for local in ["tmp/USC_%d.root" % run, "data/USC_%d.root" % run]:
         if os.path.exists(local):
             return local, "v2"
 
 
-def find2(run):
+def find2(run, _, __):
     LS1 = "/store/group/dpg_hcal/comm_hcal/LS1/USC_%d.root" % run
     stat = "%s stat %s" % (eos(), LS1)
     if not utils.commandOutputFull(stat)["returncode"]:
         return "%s/%s" % (eosprefix, LS1), "v2"
 
 
-def find3(run):
-    return find_gr(run, "/store/data/Commissioning2015/HcalNZS/RAW/v1")
+def find3(run, index, onward):
+    return find_gr(run, "/store/data/Commissioning2015/HcalNZS/RAW/v1", index, onward)
 
 
-def find4(run):
-    return find_gr(run, "/store/data/Commissioning2015/Cosmics/RAW/v1")
+def find4(run, index, onward):
+    return find_gr(run, "/store/data/Commissioning2015/Cosmics/RAW/v1", index, onward)
 
 
-def find5(run):
-    return find_gr(run, "/store/data/Commissioning2015/MinimumBias/RAW/v1")
+def find5(run, index, onward):
+    return find_gr(run, "/store/data/Commissioning2015/MinimumBias/RAW/v1", index, onward)
 
 
-def find6(run):
-    return find_gr(run, "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1")
+def find6(run, index, onward):
+    return find_gr(run, "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1", index, onward)
 
 
-def find_gr(run, grdir):
+def find_gr(run, grdir, index=None, onward=False):
     d = "%s/000/%03d/%03d/00000/" % (grdir, run/1000, run % 1000)
     stat = "%s stat %s" % (eos(), d)
-    ls = stat.replace(" stat ", " ls ")
+    ls = stat.replace(" stat ", " ls -l ")
 
-    if not utils.commandOutputFull(stat)["returncode"]:
-        files = filter(lambda x: x, utils.commandOutputFull(ls)["stdout"].split("\n"))
-        if files:
-            l = ",".join(["%s/%s%s" % (eosprefix, d, f) for f in files])
-            return l, "v3"
+    if utils.commandOutputFull(stat)["returncode"]:
+        return
+
+    listings = filter(lambda x: x, utils.commandOutputFull(ls)["stdout"].split("\n"))
+
+    month_num = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr":  4, "May":  5, "Jun":  6,
+                 "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
+
+    coords = []
+    for listing in listings:
+        fields = listing.split()
+        month, day, hhmm, fileName = fields[-4:]
+        hh, mm = hhmm.split(":")
+        coords.append((month_num[month], int(day), int(hh), int(mm), fileName))
+
+    coords.sort()
+    if index and abs(index) < len(coords):
+        if onward:
+            coords = coords[index:]
+        else:
+            coords = [coords[index]]
+        for c in coords:
+            print c
+
+    files = [c[-1] for c in coords]
+    if files:
+        l = ",".join(["%s/%s%s" % (eosprefix, d, f) for f in files])
+        return l, "v3"
 
 
 def report(file1):
@@ -107,7 +130,7 @@ def main(options, args):
         return
 
     for iFind in range(1, 7):
-        ret = find(iFind, run)
+        ret = find(iFind, run, options.index, options.onward)
         if not ret:
             continue
 
