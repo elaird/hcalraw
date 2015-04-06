@@ -10,8 +10,8 @@ cd cpp; make -j 5; cd -
 # analyze global runs
 ./look.py 235316 --match=v3 --no-warn-unpack
 ./look.py 239342 --match=v4a --nevents=100
-./look.py 239692 --match=v4a
-./look.py 239694 --match=v4a
+./look.py 239751 --match=v3 --nevents=100
+./look.py 239759 --match=v3 --nevents=100
 
 
 # analyze AMC13/DCC2 monitor buffer dumps
