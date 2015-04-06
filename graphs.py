@@ -278,7 +278,8 @@ def fedString(lst=[]):
     return ",".join(["%d" % i for i in lst])
 
 
-def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True, gopts="colz", feds1=[], feds2=[]):
+def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True, gopts="colz", feds1=[], feds2=[],
+               doYx=True, retitle=True):
     keep = []
 
     for iHisto, name in enumerate(names):
@@ -295,17 +296,19 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         stylize(h)
         magnify(h, factor=1.8)
 
-        P = name[:name.find("_vs_")].upper()
-        h.GetXaxis().SetTitle("%s (%s)" % (P, fedString(feds1)))
-        h.GetYaxis().SetTitle("%s (%s)" % (P, fedString(feds2)))
-        h.GetZaxis().SetTitle("samples / bin")
+        if retitle:
+            P = name[:name.find("_vs_")].upper()
+            h.GetXaxis().SetTitle("%s (%s)" % (P, fedString(feds1)))
+            h.GetYaxis().SetTitle("%s (%s)" % (P, fedString(feds2)))
+            h.GetZaxis().SetTitle("samples / bin")
 
-        if h.GetTitle():
+        if retitle and h.GetTitle():
             h.GetXaxis().SetTitle(h.GetXaxis().GetTitle().replace(")", ": %s)" % h.GetTitle()))
             if h.GetTitle().startswith("SOI"):
                 h.GetYaxis().SetTitle(h.GetYaxis().GetTitle().replace(")", ": SOI)"))
 
-        h.SetTitle("")
+        if retitle:
+            h.SetTitle("")
 
         xMin = h.GetXaxis().GetXmin()
         xMax = h.GetXaxis().GetXmax()
@@ -313,8 +316,11 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         line = r.TLine()
         line.SetLineWidth(1)
         line.SetLineStyle(2)
-        x0 = line.DrawLine(0.0, xMin, 0.0, xMax)
-        y0 = line.DrawLine(xMin, 0.0, xMax, 0.0)
+        if doYx:
+            x0 = line.DrawLine(0.0, xMin, 0.0, xMax)
+            y0 = line.DrawLine(xMin, 0.0, xMax, 0.0)
+        else:
+            x0 = y0 = None
 
         h.Draw(gopts + "same")  # draw again to be on top of dashed lines
 
@@ -322,13 +328,17 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         yx.SetLineColor(r.kBlack)
         yx.SetLineWidth(1)
         yx.SetLineStyle(3)
-        yx.Draw("same")
+        if doYx:
+            yx.Draw("same")
 
         leg = r.TLegend(0.25, 0.75, 0.55, 0.88)
         leg.SetBorderSize(0)
         leg.SetFillStyle(0)
-        leg.AddEntry(yx, "y = x", "l")
-        leg.AddEntry(x0, "zero", "l")
+
+        if doYx:
+            leg.AddEntry(yx, "y = x", "l")
+            leg.AddEntry(x0, "zero", "l")
+
         leg.Draw()
         keep += [h, yx, x0, y0, leg]
     return keep
@@ -567,7 +577,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     canvas.Print(pdf)
 
 
-def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[]):
+def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], doYx=True, retitle=True):
     # don't print blank page
     if not any([f.Get(name) for name in names]):
         return
@@ -575,7 +585,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[]):
     pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
     pad0.Divide(2, 1)
     pad0.Draw()
-    keep = plotGlobal(f, pad0, offset=1, names=names, feds1=feds1, feds2=feds2)
+    keep = plotGlobal(f, pad0, offset=1, names=names, feds1=feds1, feds2=feds2, doYx=doYx, retitle=retitle)
     canvas.Print(pdf)
 
 
@@ -605,6 +615,9 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
         if feds2:
             pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc", "tp_vs_tp"])
             # pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc_both_soi"])
+
+        pageTwo(f, feds1, feds2, canvas, pdf, names=["frac0_vs_BcN_%d" % feds1[0]],
+                doYx=False, retitle=False)
 
         pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_EvN"])
         # pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_time"])
