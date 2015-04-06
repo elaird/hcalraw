@@ -67,6 +67,9 @@ def main(options):
         else:
             go(options)
 
+    if options.feds2 and 0 <= options.dump:
+        analyze.printChannelSummary(options.outputFile)
+
     graphs.makeSummaryPdf(inputFile=options.outputFile,
                           feds1=sw.fedList(options.feds1),
                           feds2=sw.fedList(options.feds2),

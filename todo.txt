@@ -7,7 +7,6 @@ unc. on zero rate
 git grep -in fixme
 zcat
 fwlite
-compress matched channel output
 fix soi
 use bcn in event maps
 improve time label (orn ~ min)
