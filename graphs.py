@@ -336,7 +336,7 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
 
 def plotList(f, pad, offset=None, names=[],
              logY=True, logX=False, logZ=False,
-             gopts="hist", feds1=[], feds2=[],
+             feds1=[], feds2=[],
              func=histoLoop):
 
     fedList = (feds1 + feds2)[:5]
@@ -583,7 +583,7 @@ def pageThree(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[]):
     pad0.Draw()
 
     keep = plotList(f, pad0, offset=1, names=names, logY=False, logX=False, logZ=False,
-                    gopts="ap", feds1=feds1, feds2=feds2, func=graphLoop)
+                    feds1=feds1, feds2=feds2, func=graphLoop)
     canvas.Print(pdf)
 
 
