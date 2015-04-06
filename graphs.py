@@ -123,7 +123,6 @@ def adjustPad(pad=r.gPad, logX=False, logY=False, logZ=False,
 
 
 def stylize(h, color=r.kBlack, style=1, width=1):
-    #r.gStyle.SetOptStat(110010)
     h.SetStats(False)
     h.SetMinimum(0.5)
     h.SetLineColor(color)
@@ -131,7 +130,7 @@ def stylize(h, color=r.kBlack, style=1, width=1):
     h.SetLineWidth(width)
 
 
-def legends(legEntries=[], twoLines=False):
+def legends(legEntries=[], twoLines=False, gopts="l"):
     out = []
     dx = 0.8 / max(1, len(legEntries))
     dx *= 2 if twoLines else 1
@@ -149,7 +148,7 @@ def legends(legEntries=[], twoLines=False):
         x0 += dx
         leg.SetBorderSize(0)
         leg.SetFillStyle(0)
-        leg.AddEntry(h, desc, "l")
+        leg.AddEntry(h, desc, gopts)
         leg.Draw()
         out.append(leg)
 
@@ -160,7 +159,7 @@ def legends(legEntries=[], twoLines=False):
         x0 += dx
         leg2.SetBorderSize(0)
         leg2.SetFillStyle(0)
-        leg2.AddEntry(h, desc, "l")
+        leg2.AddEntry(h, desc, gopts)
         leg2.Draw()
         out.append(leg2)
 
@@ -230,6 +229,51 @@ def histoLoop(f, lst, func):
     return out
 
 
+def graphLoop(f, lst, func):
+    out = []
+    legEntries = []
+    h0 = None
+
+    didOne = False
+    twoLines = False
+
+    mins = []
+    maxs = []
+    for x, _, _ in lst:
+        g = f.Get(func(x))
+        if not g:
+            continue
+        xMin, xMax = xMin_xMax(g)
+        mins.append(xMin)
+        maxs.append(xMax)
+
+    for x, color, style in lst:
+        g = f.Get(func(x))
+        if not g:
+            continue
+
+        if not g.GetN():
+            continue
+
+        title, xTitle, yTitle = g.GetTitle().split(";")
+        if not h0:
+            h0 = r.TH2D("h0", ";%s;%s" % (xTitle, yTitle), 1, min(mins), max(maxs), 1, 0.0, 1.1)
+            h0.SetStats(False)
+            h0.Draw()
+            out.append(h0)
+
+        g.Draw("psame")
+        g.SetMarkerColor(color)
+        g.SetMarkerStyle(20)
+        g.SetMarkerSize(0.3)
+        out.append(g)
+
+        legEntries.append((g, title.replace("FED ", "")))
+
+    out += legends(legEntries, gopts="p")
+    return out
+
+
 def fedString(lst=[]):
     return ",".join(["%d" % i for i in lst])
 
@@ -290,7 +334,11 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
     return keep
 
 
-def plotList(f, pad, offset=None, names=[], logY=True, logX=False, logZ=False, gopts="hist", feds1=[], feds2=[]):
+def plotList(f, pad, offset=None, names=[],
+             logY=True, logX=False, logZ=False,
+             feds1=[], feds2=[],
+             func=histoLoop):
+
     fedList = (feds1 + feds2)[:5]
     color = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kMagenta]
     color += [r.kBlack] * (len(fedList) - len(color))
@@ -308,7 +356,7 @@ def plotList(f, pad, offset=None, names=[], logY=True, logX=False, logZ=False, g
         for iFed, fed in enumerate(sorted(fedList)):
             feds.append((fed, color[iFed], style[iFed]))
 
-        keep += histoLoop(f, feds, lambda x: "%s_%d" % (name, x))
+        keep += func(f, feds, lambda x: "%s_%d" % (name, x))
     return keep
 
 
@@ -530,6 +578,15 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[]):
     canvas.Print(pdf)
 
 
+def pageThree(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[]):
+    pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
+    pad0.Draw()
+
+    keep = plotList(f, pad0, offset=1, names=names, logY=False, logX=False, logZ=False,
+                    feds1=feds1, feds2=feds2, func=graphLoop)
+    canvas.Print(pdf)
+
+
 def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
     r.gROOT.SetBatch(True)
     r.gROOT.SetStyle("Plain")
@@ -547,6 +604,8 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
         if feds2:
             pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc", "tp_vs_tp"])
             pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc_both_soi"])
+            pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_EvN"])
+            pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_time"])
 
         f.Close()
     canvas.Print(pdf + "]")

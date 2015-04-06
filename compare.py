@@ -1,6 +1,7 @@
 from configuration import hw, matching, patterns
 import printer
 import printRaw
+import utils
 
 
 def flavor(book, d, fedId):
@@ -131,12 +132,23 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
                                             adcPlots=adcPlots)
 
     errFSum = 0.0 + sum(ErrF.values())
-    ErrF[13] = ErrF[1] + ErrF[3]
 
     if errFSum:
         for code, n in ErrF.iteritems():
-            title = "FED %d;frac. chan. with ErrF %s;Events / bin" % (fedId, ("== %d" % code) if code != 13 else "!= 0")
+            title = "FED %d;frac. chan. with ErrF == %d;Events / bin" % (fedId, code)
             book.fill(n/errFSum, "ErrF%d_%d" % (code, fedId), 44, 0.0, 1.1, title=title)
+
+        frac0 = ErrF[0] / errFSum
+    else:
+        frac0 = -0.1  # dummy
+
+    book.fillGraph((fedEvn, frac0), "frac0_vs_EvN_%d" % fedId,
+                   title=("FED %d" % fedId) +
+                   ";FED EvN;frac. chan. with ErrF == 0")
+
+    book.fillGraph((utils.minutes(fedOrn, fedBcn), frac0), "frac0_vs_time_%d" % fedId,
+                   title=("FED %d" % fedId) +
+                   ";time (minutes);frac. chan. with ErrF == 0")
 
     capSum = 0.0+sum(caps.values())
     if capSum:
@@ -259,7 +271,7 @@ def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None, loud=False):
                           (nBins, nBins), (xMin, xMin), (xMax, xMax),
                           title=title1)
                 if i == nPre2:  # FIXME
-                    book.fill((s1, s2), "adc_vs_adc_both_soi",
+                    book.fill((s1, s2), "adc_vs_adc_soi2a",
                               (nBins, nBins), (xMin, xMin), (xMax, xMax),
                               title=title2)
     return matched, nonMatched
