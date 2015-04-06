@@ -409,7 +409,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None):
     else:
         tenPercent = 0.1/60.0  # 1/10 second
 
-    null = r.TH2D("null", ";time (minutes);", 128,  # power of two for repeated rebin(2)
+    null = r.TH2D("null", ";time (minutes);", 4,  # power of two for repeated rebin(2)
                   xMin - tenPercent, xMax + tenPercent,
                   3, 0.5, 3.5)
 
@@ -436,6 +436,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None):
         yTitle = "#color[%d]{L1A rate (Hz)} #color[%d]{R}" % (rateColor, RColor)
         hu.GetYaxis().SetTitle(yTitle)
         hu.GetXaxis().SetLabelSize(0.0)
+        hu.GetXaxis().SetNoExponent(True)
         hu.GetXaxis().SetTickLength(0.0)
         hu.SetMinimum(y)
         hu.SetMaximum(ratemax)
@@ -471,7 +472,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None):
         magnify(hl, factor=9.0)
         hl.GetXaxis().SetTickLength(0.1)
         hl.GetXaxis().SetTitleOffset(0.7)
-
+        hl.GetXaxis().SetNoExponent(True)
         hl.GetYaxis().SetTickLength(hu.GetYaxis().GetTickLength())
         hl.GetYaxis().SetLabelSize(0.25)
         hl.GetYaxis().SetNdivisions(402, True)
@@ -603,9 +604,10 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
         pageOne(f, feds1, feds2, canvas, pdf)
         if feds2:
             pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc", "tp_vs_tp"])
-            pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc_both_soi"])
-            pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_EvN"])
-            pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_time"])
+            # pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc_both_soi"])
+
+        pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_EvN"])
+        # pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_time"])
 
         f.Close()
     canvas.Print(pdf + "]")
