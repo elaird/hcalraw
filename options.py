@@ -62,6 +62,17 @@ def opts(alsoArgs=False):
                       default=False,
                       action="store_true",
                       help="Profile this program.")
+    common.add_option("--index",
+                      dest="index",
+                      default=None,
+                      metavar="I",
+                      type="int",
+                      help="Index of file in sorted list (for look.py).")
+    common.add_option("--onward",
+                      dest="onward",
+                      default=False,
+                      action="store_true",
+                      help="with --index: use also later files.")
     parser.add_option_group(common)
 
     printing = optparse.OptionGroup(parser, "Options for printing to stdout")
