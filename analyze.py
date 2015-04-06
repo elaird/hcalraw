@@ -404,7 +404,7 @@ def eventToEvent(mapF={}, mapB={}):
 
 def go(outer={}, inner={}, outputFile="",
        mapOptions={}, compareOptions={},
-       printEventSummary=None, printChannelSummary=None):
+       printEventSummary=None):
 
     innerEvent = {}
     deltaOrn = {}
@@ -472,15 +472,36 @@ def go(outer={}, inner={}, outputFile="",
             s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
         printer.msg(s)
 
-    if printChannelSummary:
-        for iChannel in range(3):
-            print "Channel %d:" % iChannel
-            printHisto(outputFile, histoName="MatchedFibersCh%d" % iChannel)
-            print
 
-        print "TPs:"
-        printHisto(outputFile, histoName="MatchedTriggerTowers")
-        print
+def printChannelSummary(outputFile):
+    words = ["nMatched"]
+    words += ["FibCh%d" % i for i in range(3)]
+    words.append("  TPs")
+    words = "   ".join(words)
+    print words
+    print "-" * len(words)
+    f = r.TFile(outputFile)
+    hs = [f.Get("MatchedFibersCh%d" % i) for i in range(3)]
+    hs.append(f.Get("MatchedTriggerTowers"))
+    for iBin in range(0, 2 + hs[0].GetNbinsX()):
+        xs = [h.GetBinCenter(iBin) for h in hs]
+        if len(set(xs)) != 1:
+            printer.error("binnings for nMatched do not match.")
+            return
+
+        for h in hs:
+            w = h.GetBinWidth(iBin)
+            if 1.0e-6 < abs(w - 1.0):
+                printer.warning("Histogram %s bin %d has width %g" % (h.GetName(), iBin, w))
+
+        x = xs[0]
+        cs = [h.GetBinContent(iBin) for h in hs]
+
+        if any(cs):
+            s = ["   %4d" % x]
+            s += ["%4d" % c for c in cs]
+            print "     ".join(s)
+    f.Close()
 
 
 def bail(specs, fileName):
@@ -572,31 +593,4 @@ def oneRun(files1=[],
        mapOptions=mapOptions,
        compareOptions=compareOptions,
        printEventSummary=(not patterns) and (files1 != files2) and 0 <= common["dump"],
-       printChannelSummary=files2 and 0 <= common["dump"],
        )
-
-
-def printHisto(fileName="", histoName=""):
-    f = r.TFile(fileName)
-    h = f.Get(histoName)
-    if not h:
-        printer.error("histogram %s not found." % histoName)
-        return
-    for iBinX in range(0, 2+h.GetNbinsX()):
-        w = h.GetBinWidth(iBinX)
-        if 1.0e-6 < abs(w - 1.0):
-            printer.warning("Histogram %s bin %d has width %g" % (histoName, iBinX, w))
-
-        x = h.GetBinCenter(iBinX)
-        c = h.GetBinContent(iBinX)
-        stem = histoName.replace("Matched", "")
-        if "Ch" in stem:
-            stem = stem[:stem.find("Ch")]
-        msg = "%3d matched %s: %d events" % (x, stem.ljust(13), c)
-        if c:
-            if iBinX == 0:
-                msg = "<=" + msg
-            if iBinX == 1+h.GetNbinsX():
-                msg = ">=" + msg
-            printer.msg(msg)
-    f.Close()
