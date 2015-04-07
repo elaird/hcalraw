@@ -389,16 +389,19 @@ def resyncs(graph=None, maximum=None):
     return gr2
 
 
-def big(graph=None, threshold=None, height=None):
-    n = graph.GetN()
-    x = graph.GetX()
-    y = graph.GetY()
+def big_clean(size=None, frac0=None, sizeMin=None, frac0Min=None, height=None):
+    n = size.GetN()
+    sX = size.GetX()
+    sY = size.GetY()
+
+    fX = frac0.GetX()
+    fY = frac0.GetY()
 
     i2 = 0
     gr2 = r.TGraph()
     for i in range(n):
-        if threshold < y[i]:
-            gr2.SetPoint(i2, x[i], height)
+        if sizeMin < sY[i] and frac0Min < fY[i]:
+            gr2.SetPoint(i2, sX[i], height)
             i2 += 1
     return gr2
 
@@ -476,8 +479,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
         SColor = splashColor if (graph4 and graph4.GetN()) else 0
 
         yTitle = "#splitline{#color[%d]{coarse}  #color[%d]{fine}}{L1A rate (Hz)}" % (rateColorCoarse, rateColorFine)
-        yTitle += " #color[%d]{S}" % SColor
-        yTitle += "#color[%d]{R}" % RColor
+        yTitle += " #splitline{#color[%d]{R}}{#color[%d]{S}}" % (RColor, SColor)
 
         hu.GetYaxis().SetTitle(yTitle)
         hu.GetXaxis().SetLabelSize(0.0)
@@ -576,11 +578,17 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
         keep += draw_graph(cats, title=title)
     else:
         ratemax = 2.0e6
+        graph4 = big_clean(size=f.Get("kB_vs_time_718"),
+                           frac0=f.Get("frac0_vs_time_718"),
+                           sizeMin=0.8,
+                           frac0Min=0.2,
+                           height=ratemax/2.0)
+
         keep += draw_graph(graph=f.Get("evn_vs_time"),
                            title=title, ratemax=ratemax,
                            graph2=f.Get("bcn_delta_vs_time"),
                            graph3=resyncs(f.Get("incr_evn_vs_time"), ratemax),
-                           graph4=big(f.Get("kB_vs_time_718"), threshold=0.8, height=ratemax/2.0),
+                           graph4=graph4,
                            )
 
     # single FED
