@@ -77,7 +77,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
             flavor(book, channelData, fedId)
 
             ErrF[channelData["ErrF"]] += 1
-            nQie = len(channelData["QIE"].values())
+            nQie = len(channelData["QIE"])
             book.fill(nQie, "nQieSamples_%d" % fedId, 14, -0.5, 13.5,
                       title="FED %d;number of QIE samples;Channels / bin" % fedId)
 
@@ -86,8 +86,8 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
             caps[channelData["CapId0"]] += 1
             if adcPlots:
-                for adc in channelData["QIE"].values():
-                    adcs.add(adc)
+                for adc in channelData["QIE"]:
+                    adcs.add(abs(adc))  # abs because soi is negative
                     book.fill(adc, "all_adc", 128, -0.5, 127.5,
                               title=";all ADC (when ErrF==0); TS / bin")
 
@@ -238,19 +238,9 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
     return okFeds
 
 
-def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None, loud=False):
+def adc_vs_adc(mapF1, mapF2, book=None, loud=False):
     matched = []
     nonMatched = []
-
-    tsRange = matching.tsRange
-    okRange = any([tsRange == getattr(matching, "tsRange_%s" % v) for v in ["v2", "v5"]])
-    if len(nPre1) and len(nPre2) and okRange:
-        if len(nPre1) == len(nPre2) == 1:
-            nPre1 = list(nPre1)[0]
-            nPre2 = list(nPre2)[0]
-        else:
-            printer.warning("nPresamples is not uniform: %s, %s" % (str(nPre1), str(nPre2)))
-            nPre1 = nPre2 = None
 
     title1 = "ErrF == %s;ADC;ADC;samples / bin" % ",".join(["%d" % x for x in matching.okErrF])
     title2 = "SOI#semicolon %s" % title1
@@ -267,7 +257,29 @@ def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None, loud=False):
             # print (fmt % coords1) + ": " + fmt % coords2
             samples2 = [-1] * len(samples1)
 
-        if samples1 == samples2:
+        xMin = -10.5
+        xMax = 127.5
+        nBins = int(xMax - xMin)
+
+        allMatched = True
+        for i, s1 in enumerate(samples1):
+            s2 = samples2[i]
+            as1 = abs(s1)
+            as2 = abs(s2)
+
+            if as1 != as2:
+                allMatched = False
+
+            if book is not None:
+                book.fill((as1, as2), "adc_vs_adc",
+                          (nBins, nBins), (xMin, xMin), (xMax, xMax),
+                          title=title1)
+                if s1 < 0 and s2 < 0:
+                    book.fill((as1, as2), "adc_vs_adc_soi_both",
+                              (nBins, nBins), (xMin, xMin), (xMax, xMax),
+                              title=title2)
+
+        if allMatched:
             matched.append(coords1)
         else:
             nonMatched.append(coords1)
@@ -276,25 +288,6 @@ def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None, loud=False):
                 q = " ".join(["%2x"] * len(samples1))
                 print "%s  |  %s  :  %s  |  %s" % (c % coords1, c % coords2, q % samples1, q % tuple(samples2))
 
-        if book is not None:
-            # crate2, slot2, top2, fiber2, _ = coords2
-            # if top2 == " ":
-            #     rx = 12 <= fiber2
-            # else:
-            #     rx = "bt".find(top2)
-
-            xMin = -10.5
-            xMax = 127.5
-            nBins = int(xMax - xMin)
-            for i, s1 in enumerate(samples1):
-                s2 = samples2[i]
-                book.fill((s1, s2), "adc_vs_adc",
-                          (nBins, nBins), (xMin, xMin), (xMax, xMax),
-                          title=title1)
-                if i == nPre1 == nPre2:
-                    book.fill((s1, s2), "adc_vs_adc_soi_both",
-                              (nBins, nBins), (xMin, xMin), (xMax, xMax),
-                              title=title2)
     return matched, nonMatched
 
 
@@ -333,8 +326,8 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
     dump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
 
     if anyEmap:
-        mapF1, mapB1, _, _ = dataMap(raw1, book)
-        mapF2, mapB2, _, _ = dataMap(raw2, book)
+        mapF1, mapB1, _ = dataMap(raw1, book)
+        mapF2, mapB2, _ = dataMap(raw2, book)
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
         tMatched12 = tNonMatched12 = []
@@ -344,11 +337,11 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
            reportMatched(matched12)
            reportFailed(nonMatched12)
     else:
-        mapF1, _, _, nPre1 = dataMap(raw1, book)
-        mapF2, _, _, nPre2 = dataMap(raw2, book)
-        matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book)
+        mapF1, _, _ = dataMap(raw1, book)
+        mapF2, _, _ = dataMap(raw2, book)
+        matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book)
         if dump:
-            matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1, nPre2, nPre1)
+            matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1)
 
         tF1 = tpMap(raw1)[0]
         tF2 = tpMap(raw2)[0]
@@ -454,7 +447,6 @@ def dataMap(raw={}, book=None):
     backward = {}
     skipped = []
 
-    nPre = set()
     for fedId, d in raw.iteritems():
         if fedId is None:
             continue
@@ -462,7 +454,7 @@ def dataMap(raw={}, book=None):
         utca = d["header"]["utca"]
         fiberMap = hw.fiberMap(fedId)
         for block in d["htrBlocks"].values():
-            nPre.add(block["nPreSamples"])
+            nPre = block["nPreSamples"]
             for channelData in block["channelData"].values():
                 channel = channelData["FibCh"]
                 fiber = channelData["Fiber"]
@@ -481,11 +473,19 @@ def dataMap(raw={}, book=None):
 
                 book.fill(len(tsRange), "nTS_for_matching_%d" % fedId, 12, -0.5, 11.5,
                           title="FED %d;no. TS used for ADC-matching;Channels / bin" % fedId)
-                data = tuple([qie.get(i) for i in tsRange])
+
+                data = []
+                for i in tsRange:
+                    if i == nPre:
+                        data.append(-qie[i])
+                    else:
+                        data.append(qie[i])
+
+                data = tuple(data)
                 # print coords, tsRange, [hex(d) for d in data]
                 forward[coords] = data
                 backward[data] = coords
-    return forward, backward, skipped, nPre
+    return forward, backward, skipped
 
 
 def tpMap(raw={}):
