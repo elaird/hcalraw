@@ -104,7 +104,7 @@ def magnify(h, factor=1.0):
 
 
 
-def adjustPad(pad=r.gPad, logX=False, logY=False, logZ=False,
+def adjustPad(pad=r.gPad, logX=False, logY=False, logZ=False, gridX=False, gridY=False,
               m={"Left": 0.15, "Bottom": 0.15, "Right": 0.15, "Top": None}):
 
     for key, value in m.iteritems():
@@ -120,6 +120,10 @@ def adjustPad(pad=r.gPad, logX=False, logY=False, logZ=False,
         r.gPad.SetLogy()
     if logZ:
         r.gPad.SetLogz()
+    if gridX:
+        r.gPad.SetGridx()
+    if gridY:
+        r.gPad.SetGridy()
 
 
 def stylize(h, color=r.kBlack, style=1, width=1):
@@ -279,14 +283,15 @@ def fedString(lst=[]):
 
 
 def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True, gopts="colz", feds1=[], feds2=[],
-               doYx=True, retitle=True):
+               doYx=True, retitle=True, gridX=False, gridY=False):
     keep = []
 
     for iHisto, name in enumerate(names):
         if not name:
             continue
         pad.cd(offset + iHisto)
-        adjustPad(logX=logX, logY=logY, logZ=logZ)
+        adjustPad(logX=logX, logY=logY, logZ=logZ,
+                  gridX=gridX, gridY=gridY)
         h = f.Get(name)
         if not h:
             continue
@@ -590,7 +595,8 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     canvas.Print(pdf)
 
 
-def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], doYx=True, retitle=True):
+def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
+            doYx=True, retitle=True, gridX=False, gridY=False):
     # don't print blank page
     if not any([f.Get(name) for name in names]):
         return
@@ -598,7 +604,8 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], doYx=True
     pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
     pad0.Divide(len(names), 1)
     pad0.Draw()
-    keep = plotGlobal(f, pad0, offset=1, names=names, feds1=feds1, feds2=feds2, doYx=doYx, retitle=retitle)
+    keep = plotGlobal(f, pad0, offset=1, names=names, feds1=feds1, feds2=feds2,
+                      doYx=doYx, retitle=retitle, gridX=gridX, gridY=gridY)
     canvas.Print(pdf)
 
 
@@ -631,8 +638,8 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
 
 
         pageTwo(f, feds1, feds2, canvas, pdf,
-                names=["EvN_mismatch_vs_slot_crate", "OrN_mismatch_vs_slot_crate", "BcN_mismatch_vs_slot_crate"],
-                doYx=False, retitle=False)
+                names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]],
+                doYx=False, retitle=False, gridX=True)
 
         # pageTwo(f, feds1, feds2, canvas, pdf, names=["frac0_vs_BcN_%d" % (feds2 + feds1)[0]],
         #         doYx=False, retitle=False)
