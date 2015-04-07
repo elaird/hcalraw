@@ -11,7 +11,7 @@ def flavor(book, d, fedId):
 
 
 def htrSummary(blocks=[], book=None, fedId=None,
-               fedEvn=None, fedOrn=None, fedBcn=None,
+               fedEvn=None, fedOrn5=None, fedBcn=None,
                msg="", adcPlots=False):
     nBadHtrs = 0
     caps = {}
@@ -39,7 +39,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                   11, -5.5, 5.5,
                   title="FED %d;HTR EvN - FED EvN;HTRs / bin" % fedId)
 
-        book.fill(block["OrN5"] - (fedOrn & 0x1f), "OrN5_HTRs_%d" % fedId,
+        book.fill(block["OrN5"] - fedOrn5, "OrN5_HTRs_%d" % fedId,
                   11, -5.5, 5.5,
                   title="FED %d;HTR OrN5 - FED OrN5;HTRs / bin" % fedId)
 
@@ -48,7 +48,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                   title="FED %d;HTR BcN - FED BcN;HTRs / bin" % fedId)
 
         for key, fedVar in [("EvN", fedEvn),
-                            ("OrN", fedOrn),
+                            ("OrN5", fedOrn5),
                             ("BcN", fedBcn),
                          ]:
             if (block[key] - fedVar):
@@ -141,7 +141,7 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
                                             book=book,
                                             fedId=fedId,
                                             fedEvn=fedEvn,
-                                            fedOrn=fedOrn,
+                                            fedOrn5=fedOrn & 0x1f,
                                             fedBcn=fedBcn,
                                             msg=msg,
                                             adcPlots=adcPlots)
