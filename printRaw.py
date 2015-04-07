@@ -206,11 +206,11 @@ def makeRed(s):
     return '\033[91m' + s + '\033[0m'
 
 
-def qieString(qieData={}, red=False):
+def qieString(qies=[], red=False):
     l = []
-    for iQie in range(10):
-        if iQie in qieData:
-            l.append("%2x" % abs(qieData[iQie]))  # abs because soi is negative
+    for i in range(10):
+        if i < len(qies):
+            l.append("%2x" % abs(qies[i]))  # abs because soi is negative
         else:
             l.append("  ")
 
