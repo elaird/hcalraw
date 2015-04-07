@@ -21,6 +21,10 @@ def htrSummary(blocks=[], book=None, fedId=None,
         caps[i] = 0
         ErrF[i] = 0
 
+    crate2bin = {32: 1, 29: 2, 22: 3, 12: 4, 9: 5, 2: 6}
+    yAxisLabels = ["32", "29", "22", "12", "9", "2", "-1"]
+    misMatchMapBins = ((21, 7), (0.5, 0.5), (21.5, 7.5))
+
     for block in blocks:
         if type(block) is not dict:
             printer.warning("%s block is not dict" % msg)
@@ -35,14 +39,6 @@ def htrSummary(blocks=[], book=None, fedId=None,
                   11, -5.5, 5.5,
                   title="FED %d;HTR EvN - FED EvN;HTRs / bin" % fedId)
 
-        if (block["EvN"] - fedEvn):
-            iBin = {32: 1, 29: 2, 22: 3, 12: 4, 9: 5, 2: 6}
-            book.fill((block["Slot"], iBin.get(block["Crate"], 7)),
-                      "EvN_mismatch_vs_slot_crate",
-                      (21, 7), (0.5, 0.5), (21.5, 7.5),
-                      title=";slot;crate;HTR-FED  EvN mismatches",
-                      yAxisLabels=["32", "29", "22", "12", "9", "2", "other"])
-
         book.fill(block["OrN5"] - (fedOrn & 0x1f), "OrN5_HTRs_%d" % fedId,
                   11, -5.5, 5.5,
                   title="FED %d;HTR OrN5 - FED OrN5;HTRs / bin" % fedId)
@@ -50,6 +46,17 @@ def htrSummary(blocks=[], book=None, fedId=None,
         book.fill(block["BcN"] - fedBcn, "BcN_HTRs_%d" % fedId,
                   11, -5.5, 5.5,
                   title="FED %d;HTR BcN - FED BcN;HTRs / bin" % fedId)
+
+        for key, fedVar in [("EvN", fedEvn),
+                            ("OrN", fedOrn),
+                            ("BcN", fedBcn),
+                         ]:
+            if (block[key] - fedVar):
+                book.fill((block["Slot"], crate2bin.get(block["Crate"], 7)),
+                          "%s_mismatch_vs_slot_crate" % key,
+                          *misMatchMapBins,
+                          title=";slot;crate;HTR - FED   %s   mismatches" % key,
+                          yAxisLabels=yAxisLabels)
 
         for otherData in block["otherData"].values():
             flavor(book, otherData, fedId)
