@@ -583,7 +583,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], doYx=True
         return
 
     pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
-    pad0.Divide(2, 1)
+    pad0.Divide(len(names), 1)
     pad0.Draw()
     keep = plotGlobal(f, pad0, offset=1, names=names, feds1=feds1, feds2=feds2, doYx=doYx, retitle=retitle)
     canvas.Print(pdf)
@@ -617,8 +617,12 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
             # pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc_both_soi"])
 
 
-        pageTwo(f, feds1, feds2, canvas, pdf, names=["EvN_mismatch_vs_slot_crate", "frac0_vs_BcN_%d" % (feds2 + feds1)[0]],
+        pageTwo(f, feds1, feds2, canvas, pdf,
+                names=["EvN_mismatch_vs_slot_crate", "OrN_mismatch_vs_slot_crate", "BcN_mismatch_vs_slot_crate"],
                 doYx=False, retitle=False)
+
+        # pageTwo(f, feds1, feds2, canvas, pdf, names=["frac0_vs_BcN_%d" % (feds2 + feds1)[0]],
+        #         doYx=False, retitle=False)
 
         # pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_EvN"])
         # pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_time"])
