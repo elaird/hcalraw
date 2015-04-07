@@ -443,7 +443,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
 
     # nBins power of two for repeated rebin(2)
     bargs = (xMin - tenPercent, xMax + tenPercent, 3, 0.5, 3.5)
-    null_coarse = r.TH2D("null_coarse", ";time (minutes);", 4, *bargs)
+    null_coarse = r.TH2D("null_coarse", ";time (minutes);", 16, *bargs)
     null_fine = r.TH2D("null_fine", ";time (minutes);", 128, *bargs)
 
     rateColorFine = r.kGray
@@ -577,12 +577,12 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     if multiY(cats):
         keep += draw_graph(cats, title=title)
     else:
-        ratemax = 2.0e6
+        ratemax = 4.0e7
         graph4 = big_clean(size=f.Get("kB_vs_time_718"),
                            frac0=f.Get("frac0_vs_time_718"),
                            sizeMin=0.8,
                            frac0Min=0.2,
-                           height=ratemax/2.0)
+                           height=ratemax/4.0)
 
         keep += draw_graph(graph=f.Get("evn_vs_time"),
                            title=title, ratemax=ratemax,
