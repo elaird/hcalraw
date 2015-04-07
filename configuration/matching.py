@@ -68,7 +68,7 @@ def tsRange_v3(fedId=None, slot=None, fibCh=None, utca=None):
     global __utcaBcnDelta
     __utcaBcnDelta = -131
 
-    if 1100 <= fedId:
+    if utca:
         return range(2, 8)
     else:
         return range(6)
@@ -82,10 +82,10 @@ def tsRange_v4a(fedId=None, slot=None, fibCh=None, utca=None):
     global __utcaBcnDelta
     __utcaBcnDelta = -131
 
-    if fedId < 1000:
-        return [0, 1]
-    else:
+    if utca:
         return [4, 5]
+    else:
+        return [0, 1]
 
 
 def tsRange_v5(fedId=None, slot=None, fibCh=None, utca=None):
