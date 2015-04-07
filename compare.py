@@ -165,7 +165,7 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
                    title=("FED %d" % fedId) +
                    ";time (minutes);frac. chan. with ErrF == 0")
 
-    book.fill((fedBcn / 100, frac0), "frac0_vs_BcN_%d" % fedId,
+    book.fill((fedBcn / 100.0, frac0), "frac0_vs_BcN_%d" % fedId,
               (36, 6), (0.0, 0.0), (36.0, 1.2),
               title=";FED %d   (BcN / 100);frac. chan. with ErrF == 0;Events / bin" % fedId)
 
