@@ -210,7 +210,7 @@ def qieString(qieData={}, red=False):
     l = []
     for iQie in range(10):
         if iQie in qieData:
-            l.append("%2x" % qieData[iQie])
+            l.append("%2x" % abs(qieData[iQie]))  # abs because soi is negative
         else:
             l.append("  ")
 
