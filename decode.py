@@ -534,8 +534,8 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
             channelHeader["Fiber"] += 1
 
         channelHeader["FibCh"] = channelId % 4
-        channelHeader["QIE"] = {}
-        channelHeader["CapId"] = {}
+        channelHeader["QIE"] = []
+        channelHeader["CapId"] = []
 
         # if 0 <= flavor <= 1:
         #     for key in ["SOI", "TDC"]:
@@ -581,11 +581,11 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
         dct["OK"].append((word16 >> 13) & 0x1)
         dct["TP"].append(word16 & 0x1fff)
     elif dct["Flavor"] == 5:
-        dct["QIE"][2*j] = word16 & 0x7f
-        dct["QIE"][2*j+1] = (word16 >> 8) & 0x7f
+        dct["QIE"].append(word16 & 0x7f)
+        dct["QIE"].append((word16 >> 8) & 0x7f)
     elif dct["Flavor"] == 6:
-        dct["QIE"][j] = word16 & 0x7f
-        dct["CapId"][j] = (word16 >> 8) & 0x3
+        dct["QIE"].append(word16 & 0x7f)
+        dct["CapId"].append((word16 >> 8) & 0x3)
 
 
 def channelId(fiber=None, fibCh=None):
