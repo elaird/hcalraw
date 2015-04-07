@@ -389,6 +389,20 @@ def resyncs(graph=None, maximum=None):
     return gr2
 
 
+def big(graph=None, threshold=None, height=None):
+    n = graph.GetN()
+    x = graph.GetX()
+    y = graph.GetY()
+
+    i2 = 0
+    gr2 = r.TGraph()
+    for i in range(n):
+        if threshold < y[i]:
+            gr2.SetPoint(i2, x[i], height)
+            i2 += 1
+    return gr2
+
+
 def anyVisible(graph=None, maximum=None):
     n = graph.GetN()
     y = graph.GetY()
@@ -398,7 +412,7 @@ def anyVisible(graph=None, maximum=None):
     return False
 
 
-def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None):
+def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, graph4=None):
     if not graph:
         return
 
@@ -433,6 +447,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None):
     rateColorCoarse = 602
     bxColor = r.kRed
     resyncColor = r.kGreen
+    splashColor = r.kMagenta
 
     if ratemax:
         h = null_coarse.ProjectionX()
@@ -458,9 +473,12 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None):
         hu = h.DrawClone("pe")
         hu2 = g.DrawClone("pesame")
         RColor = resyncColor if (graph3 and graph3.GetN()) else 0
+        SColor = splashColor if (graph4 and graph4.GetN()) else 0
 
         yTitle = "#splitline{#color[%d]{coarse}  #color[%d]{fine}}{L1A rate (Hz)}" % (rateColorCoarse, rateColorFine)
-        yTitle += " #color[%d]{R}" % RColor
+        yTitle += " #color[%d]{S}" % SColor
+        yTitle += "#color[%d]{R}" % RColor
+
         hu.GetYaxis().SetTitle(yTitle)
         hu.GetXaxis().SetLabelSize(0.0)
         hu.GetXaxis().SetNoExponent(True)
@@ -487,6 +505,13 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None):
             graph3.SetMarkerSize(0.5)
             graph3.Draw("psame")
             keep.append(graph3)
+
+        if graph4 and graph4.GetN():
+            graph4.SetMarkerStyle(29)
+            graph4.SetMarkerColor(splashColor)
+            graph4.SetMarkerSize(0.5)
+            graph4.Draw("psame")
+            keep.append(graph4)
 
         padg.cd(2)
         adjustPad(m={"Bottom": 0.5, "Left": 0.1, "Top": 0.0, "Right": 0.03})
@@ -555,8 +580,8 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
                            title=title, ratemax=ratemax,
                            graph2=f.Get("bcn_delta_vs_time"),
                            graph3=resyncs(f.Get("incr_evn_vs_time"), ratemax),
+                           graph4=big(f.Get("kB_vs_time_718"), threshold=0.8, height=ratemax/2.0),
                            )
-
 
     # single FED
     keep += plotList(f, pad20, offset=5,
@@ -633,8 +658,8 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
 
         pageOne(f, feds1, feds2, canvas, pdf)
         if feds2:
-            pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc", "tp_vs_tp"])
-            pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc_soi_both", ""])
+            pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc", ""])
+            # pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc_soi_both", ""])
 
 
         pageTwo(f, feds1, feds2, canvas, pdf,
