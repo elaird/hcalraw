@@ -592,8 +592,7 @@ def channelId(fiber=None, fibCh=None):
     return 4*fiber + fibCh
 
 
-def storePatternData(l={}, nFibers=None):
-    nTs = patterns.nTs
+def storePatternData(l={}, nFibers=None, nTsMax=20):
     compressed = patterns.compressed
     offset = 1 if patterns.rmRibbon else 0
 
@@ -605,38 +604,39 @@ def storePatternData(l={}, nFibers=None):
         fiber2 = 2*iFiberPair + 1 + offset
         l["patternData"][fiber1] = []
 
-        for iTs in range(nTs):
+        for iTs in range(nTsMax):
             feWords = []
             # Tullio says HTR f/w makes no distinction between optical cables 1 and 2
             for fiber in [fiber1, fiber2]:
                 feWord32 = 0
                 for fibCh in range(3):
                     key = channelId(fiber, fibCh)
-                    if key in d:
-                        qies = d[key]["QIE"]
-                        try:
-                            qie = qies[iTs]
-                        except KeyError:
-                            #printer.warning("time slice %d not found:" % iTs, sorted(qies.keys()))
-                            continue
-                        if d[key]["CapId"]:
-                            cap = d[key]["CapId"][iTs]
-                        elif not compressed:
-                            sys.exit("\n".join(["Cap-ids per time-slice not found.",
-                                                "Either set 'configuration.patterns.compressed = True'",
-                                                "or do not pass '--patterns'.",
+                    if key not in d:
+                        continue
+
+                    qies = d[key]["QIE"]
+                    if len(qies) <= iTs:
+                        continue
+
+                    qie = qies[iTs]
+                    if d[key]["CapId"]:
+                        cap = d[key]["CapId"][iTs]
+                    elif not compressed:
+                        sys.exit("\n".join(["Cap-ids per time-slice not found.",
+                                            "Either set 'configuration.patterns.compressed = True'",
+                                            "or do not pass '--patterns'.",
                                             ]))
-                        else:
-                            cap = 0
-                        if fibCh == 0:
-                            feWord32 |= qie << 25
-                            feWord32 |= cap << 7
-                        if fibCh == 1:
-                            feWord32 |= qie << 17
-                            feWord32 |= cap << 5
-                        if fibCh == 2:
-                            feWord32 |= qie << 9
-                            feWord32 |= cap << 3
+                    else:
+                        cap = 0
+                    if fibCh == 0:
+                        feWord32 |= qie << 25
+                        feWord32 |= cap << 7
+                    if fibCh == 1:
+                        feWord32 |= qie << 17
+                        feWord32 |= cap << 5
+                    if fibCh == 2:
+                        feWord32 |= qie << 9
+                        feWord32 |= cap << 3
 
                 feWords.append(feWord32)
                 #print "iFiberPair =", iFiberPair, "iTs =", iTs, "qie0 =", hex(qie0), "feWord =", feWord32_1
