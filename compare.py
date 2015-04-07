@@ -242,7 +242,9 @@ def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None, loud=False):
     matched = []
     nonMatched = []
 
-    if len(nPre1) and len(nPre2):
+    tsRange = matching.tsRange
+    okRange = any([tsRange == getattr(matching, "tsRange_%s" % v) for v in ["v2", "v5"]])
+    if len(nPre1) and len(nPre2) and okRange:
         if len(nPre1) == len(nPre2) == 1:
             nPre1 = list(nPre1)[0]
             nPre2 = list(nPre2)[0]
@@ -289,8 +291,8 @@ def adc_vs_adc(mapF1, mapF2, nPre1, nPre2, book=None, loud=False):
                 book.fill((s1, s2), "adc_vs_adc",
                           (nBins, nBins), (xMin, xMin), (xMax, xMax),
                           title=title1)
-                if i == nPre2:  # FIXME
-                    book.fill((s1, s2), "adc_vs_adc_soi2a",
+                if i == nPre1 == nPre2:
+                    book.fill((s1, s2), "adc_vs_adc_soi_both",
                               (nBins, nBins), (xMin, xMin), (xMax, xMax),
                               title=title2)
     return matched, nonMatched
