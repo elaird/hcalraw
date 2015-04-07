@@ -62,7 +62,7 @@ def tchain(spec, cacheSizeMB=None):
 # this function returns two dictionaries,
 # one maps TTree entry to (orn, evn)
 # the other maps the reverse
-def eventMaps(chain, s={}):
+def eventMaps(chain, s={}, nMapMax=None):
     forward = {}
     backward = {}
     forwardBcn = {}
@@ -82,12 +82,6 @@ def eventMaps(chain, s={}):
              }
 
     iEntry = 0  # start from beginning, even when skipping events in the loop
-
-    # a guess for how far to look not to miss out-of-order events
-    nMapMax = s["nEventsMax"]
-    if nMapMax:
-        nMapMax *= 2
-
     while iEntry != nMapMax:
         if chain.GetEntry(iEntry) <= 0:
             break
@@ -410,7 +404,11 @@ def go(outer={}, inner={}, outputFile="",
     deltaOrn = {}
 
     chain = tchain(outer)
-    oMapF, oMapB, oMapBcn = eventMaps(chain, outer)
+
+    nMapMax = outer["nEventsMax"]
+    if nMapMax and not mapOptions["identityMap"]:
+        nMapMax *= 2  # a guess for how far to look not to miss out-of-order events
+    oMapF, oMapB, oMapBcn = eventMaps(chain, outer, nMapMax)
     iMapF = iMapB = iMapBcn = {}
 
     if inner:
