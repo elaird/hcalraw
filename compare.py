@@ -35,6 +35,14 @@ def htrSummary(blocks=[], book=None, fedId=None,
                   11, -5.5, 5.5,
                   title="FED %d;HTR EvN - FED EvN;HTRs / bin" % fedId)
 
+        if (block["EvN"] - fedEvn):
+            iBin = {32: 1, 29: 2, 22: 3, 12: 4, 9: 5, 2: 6}
+            book.fill((block["Slot"], iBin.get(block["Crate"], 7)),
+                      "EvN_mismatch_vs_slot_crate",
+                      (21, 7), (0.5, 0.5), (21.5, 7.5),
+                      title=";slot;crate;HTR-FED  EvN mismatches",
+                      yAxisLabels=["32", "29", "22", "12", "9", "2", "other"])
+
         book.fill(block["OrN5"] - (fedOrn & 0x1f), "OrN5_HTRs_%d" % fedId,
                   11, -5.5, 5.5,
                   title="FED %d;HTR OrN5 - FED OrN5;HTRs / bin" % fedId)
