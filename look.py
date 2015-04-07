@@ -84,7 +84,7 @@ def find_gr(run, grdir, index=None, onward=False, hhmmMin=None):
     if hhmmMin:
         mmMin = hhmmMin % 100
         hhMin = hhmmMin / 100
-        coords = filter(lambda x: hhMin <= x[2] and mmMin <= x[3], coords)
+        coords = filter(lambda x: hhMin < x[2] or (hhMin == x[2] and mmMin <= x[3]), coords)
         for c in coords:
             print c
     elif index and abs(index) < len(coords):
