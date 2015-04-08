@@ -473,8 +473,8 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
         adjustPad(m={"Bottom": 0.0, "Left": 0.1, "Top": 0.03, "Right": 0.03})
         r.gPad.SetLogy(True)
         r.gPad.SetGridy()
-        hu = h.DrawClone("pe")
-        hu2 = g.DrawClone("pesame")
+        hu = g.DrawClone("pe")
+        hu2 = h.DrawClone("pesame")
         RColor = resyncColor if (graph3 and graph3.GetN()) else 0
         SColor = splashColor if (graph4 and graph4.GetN()) else 0
 
@@ -519,8 +519,8 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
         adjustPad(m={"Bottom": 0.5, "Left": 0.1, "Top": 0.0, "Right": 0.03})
         r.gPad.SetLogy(False)
         r.gPad.SetTickx(0)
-        hl = h.DrawClone("pe")
-        hl2 = g.DrawClone("pesame")
+        hl = g.DrawClone("pe")
+        hl2 = h.DrawClone("pesame")
         hl.SetMinimum(0.0)
         hl.SetMaximum(y)
         keep += [hl, hl2]
