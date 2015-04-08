@@ -30,14 +30,14 @@ def eos():
 def find1(run):
     for local in ["tmp/USC_%d.root" % run, "data/USC_%d.root" % run]:
         if os.path.exists(local):
-            return local, "v2"
+            return local
 
 
 def find2(run):
     LS1 = "/store/group/dpg_hcal/comm_hcal/LS1/USC_%d.root" % run
     stat = "%s stat %s" % (eos(), LS1)
     if not utils.commandOutputFull(stat)["returncode"]:
-        return "%s/%s" % (eosprefix, LS1), "v2"
+        return "%s/%s" % (eosprefix, LS1)
 
 
 def find_gr(run, grdir, index=None, onward=False, hhmmMin=None):
@@ -78,7 +78,7 @@ def find_gr(run, grdir, index=None, onward=False, hhmmMin=None):
     files = [c[-1] for c in coords]
     if files:
         l = ",".join(["%s/%s%s" % (eosprefix, d, f) for f in files])
-        return l, "v3"
+        return l
 
 
 def report(file1):
@@ -124,14 +124,15 @@ def main(options, args):
                                 6: "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1",
                                 }.iteritems()):
         if grDir is None:
-            ret = eval("find%d" % iFind)(run)
+            options.file1 = eval("find%d" % iFind)(run)
+            match = "v2"
         else:
-            ret = find_gr(run, grDir, options.index, options.onward, options.hhmm)
+            options.file1 = find_gr(run, grDir, options.index, options.onward, options.hhmm)
+            match = "v3"
 
-        if not ret:
+        if not options.file1:
             continue
 
-        options.file1, match = ret
         if not options.match:
             options.match = match
 
