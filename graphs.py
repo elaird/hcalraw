@@ -588,7 +588,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
                            title=title, ratemax=ratemax,
                            graph2=f.Get("bcn_delta_vs_time"),
                            graph3=resyncs(f.Get("incr_evn_vs_time"), ratemax),
-                           #graph4=graph4,
+                           graph4=graph4 if "239895" in pdf else None,
                            )
 
     # single FED
