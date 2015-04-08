@@ -246,6 +246,9 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False):
     matched = []
     nonMatched = []
 
+    xMin = -10.5
+    xMax = 127.5
+    nBins = int(xMax - xMin)
     title1 = "ErrF == %s;ADC;ADC;samples / bin" % ",".join(["%d" % x for x in matching.okErrF])
     title2 = "SOI#semicolon %s" % title1
 
@@ -254,22 +257,17 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False):
         if coords2 is None:
             continue
 
-        if coords2 in mapF2:
-            samples2 = mapF2[coords2]
-        else:
-            # fmt = "%2d %2d%1s %1d %1d"
-            # print (fmt % coords1) + ": " + fmt % coords2
-            samples2 = [-1] * len(samples1)
-
-        xMin = -10.5
-        xMax = 127.5
-        nBins = int(xMax - xMin)
-
+        samples2 = mapF2.get(coords2)
         allMatched = True
         for i, s1 in enumerate(samples1):
-            s2 = samples2[i]
             as1 = abs(s1)
-            as2 = abs(s2)
+
+            if samples2 is None:
+                s2 = 0  # avoid soi condition below
+                as2 = -1  # avoid any match
+            else:
+                s2 = samples2[i]
+                as2 = abs(s2)
 
             if as1 != as2:
                 allMatched = False
