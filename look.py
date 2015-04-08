@@ -27,37 +27,17 @@ def eos():
     sys.exit("ERROR: could not find eos.")
 
 
-def find(i, run, index, onward, hhmm):
-    return eval("find%d" % i)(run, index, onward, hhmm)
-
-
-def find1(run, _, __, ___):
+def find1(run):
     for local in ["tmp/USC_%d.root" % run, "data/USC_%d.root" % run]:
         if os.path.exists(local):
             return local, "v2"
 
 
-def find2(run, _, __, ___):
+def find2(run):
     LS1 = "/store/group/dpg_hcal/comm_hcal/LS1/USC_%d.root" % run
     stat = "%s stat %s" % (eos(), LS1)
     if not utils.commandOutputFull(stat)["returncode"]:
         return "%s/%s" % (eosprefix, LS1), "v2"
-
-
-def find3(run, index, onward, hhmm):
-    return find_gr(run, "/store/data/Commissioning2015/HcalNZS/RAW/v1", index, onward, hhmm)
-
-
-def find4(run, index, onward, hhmm):
-    return find_gr(run, "/store/data/Commissioning2015/Cosmics/RAW/v1", index, onward, hhmm)
-
-
-def find5(run, index, onward, hhmm):
-    return find_gr(run, "/store/data/Commissioning2015/MinimumBias/RAW/v1", index, onward, hhmm)
-
-
-def find6(run, index, onward, hhmm):
-    return find_gr(run, "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1", index, onward, hhmm)
 
 
 def find_gr(run, grdir, index=None, onward=False, hhmmMin=None):
@@ -135,8 +115,19 @@ def main(options, args):
         oneRun.main(options)
         return
 
-    for iFind in range(1, 7):
-        ret = find(iFind, run, options.index, options.onward, options.hhmm)
+
+    for iFind, grDir in sorted({1: None,
+                                2: None,
+                                3: "/store/data/Commissioning2015/HcalNZS/RAW/v1",
+                                4: "/store/data/Commissioning2015/Cosmics/RAW/v1",
+                                5: "/store/data/Commissioning2015/MinimumBias/RAW/v1",
+                                6: "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1",
+                                }.iteritems()):
+        if grDir is None:
+            ret = eval("find%d" % iFind)(run)
+        else:
+            ret = find_gr(run, grDir, options.index, options.onward, options.hhmm)
+
         if not ret:
             continue
 
