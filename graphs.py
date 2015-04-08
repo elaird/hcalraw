@@ -443,7 +443,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
 
     # nBins power of two for repeated rebin(2)
     bargs = (xMin - tenPercent, xMax + tenPercent, 3, 0.5, 3.5)
-    null_coarse = r.TH2D("null_coarse", ";time (minutes);", 16, *bargs)
+    null_coarse = r.TH2D("null_coarse", ";time (minutes);", 4, *bargs)
     null_fine = r.TH2D("null_fine", ";time (minutes);", 128, *bargs)
 
     rateColorFine = r.kGray
