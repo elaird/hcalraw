@@ -578,8 +578,8 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
         keep += draw_graph(cats, title=title)
     else:
         ratemax = 4.0e7
-        graph4 = big_clean(size=f.Get("kB_vs_time_718"),
-                           frac0=f.Get("frac0_vs_time_718"),
+        graph4 = big_clean(size=f.Get("kB_vs_time_%d" % feds1[0]),
+                           frac0=f.Get("frac0_vs_time_%d" % feds1[0]),
                            sizeMin=0.8,
                            frac0Min=0.2,
                            height=ratemax/4.0)
