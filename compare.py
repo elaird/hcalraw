@@ -243,18 +243,17 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
     return okFeds
 
 
-def adc_vs_adc(mapF1, mapF2, book=None, loud=False):
+def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
+               titlePrefix="", name="adc_vs_adc", xMin=-10.5, xMax=127.5):
     matched = []
     nonMatched = []
 
-    xMin = -10.5
-    xMax = 127.5
     nBins = int(xMax - xMin)
-    title1 = "ErrF == %s;ADC;ADC;samples / bin" % ",".join(["%d" % x for x in matching.okErrF])
+    title1 = "%s;samples / bin" % titlePrefix
     title2 = "SOI#semicolon %s" % title1
 
     for coords1, samples1 in mapF1.iteritems():
-        coords2 = hw.transformed_qie(*coords1)
+        coords2 = transf(*coords1)
         if coords2 is None:
             continue
 
@@ -274,11 +273,11 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False):
                 allMatched = False
 
             if book is not None:
-                book.fill((as1, as2), "adc_vs_adc",
+                book.fill((as1, as2), name,
                           (nBins, nBins), (xMin, xMin), (xMax, xMax),
                           title=title1)
                 if s1 < 0 and s2 < 0:
-                    book.fill((as1, as2), "adc_vs_adc_soi_both",
+                    book.fill((as1, as2), "%s_soi_both" % name,
                               (nBins, nBins), (xMin, xMin), (xMax, xMax),
                               title=title2)
 
@@ -291,37 +290,6 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False):
                 q = " ".join(["%2x"] * len(samples1))
                 print "%s  |  %s  :  %s  |  %s" % (c % coords1, c % coords2, q % samples1, q % tuple(samples2))
 
-    return matched, nonMatched
-
-
-def tp_vs_tp(mapF1, mapF2, book=None):
-    matched = []
-    nonMatched = []
-
-    for coords1, samples1 in mapF1.iteritems():
-        coords2 = hw.transformed_tp(*coords1)
-        if coords2 is None:
-            continue
-
-        if coords2 in mapF2:
-            samples2 = mapF2[coords2]
-        else:
-            samples2 = [-1] * len(samples1)
-
-        if samples1 == samples2:
-            matched.append(coords1)
-        else:
-            nonMatched.append(coords1)
-
-        if book:
-            xMin = -25.5
-            xMax = 255.5
-            nBins = int(xMax - xMin)
-            for i, s1 in enumerate(samples1):
-                s2 = samples2[i]
-                book.fill((s1, s2), "tp_vs_tp",
-                          (nBins, nBins), (xMin, xMin), (xMax, xMax),
-                          title=";TP;TP;samples / bin")
     return matched, nonMatched
 
 
@@ -342,13 +310,18 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
     else:
         mapF1, _, _ = dataMap(raw1, book)
         mapF2, _, _ = dataMap(raw2, book)
-        matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book)
+        titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF])
+        matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book=book, titlePrefix=titlePrefix)
         if dump:
-            matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1)
+            matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1, titlePrefix=titlePrefix)
 
         tF1 = tpMap(raw1)[0]
         tF2 = tpMap(raw2)[0]
-        tMatched12, tNonMatched12 = tp_vs_tp(tF1, tF2, book)
+
+        tMatched12, tNonMatched12 = adc_vs_adc(tF1, tF2, book=book,
+                                               name="tp_vs_tp",
+                                               transf=hw.transformed_tp,
+                                               xMin=-25.5, xMax=255.5)
         tMatched21 = tNonMatched21 = []  # tp_vs_tp(tF2, tF1, book)  # FIXME
 
     if dump:
@@ -504,6 +477,15 @@ def tpMap(raw={}):
         for block in d["htrBlocks"].values():
             for key, triggerData in block["triggerData"].iteritems():
                 coords = (block["Crate"], block["Slot"], block["Top"], key)
-                forward[coords] = [x & 0xff for x in triggerData["TP"]]  # ignore fine-grain bit
+
+                l = []
+                for i, tp9 in enumerate(triggerData["TP"]):
+                    tp = tp9 & 0xff  # ignore fine-grain bit
+                    if triggerData["SOI"][i]:
+                        l.append(-tp)
+                    else:
+                        l.append(tp)
+
+                forward[coords] = l
 
     return forward, backward, skipped
