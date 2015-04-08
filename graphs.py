@@ -667,8 +667,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
         pageOne(f, feds1, feds2, canvas, pdf)
         if feds2:
             pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc", "tp_vs_tp"])
-            pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc_soi_both", ""])
-
+            pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc_soi_both", "tp_vs_tp_soi_both"])
 
         pageTwo(f, feds1, feds2, canvas, pdf,
                 names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]],
