@@ -157,15 +157,16 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
     else:
         frac0 = -0.1  # dummy
 
+    fedTime = utils.minutes(fedOrn, fedBcn)
     book.fillGraph((fedEvn, frac0), "frac0_vs_EvN_%d" % fedId,
                    title=("FED %d" % fedId) +
                    ";FED EvN;frac. chan. with ErrF == 0")
 
-    book.fillGraph((utils.minutes(fedOrn, fedBcn), frac0), "frac0_vs_time_%d" % fedId,
+    book.fillGraph((fedTime, frac0), "frac0_vs_time_%d" % fedId,
                    title=("FED %d" % fedId) +
                    ";time (minutes);frac. chan. with ErrF == 0")
 
-    book.fillGraph((utils.minutes(fedOrn, fedBcn), t["nWord64"] * 8.0 / 1024), "kB_vs_time_%d" % fedId,
+    book.fillGraph((fedTime, t["nWord64"] * 8.0 / 1024), "kB_vs_time_%d" % fedId,
                    title=("FED %d" % fedId) +
                    ";time (minutes);kB")
 
