@@ -6,7 +6,6 @@ bcn vs. fed
 git grep -in fixme
 zcat
 fwlite
-tp soi
 use bcn in event maps
 improve time label (orn ~ min)
 minutes range (min/max)
