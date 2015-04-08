@@ -29,7 +29,7 @@ cd cpp; make -j 5; cd -
 
 # compare payloads of different sets of FEDs, across two files
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --any-emap
-./oneRun.py --file1=$USC/USC_211154.root --feds1=714,722 --file2=$USC/USC_211155.root --feds2=989 --dump=0 --match=v0 --any-emap --nevents=101 --progress
+./oneRun.py --file1=$USC/USC_211154.root --feds1=714,722 --file2=$USC/USC_211155.root --feds2=989 --dump=0 --match=v0 --any-emap --nevents=51 --progress
 
 
 # analyze FE pattern runs
