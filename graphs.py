@@ -544,13 +544,13 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
         padg.cd()
 
         adjustPad(m={"Bottom": 0.2, "Left": 0.15, "Top": 0.03, "Right": 0.03})
-        null.Draw()
-        magnify(null, factor=3.0)
-        labelYAxis(null, labels={1: t[0], 2: t[1], 3: t[2]})
+        null_coarse.Draw()
+        magnify(null_coarse, factor=3.0)
+        labelYAxis(null_coarse, labels={1: t[0], 2: t[1], 3: t[2]})
         graph.Draw("psame")
-        keep += [null, graph]
-        null.GetXaxis().SetTitleOffset(0.75)
-        null.GetYaxis().SetLabelSize(0.1)
+        keep += [null_coarse, graph]
+        null_coarse.GetXaxis().SetTitleOffset(0.75)
+        null_coarse.GetYaxis().SetLabelSize(0.1)
 
     padg.cd(0)
     latex = r.TLatex()
