@@ -11,3 +11,4 @@ use bcn in event maps
 improve time label (orn ~ min)
 minutes range (min/max)
 dq vs time
+event prescale
