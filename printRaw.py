@@ -210,7 +210,7 @@ def qieString(qies=[], red=False):
     l = []
     for i in range(10):
         if i < len(qies):
-            l.append("%2x" % abs(qies[i]))  # abs because soi is negative
+            l.append("%2x" % qies[i])
         else:
             l.append("  ")
 

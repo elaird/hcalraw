@@ -87,7 +87,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
             caps[channelData["CapId0"]] += 1
             if adcPlots:
                 for adc in channelData["QIE"]:
-                    adcs.add(abs(adc))  # abs because soi is negative
+                    adcs.add(adc)
                     book.fill(adc, "all_adc", 128, -0.5, 127.5,
                               title=";all ADC (when ErrF==0); TS / bin")
 
