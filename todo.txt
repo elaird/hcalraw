@@ -11,3 +11,5 @@ improve time label (orn ~ min)
 minutes range (min/max)
 dq vs time
 event prescale
+reduce memory usage
+prune dump=1
