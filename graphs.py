@@ -282,7 +282,8 @@ def fedString(lst=[]):
     return ",".join(["%d" % i for i in lst])
 
 
-def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True, gopts="colz", feds1=[], feds2=[],
+def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
+               gopts="colz", feds1=[], feds2=[],
                doYx=True, retitle=True, gridX=False, gridY=False):
     keep = []
 
@@ -303,17 +304,18 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
 
         if retitle:
             P = name[:name.find("_vs_")].upper()
-            h.GetXaxis().SetTitle("%s (%s)" % (P, fedString(feds1)))
-            h.GetYaxis().SetTitle("%s (%s)" % (P, fedString(feds2)))
+            h.GetXaxis().SetTitle("%s" % fedString(feds1))
+            h.GetYaxis().SetTitle("%s" % fedString(feds2))
             h.GetZaxis().SetTitle("samples / bin")
 
-        if retitle and h.GetTitle():
-            h.GetXaxis().SetTitle(h.GetXaxis().GetTitle().replace(")", ": %s)" % h.GetTitle()))
-            if h.GetTitle().startswith("SOI"):
-                h.GetYaxis().SetTitle(h.GetYaxis().GetTitle().replace(")", ": SOI)"))
-
-        if retitle:
-            h.SetTitle("")
+            title = P
+            if h.GetTitle():
+                note = h.GetTitle().replace("SOI; ", "")
+                if note:
+                    h.GetXaxis().SetTitle("%s (%s)" % (h.GetXaxis().GetTitle(), note))
+                if h.GetTitle().startswith("SOI"):
+                    title += " (SOI)"
+            h.SetTitle(title)
 
         xMin = h.GetXaxis().GetXmin()
         xMax = h.GetXaxis().GetXmax()
@@ -635,7 +637,11 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
         return
 
     pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
-    pad0.Divide(len(names), 1)
+    if len(names) <= 3:
+        pad0.Divide(len(names), 1)
+    else:
+        pad0.DivideSquare(len(names))
+
     pad0.Draw()
     keep = plotGlobal(f, pad0, offset=1, names=names, feds1=feds1, feds2=feds2,
                       doYx=doYx, retitle=retitle, gridX=gridX, gridY=gridY)
@@ -656,6 +662,12 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
     r.gROOT.SetStyle("Plain")
     r.gErrorIgnoreLevel = r.kWarning
 
+    r.gStyle.SetTitleBorderSize(0)
+    r.gStyle.SetTitleX(0.53)
+    r.gStyle.SetTitleY(0.95)
+    r.gStyle.SetTitleFontSize(0.07)
+    r.gStyle.SetTitleAlign(22)
+
     canvas = r.TCanvas()
     canvas.Print(pdf + "[")
 
@@ -666,11 +678,11 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
 
         pageOne(f, feds1, feds2, canvas, pdf)
         if feds2:
-            pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc", "tp_vs_tp"])
-            pageTwo(f, feds1, feds2, canvas, pdf, names=["adc_vs_adc_soi_both", "tp_vs_tp_soi_both"])
+            pageTwo(f, feds1, feds2, canvas, pdf,
+                    names=["adc_vs_adc", "tp_vs_tp", "adc_vs_adc_soi_both", "tp_vs_tp_soi_both"])
 
         pageTwo(f, feds1, feds2, canvas, pdf,
-                names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]],
+                names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + ["", "", ""],
                 doYx=False, retitle=False, gridX=True)
 
         # pageTwo(f, feds1, feds2, canvas, pdf, names=["frac0_vs_BcN_%d" % (feds2 + feds1)[0]],
