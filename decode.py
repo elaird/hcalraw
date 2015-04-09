@@ -514,7 +514,7 @@ def clearChannel(d):
 
 
 def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
-    channelId = word16 & 0xff
+    channelId = word16 & 0x7f
     channelHeader = {"Flavor": flavor,
                      "iWord16": iWord16,
                      }
@@ -530,7 +530,9 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
         channelHeader["ErrF"] = (word16 >> 10) & 0x3
         channelHeader["CapId0"] = (word16 >> 8) & 0x3
         channelHeader["Fiber"] = channelId / 4
-        if not utca:
+        if utca:
+            channelHeader["M&P"] = (word16 >> 7) & 0x1
+        else:
             channelHeader["Fiber"] += 1
 
         channelHeader["FibCh"] = channelId % 4
