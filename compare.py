@@ -55,7 +55,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                 book.fill((block["Slot"], crate2bin.get(block["Crate"], 7)),
                           "%s_mismatch_vs_slot_crate" % key,
                           *misMatchMapBins,
-                          title=";slot;crate;HTR - FED   %s   mismatches" % key,
+                          title="%s;slot;crate;HTR - FED   mismatches" % key,
                           yAxisLabels=yAxisLabels)
 
         for otherData in block["otherData"].values():
