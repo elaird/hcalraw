@@ -514,7 +514,7 @@ def clearChannel(d):
 
 
 def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
-    channelId = word16 & 0x7f
+    channelId = word16 & 0xff  # modified below for flavors 5, 6
     channelHeader = {"Flavor": flavor,
                      "iWord16": iWord16,
                      }
@@ -526,6 +526,7 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
             channelHeader[key] = []
 
     elif 5 <= flavor <= 6:
+        channelId = word16 & 0x7f
         dataKey = "channelData"
         channelHeader["ErrF"] = (word16 >> 10) & 0x3
         channelHeader["CapId0"] = (word16 >> 8) & 0x3
