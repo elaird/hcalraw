@@ -260,14 +260,18 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
         samples2 = mapF2.get(coords2)
         allMatched = True
         for i, s1 in enumerate(samples1):
-            as1 = abs(s1)
+            as1 = s1
+            if s1 < 0:
+                as1 = -s1 - 1
 
             if samples2 is None:
                 s2 = 0  # avoid soi condition below
                 as2 = -1  # avoid any match
             else:
                 s2 = samples2[i]
-                as2 = abs(s2)
+                as2 = s2
+                if s2 < 0:
+                    as2 = -s2 - 1
 
             if as1 != as2:
                 allMatched = False
@@ -453,7 +457,7 @@ def dataMap(raw={}, book=None):
                 data = []
                 for i in tsRange:
                     if i == nPre:
-                        data.append(-qie[i])
+                        data.append(-qie[i] - 1)
                     else:
                         data.append(qie[i])
 
@@ -477,12 +481,11 @@ def tpMap(raw={}):
         for block in d["htrBlocks"].values():
             for key, triggerData in block["triggerData"].iteritems():
                 coords = (block["Crate"], block["Slot"], block["Top"], key)
-
                 l = []
                 for i, tp9 in enumerate(triggerData["TP"]):
                     tp = tp9 & 0xff  # ignore fine-grain bit
                     if triggerData["SOI"][i]:
-                        l.append(-tp)
+                        l.append(-tp - 1)
                     else:
                         l.append(tp)
 
