@@ -43,7 +43,14 @@ def xMin_xMax(graph=None):
     N = graph.GetN()
     X = graph.GetX()
     if 1 <= N:
-        return X[0], X[N-1]
+        xMin = X[0]
+        xMax = X[N-1]
+        delta = xMax - xMin
+        if delta:
+            tenPercent = 0.1 * delta
+        else:
+            tenPercent = 0.1 / 60.0  # 1/10 second
+        return (xMin - tenPercent, xMax + tenPercent)
     else:
         printer.error("graph contains zero points.")
         return 0.0, 0.0
@@ -437,14 +444,9 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
     t = graph.GetTitle().split("_")
 
     xMin, xMax = xMin_xMax(graph)
-    delta = xMax - xMin
-    if delta:
-        tenPercent = 0.1 * delta
-    else:
-        tenPercent = 0.1/60.0  # 1/10 second
+    bargs = (xMin, xMax, 3, 0.5, 3.5)
 
     # nBins power of two for repeated rebin(2)
-    bargs = (xMin - tenPercent, xMax + tenPercent, 3, 0.5, 3.5)
     null_coarse = r.TH2D("null_coarse", ";time (minutes);", 4, *bargs)
     null_fine = r.TH2D("null_fine", ";time (minutes);", 128, *bargs)
 
