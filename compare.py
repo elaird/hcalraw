@@ -271,7 +271,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
             if s1 < 0:
                 as1 = -s1 - 1
 
-            if samples2 is None:
+            if samples2 is None or len(samples2) <= i:
                 s2 = 0  # avoid soi condition below
                 as2 = xMin / 2  # avoid any match
             else:
