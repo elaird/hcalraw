@@ -155,7 +155,7 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
 
         frac0 = ErrF[0] / errFSum
     else:
-        frac0 = -0.1  # dummy
+        frac0 = -999.  # dummy
 
     fedTime = utils.minutes(fedOrn, fedBcn)
     book.fillGraph((fedEvn, frac0), "frac0_vs_EvN_%d" % fedId,

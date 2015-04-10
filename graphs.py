@@ -268,7 +268,7 @@ def graphLoop(f, lst, func):
 
         title, xTitle, yTitle = g.GetTitle().split(";")
         if not h0:
-            h0 = r.TH2D("h0", ";%s;%s" % (xTitle, yTitle), 1, min(mins), max(maxs), 1, 0.0, 1.1)
+            h0 = r.TH2D("h0", ";%s;%s" % (xTitle, yTitle), 1, min(mins), max(maxs), 1, -0.1, 1.1)
             h0.SetStats(False)
             h0.Draw()
             out.append(h0)
