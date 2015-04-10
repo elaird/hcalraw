@@ -479,8 +479,13 @@ def printChannelSummary(outputFile):
     print words
     print "-" * len(words)
     f = r.TFile(outputFile)
-    hs = [f.Get("MatchedFibersCh%d" % i) for i in range(3)]
-    hs.append(f.Get("MatchedTriggerTowers"))
+
+    hs = []
+    for name in ["MatchedFibersCh%d" % i for i in range(3)] + ["MatchedTriggerTowers"]:
+        h = f.Get(name)
+        if h:
+            hs.append(h)
+
     for iBin in range(0, 2 + hs[0].GetNbinsX()):
         xs = [h.GetBinCenter(iBin) for h in hs]
         if len(set(xs)) != 1:
