@@ -1,3 +1,7 @@
+nBx = 3564
+f_lhc = 40.079e6  # Hz
+
+
 def nFibers(utca):
     return 24 if utca else 8
 
