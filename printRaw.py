@@ -3,7 +3,7 @@ import printer
 import utils
 
 
-def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[]):
+def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[], slim1=False):
     if None not in d:
         return
 
@@ -14,10 +14,11 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[]):
         if dump <= 0:
             return
 
-        printer.purple("-"*85)
-        printer.purple("%4s iEntry 0x%08x (%d)" % (aux["label"], aux["iEntry"], aux["iEntry"]))
+        if not slim1:
+            printer.purple("-" * 85)
+            printer.purple("%4s iEntry 0x%08x (%d)" % (aux["label"], aux["iEntry"], aux["iEntry"]))
 
-    first = True
+    printHeaders = True
     for fedId, data in sorted(d.iteritems()):
         if fedId is None:
             continue
@@ -33,10 +34,11 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[]):
                    crateslots=aux["crateslots"],
                    nonMatchedQie=nonMatchedQie,
                    nonMatchedTp=nonMatchedTp,
-                   printHeaders=(2 <= dump) or first,
+                   printHeaders=printHeaders,
                    )
-        first = False
-    print
+        printHeaders = 2 <= dump
+    if not slim1:
+        print
 
 
 def htrOverview(d={}):
