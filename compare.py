@@ -126,7 +126,7 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
                   title="FED %d;TTS state;Events / bin" % fedId)
 
     if "BcN" in h:
-        book.fill(h["BcN"]/100.0, "BcN_%d" % fedId, 99, 0, 35.64,  # = 0.36 * 99
+        book.fill(h["BcN"] / 100.0, "BcN_%d" % fedId, hw.nBx, 0, hw.nBx / 100.0,
                   title="FED %d;BcN / 100;Events / bin" % fedId)
 
     msg = "FED %d" % fedId
@@ -176,7 +176,7 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
                    ";time (minutes);kB")
 
     book.fill((fedBcn / 100.0, frac0), "frac0_vs_BcN_%d" % fedId,
-              (36, 6), (0.0, 0.0), (36.0, 1.2),
+              (hw.nBx, 6), (0.0, 0.0), (hw.nBx / 100.0, 1.2),
               title=";FED %d   (BcN / 100);frac. chan. with ErrF == 0;Events / bin" % fedId)
 
     capSum = 0.0+sum(caps.values())
