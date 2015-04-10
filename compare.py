@@ -245,6 +245,8 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
 
 def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
                titlePrefix="", name="adc_vs_adc", xMin=-10.5, xMax=127.5):
+    assert xMin <= -2  # xMin / 2 used below as a (negative) code
+
     matched = []
     nonMatched = []
 
@@ -266,7 +268,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
 
             if samples2 is None:
                 s2 = 0  # avoid soi condition below
-                as2 = -1  # avoid any match
+                as2 = xMin / 2  # avoid any match
             else:
                 s2 = samples2[i]
                 as2 = s2
@@ -325,7 +327,7 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
         tMatched12, tNonMatched12 = adc_vs_adc(tF1, tF2, book=book,
                                                name="tp_vs_tp",
                                                transf=hw.transformed_tp,
-                                               xMin=-25.5, xMax=255.5)
+                                               xMin=-20.5, xMax=255.5)
         tMatched21 = tNonMatched21 = []  # tp_vs_tp(tF2, tF1, book)  # FIXME
 
     if doDump:
