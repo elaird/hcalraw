@@ -319,7 +319,7 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
             if h.GetTitle():
                 note = h.GetTitle().replace("SOI; ", "")
                 if note:
-                    h.GetXaxis().SetTitle("%s (%s)" % (h.GetXaxis().GetTitle(), note))
+                    h.GetXaxis().SetTitle("%s  (%s)" % (h.GetXaxis().GetTitle(), note))
                 if h.GetTitle().startswith("SOI"):
                     title += " (SOI)"
             h.SetTitle(title)
@@ -330,31 +330,31 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         line = r.TLine()
         line.SetLineWidth(1)
         line.SetLineStyle(2)
-        if doYx:
-            x0 = line.DrawLine(0.0, xMin, 0.0, xMax)
-            y0 = line.DrawLine(xMin, 0.0, xMax, 0.0)
-        else:
-            x0 = y0 = None
+        # if doYx:
+        #     x0 = line.DrawLine(0.0, xMin, 0.0, xMax)
+        #     y0 = line.DrawLine(xMin, 0.0, xMax, 0.0)
+        #     keep += [x0, y0]
 
         h.Draw(gopts + "same")  # draw again to be on top of dashed lines
 
-        yx = r.TF1("yx", "x", xMin, xMax)
+        yx = r.TF1("yx", "x", -0.5, xMax)
+        yx.SetNpx(int(0.5 + xMax))
         yx.SetLineColor(r.kBlack)
         yx.SetLineWidth(1)
         yx.SetLineStyle(3)
         if doYx:
             yx.Draw("same")
 
-        leg = r.TLegend(0.25, 0.75, 0.55, 0.88)
+        leg = r.TLegend(0.25, 0.73, 0.4, 0.85)
         leg.SetBorderSize(0)
         leg.SetFillStyle(0)
 
         if doYx:
             leg.AddEntry(yx, "y = x", "l")
-            leg.AddEntry(x0, "zero", "l")
+            # leg.AddEntry(x0, "zero", "l")
 
         leg.Draw()
-        keep += [h, yx, x0, y0, leg]
+        keep += [h, yx, leg]
     return keep
 
 
