@@ -1,14 +1,17 @@
 improve storage structures
 performance
-cp old deadbeef
-split compare
-bcn vs. fed
+reduce memory usage
 git grep -in fixme
+
 zcat
 fwlite
 use bcn in event maps
-improve time label (orn ~ min)
-minutes range (min/max)
-dq vs time
+dq vs time (mismatched evn, frac0, nmatched?)
 event prescale
-reduce memory usage
+bcn vs. fed
+f_LHC for time
+fine bx binning
+
+auto SOI
+restore cron
+chainI = chain if files2 == files1 else tchain(xxyy)
