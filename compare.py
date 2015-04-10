@@ -298,7 +298,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
 
 
 def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots=False):
-    dump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
+    doDump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
 
     if anyEmap:
         mapF1, mapB1, _ = dataMap(raw1, book)
@@ -316,7 +316,7 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
         mapF2, _, _ = dataMap(raw2, book)
         titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF])
         matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book=book, titlePrefix=titlePrefix)
-        if dump:
+        if doDump:
             matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1, titlePrefix=titlePrefix)
 
         tF1 = tpMap(raw1)[0]
@@ -328,8 +328,9 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
                                                xMin=-25.5, xMax=255.5)
         tMatched21 = tNonMatched21 = []  # tp_vs_tp(tF2, tF1, book)  # FIXME
 
-    if dump:
-        printRaw.oneEvent(raw1, nonMatchedQie=nonMatched12, nonMatchedTp=tNonMatched12)
+    if doDump:
+        slim1 = (raw1[None]["dump"] == 1) and (len(raw1) == 2) and not raw2
+        printRaw.oneEvent(raw1, nonMatchedQie=nonMatched12, nonMatchedTp=tNonMatched12, slim1=slim1)
         printRaw.oneEvent(raw2, nonMatchedQie=nonMatched21, nonMatchedTp=tNonMatched21)
 
     okFeds = loop_over_feds(raw1, book, adcPlots, adcTag="feds1")
