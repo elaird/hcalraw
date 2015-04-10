@@ -9,9 +9,9 @@ use bcn in event maps
 dq vs time (mismatched evn, frac0, nmatched?)
 event prescale
 bcn vs. fed
-f_LHC for time
 fine bx binning
 
 auto SOI
 restore cron
 chainI = chain if files2 == files1 else tchain(xxyy)
+
