@@ -21,10 +21,10 @@ def ornBcn(ornIn, bcnIn, utca):
     orn = ornIn
     bcn = bcnIn + bcnDelta
     if bcn < 0:
-        bcn += 3564
+        bcn += hw.nBx
         orn -= 1
-    if bcn > 3563:
-        bcn -= 3564
+    if hw.nBx - 1 < bcn:
+        bcn -= hw.nBx
         orn += 1
     return orn, bcn
 

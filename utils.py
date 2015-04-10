@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import printer
+from configuration import hw
 
 
 def cmssw():
@@ -9,9 +10,8 @@ def cmssw():
 
 
 def minutes(orn, bcn):
-    bcnPerOrb = 3564.0
-    orbPerSec = 11.1e3
-    orn = bcn / bcnPerOrb + orn
+    orn += float(bcn) / hw.nBx
+    orbPerSec = hw.f_lhc / hw.nBx
     return orn / orbPerSec / 60.0
 
 

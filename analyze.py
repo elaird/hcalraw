@@ -7,7 +7,7 @@ import utils
 r = utils.ROOT()
 import autoBook
 import compare
-from configuration import sw
+from configuration import hw, sw
 import decode
 import printer
 
@@ -376,7 +376,7 @@ def graphs(d={}):
         gr1.SetPoint(i, time, category)
         gr2.SetPoint(i, time, evn)
         if orn0 is not None:
-            gr3.SetPoint(i, time, 3564 * (orn - orn0) + (bcn - bcn0))
+            gr3.SetPoint(i, time, hw.nBx * (orn - orn0) + (bcn - bcn0))
             gr4.SetPoint(i, time, evn0 < evn)
         else:
             gr3.SetPoint(i, time, 1.0e30)
