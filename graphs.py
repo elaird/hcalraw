@@ -610,8 +610,8 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
         pad20.cd(16 + i)
         adjustPad(logY=True)
         keep += histoLoop(f,
-                          [("OrN", r.kBlue, 1),
-                           ("EvN", r.kCyan, 2),
+                          [("EvN", r.kBlue, 1),
+                           ("OrN", r.kCyan, 2),
                            ("BcN", r.kBlack, 3),
                            ],
                           lambda x: "delta%s_%s_%s" % (x, fed1, fed2),
