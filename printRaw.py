@@ -18,7 +18,7 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[], slim1=False):
             printer.purple("-" * 85)
             printer.purple("%4s iEntry 0x%08x (%d)" % (aux["label"], aux["iEntry"], aux["iEntry"]))
 
-    printHeaders = True
+    printHeaders = not (slim1 and aux["iEntry"])
     for fedId, data in sorted(d.iteritems()):
         if fedId is None:
             continue
@@ -36,7 +36,7 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[], slim1=False):
                    nonMatchedTp=nonMatchedTp,
                    printHeaders=printHeaders,
                    )
-        printHeaders = 2 <= dump
+        printHeaders = True
     if not slim1:
         print
 
