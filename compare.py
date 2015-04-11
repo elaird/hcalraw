@@ -248,6 +248,54 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
     return okFeds
 
 
+def tsLoop(lst1, lst2, book=None, name=None,
+           nBins=None, xMin=None, xMax=None,
+           title1=None, title2=None):
+    nPre1, delta1 = lst1[:2]
+    qies1 = lst1[2:]
+    n1 = len(qies1)
+
+    if lst2 is None:
+        nPre2 = delta2 = 0
+        qies2 = None
+        n2 = None
+    else:
+        nPre2, delta2 = lst2[:2]
+        qies2 = lst2[2:]
+        n2 = len(qies2)
+
+    allMatched = True
+    nTs = 0
+
+    for i1, qie1 in enumerate(qies1):
+        j1 = i1 + delta1
+        if j1 < 0 or n1 <= j1:
+            continue
+
+        j2 = j1 + delta2 - nPre1 + nPre2
+        if n2 is not None and (j2 < 0 or n2 <= j2):
+            continue
+
+        nTs += 1
+        if qies2 is None:
+            qie2 = xMin / 2  # avoid any match
+        else:
+            qie2 = qies2[j2]
+
+        if qie1 != qie2:
+            allMatched = False
+
+        if book is not None:
+            book.fill((qie1, qie2), name,
+                      (nBins, nBins), (xMin, xMin), (xMax, xMax),
+                      title=title1)
+            if i1 == nPre1:
+                book.fill((qie1, qie2), "%s_soi_both" % name,
+                          (nBins, nBins), (xMin, xMin), (xMax, xMax),
+                          title=title2)
+    return allMatched, nTs
+
+
 def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
                titlePrefix="", name="adc_vs_adc", xMin=-10.5, xMax=127.5):
     assert xMin <= -2  # xMin / 2 used below as a (negative) code
@@ -264,49 +312,10 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
         if coords2 is None:
             continue
 
-        nPre1, delta1 = lst1[:2]
-        qies1 = lst1[2:]
-        n1 = len(qies1)
-
         lst2 = mapF2.get(coords2)
-        if lst2 is None:
-            nPre2 = delta2 = 0
-            qies2 = None
-            n2 = None
-        else:
-            nPre2, delta2 = lst2[:2]
-            qies2 = lst2[2:]
-            n2 = len(qies2)
-
-
-        allMatched = True
-        nTs = 0
-        for i1, qie1 in enumerate(qies1):
-            j1 = i1 + delta1
-            if j1 < 0 or n1 <= j1:
-                continue
-
-            j2 = j1 + delta2 - nPre1 + nPre2
-            if n2 is not None and (j2 < 0 or n2 <= j2):
-                continue
-
-            nTs += 1
-            if qies2 is None:
-                qie2 = xMin / 2  # avoid any match
-            else:
-                qie2 = qies2[j2]
-
-            if qie1 != qie2:
-                allMatched = False
-
-            if book is not None:
-                book.fill((qie1, qie2), name,
-                          (nBins, nBins), (xMin, xMin), (xMax, xMax),
-                          title=title1)
-                if i1 == nPre1:
-                    book.fill((qie1, qie2), "%s_soi_both" % name,
-                              (nBins, nBins), (xMin, xMin), (xMax, xMax),
-                              title=title2)
+        allMatched, nTs = tsLoop(lst1, lst2, book,
+                                 name, nBins, xMin, xMax,
+                                 title1, title2)
 
         if name.startswith("adc"):
             book.fill(nTs, "nTS_for_matching_ADC", 12, -0.5, 11.5,
@@ -320,9 +329,16 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
         else:
             nonMatched.append(coords1)
             if loud and coords2 in mapF2:
-                c = "%2d %2d%1s %2d %1d"
+                samples1 = tuple(lst1[2:])
+                samples2 = tuple(lst2[2:])
                 q = " ".join(["%2x"] * len(samples1))
-                print "%s  |  %s  :  %s  |  %s" % (c % coords1, c % coords2, q % samples1, q % tuple(samples2))
+                if type(coords1[2]) is str:  # TPs
+                    c1 = str(coords1)
+                    c2 = str(coords2)
+                else:
+                    c1 = "%2d %2d%1s %2d %1d" % coords1
+                    c2 = "%2d %2d%1s %2d %1d" % coords2
+                print "%s  |  %s  :  %s  |  %s" % (c1, c2, q % samples1, q % samples2)
 
     return matched, nonMatched
 
