@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+
+
+from options import opts
+from configuration import sw
 import math
 import collections
 import printer
@@ -702,3 +707,15 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
 
 def makeSummaryPdf(inputFile="", feds1=[], feds2=[], pdf="summary.pdf"):
     makeSummaryPdfMulti(inputFiles=[inputFile], feds1s=[feds1], feds2s=[feds2], pdf=pdf)
+
+
+def main(options):
+    makeSummaryPdf(inputFile=options.outputFile,
+                   feds1=sw.fedList(options.feds1),
+                   feds2=sw.fedList(options.feds2),
+                   pdf=options.outputFile.replace(".root", ".pdf"),
+    )
+
+
+if __name__ == "__main__":
+    main(opts()[0])
