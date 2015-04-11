@@ -264,7 +264,7 @@ def tsLoop(lst1, lst2, book=None, name=None,
         qies2 = lst2[2:]
         n2 = len(qies2)
 
-    allMatched = True
+    nTsMatched = 0
     nTs = 0
 
     for i1, qie1 in enumerate(qies1):
@@ -282,8 +282,8 @@ def tsLoop(lst1, lst2, book=None, name=None,
         else:
             qie2 = qies2[j2]
 
-        if qie1 != qie2:
-            allMatched = False
+        if qie1 == qie2:
+            nTsMatched += 1
 
         if book is not None:
             book.fill((qie1, qie2), name,
@@ -293,7 +293,7 @@ def tsLoop(lst1, lst2, book=None, name=None,
                 book.fill((qie1, qie2), "%s_soi_both" % name,
                           (nBins, nBins), (xMin, xMin), (xMax, xMax),
                           title=title2)
-    return allMatched, nTs
+    return nTs, nTsMatched
 
 
 def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
@@ -313,7 +313,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
             continue
 
         lst2 = mapF2.get(coords2)
-        allMatched, nTs = tsLoop(lst1, lst2, book,
+        nTs, nTsMatched = tsLoop(lst1, lst2, book,
                                  name, nBins, xMin, xMax,
                                  title1, title2)
 
@@ -324,7 +324,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
             book.fill(nTs, "nTS_for_matching_TP", 12, -0.5, 11.5,
                       title="TP;no. TS used for matching;Events / bin")
 
-        if allMatched:
+        if nTsMatched == nTs:
             matched.append(coords1)
         else:
             nonMatched.append(coords1)
@@ -349,8 +349,8 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
     if anyEmap:
         mapF1, mapB1, _ = dataMap(raw1, book)
         mapF2, mapB2, _ = dataMap(raw2, book)
-        matched12, nonMatched12 = matchStats(mapF1, mapB2)
-        matched21, nonMatched21 = matchStats(mapF2, mapB1)
+        matched12, nonMatched12 = matchStats(mapF1, mapF2)
+        matched21, nonMatched21 = matchStats(mapF2, mapF1)
         tMatched12 = tNonMatched12 = []
         tMatched21 = tNonMatched21 = []
 
@@ -456,15 +456,17 @@ def reportFailed(failed=[]):
             print "(%s)" % coordString(*c)
 
 
-def matchStats(f={}, b={}):
-    sys.exit("FIXME: matchStats")
+def matchStats(f1={}, f2={}):
     matched = {}
     failed = []
-    for coords, data in f.iteritems():
-        if data in b:
-            matched[coords] = b[data]
-        else:
-            failed.append(coords)
+    for coords1, lst1 in f1.iteritems():
+        for coords2, lst2 in f2.iteritems():
+            nTs, nTsMatched = tsLoop(lst1, lst2)
+            if nTsMatched == nTs:
+                # print coords1, coords2, nTs, nTsMatched
+                matched[coords1] = coords2
+            else:
+                failed.append(coords1)
     return matched, failed
 
 
