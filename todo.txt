@@ -12,4 +12,3 @@ bcn vs. fed
 
 auto SOI
 restore cron
-chainI = chain if files2 == files1 else tchain(xxyy)
