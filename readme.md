@@ -8,20 +8,19 @@ cd cpp; make -j 5; cd -
 
 
 # analyze global runs
-./look.py 235316 --match=v2 --no-warn-unpack
-./look.py 239342 --match=v3a --nevents=100
-./look.py 239751 --match=v2 --nevents=100
-./look.py 239895 --match=v2 --hhmm=2212 --nevents=100
-./look.py 240073 --match=v2
+./look.py 235316 --no-warn-unpack
+./look.py 239751 --nevents=100
+./look.py 239895 --hhmm=2212 --nevents=20
+./look.py 240073
 
 
 # analyze AMC13/DCC2 monitor buffer dumps
-./dumps2root2pdf.py data/239713_*.dat --match=v2 --nevents=100
+./dumps2root2pdf.py data/239713_*.dat
 
 
 # compare payloads of different sets of FEDs, within one file
-./look.py 239480 --match=v2
-./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF --match=v2 --dump=0 --output-file=output/239480.root --progress
+./look.py 239480
+./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF --dump=0 --output-file=output/239480.root --progress
 
 
 # dump decoded data to stdout
@@ -29,8 +28,11 @@ cd cpp; make -j 5; cd -
 
 
 # compare payloads of different sets of FEDs, across two files
-./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --file2=data/mol_run55.root --feds2=931 --dump=0 --match=v0 --any-emap
-./oneRun.py --file1=$USC/USC_211154.root --feds1=714,722 --file2=$USC/USC_211155.root --feds2=989 --dump=0 --match=v0 --any-emap --nevents=51 --progress
+./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 \
+--file2=data/mol_run55.root --feds2=931 --utca-bcn-delta=-119 --any-emap --dump=0
+
+./oneRun.py --file1=$USC/USC_211154.root --feds1=714,722 --nevents=51 --progress \
+--file2=$USC/USC_211155.root --feds2=989 --utca-bcn-delta=-119 --any-emap --dump=0
 
 
 # analyze FE pattern runs
