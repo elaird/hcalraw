@@ -53,8 +53,8 @@ def main(options):
     check_and_adjust(options)
 
     if options.match:
-        matching.tsRange = getattr(matching, "tsRange_%s" % options.match)
-        matching.tsRange()  # call once to set utcaBcnDelta
+        matching.pipeline = getattr(matching, "pipeline_%s" % options.match)
+        matching.pipeline()  # call once to set utcaBcnDelta
 
     if options.noColor:
         printer.__color = False
