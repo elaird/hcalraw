@@ -6,13 +6,15 @@ import utils
 
 def flavor(book, d, fedId):
     x = d["Flavor"]
+    if x <= 3:
+        x = 3
     if 6 <= x:
         x += 1
     if d.get("M&P"):
         x += 1
-    book.fill(x, "ChannelFlavor_%d" % fedId, 9, -0.5, 8.5,
+    book.fill(x, "ChannelFlavor_%d" % fedId, 6, 2.5, 8.5,
               title="FED %d;channel flavor;Channels / bin" % fedId,
-              xAxisLabels=["0", "1", "2", "3", "utp", "cpt", "mp", "vrb", "tch"])
+              xAxisLabels=["#leq3", "utp", "cpt", "mp", "vrb", "tch"])
 
 
 def htrSummary(blocks=[], book=None, fedId=None,
@@ -116,7 +118,7 @@ def htrOverviewBits(d={}, book={}, fedId=None, letters="LMSEPVC"):
 
 
 def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
-    book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 16, -0.5, 15.5,
+    book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 14, -0.5, 13.5,
               title="FED %d;nWord16 skipped during unpacking;Events / bin" % fedId)
 
     h = d["header"]
@@ -223,7 +225,7 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
         if fedId is None:
             continue
 
-        book.fill(dct["nBytesSW"]/1024.0, "nBytesSW_%d" % fedId, 64, 0, 16,
+        book.fill(dct["nBytesSW"] / 1024.0, "nBytesSW_%d" % fedId, 16*8, 0, 16,
                   title="FED %d; kBytes;Events / bin" % fedId)
 
         fedIdHw = dct["header"]["FEDid"]
@@ -319,10 +321,10 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
                                  title1, title2)
 
         if name.startswith("adc"):
-            book.fill(nTs, "nTS_for_matching_ADC", 12, -0.5, 11.5,
+            book.fill(nTs, "nTS_for_matching_ADC", 14, -0.5, 13.5,
                       title="ADC;no. TS used for matching;Events / bin")
         else:
-            book.fill(nTs, "nTS_for_matching_TP", 12, -0.5, 11.5,
+            book.fill(nTs, "nTS_for_matching_TP", 14, -0.5, 13.5,
                       title="TP;no. TS used for matching;Events / bin")
 
         if nTsMatched == nTs:
