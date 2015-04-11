@@ -3,6 +3,8 @@
 import os
 import subprocess
 import sys
+import utils
+from look import eos
 
 
 def commandOutput(command):
@@ -51,13 +53,6 @@ def prepareRunList(dest="", hcalRuns=""):
             assert e.errno == 2
 
     stdout("wget -O %s %s" % (dest, hcalRuns), checkErr=False)
-
-
-def rootFiles(eosDir=""):
-    cmd = "\n".join(["source /afs/cern.ch/project/eos/installation/cms/etc/setup.sh",
-                     "eos ls %s | grep 'USC_[0-9]\{6\}\.root'" % eosDir,
-                     ])
-    return stdout(cmd)
 
 
 def makeDir(baseDir="", run=0):
@@ -118,7 +113,10 @@ def goodRun(rootFile=""):
 
 
 def env():
-    return ["cd ~elaird/public/hcalraw_pro", "source env/slc6-cmssw.sh"]
+    l =  ["cd ~%s/public/hcalraw_pro" % os.environ["USER"]]
+    if "cern.ch" in os.environ.get("HOSTNAME", ""):
+        l.append("source env/lxplus6.sh")
+    return l
 
 
 def gitLog(inputFile="", outputDir="", run=0):
@@ -138,27 +136,25 @@ def oneRun(args=[], outputFile="", suppress=["Xrd", "nologin"]):
 def dumpFibering(inputFile="", outputDir="", run=0):
     outputFile = "%s/cabled.txt" % outputDir
     args = ["--file1='%s'" % inputFile,
-            #"--feds1=HCAL",
+            "--feds1=uHCAL",
             "--patterns",
-            "--nevents=1",
             ]
-
-    if 222965 <= run:
-        args.append("--compressed")
-    if run <= 223008:
-        args.append("--nts=20")
-
-    if 222965 <= run <= 223333:
-        args.append("--feds1=HBHEHF")
-    else:
-        args.append("--feds1=HCAL")
-
     return commandOutput(oneRun(args, outputFile))
 
 
-def compareFibering(inputFile="", outputDir="", run=0):
-    cmd = "cat %s/cabled.txt | ./diff.py > %s/summary.txt" % (outputDir,
-                                                              outputDir)
+def compareFibering_vme(inputFile="", outputDir="", run=0):
+    return compareFibering(inputFile, outputDir, run, "data/ref_vme_G.txt")
+
+
+def compareFibering_utca(inputFile="", outputDir="", run=0):
+    return compareFibering(inputFile, outputDir, run, "data/ref_utca_G.txt")
+
+
+def compareFibering(inputFile="", outputDir="", run=0, ref=""):
+    assert ref
+    summary = ref.replace("data/ref_", "summary_").replace("_G", "")
+    cmd = "cat %s/cabled.txt | ./diff.py %s > %s/%s" % (outputDir, ref,
+                                                        outputDir, summary)
     return commandOutput(" && ".join(env() + [cmd]))
 
 
@@ -198,10 +194,13 @@ def compare(inputFile="", outputDir="", run=0, stem="compare", moreArgs=[]):
 def report(d={}, subject=""):
     print subject
     if d.get("stderr") or d.get("returncode"):
-        cmd = "echo '%s' |& mail -s '%s' %s" % (blob(d),
-                                                subject,
-                                                os.environ["USER"])
-        os.system(cmd)
+        if os.path.exists("/bin/mail"):
+            cmd = "echo '%s' |& mail -s '%s' %s" % (blob(d),
+                                                    subject,
+                                                    os.environ["USER"])
+            os.system(cmd)
+        else:
+            print blob(d)
 
 
 def runs(runListFile="",
@@ -220,19 +219,16 @@ def go(baseDir="",
        runs=[],
        process=lambda inputFile, outputDir, run: {},
        dependsUpon=[],
-       eosPrefix="root://eoscms.cern.ch",
-       eosDir="/eos/cms/store/group/comm_hcal/LS1",
        urlPrefix="http://cmsdoc.cern.ch",
        jobCheck="oneRun",
        nProcMax=5,
+       debug=False,
        ):
 
-    for rootFile in rootFiles(eosDir):
-        run = goodRun(rootFile)
-        if run not in runs:
+    for run in runs:
+        fileName = "root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/LS1/USC_%d.root" % run
+        if not utils.commandOutputFull("%s stat %s" % (eos(), fileName))["returncode"]:
             continue
-        else:
-            runs.remove(run)
 
         processes = stdout("ps -ef | grep %s | grep %s" % (os.environ["USER"], jobCheck))
         if nProcMax < len(processes):
@@ -247,11 +243,12 @@ def go(baseDir="",
                                           suffix=suffix,
                                           dependsUpon=dependsUpon)
 
-        #print run, ready, procFlag, doneFlag, process
+        if debug:
+            print run, ready, procFlag, doneFlag, process
+
         if ready:
             stdout("touch %s" % procFlag)
-            d = process(inputFile="%s/%s/%s" % (eosPrefix, eosDir, rootFile),
-                        #inputFile="%s/USC_%d.root" % (os.environ["HOME"], run),
+            d = process(inputFile=fileName,
                         outputDir=runDir,
                         run=run)
             stdout("rm %s" % procFlag)
@@ -297,21 +294,22 @@ if __name__ == "__main__":
                    )
 
     fiberIdRuns = runs(runListFile=runListFile,
-                       minimumRun=214782,
+                       minimumRun=236631,
                        select=lambda x: "FiberID" in x,
                        ) + extraRuns("%s/public/FiberID/extraruns.txt" % os.environ["HOME"])
 
-    for func, deps in [#(gitLog, []),
-                       (dumpFibering, []),
-                       (compareFibering, ["dumpFibering"]),
+    for func, deps in [(dumpFibering, []),
+                       (compareFibering_vme, ["dumpFibering"]),
+                       (compareFibering_utca, ["dumpFibering"]),
                        ]:
         go(baseDir="%s/public/FiberID" % os.environ["HOME"],
            process=func,
            dependsUpon=deps,
-           runs=fiberIdRuns+[],
+           runs=fiberIdRuns,
            )
 
 
+    sys.exit()
     utcaRuns = runs(runListFile=runListFile,
                     minimumRun=219866,
                     select=lambda x: ("/HF/" in x) and ("no_utca" not in x) and ("SelfTrigger" not in x),
