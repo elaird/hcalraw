@@ -345,8 +345,8 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
     doDump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
 
     if anyEmap:
-        mapF1, mapB1, _ = dataMap(raw1, book, onlySamples=True)
-        mapF2, mapB2, _ = dataMap(raw2, book, onlySamples=True)
+        mapF1, mapB1, _ = dataMap(raw1, book)
+        mapF2, mapB2, _ = dataMap(raw2, book)
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
         tMatched12 = tNonMatched12 = []
@@ -465,7 +465,7 @@ def matchStats(f={}, b={}):
     return matched, failed
 
 
-def dataMap(raw={}, book=None, onlySamples=False):
+def dataMap(raw={}, book=None):
     okErrF = matching.okErrF
 
     forward = {}
