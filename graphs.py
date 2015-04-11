@@ -451,14 +451,18 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
     graph.SetMarkerStyle(20)
     graph.SetMarkerColor(r.gStyle.GetHistLineColor())
     graph.SetMarkerSize(0.5*graph.GetMarkerSize())
-    t = graph.GetTitle().split("_")
 
     xMin, xMax = xMin_xMax(graph)
     bargs = (xMin, xMax, 3, 0.5, 3.5)
 
     # nBins power of two for repeated rebin(2)
-    null_coarse = r.TH2D("null_coarse", ";time (minutes);", 4, *bargs)
-    null_fine = r.TH2D("null_fine", ";time (minutes);", 128, *bargs)
+    null_title = ";"
+    if "/store" in graph.GetTitle():
+        null_title += "%s%s" % (graph.GetTitle(), " " * 10)
+
+    null_title += "time (minutes);"
+    null_coarse = r.TH2D("null_coarse", null_title,   4, *bargs)
+    null_fine   = r.TH2D("null_fine",   null_title, 128, *bargs)
 
     rateColorFine = r.kGray
     rateColorCoarse = 602
@@ -540,7 +544,8 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
         keep += [hl, hl2]
         magnify(hl, factor=9.0)
         hl.GetXaxis().SetTickLength(0.1)
-        hl.GetXaxis().SetTitleOffset(0.7)
+        hl.GetXaxis().SetTitleOffset(0.85)
+        hl.GetXaxis().SetTitleSize(0.25)
         hl.GetXaxis().SetNoExponent(True)
         hl.GetYaxis().SetTickLength(hu.GetYaxis().GetTickLength())
         hl.GetYaxis().SetLabelSize(0.25)
@@ -560,6 +565,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
         adjustPad(m={"Bottom": 0.2, "Left": 0.15, "Top": 0.03, "Right": 0.03})
         null_coarse.Draw()
         magnify(null_coarse, factor=3.0)
+        t = graph.GetTitle().split("_")
         labelYAxis(null_coarse, labels={1: t[0], 2: t[1], 3: t[2]})
         graph.Draw("psame")
         keep += [null_coarse, graph]
@@ -579,6 +585,20 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
     return keep
 
 
+def relabel(cats, counts):
+    labels = []
+    for i, label in enumerate(cats.GetTitle().split("_")):
+        labels.append("%s (%d)" % (label, counts[1 + i]))
+    cats.SetTitle("_".join(labels))
+
+
+def retitle(evn_graph):
+    fields = evn_graph.GetTitle().split(",")[0].split("/")
+    title = "/".join(fields[:-2])
+    title = title[title.find("/store"):]
+    evn_graph.SetTitle(title)
+
+
 def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     pad20 = r.TPad("pad20", "pad20", 0.00, 0.00, 1.00, 1.00)
     pad20.Divide(5, 4, 0.001, 0.001)
@@ -590,10 +610,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     cats = f.Get("category_vs_time")
     counts = yCounts(cats)
     if 2 <= len(counts.keys()):
-        labels = []
-        for i, label in enumerate(cats.GetTitle().split("_")):
-            labels.append("%s (%d)" % (label, counts[1 + i]))
-        cats.SetTitle("_".join(labels))
+        relabel(cats, counts)
         keep += draw_graph(cats, title=title)
     else:
         ratemax = 5.0e7
@@ -603,7 +620,9 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
                            frac0Min=0.2,
                            height=ratemax / 5.0)
 
-        keep += draw_graph(graph=f.Get("evn_vs_time"),
+        evn_graph = f.Get("evn_vs_time")
+        retitle(evn_graph)
+        keep += draw_graph(graph=evn_graph,
                            title=title, ratemax=ratemax,
                            graph2=f.Get("bcn_delta_vs_time"),
                            graph3=resyncs(f.Get("incr_evn_vs_time"), ratemax),
