@@ -225,11 +225,8 @@ def go(baseDir="",
        debug=False,
        ):
 
+    not_found = []
     for run in runs:
-        fileName = "root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/LS1/USC_%d.root" % run
-        if not utils.commandOutputFull("%s stat %s" % (eos(), fileName))["returncode"]:
-            continue
-
         processes = stdout("ps -ef | grep %s | grep %s" % (os.environ["USER"], jobCheck))
         if nProcMax < len(processes):
             msg = "Already %d processes:" % len(processes)
@@ -247,6 +244,13 @@ def go(baseDir="",
             print run, ready, procFlag, doneFlag, process
 
         if ready:
+            fileName = "/store/group/dpg_hcal/comm_hcal/LS1/USC_%d.root" % run
+            if utils.commandOutputFull("%s stat %s" % (eos(), fileName))["returncode"]:
+                not_found.append(run)
+                continue
+            else:
+                fileName = "root://eoscms.cern.ch/%s" % fileName
+
             stdout("touch %s" % procFlag)
             d = process(inputFile=fileName,
                         outputDir=runDir,
@@ -260,14 +264,16 @@ def go(baseDir="",
                 with open(doneFlag, "w") as f:
                     print >> f, blob(d)
 
-    #if runs:
-    #    print "Runs not found in EOS:"
-    #    for run in runs:
-    #        print run
+    if not_found:
+       print "Runs not found in EOS:"
+       print not_found
 
 
 def extraRuns(fileName=""):
     out = []
+    if not os.path.exists(fileName):
+        return out
+
     f = open(fileName)
     for iLine, line in enumerate(f):
         if line and line[0] == "#":
@@ -305,7 +311,7 @@ if __name__ == "__main__":
         go(baseDir="%s/public/FiberID" % os.environ["HOME"],
            process=func,
            dependsUpon=deps,
-           runs=fiberIdRuns,
+           runs=fiberIdRuns + [],
            )
 
 
