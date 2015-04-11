@@ -454,14 +454,9 @@ def go(outer={}, inner={}, outputFile="",
     gr1, gr2, gr3, gr4 = graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
                                                  iMap=iMapF, iMapBcn=iMapBcn,
                                                  innerEvent=innerEvent))
-    nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
-    labels = ["only %s (%d)" % (inner["label"],
-                                len(iMapF)-nBoth) if inner else "",
-              "only %s (%d)" % (outer["label"],
-                                len(oMapF)-nBoth) if outer else "",
-              "both (%d)" % nBoth if inner else "",
-              ]
-    gr1.SetTitle("_".join(labels))
+    gr1.SetTitle("_".join(["only %s" % inner["label"], "only %s" % outer["label"], "both"]))
+    gr2.SetTitle(",".join(outer["fileNames"]))
+
     for gr in [gr1, gr2, gr3, gr4]:
         gr.Write()
 
@@ -472,6 +467,7 @@ def go(outer={}, inner={}, outputFile="",
     if printEventSummary:
         s = "%s: %4s = %6d" % (outputFile, outer["label"], len(oMapF))
         if inner:
+            nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
             s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
         printer.msg(s)
 
