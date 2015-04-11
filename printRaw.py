@@ -23,10 +23,10 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[], slim1=False):
         if fedId is None:
             continue
         if data["other"]:
-            if "GZ" in data["other"]:
-                oneFedMol(data["other"])
-            else:
+            if "magic" in data["other"]:
                 oneFedBu(data["other"])
+            else:
+                oneFedMol(data["other"])
 
         oneFedHcal(data,
                    patterns=aux["patterns"],
@@ -484,7 +484,7 @@ def oneFedMol(d):
                              "EvN ",
                              "   iBlock",
                              "  nWord64",
-                             "  GZ",
+                             "magic",
                              ])
     printer.blue("--MOL" + ("-" * len(header)))
     printer.blue(header)
@@ -494,7 +494,7 @@ def oneFedMol(d):
                                  "0x%07x" % value["Trigger"],
                                  "%5d" % iBlock,
                                  "    %5d" % value["nWord64"],
-                                 "   %4x" % value["GZ"],
+                                 "   %4x" % value["magic"],
                              ]))
 
 
