@@ -14,30 +14,21 @@ def bcnDelta(utca):
 
 def pipeline_v0(utca=None):
     global __utcaBcnDelta
-    __utcaBcnDelta = -119
-
     global okErrF
+    __utcaBcnDelta = -119
     okErrF = [0, 1]
-
     return 0
 
 
 def pipeline_v1(utca=None):
     global __utcaBcnDelta
     __utcaBcnDelta = -119
-
     return 0
 
 
 def pipeline_v2(utca=None):
-    """local runs; global runs from
-    Feb.    2015 - Mar. 16, 2015;
-    Apr. 4, 2015 - 
-    """
-
     global __utcaBcnDelta
     __utcaBcnDelta = -131
-
     return 0
 
 
