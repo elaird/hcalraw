@@ -61,12 +61,12 @@ def xMin_xMax(graph=None):
         return 0.0, 0.0
 
 
-def multiY(graph=None):
-    s = set()
+def yCounts(graph=None):
+    counts = collections.defaultdict(int)
     y = graph.GetY()
     for i in range(graph.GetN()):
-        s.add(y[i])
-    return 2 <= len(s)
+        counts[int(y[i])] += 1
+    return counts
 
 
 def fillRateHisto(h, g):
@@ -588,7 +588,12 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
 
     title = f.GetPath()
     cats = f.Get("category_vs_time")
-    if multiY(cats):
+    counts = yCounts(cats)
+    if 2 <= len(counts.keys()):
+        labels = []
+        for i, label in enumerate(cats.GetTitle().split("_")):
+            labels.append("%s (%d)" % (label, counts[1 + i]))
+        cats.SetTitle("_".join(labels))
         keep += draw_graph(cats, title=title)
     else:
         ratemax = 5.0e7
