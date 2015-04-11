@@ -52,10 +52,7 @@ def go(options):
 def main(options):
     check_and_adjust(options)
 
-    if options.match:
-        matching.pipeline = getattr(matching, "pipeline_%s" % options.match)
-        matching.pipeline(True)  # call once to set utcaBcnDelta
-
+    matching.__utcaBcnDelta = options.utcaBcnDelta
     if options.noColor:
         printer.__color = False
 

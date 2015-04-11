@@ -468,8 +468,6 @@ def matchStats(f={}, b={}):
 
 
 def dataMap(raw={}, book=None):
-    okErrF = matching.okErrF
-
     forward = {}
     backward = {}
     skipped = []
@@ -478,7 +476,8 @@ def dataMap(raw={}, book=None):
         if fedId is None:
             continue
 
-        delta = matching.pipeline(d["header"]["utca"])
+        delta = matching.pipelineDelta(d["header"]["utca"])
+
         fiberMap = hw.fiberMap(fedId)
         for block in d["htrBlocks"].values():
             nPre = block["nPreSamples"]
@@ -488,7 +487,7 @@ def dataMap(raw={}, book=None):
                 fiber = fiberMap.get(fiber, fiber)
                 coords = (block["Crate"], block["Slot"], block["Top"], fiber, channel)
 
-                if channelData["ErrF"] not in okErrF:
+                if channelData["ErrF"] not in matching.okErrF:
                     skipped.append(coords)
                     continue
 

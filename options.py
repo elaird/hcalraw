@@ -128,11 +128,12 @@ def opts(alsoArgs=False):
     parser.add_option_group(match)
 
     matchCh = optparse.OptionGroup(parser, "Options for matching channels across events")
-    matchCh.add_option("--match",
-                       dest="match",
-                       default="",
-                       metavar="s",
-                       help="choose configuration.matching.pipeline_s")
+    matchCh.add_option("--utca-bcn-delta",
+                       dest="utcaBcnDelta",
+                       default=-131,
+                       metavar="n",
+                       type="int",
+                       help="Number of BX to add to uTCA counters (default is -131)")
     matchCh.add_option("--any-emap",
                        dest="anyEmap",
                        default=False,
