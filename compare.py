@@ -331,14 +331,11 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
             if loud and coords2 in mapF2:
                 samples1 = tuple(lst1[2:])
                 samples2 = tuple(lst2[2:])
-                q = " ".join(["%2x"] * len(samples1))
-                if type(coords1[2]) is str:  # TPs
-                    c1 = str(coords1)
-                    c2 = str(coords2)
-                else:
-                    c1 = "%2d %2d%1s %2d %1d" % coords1
-                    c2 = "%2d %2d%1s %2d %1d" % coords2
-                print "%s  |  %s  :  %s  |  %s" % (c1, c2, q % samples1, q % samples2)
+                q1 = " ".join(["%2x"] * len(samples1)) % samples1
+                q2 = " ".join(["%2x"] * len(samples2)) % samples2
+                c1 = str(coords1)
+                c2 = str(coords2)
+                print "%s  |  %s  :  %s  |  %s" % (c1, c2, q1, q2)
 
     return matched, nonMatched
 
