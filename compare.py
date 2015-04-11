@@ -520,14 +520,15 @@ def tpMap(raw={}):
         for block in d["htrBlocks"].values():
             for key, triggerData in block["triggerData"].iteritems():
                 coords = (block["Crate"], block["Slot"], block["Top"], key)
-                l = []
-                for i, tp9 in enumerate(triggerData["TP"]):
-                    tp = tp9 & 0xff  # ignore fine-grain bit
-                    if triggerData["SOI"][i]:
-                        l.append(-tp - 1)
-                    else:
-                        l.append(tp)
+                if sum(triggerData["SOI"]) != 1:
+                    printer.warning("%s has !=1 SOIs: %s" % (coords, triggerData["SOI"]))
 
+                for i, soi in enumerate(triggerData["SOI"]):
+                    if soi:
+                        break
+                l = [soi, 0]
+                for tp9 in triggerData["TP"]:
+                    l.append(tp9 & 0xff)  # ignore fine-grain bit
                 forward[coords] = l
 
     return forward, backward, skipped
