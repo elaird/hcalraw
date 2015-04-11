@@ -478,7 +478,7 @@ def dataMap(raw={}, book=None, onlySamples=False):
         if fedId is None:
             continue
 
-        utca = d["header"]["utca"]
+        delta = matching.pipeline(d["header"]["utca"])
         fiberMap = hw.fiberMap(fedId)
         for block in d["htrBlocks"].values():
             nPre = block["nPreSamples"]
@@ -492,15 +492,7 @@ def dataMap(raw={}, book=None, onlySamples=False):
                     skipped.append(coords)
                     continue
 
-                delta = matching.pipeline(fedId, block["Slot"], channel, utca)
-                if onlySamples:
-                    other = matching.pipeline(fedId, block["Slot"], channel, not utca)
-                    data = tuple(channelData["QIE"][delta:])
-                    if other and not delta:
-                        data = tuple(channelData["QIE"][:-other])
-                else:
-                    data = tuple([nPre,  delta] + channelData["QIE"])
-
+                data = tuple([nPre,  delta] + channelData["QIE"])
                 # print coords, data
                 forward[coords] = data
                 backward[data] = coords
@@ -516,7 +508,6 @@ def tpMap(raw={}):
         if fedId is None:
             continue
 
-        utca = d["header"]["utca"]
         for block in d["htrBlocks"].values():
             for key, triggerData in block["triggerData"].iteritems():
                 coords = (block["Crate"], block["Slot"], block["Top"], key)
