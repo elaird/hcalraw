@@ -472,12 +472,6 @@ def go(outer={}, inner={}, outputFile="",
 
 
 def printChannelSummary(outputFile):
-    words = ["nMatched"]
-    words += ["FibCh%d" % i for i in range(3)]
-    words.append("  TPs")
-    words = "   ".join(words)
-    print words
-    print "-" * len(words)
     f = r.TFile(outputFile)
 
     hs = []
@@ -485,6 +479,16 @@ def printChannelSummary(outputFile):
         h = f.Get(name)
         if h:
             hs.append(h)
+
+    if hs:
+        words = ["nMatched"]
+        words += ["FibCh%d" % i for i in range(3)]
+        words.append("  TPs")
+        words = "   ".join(words)
+        print words
+        print "-" * len(words)
+    else:
+        return
 
     for iBin in range(0, 2 + hs[0].GetNbinsX()):
         xs = [h.GetBinCenter(iBin) for h in hs]

@@ -399,6 +399,9 @@ def resyncs(graph=None, maximum=None):
 
 
 def big_clean(size=None, frac0=None, sizeMin=None, frac0Min=None, height=None):
+    if (not size) or (not frac0):
+        return
+
     n = size.GetN()
     sX = size.GetX()
     sY = size.GetY()
