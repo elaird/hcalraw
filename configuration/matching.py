@@ -1,41 +1,15 @@
-# these values may be overwritten by configuration.matching.pipeline_*
-okErrF = [0]
-__utcaBcnDelta = 0
-__vmeBcnDelta = 0
-
-# this function is overwritten by oneRun.py
-def pipeline(_):
-    return 0
+okErrF = [0]        # set to [0, 1] for some test runs from 2013 - 2014
+__utcaBcnDelta = 0  # this is overwritten by oneRun.py
 
 
 def bcnDelta(utca):
-    return __utcaBcnDelta if utca else __vmeBcnDelta
+    return __utcaBcnDelta if utca else 0
 
 
-def pipeline_v0(_):
-    global __utcaBcnDelta
-    global okErrF
-    __utcaBcnDelta = -119
-    okErrF = [0, 1]
+def pipelineDelta(utca):
+    ###################################################
+    ## global runs from Mar. 16, 2015 - Apr. 3, 2015 ##
+    #                                                 #
+    # return 4 if utca else 0                         #
+    ###################################################
     return 0
-
-
-def pipeline_v1(_):
-    global __utcaBcnDelta
-    __utcaBcnDelta = -119
-    return 0
-
-
-def pipeline_v2(_):
-    global __utcaBcnDelta
-    __utcaBcnDelta = -131
-    return 0
-
-
-def pipeline_v3a(utca):
-    """global runs from
-    Mar. 16, 2015 - Apr. 3, 2015
-    """
-    global __utcaBcnDelta
-    __utcaBcnDelta = -131
-    return 4 if utca else 0
