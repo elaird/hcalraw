@@ -131,9 +131,6 @@ def main(options, args):
         if not options.file1:
             continue
 
-        if not options.match:
-            options.match = "v3"
-
         report(options.file1)
         oneRun.main(options)
         return
