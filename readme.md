@@ -20,11 +20,13 @@ cd cpp; make -j 5; cd -
 
 # compare payloads of different sets of FEDs, within one file
 ./look.py 239480
-./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF --dump=0 --output-file=output/239480.root --progress
+./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF \
+--dump=0 --output-file=output/239480.root --progress
 
 
 # dump decoded data to stdout
-./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702,931 --nevents=1 --dump=4
+./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702,931 \
+--nevents=1 --dump=4
 
 
 # compare payloads of different sets of FEDs, across two files
