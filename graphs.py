@@ -591,12 +591,12 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     if multiY(cats):
         keep += draw_graph(cats, title=title)
     else:
-        ratemax = 4.0e7
+        ratemax = 5.0e7
         graph4 = big_clean(size=f.Get("kB_vs_time_%d" % feds1[0]),
                            frac0=f.Get("frac0_vs_time_%d" % feds1[0]),
                            sizeMin=0.8,
                            frac0Min=0.2,
-                           height=ratemax/4.0)
+                           height=ratemax / 5.0)
 
         keep += draw_graph(graph=f.Get("evn_vs_time"),
                            title=title, ratemax=ratemax,
@@ -678,7 +678,7 @@ def pageThree(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[]):
     canvas.Print(pdf)
 
 
-def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
+def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", onePageOnly=False):
     r.gROOT.SetBatch(True)
     r.gROOT.SetStyle("Plain")
     r.gErrorIgnoreLevel = r.kWarning
@@ -698,6 +698,10 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf"):
             continue
 
         pageOne(f, feds1, feds2, canvas, pdf)
+
+        if onePageOnly:
+            continue
+
         if feds2:
             pageTwo(f, feds1, feds2, canvas, pdf,
                     names=["adc_vs_adc", "tp_vs_tp", "adc_vs_adc_soi_both", "tp_vs_tp_soi_both"])
