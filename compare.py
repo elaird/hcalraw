@@ -14,7 +14,7 @@ def flavor(book, d, fedId):
         x += 1
     book.fill(x, "ChannelFlavor_%d" % fedId, 6, 2.5, 8.5,
               title="FED %d;channel flavor;Channels / bin" % fedId,
-              xAxisLabels=["#leq3", "utp", "cpt", "mp", "vrb", "tch"])
+              xAxisLabels=["#leq 3", "uTP", "Q 5", "M&P", "Q 6", "7"])
 
 
 def htrSummary(blocks=[], book=None, fedId=None,
