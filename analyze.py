@@ -147,7 +147,7 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOpti
 
             kargs["raw1"] = collectedRaw(tree=chain, specs=outer)
 
-            if inner:
+            if innerEvent:
                 iEntry = innerEvent[oEntry]
                 if iEntry is None:
                     oEntry += 1
@@ -156,6 +156,7 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOpti
                 if chainI.GetEntry(iEntry) <= 0:
                     break
 
+            if inner:
                 kargs["raw2"] = collectedRaw(tree=chainI, specs=inner)
 
             if outer["unpack"]:
@@ -343,7 +344,7 @@ def category_vs_time(oMap={}, oMapBcn={}, iMap={}, iMapBcn={}, innerEvent={}):
     for oEntry, (evn, orn) in oMap.iteritems():
         bcn = oMapBcn[oEntry]
         time = utils.minutes(orn, bcn)
-        if oEntry in innerEvent and (innerEvent[oEntry] is not None):
+        if innerEvent.get(oEntry) is not None:
             d[time] = (3, evn, orn, bcn)
         else:
             d[time] = (2, evn, orn, bcn)
@@ -408,10 +409,14 @@ def go(outer={}, inner={}, outputFile="",
     nMapMax = outer["nEventsMax"]
     if nMapMax and not mapOptions["identityMap"]:
         nMapMax *= 2  # a guess for how far to look not to miss out-of-order events
+
     oMapF, oMapB, oMapBcn = eventMaps(chain, outer, nMapMax)
     iMapF = iMapB = iMapBcn = {}
 
-    if inner:
+    if inner.get("fileNames") == outer["fileNames"]:
+        chainI = chain
+        innerEvent = {}
+    elif inner:
         chainI = tchain(inner)
         if mapOptions["identityMap"]:
             iMapF = oMapF
