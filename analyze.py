@@ -14,8 +14,8 @@ import printer
 
 def setup():
     r.gROOT.SetBatch(True)
-    r.gSystem.Load("cpp/cdf.so")
-    r.gSystem.Load("cpp/cms.so")
+    r.gSystem.Load("%s/cpp/cdf.so" % os.environ["PWD"])
+    r.gSystem.Load("%s/cpp/cms.so" % os.environ["PWD"])
 
     if sw.use_fwlite and utils.cmssw():
         r.gSystem.Load("libFWCoreFWLite.so")
