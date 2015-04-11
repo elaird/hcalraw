@@ -560,8 +560,7 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
 
 
 def storeChannelData(dct={}, iWord16=None, word16=None):
-    j = iWord16 - dct["iWord16"] - 1
-
+    # j = iWord16 - dct["iWord16"] - 1
     # if 0 <= dct["Flavor"] <= 1:
     #     dct["SOI"][j] = (word16 >> 14) & 0x1
     #     dct["TDC"][j] = (word16 >> 8) & 0x3f
@@ -576,17 +575,18 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
     #         dct["OK"][k] = (word16 >> 12) & 0x1
     #         dct["QIE"][k] = word16 & 0xff
 
-    if dct["Flavor"] <= 3 or 7 <= dct["Flavor"]:
+    flavor = dct["Flavor"]
+    if flavor <= 3 or 7 <= flavor:
         dct["words"].append(word16)
 
-    elif dct["Flavor"] == 4:
+    elif flavor == 4:
         dct["SOI"].append((word16 >> 14) & 0x1)
         dct["OK"].append((word16 >> 13) & 0x1)
         dct["TP"].append(word16 & 0x1fff)
-    elif dct["Flavor"] == 5:
+    elif flavor == 5:
         dct["QIE"].append(word16 & 0x7f)
         dct["QIE"].append((word16 >> 8) & 0x7f)
-    elif dct["Flavor"] == 6:
+    elif flavor == 6:
         dct["QIE"].append(word16 & 0x7f)
         dct["CapId"].append((word16 >> 8) & 0x3)
 
