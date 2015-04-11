@@ -347,10 +347,10 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
     doDump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
 
     if anyEmap:
-        mapF1, mapB1, _ = dataMap(raw1, book)
-        mapF2, mapB2, _ = dataMap(raw2, book)
-        matched12, nonMatched12 = matchStats(mapF1, mapF2)
-        matched21, nonMatched21 = matchStats(mapF2, mapF1)
+        mapF1, mapB1, _ = dataMap(raw1, book, onlySamples=True)
+        mapF2, mapB2, _ = dataMap(raw2, book, onlySamples=True)
+        matched12, nonMatched12 = matchStats(mapF1, mapB2)
+        matched21, nonMatched21 = matchStats(mapF2, mapB1)
         tMatched12 = tNonMatched12 = []
         tMatched21 = tNonMatched21 = []
 
@@ -456,21 +456,18 @@ def reportFailed(failed=[]):
             print "(%s)" % coordString(*c)
 
 
-def matchStats(f1={}, f2={}):
+def matchStats(f={}, b={}):
     matched = {}
     failed = []
-    for coords1, lst1 in f1.iteritems():
-        for coords2, lst2 in f2.iteritems():
-            nTs, nTsMatched = tsLoop(lst1, lst2)
-            if nTsMatched == nTs:
-                # print coords1, coords2, nTs, nTsMatched
-                matched[coords1] = coords2
-            else:
-                failed.append(coords1)
+    for coords, data in f.iteritems():
+        if data in b:
+            matched[coords] = b[data]
+        else:
+            failed.append(coords)
     return matched, failed
 
 
-def dataMap(raw={}, book=None):
+def dataMap(raw={}, book=None, onlySamples=False):
     okErrF = matching.okErrF
 
     forward = {}
@@ -495,8 +492,15 @@ def dataMap(raw={}, book=None):
                     skipped.append(coords)
                     continue
 
-                data = [nPre,  matching.pipeline(fedId, block["Slot"], channel, utca)]
-                data = tuple(data + channelData["QIE"])
+                delta = matching.pipeline(fedId, block["Slot"], channel, utca)
+                if onlySamples:
+                    other = matching.pipeline(fedId, block["Slot"], channel, not utca)
+                    data = tuple(channelData["QIE"][delta:])
+                    if other and not delta:
+                        data = tuple(channelData["QIE"][:-other])
+                else:
+                    data = tuple([nPre,  delta] + channelData["QIE"])
+
                 # print coords, data
                 forward[coords] = data
                 backward[data] = coords
