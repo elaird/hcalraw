@@ -608,7 +608,6 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
                      names=["BcN",
                             "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples", "nTpSamples",
                             "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "LMSEPVC", "ErrF0",
-                            "", "", "", "", "nTS_for_matching",
                             # "TTS", "PopCapFrac",
                             ], feds1=feds1, feds2=feds2)
 
@@ -633,6 +632,16 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
                        ("MatchedFibersCh1", r.kCyan, 2),
                        ("MatchedFibersCh2", r.kBlack, 3),
                        ("MatchedTriggerTowers", r.kGreen, 4),
+                       ],
+                      lambda x: x,
+                      )
+
+    # TS
+    pad20.cd(20)
+    adjustPad(logY=True)
+    keep += histoLoop(f,
+                      [("nTS_for_matching_ADC", r.kBlue, 1),
+                       ("nTS_for_matching_TP", r.kCyan, 2),
                        ],
                       lambda x: x,
                       )
