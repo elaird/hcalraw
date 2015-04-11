@@ -220,6 +220,8 @@ def histoLoop(f, lst, func):
         magnify(h, factor=1.8)
         if not h.GetXaxis().GetTitle():
             h.GetXaxis().SetLabelSize(0.13)
+        if h.GetXaxis().GetTitle() == "channel flavor":
+            h.GetXaxis().SetLabelSize(0.10)
         out.append(h)
 
         s = "Matched"
