@@ -125,16 +125,11 @@ def main(options, args):
                                 }.iteritems()):
         if grDir is None:
             options.file1 = eval("find%d" % iFind)(run)
-            match = "v2"
         else:
             options.file1 = find_gr(run, grDir, options.index, options.onward, options.hhmm)
-            match = "v3"
 
         if not options.file1:
             continue
-
-        if not options.match:
-            options.match = match
 
         report(options.file1)
         oneRun.main(options)

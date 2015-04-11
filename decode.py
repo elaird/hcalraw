@@ -180,7 +180,7 @@ def molHeader(d={}, words64=[]):
     w2 = swapped64(words64[1])
     iblock = (w1 >> 32) & 0x7ff
     d[iblock] = {}
-    d[iblock]["GZ"] = words64[0] & 0xffff
+    d[iblock]["magic"] = words64[0] & 0xffff
     d[iblock]["isFirstBlock"] = w1 & (1L << 31)
     d[iblock]["isLastBlock"] = w1 & (1L << 30)
     d[iblock]["nWord64"] = w1 & 0x3ff

@@ -248,10 +248,59 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
     return okFeds
 
 
-def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
-               titlePrefix="", name="adc_vs_adc", xMin=-10.5, xMax=127.5):
+def tsLoop(lst1, lst2, book=None, name=None,
+           nBins=None, xMin=None, xMax=None,
+           title1=None, title2=None):
+
     assert xMin <= -2  # xMin / 2 used below as a (negative) code
 
+    nPre1, delta1 = lst1[:2]
+    qies1 = lst1[2:]
+    n1 = len(qies1)
+
+    if lst2 is None:
+        nPre2 = delta2 = 0
+        qies2 = None
+        n2 = None
+    else:
+        nPre2, delta2 = lst2[:2]
+        qies2 = lst2[2:]
+        n2 = len(qies2)
+
+    nTsMatched = 0
+    nTs = 0
+
+    for i1, qie1 in enumerate(qies1):
+        j1 = i1 + delta1
+        if j1 < 0 or n1 <= j1:
+            continue
+
+        j2 = j1 + delta2 - nPre1 + nPre2
+        if n2 is not None and (j2 < 0 or n2 <= j2):
+            continue
+
+        nTs += 1
+        if qies2 is None:
+            qie2 = xMin / 2  # avoid any match
+        else:
+            qie2 = qies2[j2]
+
+        if qie1 == qie2:
+            nTsMatched += 1
+
+        if book is not None:
+            book.fill((qie1, qie2), name,
+                      (nBins, nBins), (xMin, xMin), (xMax, xMax),
+                      title=title1)
+            if i1 == nPre1:
+                book.fill((qie1, qie2), "%s_soi_both" % name,
+                          (nBins, nBins), (xMin, xMin), (xMax, xMax),
+                          title=title2)
+    return nTs, nTsMatched
+
+
+def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
+               titlePrefix="", name="adc_vs_adc", xMin=-10.5, xMax=127.5):
     matched = []
     nonMatched = []
 
@@ -259,47 +308,35 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
     title1 = "%s;samples / bin" % titlePrefix
     title2 = "SOI#semicolon %s" % title1
 
-    for coords1, samples1 in mapF1.iteritems():
+    for coords1, lst1 in mapF1.iteritems():
         coords2 = transf(*coords1)
         if coords2 is None:
             continue
 
-        samples2 = mapF2.get(coords2)
-        allMatched = True
-        for i, s1 in enumerate(samples1):
-            as1 = s1
-            if s1 < 0:
-                as1 = -s1 - 1
+        lst2 = mapF2.get(coords2)
+        nTs, nTsMatched = tsLoop(lst1, lst2, book,
+                                 name, nBins, xMin, xMax,
+                                 title1, title2)
 
-            if samples2 is None or len(samples2) <= i:
-                s2 = 0  # avoid soi condition below
-                as2 = xMin / 2  # avoid any match
-            else:
-                s2 = samples2[i]
-                as2 = s2
-                if s2 < 0:
-                    as2 = -s2 - 1
+        if name.startswith("adc"):
+            book.fill(nTs, "nTS_for_matching_ADC", 12, -0.5, 11.5,
+                      title="ADC;no. TS used for matching;Events / bin")
+        else:
+            book.fill(nTs, "nTS_for_matching_TP", 12, -0.5, 11.5,
+                      title="TP;no. TS used for matching;Events / bin")
 
-            if as1 != as2:
-                allMatched = False
-
-            if book is not None:
-                book.fill((as1, as2), name,
-                          (nBins, nBins), (xMin, xMin), (xMax, xMax),
-                          title=title1)
-                if s1 < 0 and s2 < 0:
-                    book.fill((as1, as2), "%s_soi_both" % name,
-                              (nBins, nBins), (xMin, xMin), (xMax, xMax),
-                              title=title2)
-
-        if allMatched:
+        if nTsMatched == nTs:
             matched.append(coords1)
         else:
             nonMatched.append(coords1)
             if loud and coords2 in mapF2:
-                c = "%2d %2d%1s %2d %1d"
-                q = " ".join(["%2x"] * len(samples1))
-                print "%s  |  %s  :  %s  |  %s" % (c % coords1, c % coords2, q % samples1, q % tuple(samples2))
+                samples1 = tuple(lst1[2:])
+                samples2 = tuple(lst2[2:])
+                q1 = " ".join(["%2x"] * len(samples1)) % samples1
+                q2 = " ".join(["%2x"] * len(samples2)) % samples2
+                c1 = str(coords1)
+                c2 = str(coords2)
+                print "%s  |  %s  :  %s  |  %s" % (c1, c2, q1, q2)
 
     return matched, nonMatched
 
@@ -439,7 +476,7 @@ def dataMap(raw={}, book=None):
         if fedId is None:
             continue
 
-        utca = d["header"]["utca"]
+        delta = matching.pipeline(d["header"]["utca"])
         fiberMap = hw.fiberMap(fedId)
         for block in d["htrBlocks"].values():
             nPre = block["nPreSamples"]
@@ -453,24 +490,8 @@ def dataMap(raw={}, book=None):
                     skipped.append(coords)
                     continue
 
-                tsRange = matching.tsRange(fedId, block["Slot"], channel, utca)
-                qie = channelData["QIE"]
-                if len(qie) < len(tsRange):
-                    skipped.append(coords)
-                    continue
-
-                book.fill(len(tsRange), "nTS_for_matching_%d" % fedId, 12, -0.5, 11.5,
-                          title="FED %d;no. TS used for ADC-matching;Channels / bin" % fedId)
-
-                data = []
-                for i in tsRange:
-                    if i == nPre:
-                        data.append(-qie[i] - 1)
-                    else:
-                        data.append(qie[i])
-
-                data = tuple(data)
-                # print coords, tsRange, [hex(d) for d in data]
+                data = tuple([nPre,  delta] + channelData["QIE"])
+                # print coords, data
                 forward[coords] = data
                 backward[data] = coords
     return forward, backward, skipped
@@ -485,18 +506,18 @@ def tpMap(raw={}):
         if fedId is None:
             continue
 
-        utca = d["header"]["utca"]
         for block in d["htrBlocks"].values():
             for key, triggerData in block["triggerData"].iteritems():
                 coords = (block["Crate"], block["Slot"], block["Top"], key)
-                l = []
-                for i, tp9 in enumerate(triggerData["TP"]):
-                    tp = tp9 & 0xff  # ignore fine-grain bit
-                    if triggerData["SOI"][i]:
-                        l.append(-tp - 1)
-                    else:
-                        l.append(tp)
+                if sum(triggerData["SOI"]) != 1:
+                    printer.warning("%s has !=1 SOIs: %s" % (coords, triggerData["SOI"]))
 
+                for i, yes in enumerate(triggerData["SOI"]):
+                    if yes:
+                        break
+                l = [i, 0]
+                for tp9 in triggerData["TP"]:
+                    l.append(tp9 & 0xff)  # ignore fine-grain bit
                 forward[coords] = l
 
     return forward, backward, skipped

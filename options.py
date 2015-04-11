@@ -132,7 +132,7 @@ def opts(alsoArgs=False):
                        dest="match",
                        default="",
                        metavar="s",
-                       help="choose configuration.matching.tsRange_s")
+                       help="choose configuration.matching.pipeline_s")
     matchCh.add_option("--any-emap",
                        dest="anyEmap",
                        default=False,
