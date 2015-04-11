@@ -54,7 +54,7 @@ def main(options):
 
     if options.match:
         matching.pipeline = getattr(matching, "pipeline_%s" % options.match)
-        matching.pipeline()  # call once to set utcaBcnDelta
+        matching.pipeline(True)  # call once to set utcaBcnDelta
 
     if options.noColor:
         printer.__color = False
