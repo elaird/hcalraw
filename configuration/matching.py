@@ -52,7 +52,7 @@ def pipeline_v1(fedId=None, slot=None, fibCh=None, utca=None):
     return pipeline_LS1(fedId, slot, fibCh, utca, False)
 
 
-def pipeline_v3(fedId=None, slot=None, fibCh=None, utca=None):
+def pipeline_v2(fedId=None, slot=None, fibCh=None, utca=None):
     """local runs; global runs from
     Feb.    2015 - Mar. 16, 2015;
     Apr. 4, 2015 - 
@@ -64,7 +64,7 @@ def pipeline_v3(fedId=None, slot=None, fibCh=None, utca=None):
     return 0
 
 
-def pipeline_v4a(fedId=None, slot=None, fibCh=None, utca=None):
+def pipeline_v3a(fedId=None, slot=None, fibCh=None, utca=None):
     """global runs from
     Mar. 16, 2015 - Apr. 3, 2015
     """

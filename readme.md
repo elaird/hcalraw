@@ -8,20 +8,20 @@ cd cpp; make -j 5; cd -
 
 
 # analyze global runs
-./look.py 235316 --match=v3 --no-warn-unpack
-./look.py 239342 --match=v4a --nevents=100
-./look.py 239751 --match=v3 --nevents=100
-./look.py 239895 --match=v3 --hhmm=2212 --nevents=100
-./look.py 240073 --match=v3
+./look.py 235316 --match=v2 --no-warn-unpack
+./look.py 239342 --match=v3a --nevents=100
+./look.py 239751 --match=v2 --nevents=100
+./look.py 239895 --match=v2 --hhmm=2212 --nevents=100
+./look.py 240073 --match=v2
 
 
 # analyze AMC13/DCC2 monitor buffer dumps
-./dumps2root2pdf.py data/239713_*.dat --match=v3 --nevents=100
+./dumps2root2pdf.py data/239713_*.dat --match=v2 --nevents=100
 
 
 # compare payloads of different sets of FEDs, within one file
-./look.py 239480 --match=v3
-./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF --match=v3 --dump=0 --output-file=output/239480.root --progress
+./look.py 239480 --match=v2
+./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF --match=v2 --dump=0 --output-file=output/239480.root --progress
 
 
 # dump decoded data to stdout
