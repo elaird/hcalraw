@@ -259,38 +259,61 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
     title1 = "%s;samples / bin" % titlePrefix
     title2 = "SOI#semicolon %s" % title1
 
-    for coords1, samples1 in mapF1.iteritems():
+    for coords1, lst1 in mapF1.iteritems():
         coords2 = transf(*coords1)
         if coords2 is None:
             continue
 
-        samples2 = mapF2.get(coords2)
+        nPre1, delta1 = lst1[:2]
+        qies1 = lst1[2:]
+        n1 = len(qies1)
+
+        lst2 = mapF2.get(coords2)
+        if lst2 is None:
+            nPre2 = delta2 = 0
+            qies2 = None
+            n2 = None
+        else:
+            nPre2, delta2 = lst2[:2]
+            qies2 = lst2[2:]
+            n2 = len(qies2)
+
+
         allMatched = True
-        for i, s1 in enumerate(samples1):
-            as1 = s1
-            if s1 < 0:
-                as1 = -s1 - 1
+        nTs = 0
+        for i1, qie1 in enumerate(qies1):
+            j1 = i1 + delta1
+            if j1 < 0 or n1 <= j1:
+                continue
 
-            if samples2 is None or len(samples2) <= i:
-                s2 = 0  # avoid soi condition below
-                as2 = xMin / 2  # avoid any match
+            j2 = j1 + delta2 - nPre1 + nPre2
+            if n2 is not None and (j2 < 0 or n2 <= j2):
+                continue
+
+            nTs += 1
+            if qies2 is None:
+                qie2 = xMin / 2  # avoid any match
             else:
-                s2 = samples2[i]
-                as2 = s2
-                if s2 < 0:
-                    as2 = -s2 - 1
+                qie2 = qies2[j2]
 
-            if as1 != as2:
+            if qie1 != qie2:
                 allMatched = False
 
             if book is not None:
-                book.fill((as1, as2), name,
+                book.fill((qie1, qie2), name,
                           (nBins, nBins), (xMin, xMin), (xMax, xMax),
                           title=title1)
-                if s1 < 0 and s2 < 0:
-                    book.fill((as1, as2), "%s_soi_both" % name,
+                if i1 == nPre1:
+                    book.fill((qie1, qie2), "%s_soi_both" % name,
                               (nBins, nBins), (xMin, xMin), (xMax, xMax),
                               title=title2)
+
+        if name.startswith("adc"):
+            book.fill(nTs, "nTS_for_matching_ADC", 12, -0.5, 11.5,
+                      title="ADC;no. TS used for matching;Events / bin")
+        else:
+            book.fill(nTs, "nTS_for_matching_TP", 12, -0.5, 11.5,
+                      title="TP;no. TS used for matching;Events / bin")
 
         if allMatched:
             matched.append(coords1)
@@ -418,6 +441,7 @@ def reportFailed(failed=[]):
 
 
 def matchStats(f={}, b={}):
+    sys.exit("FIXME: matchStats")
     matched = {}
     failed = []
     for coords, data in f.iteritems():
@@ -453,24 +477,9 @@ def dataMap(raw={}, book=None):
                     skipped.append(coords)
                     continue
 
-                tsRange = matching.tsRange(fedId, block["Slot"], channel, utca)
-                qie = channelData["QIE"]
-                if len(qie) < len(tsRange):
-                    skipped.append(coords)
-                    continue
-
-                book.fill(len(tsRange), "nTS_for_matching_%d" % fedId, 12, -0.5, 11.5,
-                          title="FED %d;no. TS used for ADC-matching;Channels / bin" % fedId)
-
-                data = []
-                for i in tsRange:
-                    if i == nPre:
-                        data.append(-qie[i] - 1)
-                    else:
-                        data.append(qie[i])
-
-                data = tuple(data)
-                # print coords, tsRange, [hex(d) for d in data]
+                data = [nPre,  matching.pipeline(fedId, block["Slot"], channel, utca)]
+                data = tuple(data + channelData["QIE"])
+                # print coords, data
                 forward[coords] = data
                 backward[data] = coords
     return forward, backward, skipped
