@@ -251,6 +251,9 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
 def tsLoop(lst1, lst2, book=None, name=None,
            nBins=None, xMin=None, xMax=None,
            title1=None, title2=None):
+
+    assert xMin <= -2  # xMin / 2 used below as a (negative) code
+
     nPre1, delta1 = lst1[:2]
     qies1 = lst1[2:]
     n1 = len(qies1)
@@ -298,8 +301,6 @@ def tsLoop(lst1, lst2, book=None, name=None,
 
 def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
                titlePrefix="", name="adc_vs_adc", xMin=-10.5, xMax=127.5):
-    assert xMin <= -2  # xMin / 2 used below as a (negative) code
-
     matched = []
     nonMatched = []
 
