@@ -604,5 +604,5 @@ def oneRun(files1=[],
        outputFile=outputFile,
        mapOptions=mapOptions,
        compareOptions=compareOptions,
-       printEventSummary=(not patterns) and (files1 != files2) and 0 <= common["dump"],
+       printEventSummary=(not patterns) and feds2 and (files1 != files2) and 0 <= common["dump"],
        )
