@@ -618,7 +618,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
         evn_graph = f.Get("evn_vs_time")
         retitle(evn_graph)
 
-        if "/239" in evn_graph.GetTitle() and "/895" in evn_graph.GetTitle():
+        if "/239/895" in evn_graph.GetTitle():
             graph4 = big_clean(size=f.Get("kB_vs_time_%d" % feds1[0]),
                                frac0=f.Get("frac0_vs_time_%d" % feds1[0]),
                                sizeMin=0.8,
@@ -736,7 +736,8 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
                     names=["adc_vs_adc", "tp_vs_tp", "adc_vs_adc_soi_both", "tp_vs_tp_soi_both"])
 
         pageTwo(f, feds1, feds2, canvas, pdf,
-                names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + ["", "", ""],
+                names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + \
+                ["ErrFNZ_vs_slot_crate", "", ""],
                 doYx=False, retitle=False, gridX=True)
 
         # pageTwo(f, feds1, feds2, canvas, pdf, names=["frac0_vs_BcN_%d" % (feds2 + feds1)[0]],
