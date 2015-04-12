@@ -205,7 +205,10 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
 
 
 def makeRed(s):
-    return '\033[91m' + s + '\033[0m'
+    if printer.__color:  # hack
+        return '\033[91m' + s + '\033[0m'
+    else:
+        return s
 
 
 def qieString(qies=[], red=False):
@@ -314,10 +317,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
             continue
         if data["ErrF"] in skipErrF:
             continue
-        if printer.__color:  # hack
-            red = (crate, slot, top, data["Fiber"], data["FibCh"]) in nonMatched
-        else:
-            red = False
+        red = (crate, slot, top, data["Fiber"], data["FibCh"]) in nonMatched
         out.append("   ".join([" %3d" % crate,
                                "%3d%1s" % (slot, top),
                                "%2d" % data["Fiber"],
