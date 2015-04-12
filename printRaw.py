@@ -295,7 +295,8 @@ def uhtrTriggerData(d={}, skipZero=False, crate=None, slot=None, top="", nonMatc
 
 def htrChannelData(lst=[], crate=0, slot=0, top="",
                    fibChs=[], skipErrF=[],
-                   nonMatched=[], latency={}, zs={}):
+                   nonMatched=[], latency={}, zs={},
+                   utcaFiberBlackList=[0,1,10,11,12,13,22,23][:0]):
     out = []
     columns = ["Crate",
                "Slot",
@@ -313,6 +314,8 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
     out.append("  ".join(columns))
 
     for data in lst:
+        if (top not in "tb") and data["Fiber"] in utcaFiberBlackList:
+            continue
         if data["FibCh"] not in fibChs:
             continue
         if data["ErrF"] in skipErrF:
