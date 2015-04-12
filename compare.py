@@ -89,6 +89,10 @@ def htrSummary(blocks=[], book=None, fedId=None,
                       title="FED %d;number of QIE samples;Channels / bin" % fedId)
 
             if channelData["ErrF"]:
+                book.fill((block["Slot"], crate2bin.get(block["Crate"], 7)),
+                          "ErrFNZ_vs_slot_crate", *misMatchMapBins,
+                          title="ErrF != 0;slot;crate;Channels / bin",
+                          yAxisLabels=yAxisLabels)
                 continue
 
             caps[channelData["CapId0"]] += 1
