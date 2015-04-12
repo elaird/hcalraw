@@ -2,7 +2,8 @@
 
 import os
 import graphs
-from look import eos
+import look
+from options import opts
 
 
 def main(runs=[]):
@@ -10,7 +11,11 @@ def main(runs=[]):
     feds1s = []
     feds2s = []
     for run in runs:
-        os.system("./look.py %d" % run)
+        args = "%d --nevents=100" % run
+        if run == 239895:
+            args += " --hhmm=2212"
+
+        os.system("./look.py %s" % args)
         roots.append("output/%d.root" % run)
         feds1s.append([718, 719])
         feds2s.append([1118, 1120, 1122])
@@ -24,13 +29,25 @@ def main(runs=[]):
 
 
 def runs(**_):
-    return [240189,
+    return [239895,
+            240189,
             240190,
             240193,
             240198,
             240200,
             240201,
             240209,
+            240212,
+            240214,
+            240216,
+            240217,
+            240219,
+            240223,
+            240224,
+            240226,
+            240229,
+            240230,
+            240232,
         ]
 
 
