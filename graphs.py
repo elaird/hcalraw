@@ -614,19 +614,24 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
         keep += draw_graph(cats, title=title)
     else:
         ratemax = 5.0e7
-        graph4 = big_clean(size=f.Get("kB_vs_time_%d" % feds1[0]),
-                           frac0=f.Get("frac0_vs_time_%d" % feds1[0]),
-                           sizeMin=0.8,
-                           frac0Min=0.2,
-                           height=ratemax / 5.0)
 
         evn_graph = f.Get("evn_vs_time")
         retitle(evn_graph)
+
+        if "/239" in evn_graph.GetTitle() and "/895" in evn_graph.GetTitle():
+            graph4 = big_clean(size=f.Get("kB_vs_time_%d" % feds1[0]),
+                               frac0=f.Get("frac0_vs_time_%d" % feds1[0]),
+                               sizeMin=0.8,
+                               frac0Min=0.2,
+                               height=ratemax / 5.0)
+        else:
+            graph4 = None
+
         keep += draw_graph(graph=evn_graph,
                            title=title, ratemax=ratemax,
                            graph2=f.Get("bcn_delta_vs_time"),
                            graph3=resyncs(f.Get("incr_evn_vs_time"), ratemax),
-                           graph4=graph4 if "239895" in pdf else None,
+                           graph4=graph4,
                            )
 
     # single FED
