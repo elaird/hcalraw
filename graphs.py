@@ -435,7 +435,7 @@ def anyVisible(graph=None, maximum=None):
 
 
 def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, graph4=None):
-    if not graph:
+    if not graph or not graph.GetN():
         return
 
     padg = r.TPad("padg", "padg", 0.00, 0.75, 0.80, 1.00)
@@ -608,6 +608,9 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
 
     title = f.GetPath()
     cats = f.Get("category_vs_time")
+    if not cats.GetN():
+        return
+
     counts = yCounts(cats)
     if 2 <= len(counts.keys()):
         relabel(cats, counts)
