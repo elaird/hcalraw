@@ -1,4 +1,5 @@
 use_fwlite = True
+eosprefix = "root://eoscms.cern.ch/"
 
 
 def fedMap():
