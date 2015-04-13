@@ -646,6 +646,10 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
                             ], feds1=feds1, feds2=feds2)
 
     # EvN, OrN, BcN agreement
+    if not feds1:
+        printer.error(" in graphs.py pageOne: feds1 = %s" % str(feds1))
+        return
+
     fed1 = sorted(feds1)[0]
     for i, fed2 in enumerate(feds2[:3]):
         pad20.cd(16 + i)
