@@ -11,7 +11,7 @@ def main(runs=[]):
     feds1s = []
     feds2s = []
     for run in runs:
-        args = "%d --nevents=100" % run
+        args = "%d --nevents=10" % run
         if run == 239895:
             args += " --hhmm=2212"
 
@@ -23,7 +23,7 @@ def main(runs=[]):
     graphs.makeSummaryPdfMulti(inputFiles=roots,
                                feds1s=feds1s,
                                feds2s=feds2s,
-                               pdf="output/gr.pdf",
+                               pdf="output/grs.pdf",
                                onePageOnly=True,
                                )
 
@@ -47,7 +47,16 @@ def runs(**_):
             240226,
             240229,
             240230,
-            240232,
+            240257,
+            240259,
+            240262,
+            240267,
+            240272,
+            240274,
+            240275,
+            240278,
+            240280,
+            240285,
         ]
 
 
