@@ -4,7 +4,9 @@ import os
 import sys
 import utils
 import oneRun
+import printer
 from options import opts
+from configuration.sw import eosprefix
 
 
 def eos():
@@ -135,9 +137,8 @@ def main(options, args):
         oneRun.main(options)
         return
 
-    sys.exit("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
+    printer.warning("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
 
 
 if __name__ == "__main__":
-    eosprefix = "root://eoscms.cern.ch/"
     main(*opts(alsoArgs=True))
