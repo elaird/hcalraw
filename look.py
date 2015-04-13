@@ -135,7 +135,7 @@ def main(options, args):
 
         report(options.file1)
         oneRun.main(options)
-        return
+        return True
 
     printer.warning("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
 
