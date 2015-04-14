@@ -312,6 +312,10 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
             continue
 
         shiftFlows(h)
+
+        if name.startswith("frac0_vs_BcN"):
+            h.RebinX(36)
+
         h.Draw(gopts)
         stylize(h)
         magnify(h, factor=1.8)
