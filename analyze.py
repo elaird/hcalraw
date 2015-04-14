@@ -360,16 +360,21 @@ def category_vs_time(oMap={}, oMapBcn={}, iMap={}, iMapBcn={}, innerEvent={}):
     return d
 
 
-def graphs(d={}):
+def graphs(d={}, oFed=None, iFed=None):
     gr1 = r.TGraph()
     gr2 = r.TGraph()
     gr3 = r.TGraph()
     gr4 = r.TGraph()
 
-    gr1.SetName("category_vs_time")
-    gr2.SetName("evn_vs_time")
-    gr3.SetName("bcn_delta_vs_time")
-    gr4.SetName("incr_evn_vs_time")
+    suffix = ""
+    for fed in [oFed, iFed]:
+        if fed is not None:
+            suffix += "_%d" % fed
+
+    gr1.SetName("category_vs_time" + suffix)
+    gr2.SetName("evn_vs_time" + suffix)
+    gr3.SetName("bcn_delta_vs_time" + suffix)
+    gr4.SetName("incr_evn_vs_time" + suffix)
 
     evn0 = orn0 = bcn0 = None
     for i, time in enumerate(sorted(d.keys())):
@@ -451,9 +456,14 @@ def go(outer={}, inner={}, outputFile="",
 
     f = r.TFile(outputFile, "RECREATE")
 
+    kargs = {"oFed": outer["fedIds"][0]}
+    if inner.get("fedIds"):
+        kargs["iFed"] = inner["fedIds"][0]
+
     gr1, gr2, gr3, gr4 = graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
                                                  iMap=iMapF, iMapBcn=iMapBcn,
-                                                 innerEvent=innerEvent))
+                                                 innerEvent=innerEvent), **kargs)
+
     gr1.SetTitle("_".join(["only %s" % inner.get("label", ""), "only %s" % outer.get("label", ""), "both"]))
     gr2.SetTitle(",".join(outer["fileNames"]))
 

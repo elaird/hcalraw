@@ -607,7 +607,11 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     keep = []
 
     title = f.GetPath()
-    cats = f.Get("category_vs_time")
+    suffix = "_%d" % feds1[0]
+    if feds2:
+        suffix += "_%d" % feds2[0]
+
+    cats = f.Get("category_vs_time" + suffix)
     if not cats.GetN():
         return
 
@@ -618,7 +622,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     else:
         ratemax = 5.0e7
 
-        evn_graph = f.Get("evn_vs_time")
+        evn_graph = f.Get("evn_vs_time" + suffix)
         retitle(evn_graph)
 
         if "/239/895" in evn_graph.GetTitle():
@@ -632,8 +636,8 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
 
         keep += draw_graph(graph=evn_graph,
                            title=title, ratemax=ratemax,
-                           graph2=f.Get("bcn_delta_vs_time"),
-                           graph3=resyncs(f.Get("incr_evn_vs_time"), ratemax),
+                           graph2=f.Get("bcn_delta_vs_time" + suffix),
+                           graph3=resyncs(f.Get("incr_evn_vs_time" + suffix), ratemax),
                            graph4=graph4,
                            )
 
