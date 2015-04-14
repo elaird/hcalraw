@@ -28,6 +28,11 @@ def commandOutputFull(cmd=""):
     return {"stdout": stdout, "stderr": stderr, "returncode": p.returncode}
 
 
+def delete(thing):
+    # free up memory (http://wlav.web.cern.ch/wlav/pyroot/memory.html)
+    thing.IsA().Destructor(thing)
+
+
 def bail():
     url = "http://root.cern.ch/drupal/content"
     url += "/how-use-use-python-pyroot-interpreter"

@@ -448,6 +448,10 @@ def go(outer={}, inner={}, outputFile="",
                 innerEvent=innerEvent,
                 compareOptions=compareOptions)
 
+    utils.delete(chain)
+    if chainI:
+        utils.delete(chainI)
+
     #write results to a ROOT file
     dirName = os.path.dirname(outputFile)
     if not os.path.exists(dirName):
@@ -473,6 +477,9 @@ def go(outer={}, inner={}, outputFile="",
     for h in book.values():
         h.Write()
     f.Close()
+
+    for h in book.values():
+        utils.delete(h)
 
     if printEventSummary:
         s = "%s: %4s = %6d" % (outputFile, outer["label"], len(oMapF))
