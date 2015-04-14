@@ -454,7 +454,7 @@ def go(outer={}, inner={}, outputFile="",
     gr1, gr2, gr3, gr4 = graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
                                                  iMap=iMapF, iMapBcn=iMapBcn,
                                                  innerEvent=innerEvent))
-    gr1.SetTitle("_".join(["only %s" % inner["label"], "only %s" % outer["label"], "both"]))
+    gr1.SetTitle("_".join(["only %s" % inner.get("label", ""), "only %s" % outer.get("label", ""), "both"]))
     gr2.SetTitle(",".join(outer["fileNames"]))
 
     for gr in [gr1, gr2, gr3, gr4]:
