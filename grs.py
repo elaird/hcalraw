@@ -20,7 +20,7 @@ def main(options, runs=[]):
         options.file2 = ""
         options.noPlot = True
 
-        if look.main(options, [run]):
+        if not look.main(options, [run]):
             roots.append(options.outputFile)
             feds1s.append(fedList(options.feds1))
             feds2s.append(fedList(options.feds2))
