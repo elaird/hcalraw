@@ -1,25 +1,34 @@
 #!/usr/bin/env python
 
-import os
 import graphs
 import look
 from options import opts
+from configuration.sw import fedList
 
 
-def main(runs=[]):
+def main(options, runs=[]):
     roots = []
     feds1s = []
     feds2s = []
     for run in runs:
-        args = "%d --nevents=10" % run
         if run == 239895:
-            args += " --hhmm=2212"
+            options.hhmm = 2212
+        else:
+            options.hhmm = None
 
-        os.system("./look.py %s" % args)
-        roots.append("output/%d.root" % run)
-        feds1s.append([718, 719])
-        feds2s.append([1118, 1120, 1122])
+        options.file1 = ""
+        options.file2 = ""
+        options.noPlot = True
 
+        if look.main(options, [run]):
+            roots.append(options.outputFile)
+            feds1s.append(fedList(options.feds1))
+            feds2s.append(fedList(options.feds2))
+
+    plot(roots, feds1s, feds2s)
+
+
+def plot(roots, feds1s, feds2s):
     graphs.makeSummaryPdfMulti(inputFiles=roots,
                                feds1s=feds1s,
                                feds2s=feds2s,
@@ -61,4 +70,4 @@ def runs(**_):
 
 
 if __name__ == "__main__":
-    main(runs(minumum=240189, maximum=240209))
+    main(opts()[0], runs(minumum=240189, maximum=240209))
