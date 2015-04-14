@@ -92,7 +92,7 @@ def report(file1):
     print "Found %d %s in %s/" % (len(fileNames), msg, "/".join(bases))
 
 
-def main(options, args):
+def main(options, args, progress=False):
     if len(args) != 1:
         sys.exit("Please provide a run number as the argument.")
     try:
@@ -102,7 +102,7 @@ def main(options, args):
 
     options.feds1 = "718,719"
     options.feds2 = "uHF"
-    options.progress = True
+    options.progress = progress
     options.outputFile = "output/%d.root" % run
 
     # override three defaults: nEvents, dump, match
@@ -141,4 +141,4 @@ def main(options, args):
 
 
 if __name__ == "__main__":
-    main(*opts(alsoArgs=True))
+    main(*opts(alsoArgs=True), progress=True)
