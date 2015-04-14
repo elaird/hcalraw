@@ -324,7 +324,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
                                  name, nBins, xMin, xMax,
                                  title1, title2)
 
-        if book is not None:
+        if mapF2 and book is not None:
             if name.startswith("adc"):
                 book.fill(nTs, "nTS_for_matching_ADC", 14, -0.5, 13.5,
                           title="ADC;no. TS used for matching;Events / bin")
