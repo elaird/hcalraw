@@ -67,7 +67,8 @@ def main(options):
     if options.feds2 and 0 <= options.dump:
         analyze.printChannelSummary(options.outputFile)
 
-    graphs.main(options)
+    if not options.noPlot:
+        graphs.main(options)
 
 
 if __name__ == "__main__":
