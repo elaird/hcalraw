@@ -744,6 +744,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         pageOne(f, feds1, feds2, canvas, pdf)
 
         if onePageOnly:
+            f.Close()
             continue
 
         if feds2:
