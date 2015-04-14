@@ -47,6 +47,11 @@ def opts(alsoArgs=False):
                       default=False,
                       action="store_true",
                       help="Loop over raw data, but do not unpack it.")
+    common.add_option("--no-plot",
+                      dest="noPlot",
+                      default=False,
+                      action="store_true",
+                      help="Do not make .pdf from .root file")
     common.add_option("--patterns",
                         dest="patterns",
                         default=False,
