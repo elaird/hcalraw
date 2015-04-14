@@ -748,8 +748,12 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
 
         pageTwo(f, feds1, feds2, canvas, pdf,
                 names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + \
-                    # ["", "", ""],
-                    ["ErrFNZ_vs_slot_crate", "frac0_vs_BcN_%d" % (feds2 + feds1)[0], ""],
+                      ["ErrFNZ_vs_slot_crate", "", ""],
+                doYx=False, retitle=False, gridX=True)
+
+        names = ["frac0_vs_BcN_%d" % x for x in feds1[:3] + feds2[:3]] + [""] * 6
+        pageTwo(f, feds1, feds2, canvas, pdf,
+                names=names[:6],
                 doYx=False, retitle=False, gridX=True)
 
         # pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_time"])
