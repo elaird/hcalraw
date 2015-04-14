@@ -135,9 +135,10 @@ def main(options, args, progress=False):
 
         report(options.file1)
         oneRun.main(options)
-        return True
+        return
 
     printer.warning("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
+    return 1
 
 
 if __name__ == "__main__":
