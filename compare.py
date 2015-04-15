@@ -365,7 +365,7 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
     else:
         mapF1, _, _ = dataMap(raw1, book)
         mapF2, _, _ = dataMap(raw2, book)
-        titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF])
+        titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF()])
         matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book=book, titlePrefix=titlePrefix)
         if doDump:
             matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1, titlePrefix=titlePrefix)
@@ -492,7 +492,7 @@ def dataMap(raw={}, book=None):
                 fiber = fiberMap.get(fiber, fiber)
                 coords = (block["Crate"], block["Slot"], block["Top"], fiber, channel)
 
-                if channelData["ErrF"] not in matching.okErrF:
+                if channelData["ErrF"] not in matching.okErrF():
                     skipped.append(coords)
                     continue
 
