@@ -512,6 +512,7 @@ def tpMap(raw={}):
         if fedId is None:
             continue
 
+        delta = matching.pipelineDelta(d["header"]["utca"])
         for block in d["htrBlocks"].values():
             for key, triggerData in block["triggerData"].iteritems():
                 coords = (block["Crate"], block["Slot"], block["Top"], key)
@@ -521,7 +522,7 @@ def tpMap(raw={}):
                 for i, yes in enumerate(triggerData["SOI"]):
                     if yes:
                         break
-                l = [i, 0]
+                l = [i, delta]
                 for tp9 in triggerData["TP"]:
                     l.append(tp9 & 0xff)  # ignore fine-grain bit
                 forward[coords] = l
