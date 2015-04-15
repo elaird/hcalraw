@@ -133,7 +133,7 @@ def opts(alsoArgs=False):
     parser.add_option_group(match)
 
     matchCh = optparse.OptionGroup(parser, "Options for matching channels across events")
-    matchCh.add_option("--okErrF",
+    matchCh.add_option("--ok-errf",
                        dest="okErrF",
                        default="0",
                        help="Values of ErrF to allow")
