@@ -53,6 +53,7 @@ def main(options):
     check_and_adjust(options)
 
     matching.__utcaBcnDelta = options.utcaBcnDelta
+    matching.__utcaPipelineDelta = options.utcaPipelineDelta
     if options.noColor:
         printer.__color = False
 

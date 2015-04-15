@@ -139,6 +139,12 @@ def opts(alsoArgs=False):
                        metavar="n",
                        type="int",
                        help="Number of BX to add to uTCA counters (default is -131)")
+    matchCh.add_option("--utca-pipeline-delta",
+                       dest="utcaPipelineDelta",
+                       default=0,
+                       metavar="n",
+                       type="int",
+                       help="Subtract n BX from uTCA pipelines (default is 0)")
     matchCh.add_option("--any-emap",
                        dest="anyEmap",
                        default=False,
