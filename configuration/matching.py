@@ -1,6 +1,11 @@
-okErrF = [0]             # set to [0, 1] for some test runs from 2013 - 2014
-__utcaBcnDelta = 0       # this is overwritten by oneRun.py
-__utcaPipelineDelta = 0  # this is overwritten by oneRun.py
+# these are overwritten by oneRun.py
+__okErrF = [0]
+__utcaBcnDelta = 0
+__utcaPipelineDelta = 0
+
+
+def okErrF():
+    return __okErrF
 
 
 def bcnDelta(utca):

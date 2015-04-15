@@ -133,6 +133,10 @@ def opts(alsoArgs=False):
     parser.add_option_group(match)
 
     matchCh = optparse.OptionGroup(parser, "Options for matching channels across events")
+    matchCh.add_option("--okErrF",
+                       dest="okErrF",
+                       default="0",
+                       help="Values of ErrF to allow")
     matchCh.add_option("--utca-bcn-delta",
                        dest="utcaBcnDelta",
                        default=-131,

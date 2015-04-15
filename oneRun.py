@@ -52,6 +52,7 @@ def go(options):
 def main(options):
     check_and_adjust(options)
 
+    matching.__okErrF = sw.fedList(options.okErrF)
     matching.__utcaBcnDelta = options.utcaBcnDelta
     matching.__utcaPipelineDelta = options.utcaPipelineDelta
     if options.noColor:
