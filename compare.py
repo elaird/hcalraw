@@ -519,9 +519,14 @@ def tpMap(raw={}):
                 if sum(triggerData["SOI"]) != 1:
                     printer.warning("%s has !=1 SOIs: %s" % (coords, triggerData["SOI"]))
 
+                i = None
                 for i, yes in enumerate(triggerData["SOI"]):
                     if yes:
                         break
+
+                if i is None:
+                    continue
+
                 l = [i, delta]
                 for tp9 in triggerData["TP"]:
                     l.append(tp9 & 0xff)  # ignore fine-grain bit
