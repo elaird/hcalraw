@@ -420,7 +420,7 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
 
         if (fed1 in okFeds) and (fed2 in okFeds):
             for x in ["BcN", "OrN", "EvN"]:
-                title = ";".join([x+("%d" % bcnDelta if (x == "BcN") else ""),
+                title = ";".join([x+("%d" % bcnDelta if (x == "BcN" and bcnDelta) else ""),
                                   "FED %s - FED %s" % (fed1, fed2),
                                   "Events / bin",
                                   ])
