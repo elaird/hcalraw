@@ -5,3 +5,4 @@ cdf.so
 cms.so
 tmp[1-2].h
 tmp[1-2].cpp
+tmp[1-2]*.pcm
