@@ -139,10 +139,10 @@ def opts(alsoArgs=False):
                        help="Values of ErrF to allow")
     matchCh.add_option("--utca-bcn-delta",
                        dest="utcaBcnDelta",
-                       default=-131,
+                       default=0,
                        metavar="n",
                        type="int",
-                       help="Number of BX to add to uTCA counters (default is -131)")
+                       help="Number of BX to add to uTCA counters (default is 0)")
     matchCh.add_option("--utca-pipeline-delta",
                        dest="utcaPipelineDelta",
                        default=0,
