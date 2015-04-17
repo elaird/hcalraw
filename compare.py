@@ -303,9 +303,9 @@ def tsLoop(lst1, lst2, book=None, name=None,
                           title=titleb)
 
                 if 0 <= qie1:
-                    book.fill(qie1, "%s_soi1_mp%d" % (name, mp1), nBins, xMin, xMin, title=titlec)
+                    book.fill(qie1, "%s_soi1_mp%d" % (name, mp1), nBins, xMin, xMax, title=titlec)
                 if 0 <= qie2:
-                    book.fill(qie2, "%s_soi2_mp%d" % (name, mp2), nBins, xMin, xMin, title=titlec)
+                    book.fill(qie2, "%s_soi2_mp%d" % (name, mp2), nBins, xMin, xMax, title=titlec)
 
     return nTs, nTsMatched
 
@@ -316,7 +316,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
     nonMatched = []
 
     nBins = int(xMax - xMin)
-    titlea = "%s;samples / bin" % titlePrefix
+    titlea = "%s;Samples / bin" % titlePrefix
     titleb = "SOI#semicolon %s" % titlea
     titlec = titleb.replace(";ADC;ADC", ";ADC").replace("semicolon ;", "semicolon;TP;")
 
