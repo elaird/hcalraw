@@ -1,5 +1,5 @@
-export SCRAM_ARCH=slc6_amd64_gcc481
-cd /afs/cern.ch/cms/${SCRAM_ARCH}/cms/cmssw/CMSSW_7_3_5/src
+export SCRAM_ARCH=slc6_amd64_gcc491
+cd /afs/cern.ch/cms/${SCRAM_ARCH}/cms/cmssw/CMSSW_7_4_0/src
 eval `/afs/cern.ch/cms/common/scramv1 runtime -sh`
 cd - > /dev/null
 
