@@ -324,7 +324,7 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
             P = name[:name.find("_vs_")].upper()
             h.GetXaxis().SetTitle("%s" % fedString(feds1))
             h.GetYaxis().SetTitle("%s" % fedString(feds2))
-            h.GetZaxis().SetTitle("samples / bin")
+            h.GetZaxis().SetTitle("Samples / bin")
 
             title = P
             if h.GetTitle():
@@ -697,6 +697,12 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
 
 def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
             doYx=True, retitle=True, gridX=False, gridY=False):
+
+    n = len(names)
+    if not names:
+        names=["adc_vs_adc", "adc_vs_adc_soi_both", "",
+               "tp_vs_tp", "tp_vs_tp_soi_both", ""]
+
     # don't print blank page
     if not any([f.Get(name) for name in names]):
         return
@@ -710,6 +716,45 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
     pad0.Draw()
     keep = plotGlobal(f, pad0, offset=1, names=names, feds1=feds1, feds2=feds2,
                       doYx=doYx, retitle=retitle, gridX=gridX, gridY=gridY)
+
+    if n == -1:
+        pad0.cd(3)
+        adjustPad(logY=True)
+
+        ha1 = f.Get("adc_vs_adc_soi2_mp1")
+        ha0 = f.Get("adc_vs_adc_soi2_mp0")
+        for h in [ha1, ha0]:
+            if not h:
+                continue
+            h.SetTitle(";ADC SOI (%s);Samples / bin" % fedString(feds2))
+            shiftFlows(h)
+            h.GetXaxis().SetRangeUser(-0.5, 13.5)
+            stylize(h, r.kBlue, 1)
+            magnify(h, factor=1.8)
+
+        same = ""
+        if ha1:
+            color1 = r.kCyan
+            stylize(ha1, color1, 2)
+            ha1.Draw("hist")
+            ha1.SetTitle("#color[%d]{M&P}" % color1)
+            same = "same"
+        if ha0:
+            stylize(ha0, r.kBlue, 1)
+            ha0.Draw("hist%s" % same)
+
+        pad0.cd(6)
+        adjustPad(logY=True)
+
+        ht1 = f.Get("tp_vs_tp_soi2_mp0")
+        if ht1:
+            ht1.SetTitle(";TP SOI (%s);Samples / bin" % fedString(feds2))
+            shiftFlows(ht1)
+            ht1.Draw("hist")
+            ht1.GetXaxis().SetRangeUser(-0.5, 13.5)
+            stylize(ht1, r.kBlue, 1)
+            magnify(ht1, factor=1.8)
+
     canvas.Print(pdf)
 
 
@@ -748,8 +793,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             continue
 
         if feds2:
-            pageTwo(f, feds1, feds2, canvas, pdf,
-                    names=["adc_vs_adc", "tp_vs_tp", "adc_vs_adc_soi_both", "tp_vs_tp_soi_both"])
+            pageTwo(f, feds1, feds2, canvas, pdf)
 
         pageTwo(f, feds1, feds2, canvas, pdf,
                 names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + \
