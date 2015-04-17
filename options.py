@@ -57,11 +57,6 @@ def opts(alsoArgs=False):
                         default=False,
                         action="store_true",
                         help="interpret QIE data as FE patterns: see configuration/patterns.py")
-    common.add_option("--adc-plots",
-                      dest="adcPlots",
-                      default=False,
-                      action="store_true",
-                      help="Histogram ADC values when ErrF == 0.")
     common.add_option("--profile",
                       dest="profile",
                       default=False,
