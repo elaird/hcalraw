@@ -259,17 +259,17 @@ def tsLoop(lst1, lst2, book=None, name=None,
 
     assert xMin <= -2  # xMin / 2 used below as a (negative) code
 
-    nPre1, delta1 = lst1[:2]
-    qies1 = lst1[2:]
+    nPre1, delta1, mp1 = lst1[:3]
+    qies1 = lst1[3:]
     n1 = len(qies1)
 
     if lst2 is None:
-        nPre2 = delta2 = 0
+        nPre2 = delta2 = mp2 = 0
         qies2 = None
         n2 = None
     else:
-        nPre2, delta2 = lst2[:2]
-        qies2 = lst2[2:]
+        nPre2, delta2, mp2 = lst2[:3]
+        qies2 = lst2[3:]
         n2 = len(qies2)
 
     nTsMatched = 0
@@ -336,8 +336,8 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
         else:
             nonMatched.append(coords1)
             if loud and coords2 in mapF2:
-                samples1 = tuple(lst1[2:])
-                samples2 = tuple(lst2[2:])
+                samples1 = tuple(lst1[3:])
+                samples2 = tuple(lst2[3:])
                 q1 = " ".join(["%2x"] * len(samples1)) % samples1
                 q2 = " ".join(["%2x"] * len(samples2)) % samples2
                 c1 = str(coords1)
@@ -486,6 +486,7 @@ def dataMap(raw={}, book=None):
         for block in d["htrBlocks"].values():
             nPre = block["nPreSamples"]
             for channelData in block["channelData"].values():
+                mp = channelData.get("M&P", 0)
                 channel = channelData["FibCh"]
                 fiber = channelData["Fiber"]
                 fiber = fiberMap.get(fiber, fiber)
@@ -495,7 +496,7 @@ def dataMap(raw={}, book=None):
                     skipped.append(coords)
                     continue
 
-                data = tuple([nPre,  delta] + channelData["QIE"])
+                data = tuple([nPre, delta, mp] + channelData["QIE"])
                 # print coords, data
                 forward[coords] = data
                 backward[data] = coords
@@ -526,7 +527,7 @@ def tpMap(raw={}):
                 if i is None:
                     continue
 
-                l = [i, delta]
+                l = [i, delta, 0]
                 for tp9 in triggerData["TP"]:
                     l.append(tp9 & 0xff)  # ignore fine-grain bit
                 forward[coords] = l
