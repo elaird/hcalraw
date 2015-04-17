@@ -255,7 +255,7 @@ def loop_over_feds(raw, book, adcTag=""):
 
 def tsLoop(lst1, lst2, book=None, name=None,
            nBins=None, xMin=None, xMax=None,
-           title1=None, title2=None):
+           titlea=None, titleb=None, titlec=None):
 
     assert xMin <= -2  # xMin / 2 used below as a (negative) code
 
@@ -296,11 +296,17 @@ def tsLoop(lst1, lst2, book=None, name=None,
         if book is not None:
             book.fill((qie1, qie2), name,
                       (nBins, nBins), (xMin, xMin), (xMax, xMax),
-                      title=title1)
+                      title=titlea)
             if i1 == nPre1:
                 book.fill((qie1, qie2), "%s_soi_both" % name,
                           (nBins, nBins), (xMin, xMin), (xMax, xMax),
-                          title=title2)
+                          title=titleb)
+
+                if 0 <= qie1:
+                    book.fill(qie1, "%s_soi1_mp%d" % (name, mp1), nBins, xMin, xMin, title=titlec)
+                if 0 <= qie2:
+                    book.fill(qie2, "%s_soi2_mp%d" % (name, mp2), nBins, xMin, xMin, title=titlec)
+
     return nTs, nTsMatched
 
 
@@ -310,8 +316,9 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
     nonMatched = []
 
     nBins = int(xMax - xMin)
-    title1 = "%s;samples / bin" % titlePrefix
-    title2 = "SOI#semicolon %s" % title1
+    titlea = "%s;samples / bin" % titlePrefix
+    titleb = "SOI#semicolon %s" % titlea
+    titlec = titleb.replace(";ADC;ADC", ";ADC").replace("semicolon ;", "semicolon;TP;")
 
     for coords1, lst1 in mapF1.iteritems():
         coords2 = transf(*coords1)
@@ -321,7 +328,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
         lst2 = mapF2.get(coords2)
         nTs, nTsMatched = tsLoop(lst1, lst2, book,
                                  name, nBins, xMin, xMax,
-                                 title1, title2)
+                                 titlea, titleb, titlec)
 
         if mapF2 and book is not None:
             if name.startswith("adc"):
