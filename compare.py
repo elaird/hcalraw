@@ -121,7 +121,7 @@ def htrOverviewBits(d={}, book={}, fedId=None, letters="LMSEPVC"):
                       xAxisLabels=letters)
 
 
-def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
+def singleFedPlots(fedId=None, d={}, book={}):
     book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 14, -0.5, 13.5,
               title="FED %d;nWord16 skipped during unpacking;Events / bin" % fedId)
 
@@ -154,8 +154,7 @@ def singleFedPlots(fedId=None, d={}, book={}, adcPlots=False):
                                             fedEvn=fedEvn,
                                             fedOrn5=fedOrn & 0x1f,
                                             fedBcn=fedBcn,
-                                            msg=msg,
-                                            adcPlots=adcPlots)
+                                            msg=msg)
 
     errFSum = 0.0 + sum(ErrF.values())
 
@@ -221,7 +220,7 @@ def nPerChannel(lst=[], iChannel=None):
     return len(filter(lambda x: x[-1] == iChannel, lst))
 
 
-def loop_over_feds(raw, book, adcPlots, adcTag=""):
+def loop_over_feds(raw, book, adcTag=""):
     okFeds = set()
     adcs = set()
 
@@ -237,7 +236,7 @@ def loop_over_feds(raw, book, adcPlots, adcTag=""):
             printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
             continue
 
-        nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book, adcPlots=adcPlots)
+        nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book)
         adcs = adcs.union(adcs1)
         if nBadHtrs:
             return
@@ -348,7 +347,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
     return matched, nonMatched
 
 
-def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots=False):
+def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False):
     doDump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
 
     if anyEmap:
@@ -384,13 +383,13 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, adcPlots
         printRaw.oneEvent(raw1, nonMatchedQie=nonMatched12, nonMatchedTp=tNonMatched12, slim1=slim1)
         printRaw.oneEvent(raw2, nonMatchedQie=nonMatched21, nonMatchedTp=tNonMatched21)
 
-    okFeds = loop_over_feds(raw1, book, adcPlots, adcTag="feds1")
+    okFeds = loop_over_feds(raw1, book, adcTag="feds1")
 
     noGood = [[], [None]]
     if raw1.keys() in noGood or raw2.keys() in noGood:
         return
 
-    okFeds = okFeds.union(loop_over_feds(raw2, book, adcPlots, adcTag="feds2"))
+    okFeds = okFeds.union(loop_over_feds(raw2, book, adcTag="feds2"))
 
     # histogram n matched
     nFib = 228  # = 2 2 3 19;  gt 14 HTRs * 16 fib / HTR
