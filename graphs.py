@@ -660,7 +660,7 @@ def plotZS(f, pad0, feds2):
 
     ht1 = f.Get("tp_vs_tp_soi2_mp0")
     if ht1:
-        ht1.SetTitle("%s;TP SOI;Samples / bin" % fedString(feds2))
+        ht1.SetTitle("%s;TP E_{SOI};Trigger Towers / bin" % fedString(feds2))
         shiftFlows(ht1)
         ht1.Draw("hist")
         ht1.GetXaxis().SetRangeUser(-0.5, 13.5)
