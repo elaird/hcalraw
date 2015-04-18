@@ -637,18 +637,23 @@ def plotZS(f, pad0, feds2):
     else:
         hMax = None
 
+    leg = r.TLegend(0.17, 0.80, 0.32, 0.92)
+    leg.SetBorderSize(0)
+    leg.SetFillStyle(0)
+
     same = ""
     if ha1:
         color1 = r.kCyan
         stylize(ha1, color1, 2)
         ha1.Draw("hist")
         ha1.SetMaximum(hMax)
-        ha1.SetTitle("#color[%d]{M&P}" % color1)
+        leg.AddEntry(ha1, "M&P", "l")
         same = "same"
     if ha0:
         stylize(ha0, r.kBlue, 1)
         ha0.Draw("hist%s" % same)
         ha0.SetMaximum(hMax)
+    leg.Draw()
 
     pad0.cd(6)
     adjustPad(logY=True)
@@ -662,7 +667,7 @@ def plotZS(f, pad0, feds2):
         stylize(ht1, r.kBlue, 1)
         magnify(ht1, factor=1.8)
 
-    return [ha0, ha1, ht1]
+    return [ha0, ha1, leg, ht1]
 
 
 def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
