@@ -102,7 +102,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                 adcs.add(adc)
                 mp = channelData.get("M&P", 0)
                 book.fill(adc, "channel_peak_adc_mp%d_%d" % (mp, fedId), 14, -0.5, 13.5,
-                          title="FED %d;Peak ADC (ErrF==0);Channels / bin" % fedId)
+                          title="FED %d;Peak ADC (ErrF == 0);Channels / bin" % fedId)
 
     return nBadHtrs, ErrF, caps, adcs
 
