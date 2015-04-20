@@ -8,11 +8,11 @@ cd cpp; make -j 5; cd -
 
 
 # analyze global runs
-./look.py 235316 --no-warn-unpack --utca-bcn-delta=-131
-./look.py 239342 --utca-pipeline-delta=4 --utca-bcn-delta=-131
-./look.py 239751 --nevents=100 --utca-bcn-delta=-131
-./look.py 239895 --hhmm=2212 --nevents=20 --utca-bcn-delta=-131
-./look.py 240073 --utca-bcn-delta=-131
+./look.py 235316 --no-warn-unpack
+./look.py 239342 --utca-pipeline-delta=4
+./look.py 239751 --nevents=100
+./look.py 239895 --hhmm=2212 --nevents=20
+./look.py 240073
 
 
 # analyze AMC13/DCC2 monitor buffer dumps
@@ -20,7 +20,7 @@ cd cpp; make -j 5; cd -
 
 
 # compare payloads of different sets of FEDs, within one file
-./look.py 239480 --utca-bcn-delta=-131
+./look.py 239480
 ./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF \
 --dump=0 --output-file=output/239480.root --progress --utca-bcn-delta=-131
 
