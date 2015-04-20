@@ -19,7 +19,7 @@ def flavor(book, d, fedId):
 
 def htrSummary(blocks=[], book=None, fedId=None,
                fedEvn=None, fedOrn5=None, fedBcn=None,
-               msg="", adcPlots=False):
+               msg=""):
     nBadHtrs = 0
     caps = {}
     ErrF = {}
@@ -96,11 +96,13 @@ def htrSummary(blocks=[], book=None, fedId=None,
                 continue
 
             caps[channelData["CapId0"]] += 1
-            if adcPlots:
-                for adc in channelData["QIE"]:
-                    adcs.add(adc)
-                    book.fill(adc, "all_adc", 128, -0.5, 127.5,
-                              title=";all ADC (when ErrF==0); TS / bin")
+
+            if channelData["QIE"]:
+                adc = max(channelData["QIE"])
+                adcs.add(adc)
+                mp = channelData.get("M&P", 0)
+                book.fill(adc, "channel_peak_adc_mp%d_%d" % (mp, fedId), 14, -0.5, 13.5,
+                          title="FED %d;Peak ADC (ErrF == 0);Channels / bin" % fedId)
 
     return nBadHtrs, ErrF, caps, adcs
 

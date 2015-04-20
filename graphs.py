@@ -603,6 +603,73 @@ def retitle(evn_graph):
     evn_graph.SetTitle(title)
 
 
+def fedSum(f=None, prefix="", feds=[]):
+    h = None
+    for fed in feds:
+        h1 = f.Get("%s_%d" % (prefix, fed))
+        if not h1:
+            continue
+        if h:
+            h.Add(h1)
+        else:
+            h = h1.Clone()
+    return h
+
+
+def plotZS(f, pad0, feds2):
+    pad0.cd(3)
+    adjustPad(logY=True)
+
+    ha1 = fedSum(f, "channel_peak_adc_mp1", feds2)
+    ha0 = fedSum(f, "channel_peak_adc_mp0", feds2)
+    maxes = []
+    for h in [ha1, ha0]:
+        if not h:
+            continue
+        h.SetTitle(fedString(feds2))
+        shiftFlows(h)
+        stylize(h, r.kBlue, 1)
+        magnify(h, factor=1.8)
+        maxes.append(h.GetMaximum())
+
+    if maxes:
+        hMax = 2.0 * max(maxes)
+    else:
+        hMax = None
+
+    leg = r.TLegend(0.17, 0.80, 0.32, 0.92)
+    leg.SetBorderSize(0)
+    leg.SetFillStyle(0)
+
+    same = ""
+    if ha1:
+        color1 = r.kCyan
+        stylize(ha1, color1, 2)
+        ha1.Draw("hist")
+        ha1.SetMaximum(hMax)
+        leg.AddEntry(ha1, "M&P", "l")
+        same = "same"
+    if ha0:
+        stylize(ha0, r.kBlue, 1)
+        ha0.Draw("hist%s" % same)
+        ha0.SetMaximum(hMax)
+    leg.Draw()
+
+    pad0.cd(6)
+    adjustPad(logY=True)
+
+    ht1 = f.Get("tp_vs_tp_soi2_mp0")
+    if ht1:
+        ht1.SetTitle("%s;TP E_{SOI};Trigger Towers / bin" % fedString(feds2))
+        shiftFlows(ht1)
+        ht1.Draw("hist")
+        ht1.GetXaxis().SetRangeUser(-0.5, 13.5)
+        stylize(ht1, r.kBlue, 1)
+        magnify(ht1, factor=1.8)
+
+    return [ha0, ha1, leg, ht1]
+
+
 def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     pad20 = r.TPad("pad20", "pad20", 0.00, 0.00, 1.00, 1.00)
     pad20.Divide(5, 4, 0.001, 0.001)
@@ -717,43 +784,8 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
     keep = plotGlobal(f, pad0, offset=1, names=names, feds1=feds1, feds2=feds2,
                       doYx=doYx, retitle=retitle, gridX=gridX, gridY=gridY)
 
-    if n == -1:
-        pad0.cd(3)
-        adjustPad(logY=True)
-
-        ha1 = f.Get("adc_vs_adc_soi2_mp1")
-        ha0 = f.Get("adc_vs_adc_soi2_mp0")
-        for h in [ha1, ha0]:
-            if not h:
-                continue
-            h.SetTitle(";ADC SOI (%s);Samples / bin" % fedString(feds2))
-            shiftFlows(h)
-            h.GetXaxis().SetRangeUser(-0.5, 13.5)
-            stylize(h, r.kBlue, 1)
-            magnify(h, factor=1.8)
-
-        same = ""
-        if ha1:
-            color1 = r.kCyan
-            stylize(ha1, color1, 2)
-            ha1.Draw("hist")
-            ha1.SetTitle("#color[%d]{M&P}" % color1)
-            same = "same"
-        if ha0:
-            stylize(ha0, r.kBlue, 1)
-            ha0.Draw("hist%s" % same)
-
-        pad0.cd(6)
-        adjustPad(logY=True)
-
-        ht1 = f.Get("tp_vs_tp_soi2_mp0")
-        if ht1:
-            ht1.SetTitle(";TP SOI (%s);Samples / bin" % fedString(feds2))
-            shiftFlows(ht1)
-            ht1.Draw("hist")
-            ht1.GetXaxis().SetRangeUser(-0.5, 13.5)
-            stylize(ht1, r.kBlue, 1)
-            magnify(ht1, factor=1.8)
+    if n == 0:
+        keep += plotZS(f, pad0, feds2)
 
     canvas.Print(pdf)
 
