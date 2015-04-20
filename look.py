@@ -92,7 +92,22 @@ def report(file1):
     print "Found %d %s in %s/" % (len(fileNames), msg, "/".join(bases))
 
 
-def main(options, args, progress=False):
+def override(options, quiet, run):
+    if not options.nEvents:
+        options.nEvents = 10
+
+    options.progress = not quiet
+    if options.dump == -1 and not quiet:
+        options.dump = 0
+
+    # handle old BcN (http://cmsonline.cern.ch/cms-elog/849949)
+    if run <= 240698:
+        options.utcaBcnDelta = -131
+    else:
+        options.utcaBcnDelta = 0
+
+
+def main(options, args, quiet=False):
     if len(args) != 1:
         sys.exit("Please provide a run number as the argument.")
     try:
@@ -102,21 +117,14 @@ def main(options, args, progress=False):
 
     options.feds1 = "718,719"
     options.feds2 = "uHF"
-    options.progress = progress
     options.outputFile = "output/%d.root" % run
 
-    # override three defaults: nEvents, dump, match
-    if not options.nEvents:
-        options.nEvents = 10
-
-    if options.dump == -1:
-        options.dump = 0
+    override(options, quiet, run)
 
     if options.noLoop:  # skip file finding
         options.file1 = "dummy"
         oneRun.main(options)
         return
-
 
     for iFind, grDir in sorted({1: None,
                                 2: None,
@@ -142,4 +150,4 @@ def main(options, args, progress=False):
 
 
 if __name__ == "__main__":
-    main(*opts(alsoArgs=True), progress=True)
+    main(*opts(alsoArgs=True))
