@@ -7,12 +7,16 @@ source env/lxplus6.sh
 cd cpp; make -j 5; cd -
 
 
-# analyze global runs
+# analyze a global run
 ./look.py 235316 --no-warn-unpack
 ./look.py 239342 --utca-pipeline-delta=4
 ./look.py 239751 --nevents=100
 ./look.py 239895 --hhmm=2212 --nevents=20
 ./look.py 240073
+
+
+# analyze several global runs
+cat gr_list.txt | ./multi.py --nevents=100
 
 
 # analyze AMC13/DCC2 monitor buffer dumps
