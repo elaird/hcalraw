@@ -33,7 +33,7 @@ def plot(roots, feds1s, feds2s):
     graphs.makeSummaryPdfMulti(inputFiles=roots,
                                feds1s=feds1s,
                                feds2s=feds2s,
-                               pdf="output/grs.pdf",
+                               pdf="output/runs.pdf",
                                onePageOnly=True,
                                )
 
