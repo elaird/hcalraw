@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import graphs
 import look
 from options import opts
@@ -37,41 +38,18 @@ def plot(roots, feds1s, feds2s):
                                )
 
 
-def runs(**_):
-    return [239895,
-            240189,
-            # 240190,
-            # 240193,
-            # 240198,
-            # 240200,
-            240201,
-            # 240209,
-            # 240212,
-            240214,
-            # 240216,
-        #     240217,
-        #     240219,
-        #     240223,
-        #     240224,
-        #     240226,
-        #     240229,
-        #     240230,
-        #     240257,
-        #     240259,
-        #     240262,
-        #     240267,
-        #     240272,
-        #     240274,
-        #     240275,
-        #     240278,
-        #     240280,
-        #     240285,
-        #     240466,
-            240858,
-            240860,
-            240862,
-            ]
+def runs(file=None):
+    out = []
+    for i, lineRaw in enumerate(file):
+        line = lineRaw.strip()
+        if line.startswith("#"):
+            continue
+        try:
+            out.append(int(line))
+        except ValueError:
+            print "skipping line %d: '%s'" % (i, line)
+    return out
 
 
 if __name__ == "__main__":
-    main(opts()[0], runs(minumum=240189, maximum=240209))
+    main(opts()[0], runs(sys.stdin))
