@@ -99,6 +99,8 @@ def block_header_ufov1(d={}, iWord64=None, word64=None):
         lmsepvc = (w >> 56) & 0x7f
         for i, l in enumerate(["L", "M", "S", "E", "P", "V", "C"]):
             d[key][l] = (lmsepvc >> (6-i)) & 0x1
+
+        d[key]["!C"] = not d[key]["C"]  # enable convenient plotting in compare.py
         if d[key]["M"]:
             sys.exit("multi-block unpacking not implemented")
         d[key]["BoardID"] = w & 0xffff
