@@ -107,7 +107,10 @@ def htrSummary(blocks=[], book=None, fedId=None,
     return nBadHtrs, ErrF, caps, adcs
 
 
-def htrOverviewBits(d={}, book={}, fedId=None, letters="LMSEPVC"):
+def htrOverviewBits(d={}, book={}, fedId=None):
+    letters = ["L", "M", "S", "E", "P", "V", "!C"]
+    block = "".join(letters)
+
     abbr = "HTR" if "HTR0" in d else "uHTR"
     for iHtr in range(15):
         key = "%s%d" % (abbr, iHtr)
@@ -118,7 +121,7 @@ def htrOverviewBits(d={}, book={}, fedId=None, letters="LMSEPVC"):
         for i, l in enumerate(letters):
             if not h.get(l):
                 continue
-            book.fill(i, "%s_%d" % (letters, fedId), 7, -0.5, 6.5,
+            book.fill(i, "%s_%d" % (block, fedId), 7, -0.5, 6.5,
                       title="FED %d;;HTRs / bin" % fedId,
                       xAxisLabels=letters)
 
