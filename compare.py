@@ -108,9 +108,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
 
 def htrOverviewBits(d={}, book={}, fedId=None):
-    letters = ["L", "M", "S", "E", "P", "V", "!C"]
-    block = "".join(letters)
-
+    letters = ["L", "M", "S", "E", "P", "!V", "!C"]
     abbr = "HTR" if "HTR0" in d else "uHTR"
     for iHtr in range(15):
         key = "%s%d" % (abbr, iHtr)
@@ -119,11 +117,17 @@ def htrOverviewBits(d={}, book={}, fedId=None):
         h = d[key]
 
         for i, l in enumerate(letters):
-            if not h.get(l):
+            x = h.get(l[-1])  # .get to handle 'LMS' for VME; last char to avoid '!'
+            if x is None:
                 continue
-            book.fill(i, "%s_%d" % (block, fedId), 7, -0.5, 6.5,
-                      title="FED %d;;HTRs / bin" % fedId,
-                      xAxisLabels=letters)
+
+            if len(l) == 2:  # flip if !
+                x = not x
+
+            if x:
+                book.fill(i, "htrOverviewBits_%d" % fedId, 7, -0.5, 6.5,
+                          title="FED %d;;HTRs / bin" % fedId,
+                          xAxisLabels=letters)
 
 
 def singleFedPlots(fedId=None, d={}, book={}):
