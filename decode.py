@@ -494,7 +494,7 @@ def htrData(d={}, l={}, iWord16=None, word16=None,
                                                         utca=utca)
         if warn and dataKey == "otherData":
             coords = "FED %4d crate %2d slot %2d" % (fedId, l["Crate"], l["Slot"])
-            evn = "(EvN %d, iWord16 %d, word16 0x%04x)" % (l["EvN"], iWord16, word16)
+            evn = "(EvN 0x%06x, iWord16 %4d, word16 0x%04x)" % (l["EvN"], iWord16, word16)
             printer.warning("unknown flavor %d: %s %s." % (flavor, coords, evn))
 
         d["dataKey"] = dataKey
