@@ -30,7 +30,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
     crate2bin = {32: 1, 29: 2, 22: 3, 12: 4, 9: 5, 2: 6}
     yAxisLabels = ["32", "29", "22", "12", "9", "2", "-1"]
-    misMatchMapBins = ((21, 7), (0.5, 0.5), (21.5, 7.5))
+    misMatchMapBins = ((23, 7), (-0.5, 0.5), (22.5, 7.5))
 
     for block in blocks:
         if type(block) is not dict:
@@ -59,7 +59,12 @@ def htrSummary(blocks=[], book=None, fedId=None,
                             ("BcN", fedBcn),
                          ]:
             if (block[key] - fedVar):
-                book.fill((block["Slot"], crate2bin.get(block["Crate"], 7)),
+                slot = block["Slot"]
+                if slot <= 0:
+                    slot = 0
+                if 22 <= slot:
+                    slot = 22
+                book.fill((slot, crate2bin.get(block["Crate"], 7)),
                           "%s_mismatch_vs_slot_crate" % key,
                           *misMatchMapBins,
                           title="%s;slot;crate;HTR - FED   mismatches" % key,
@@ -108,7 +113,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
 
 def htrOverviewBits(d={}, book={}, fedId=None):
-    letters = ["L", "M", "S", "E", "P", "!V", "!C"]
+    letters = ["L", "M", "S", "E", "!P", "!V", "!C"]
     abbr = "HTR" if "HTR0" in d else "uHTR"
     for iHtr in range(15):
         key = "%s%d" % (abbr, iHtr)
