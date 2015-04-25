@@ -118,19 +118,19 @@ def histogrammed(prefix, feds, split=1118):
 
 
 def plot(prefix, roots, feds1s, feds2s):
-    if any(feds2s):
-        graphs.makeSummaryPdfMulti(inputFiles=roots,
-                                   feds1s=feds1s,
-                                   feds2s=feds2s,
-                                   pdf="output/%s.pdf" % prefix)
-    else:
+    graphs.makeSummaryPdfMulti(inputFiles=roots,
+                               feds1s=feds1s,
+                               feds2s=feds2s,
+                               pdf="output/%s.pdf" % prefix)
+
+    if not any(feds2s):
         outputFile = "output/%s.root" % prefix
         cmd = " ".join(["hadd -f", outputFile] + roots)
         os.system(cmd)
 
         graphs.makeSummaryPdf(inputFile=outputFile,
                               feds1=sorted(sum(feds1s, [])),
-                              pdf=outputFile.replace(".root", ".pdf"))
+                              pdf=outputFile.replace(".root", "_merged.pdf"))
 
 
 
