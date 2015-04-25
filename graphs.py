@@ -296,9 +296,21 @@ def fedString(lst=[]):
     return ",".join(["%d" % i for i in lst])
 
 
+def drawCrates():
+    b = r.TBox()
+    b.SetFillStyle(0)
+    b.SetLineColor(r.kBlack)
+    b.SetLineStyle(2)
+    return [b.DrawBox( 0.5, 0.5, 12.5, 3.5),
+            b.DrawBox( 1.5, 3.5,  8.5, 6.5),
+            b.DrawBox(12.5, 3.5, 18.5, 6.5),
+            b.DrawBox(20.5, 3.5, 21.5, 6.5),
+            ]
+
+
 def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
-               gopts="colz", feds1=[], feds2=[],
-               doYx=True, retitle=True, gridX=False, gridY=False):
+               gopts="colz", feds1=[], feds2=[], doYx=True, retitle=True,
+               gridX=False, gridY=False, boxes=False):
     keep = []
 
     for iHisto, name in enumerate(names):
@@ -319,6 +331,9 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         h.Draw(gopts)
         stylize(h)
         magnify(h, factor=1.8)
+
+        if boxes:
+            keep += drawCrates()
 
         if retitle:
             P = name[:name.find("_vs_")].upper()
@@ -763,7 +778,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
 
 
 def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
-            doYx=True, retitle=True, gridX=False, gridY=False):
+            doYx=True, retitle=True, gridX=False, gridY=False, boxes=False):
 
     n = len(names)
     if not names:
@@ -782,7 +797,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
 
     pad0.Draw()
     keep = plotGlobal(f, pad0, offset=1, names=names, feds1=feds1, feds2=feds2,
-                      doYx=doYx, retitle=retitle, gridX=gridX, gridY=gridY)
+                      doYx=doYx, retitle=retitle, gridX=gridX, gridY=gridY, boxes=boxes)
 
     if n == 0:
         keep += plotZS(f, pad0, feds2)
@@ -809,6 +824,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
     r.gStyle.SetTitleY(0.95)
     r.gStyle.SetTitleFontSize(0.07)
     r.gStyle.SetTitleAlign(22)
+    r.gStyle.SetGridStyle(2)
 
     canvas = r.TCanvas()
     canvas.Print(pdf + "[")
@@ -830,7 +846,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         pageTwo(f, feds1, feds2, canvas, pdf,
                 names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + \
                       ["ErrFNZ_vs_slot_crate", "", ""],
-                doYx=False, retitle=False, gridX=True)
+                doYx=False, retitle=False, boxes=True)
 
         names = ["frac0_vs_BcN_%d" % x for x in feds1[:3] + feds2[:3]] + [""] * 6
         pageTwo(f, feds1, feds2, canvas, pdf,
