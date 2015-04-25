@@ -12,3 +12,5 @@ bcn vs. fed
 restore cron
 move soi warning to decode
 map m&p
+warn about C
+warn about EvN mismatch
