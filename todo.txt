@@ -14,3 +14,4 @@ move soi warning to decode
 map m&p
 warn about C
 warn about EvN mismatch
+make ticks visible in problem maps
