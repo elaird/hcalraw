@@ -17,6 +17,7 @@ cd cpp; make -j 5; cd -
 
 # analyze several global runs
 cat gr_list.txt | ./multi.py --nevents=100
+cat gr_list.txt | ./dqReport.py
 
 
 # analyze AMC13/DCC2 monitor buffer dumps
