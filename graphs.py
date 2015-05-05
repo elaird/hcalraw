@@ -602,6 +602,8 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
     if "_" not in title:
         title = "Run %s" % title
     keep.append(latex.DrawLatex(0.01, 0.98, "#color[46]{%s}" % title))
+
+    # padg.Print("output/%s_l1a.pdf" % title.replace("Run ", ""))
     return keep
 
 
