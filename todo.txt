@@ -7,7 +7,6 @@ zcat
 fwlite
 use bcn in event maps
 dq vs time (mismatched evn, frac0, nmatched?)
-event prescale
 bcn vs. fed
 restore cron
 move soi warning to decode
