@@ -37,6 +37,12 @@ def opts(alsoArgs=False):
                       default="output/latest.root",
                       metavar="f",
                       help="Store histograms in this .root file.")
+    common.add_option("--sparse-loop",
+                      dest="sparseLoop",
+                      default=-1,
+                      metavar="S",
+                      type="int",
+                      help="Loop over only (up to) S events per file.")
     common.add_option("--no-loop",
                       dest="noLoop",
                       default=False,
