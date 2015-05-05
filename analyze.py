@@ -59,7 +59,9 @@ def tchain(spec, cacheSizeMB=None):
     return chain
 
 
-def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False):
+def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False, sparseLoop=None):
+    assert sparseLoop <= 0
+
     iMask = 0
 
     iEntry = iEntryStart
@@ -133,7 +135,7 @@ def eventMaps(chain, s={}, nMapMax=None):
                      forward, forwardBcn, backward)
 
     # start from beginning, even when skipping events in the loop
-    chainLoop(chain, 0, nMapMax, fillEventMap2, progress=s["progress"])
+    chainLoop(chain, 0, nMapMax, fillEventMap2, progress=s["progress"], sparseLoop=s["sparseLoop"])
 
     return forward, backward, forwardBcn
 
@@ -176,7 +178,9 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOpti
         def outerInnerCompare2(chain, iEntry):
             return outerInnerCompare(chain, iEntry, outer, kargs, inner, innerEvent, chainI)
 
-        chainLoop(chain, outer["nEventsSkip"], outer["nEventsMax"], outerInnerCompare2, progress=outer["progress"])
+        chainLoop(chain, outer["nEventsSkip"], outer["nEventsMax"], outerInnerCompare2,
+                  progress=outer["progress"], sparseLoop=outer["sparseLoop"])
+
     except KeyboardInterrupt:
         printer.warning("KeyboardInterrupt!")
 
@@ -606,6 +610,7 @@ def oneRun(files1=[],
 
     common = {"nEventsMax": nEvents,
               "nEventsSkip": nEventsSkip,
+              "sparseLoop": sparseLoop,
               "patterns": patterns,
               "unpack": not noUnpack,
               }
