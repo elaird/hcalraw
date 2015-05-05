@@ -59,8 +59,37 @@ def tchain(spec, cacheSizeMB=None):
     return chain
 
 
+def chainLoopSparse(chain, iEntryStop, callback, progress=False):
+    assert not progress
+
+    nEntries = iEntryStop
+    iTreeFirstEntry = 0
+    for nTree in range(chain.GetNtrees()):
+        if 0 > chain.LoadTree(iTreeFirstEntry):
+            return
+
+        tree = chain.GetTree()
+        if not tree:
+            continue
+
+        nTreeEntries = tree.GetEntries()
+        for iTreeEntry in range(nTreeEntries):
+            # if (not nTree) and iTreeEntry == 100:
+            #     tree.StopCacheLearningPhase()
+
+            entry = iTreeFirstEntry + iTreeEntry
+            if nEntries != None and nEntries <= entry:
+                return
+
+            callback(chain, entry)
+        # tree.PrintCacheStats()
+        iTreeFirstEntry += nTreeEntries
+
+
 def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False, sparseLoop=None):
-    assert sparseLoop <= 0
+    if 0 <= sparseLoop:
+        chainLoopSparse(chain, iEntryStop, callback, progress=progress)
+        return
 
     iMask = 0
 
