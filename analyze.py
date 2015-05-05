@@ -69,7 +69,7 @@ def chainLoopSparse(chain, iEntryStop, callback, progress=False):
         return
 
     for nTree in range(chain.GetNtrees()):
-        if 0 > chain.LoadTree(iTreeFirstEntry):
+        if chain.LoadTree(iTreeFirstEntry) < 0:
             return
 
         tree = chain.GetTree()
