@@ -129,9 +129,10 @@ def main(options, args, quiet=False):
     for iFind, grDir in sorted({1: None,
                                 2: None,
                                 3: "/store/data/Commissioning2015/HcalNZS/RAW/v1",
-                                4: "/store/data/Commissioning2015/Cosmics/RAW/v1",
-                                5: "/store/data/Commissioning2015/MinimumBias/RAW/v1",
-                                6: "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1",
+                                4: "/store/express/Commissioning2015/ExpressPhysics/FEVT/Express-v1",
+                                5: "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1",
+                                6: "/store/data/Commissioning2015/Cosmics/RAW/v1",
+                                7: "/store/data/Commissioning2015/MinimumBias/RAW/v1",
                                 }.iteritems()):
         if grDir is None:
             options.file1 = eval("find%d" % iFind)(run)
