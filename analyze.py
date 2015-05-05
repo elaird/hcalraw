@@ -597,6 +597,7 @@ def oneRun(files1=[],
            noUnpack=False,
            nEvents=None,
            nEventsSkip=None,
+           sparseLoop=None,
            outputFile="",
            ):
 
