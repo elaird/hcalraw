@@ -77,31 +77,31 @@ def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False):
         print
 
 
-def fillEventMap(chain, iEntry, treeName, fedId0, branch0, s, kargs,
+def fillEventMap(chain, iEntry,
+                 treeName, fedId0, branch0, s, kargs,
                  forward, forwardBcn, backward):
-    if True:
-        if treeName == "Events":  # CMS CDAQ
-            rawThisFed = wordsOneFed(tree=chain,
-                                     fedId=fedId0,
-                                     collection=s["rawCollection"],
-                                     product=s["product"]
-                                 )
-        elif treeName == "CMSRAW":  # HCAL local
-            rawThisFed = wordsOneChunk(tree=chain, branch=branch0)
-        else:
-            rawThisFed = wordsOneBranch(tree=chain, branch=branch0)
+    if treeName == "Events":  # CMS CDAQ
+        rawThisFed = wordsOneFed(tree=chain,
+                                 fedId=fedId0,
+                                 collection=s["rawCollection"],
+                                 product=s["product"]
+                             )
+    elif treeName == "CMSRAW":  # HCAL local
+        rawThisFed = wordsOneChunk(tree=chain, branch=branch0)
+    else:
+        rawThisFed = wordsOneBranch(tree=chain, branch=branch0)
 
-        raw = unpacked(fedData=rawThisFed, **kargs)
-        if not raw["nBytesSW"]:
-            printer.error("the first listed FED (%d) has zero bytes in tree '%s'." % (fedId0, treeName))
-            sys.exit(2)
+    raw = unpacked(fedData=rawThisFed, **kargs)
+    if not raw["nBytesSW"]:
+        printer.error("the first listed FED (%d) has zero bytes in tree '%s'." % (fedId0, treeName))
+        sys.exit(2)
 
-        evn, orn, bcn = coords(raw)
-        evnOrn = (evn, orn)
+    evn, orn, bcn = coords(raw)
+    evnOrn = (evn, orn)
 
-        forward[iEntry] = evnOrn
-        forwardBcn[iEntry] = bcn
-        backward[evnOrn] = iEntry
+    forward[iEntry] = evnOrn
+    forwardBcn[iEntry] = bcn
+    backward[evnOrn] = iEntry
 
 
 # this function returns two dictionaries,
@@ -146,25 +146,23 @@ def reportProgress(iEvent, iMask):
         return iMask
 
 
-def funcy2(chain, oEntry, outer, kargs, inner, innerEvent, chainI):
-    if True:
-        if True:
-            kargs["raw1"] = collectedRaw(tree=chain, specs=outer)
+def outerInnerCompare(chain, oEntry, outer, kargs, inner, innerEvent, chainI):
+    kargs["raw1"] = collectedRaw(tree=chain, specs=outer)
 
-            if innerEvent:
-                iEntry = innerEvent[oEntry]
-                if iEntry is None:
-                    oEntry += 1
-                    return
+    if innerEvent:
+        iEntry = innerEvent[oEntry]
+        if iEntry is None:
+            oEntry += 1
+            return
 
-                if chainI.GetEntry(iEntry) <= 0:
-                    return True  # break!
+        if chainI.GetEntry(iEntry) <= 0:
+            return True  # break!
 
-            if inner:
-                kargs["raw2"] = collectedRaw(tree=chainI, specs=inner)
+    if inner:
+        kargs["raw2"] = collectedRaw(tree=chainI, specs=inner)
 
-            if outer["unpack"]:
-                compare.compare(**kargs)
+    if outer["unpack"]:
+        compare.compare(**kargs)
 
 
 def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOptions={}):
@@ -175,10 +173,10 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOpti
     kargs.update(compareOptions)
 
     try:
-        def funcy(chain, iEntry):
-            return funcy2(chain, iEntry, outer, kargs, inner, innerEvent, chainI)
+        def outerInnerCompare2(chain, iEntry):
+            return outerInnerCompare(chain, iEntry, outer, kargs, inner, innerEvent, chainI)
 
-        chainLoop(chain, outer["nEventsSkip"], outer["nEventsMax"], funcy, progress=outer["progress"])
+        chainLoop(chain, outer["nEventsSkip"], outer["nEventsMax"], outerInnerCompare2, progress=outer["progress"])
     except KeyboardInterrupt:
         printer.warning("KeyboardInterrupt!")
 
