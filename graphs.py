@@ -382,6 +382,13 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
 
         leg.Draw()
         keep += [h, yx, leg]
+        # if name == "adc_vs_adc":
+        #     h.SetTitle("")
+        #     h.GetXaxis().SetTitle("ADC  (VME FEDs 718,719)")
+        #     h.GetYaxis().SetTitle("ADC  (uTCA FED 1118)")
+        #     r.gPad.Print("adc.pdf")
+        #     import os
+        #     os.system("pdfcrop adc.pdf")
     return keep
 
 
