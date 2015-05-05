@@ -59,33 +59,27 @@ def tchain(spec, cacheSizeMB=None):
     return chain
 
 
-# this function returns two dictionaries,
-# one maps TTree entry to (orn, evn)
-# the other maps the reverse
-def eventMaps(chain, s={}, nMapMax=None):
-    forward = {}
-    backward = {}
-    forwardBcn = {}
+def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False):
+    iMask = 0
 
-    treeName = s["treeName"]
-    fedId0 = s["fedIds"][0]
-    if treeName != "Events":
-        branch0 = s["branch"](fedId0)
-
-    if s["progress"]:
-        iMask = 0
-        print "Mapping %s:" % s["label"]
-
-    kargs = {"headerOnly": True,
-             "nBytesPer": s["nBytesPer"],
-             "skipWords64": s["skipWords64"],
-             }
-
-    iEntry = 0  # start from beginning, even when skipping events in the loop
-    while iEntry != nMapMax:
+    iEntry = iEntryStart
+    while iEntry != iEntryStop:
         if chain.GetEntry(iEntry) <= 0:
             break
+        if callback(chain, iEntry):
+            break
 
+        iEntry += 1
+        if progress:
+            iMask = reportProgress(iEntry, iMask)
+
+    if progress:
+        print
+
+
+def fillEventMap(chain, iEntry, treeName, fedId0, branch0, s, kargs,
+                 forward, forwardBcn, backward):
+    if True:
         if treeName == "Events":  # CMS CDAQ
             rawThisFed = wordsOneFed(tree=chain,
                                      fedId=fedId0,
@@ -102,9 +96,6 @@ def eventMaps(chain, s={}, nMapMax=None):
             printer.error("the first listed FED (%d) has zero bytes in tree '%s'." % (fedId0, treeName))
             sys.exit(2)
 
-        if s["progress"]:
-            iMask = progress(iEntry, iMask)
-
         evn, orn, bcn = coords(raw)
         evnOrn = (evn, orn)
 
@@ -112,15 +103,42 @@ def eventMaps(chain, s={}, nMapMax=None):
         forwardBcn[iEntry] = bcn
         backward[evnOrn] = iEntry
 
-        iEntry += 1
 
+# this function returns two dictionaries,
+# one maps TTree entry to (orn, evn)
+# the other maps the reverse
+def eventMaps(chain, s={}, nMapMax=None):
+    forward = {}
+    backward = {}
+    forwardBcn = {}
+
+    treeName = s["treeName"]
+    fedId0 = s["fedIds"][0]
+    if treeName != "Events":
+        branch0 = s["branch"](fedId0)
+    else:
+        branch0 = None
 
     if s["progress"]:
-        print
+        print "Mapping %s:" % s["label"]
+
+    kargs = {"headerOnly": True,
+             "nBytesPer": s["nBytesPer"],
+             "skipWords64": s["skipWords64"],
+             }
+
+    def fillEventMap2(chain, iEntry):
+        fillEventMap(chain, iEntry,
+                     treeName, fedId0, branch0, s, kargs,
+                     forward, forwardBcn, backward)
+
+    # start from beginning, even when skipping events in the loop
+    chainLoop(chain, 0, nMapMax, fillEventMap2, progress=s["progress"])
+
     return forward, backward, forwardBcn
 
 
-def progress(iEvent, iMask):
+def reportProgress(iEvent, iMask):
     if iEvent and not (iEvent & (2**iMask - 1)):
         print "%8d" % iEvent, time.ctime()
         return iMask + 1
@@ -128,33 +146,19 @@ def progress(iEvent, iMask):
         return iMask
 
 
-def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOptions={}):
-    if outer["progress"]:
-        iMask = 0
-        print "Looping:"
-
-    kargs = {"book": autoBook.autoBook("book")}
-    kargs.update(compareOptions)
-
-    try:
-        oEntry = outer["nEventsSkip"]
-        while oEntry != outer["nEventsMax"]:
-            if chain.GetEntry(oEntry) <= 0:
-                break
-
-            if outer["progress"]:
-                iMask = progress(oEntry, iMask)
-
+def funcy2(chain, oEntry, outer, kargs, inner, innerEvent, chainI):
+    if True:
+        if True:
             kargs["raw1"] = collectedRaw(tree=chain, specs=outer)
 
             if innerEvent:
                 iEntry = innerEvent[oEntry]
                 if iEntry is None:
                     oEntry += 1
-                    continue
+                    return
 
                 if chainI.GetEntry(iEntry) <= 0:
-                    break
+                    return True  # break!
 
             if inner:
                 kargs["raw2"] = collectedRaw(tree=chainI, specs=inner)
@@ -162,9 +166,22 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOpti
             if outer["unpack"]:
                 compare.compare(**kargs)
 
-            oEntry += 1
+
+def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOptions={}):
+    if outer["progress"]:
+        print "Looping:"
+
+    kargs = {"book": autoBook.autoBook("book")}
+    kargs.update(compareOptions)
+
+    try:
+        def funcy(chain, iEntry):
+            return funcy2(chain, iEntry, outer, kargs, inner, innerEvent, chainI)
+
+        chainLoop(chain, outer["nEventsSkip"], outer["nEventsMax"], funcy, progress=outer["progress"])
     except KeyboardInterrupt:
-        printer.warning("KeyboardInterrupt after %d events." % oEntry)
+        printer.warning("KeyboardInterrupt!")
+
     return kargs["book"]
 
 
