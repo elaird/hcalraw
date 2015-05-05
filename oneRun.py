@@ -22,8 +22,11 @@ def check_and_adjust(options):
         sys.exit("--file1 and --feds1 are required (see './oneRun.py --help').")
     if not options.outputFile.endswith(".root"):
         sys.exit("--output-file must end with .root (%s)" % options.outputFile)
-    if options.file2 and options.sparseLoop:
-        sys.exit("--sparse-loop does not work with --file2")
+    if options.sparseLoop:
+        if options.file2:
+            sys.exit("--sparse-loop does not work with --file2")
+        if options.nEventsSkip:
+            sys.exit("--sparse-loop does not work with --nevents-skip")
     if options.feds2 and (not options.file2) and (not options.noLoop):
         print "INFO: using --file1 also for --file2; also using identity map"
         options.file2 = options.file1
