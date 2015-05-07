@@ -163,17 +163,6 @@ def opts(alsoArgs=False):
     parser.add_option_group(matchCh)
 
     look = optparse.OptionGroup(parser, "Options solely for use with look.py")
-    look.add_option("--index",
-                    dest="index",
-                    default=None,
-                    metavar="I",
-                    type="int",
-                    help="Index of file in sorted list (for look.py).")
-    look.add_option("--onward",
-                    dest="onward",
-                    default=False,
-                    action="store_true",
-                    help="with --index: use also later files.")
     look.add_option("--hhmm",
                     dest="hhmm",
                     default=None,
