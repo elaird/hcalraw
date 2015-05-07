@@ -57,15 +57,27 @@ cat gr_list.txt | ./dqReport.py
 ####License
 [GPLv3](http://www.gnu.org/licenses/gpl.html)
 
+
+####Design Goals
+* unpack both VME and uTCA data
+* digest global, local, or monitor buffer data without configuration
+* compare payloads across two .root files containing unsorted events
+* enable evaluation of board performance in only one page of plots
+* provide flexibility in analysis
+* not require CMSSW
+
+
 ####Dependencies
 * python (2.x, x>=6)
 * ROOT (>=5.32)
+
 
 ####Environment (SLC6/AFS)
 (use exactly one of these)
 * `env/lxplus6.sh` sets up CMSSW, EOS, and the environment vars LS1,USC
 * `env/slc6-pypy.sh` sets up pypyROOT (outside of CMSSW)
 * `env/slc6-root6.sh` sets up a ROOT 6 environment (outside of CMSSW)
+
 
 ####Files
 * `cpp/CDF*.h` are copied from CMSSW (IORawData/HcalTBInputService/src)
