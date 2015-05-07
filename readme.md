@@ -69,7 +69,7 @@ cat gr_list.txt | ./dqReport.py
 
 ####Dependencies
 * python (2.x, x>=6)
-* ROOT (>=5.32)
+* [ROOT](https://root.cern.ch/) (>=5.32)
 
 
 ####Environment (SLC6/AFS)
