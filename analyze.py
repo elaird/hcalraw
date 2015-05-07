@@ -59,6 +59,93 @@ def tchain(spec, cacheSizeMB=None):
     return chain
 
 
+def chainLoopSparse(chain, nEntries, callback, nPerTree, progress=False):
+    iMask = 0
+    iTreeFirstEntry = 0
+    nSeen = 0
+
+    for nTree in range(chain.GetNtrees()):
+        if chain.LoadTree(iTreeFirstEntry) < 0:
+            return
+
+        tree = chain.GetTree()
+        if not tree:
+            continue
+
+        nTreeEntries = tree.GetEntries()
+        for iTreeEntry in range(nTreeEntries):
+            # if (not nTree) and iTreeEntry == 100:
+            #     tree.StopCacheLearningPhase()
+
+            if nPerTree <= iTreeEntry:
+                break
+
+            tree.GetEntry(iTreeEntry)
+            entry = iTreeFirstEntry + iTreeEntry
+            nSeen += 1
+            # print "nTree %d  iTreeEntry %d   entry %d   nSeen %d" % (nTree, iTreeEntry, entry, nSeen)
+            if nEntries != None and nEntries <= nSeen:
+                return
+
+            if callback(chain, entry):
+                return
+
+            if progress:
+                iMask = reportProgress(nSeen, iMask)
+
+        # tree.PrintCacheStats()
+        iTreeFirstEntry += nTreeEntries
+
+
+def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False, sparseLoop=None):
+    if 0 <= sparseLoop:
+        chainLoopSparse(chain, iEntryStop, callback, sparseLoop, progress=progress)
+        return
+
+    iMask = 0
+
+    iEntry = iEntryStart
+    while iEntry != iEntryStop:
+        if chain.GetEntry(iEntry) <= 0:
+            break
+        if callback(chain, iEntry):
+            break
+
+        iEntry += 1
+        if progress:
+            iMask = reportProgress(iEntry, iMask)
+
+    if progress:
+        print
+
+
+def fillEventMap(chain, iEntry,
+                 treeName, fedId0, branch0, s, kargs,
+                 forward, forwardBcn, backward):
+    if treeName == "Events":  # CMS CDAQ
+        rawThisFed = wordsOneFed(tree=chain,
+                                 fedId=fedId0,
+                                 collection=s["rawCollection"],
+                                 product=s["product"]
+                             )
+    elif treeName == "CMSRAW":  # HCAL local
+        rawThisFed = wordsOneChunk(tree=chain, branch=branch0)
+    else:
+        rawThisFed = wordsOneBranch(tree=chain, branch=branch0)
+
+    raw = unpacked(fedData=rawThisFed, **kargs)
+    if not raw["nBytesSW"]:
+        printer.error("the first listed FED (%d) has zero bytes in tree '%s'." % (fedId0, treeName))
+        sys.exit(2)
+
+    evn, orn, bcn = coords(raw)
+    evnOrn = (evn, orn)
+
+    forward[iEntry] = evnOrn
+    forwardBcn[iEntry] = bcn
+    backward[evnOrn] = iEntry
+
+
 # this function returns two dictionaries,
 # one maps TTree entry to (orn, evn)
 # the other maps the reverse
@@ -71,9 +158,10 @@ def eventMaps(chain, s={}, nMapMax=None):
     fedId0 = s["fedIds"][0]
     if treeName != "Events":
         branch0 = s["branch"](fedId0)
+    else:
+        branch0 = None
 
     if s["progress"]:
-        iMask = 0
         print "Mapping %s:" % s["label"]
 
     kargs = {"headerOnly": True,
@@ -81,46 +169,18 @@ def eventMaps(chain, s={}, nMapMax=None):
              "skipWords64": s["skipWords64"],
              }
 
-    iEntry = 0  # start from beginning, even when skipping events in the loop
-    while iEntry != nMapMax:
-        if chain.GetEntry(iEntry) <= 0:
-            break
+    def fillEventMap2(chain, iEntry):
+        fillEventMap(chain, iEntry,
+                     treeName, fedId0, branch0, s, kargs,
+                     forward, forwardBcn, backward)
 
-        if treeName == "Events":  # CMS CDAQ
-            rawThisFed = wordsOneFed(tree=chain,
-                                     fedId=fedId0,
-                                     collection=s["rawCollection"],
-                                     product=s["product"]
-                                 )
-        elif treeName == "CMSRAW":  # HCAL local
-            rawThisFed = wordsOneChunk(tree=chain, branch=branch0)
-        else:
-            rawThisFed = wordsOneBranch(tree=chain, branch=branch0)
+    # start from beginning, even when skipping events in the loop
+    chainLoop(chain, 0, nMapMax, fillEventMap2, progress=s["progress"], sparseLoop=s["sparseLoop"])
 
-        raw = unpacked(fedData=rawThisFed, **kargs)
-        if not raw["nBytesSW"]:
-            printer.error("the first listed FED (%d) has zero bytes in tree '%s'." % (fedId0, treeName))
-            sys.exit(2)
-
-        if s["progress"]:
-            iMask = progress(iEntry, iMask)
-
-        evn, orn, bcn = coords(raw)
-        evnOrn = (evn, orn)
-
-        forward[iEntry] = evnOrn
-        forwardBcn[iEntry] = bcn
-        backward[evnOrn] = iEntry
-
-        iEntry += 1
-
-
-    if s["progress"]:
-        print
     return forward, backward, forwardBcn
 
 
-def progress(iEvent, iMask):
+def reportProgress(iEvent, iMask):
     if iEvent and not (iEvent & (2**iMask - 1)):
         print "%8d" % iEvent, time.ctime()
         return iMask + 1
@@ -128,43 +188,42 @@ def progress(iEvent, iMask):
         return iMask
 
 
+def outerInnerCompare(chain, oEntry, outer, kargs, inner, innerEvent, chainI):
+    kargs["raw1"] = collectedRaw(tree=chain, specs=outer)
+
+    if innerEvent:
+        iEntry = innerEvent[oEntry]
+        if iEntry is None:
+            oEntry += 1
+            return
+
+        if chainI.GetEntry(iEntry) <= 0:
+            return True  # break!
+
+    if inner:
+        kargs["raw2"] = collectedRaw(tree=chainI, specs=inner)
+
+    if outer["unpack"]:
+        compare.compare(**kargs)
+
+
 def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOptions={}):
     if outer["progress"]:
-        iMask = 0
         print "Looping:"
 
     kargs = {"book": autoBook.autoBook("book")}
     kargs.update(compareOptions)
 
     try:
-        oEntry = outer["nEventsSkip"]
-        while oEntry != outer["nEventsMax"]:
-            if chain.GetEntry(oEntry) <= 0:
-                break
+        def outerInnerCompare2(chain, iEntry):
+            return outerInnerCompare(chain, iEntry, outer, kargs, inner, innerEvent, chainI)
 
-            if outer["progress"]:
-                iMask = progress(oEntry, iMask)
+        chainLoop(chain, outer["nEventsSkip"], outer["nEventsMax"], outerInnerCompare2,
+                  progress=outer["progress"], sparseLoop=outer["sparseLoop"])
 
-            kargs["raw1"] = collectedRaw(tree=chain, specs=outer)
-
-            if innerEvent:
-                iEntry = innerEvent[oEntry]
-                if iEntry is None:
-                    oEntry += 1
-                    continue
-
-                if chainI.GetEntry(iEntry) <= 0:
-                    break
-
-            if inner:
-                kargs["raw2"] = collectedRaw(tree=chainI, specs=inner)
-
-            if outer["unpack"]:
-                compare.compare(**kargs)
-
-            oEntry += 1
     except KeyboardInterrupt:
-        printer.warning("KeyboardInterrupt after %d events." % oEntry)
+        printer.warning("KeyboardInterrupt!")
+
     return kargs["book"]
 
 
@@ -582,6 +641,7 @@ def oneRun(files1=[],
            noUnpack=False,
            nEvents=None,
            nEventsSkip=None,
+           sparseLoop=None,
            outputFile="",
            ):
 
@@ -590,6 +650,7 @@ def oneRun(files1=[],
 
     common = {"nEventsMax": nEvents,
               "nEventsSkip": nEventsSkip,
+              "sparseLoop": sparseLoop,
               "patterns": patterns,
               "unpack": not noUnpack,
               }

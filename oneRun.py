@@ -22,6 +22,11 @@ def check_and_adjust(options):
         sys.exit("--file1 and --feds1 are required (see './oneRun.py --help').")
     if not options.outputFile.endswith(".root"):
         sys.exit("--output-file must end with .root (%s)" % options.outputFile)
+    if 0 <= options.sparseLoop:
+        if options.file2:
+            sys.exit("--sparse-loop does not work with --file2")
+        if options.nEventsSkip:
+            sys.exit("--sparse-loop does not work with --nevents-skip")
     if options.feds2 and (not options.file2) and (not options.noLoop):
         print "INFO: using --file1 also for --file2; also using identity map"
         options.file2 = options.file1
@@ -34,7 +39,7 @@ def check_and_adjust(options):
 
 def go(options):
     kargs = subset(options, ["feds1", "feds2"], process=True)
-    kargs.update(subset(options, ["nEvents", "nEventsSkip", "outputFile", "noUnpack", "patterns"]))
+    kargs.update(subset(options, ["nEvents", "nEventsSkip", "outputFile", "noUnpack", "patterns", "sparseLoop"]))
     kargs["compareOptions"] = subset(options, ["anyEmap", "printEmap"])
     kargs["mapOptions"] = subset(options, ["printEventMap", "identityMap"])
     kargs["printOptions"] = subset(options, ["dump", "progress"])

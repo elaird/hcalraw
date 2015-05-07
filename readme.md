@@ -12,7 +12,7 @@ cd cpp; make -j 5; cd -
 ./look.py 239342 --utca-pipeline-delta=4
 ./look.py 239751 --nevents=100
 ./look.py 239895 --hhmm=2212 --nevents=20
-./look.py 240073
+./look.py 243484 --sparse-loop=2
 
 
 # analyze several global runs
