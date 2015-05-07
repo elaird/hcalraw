@@ -22,7 +22,7 @@ def check_and_adjust(options):
         sys.exit("--file1 and --feds1 are required (see './oneRun.py --help').")
     if not options.outputFile.endswith(".root"):
         sys.exit("--output-file must end with .root (%s)" % options.outputFile)
-    if options.sparseLoop:
+    if 0 <= options.sparseLoop:
         if options.file2:
             sys.exit("--sparse-loop does not work with --file2")
         if options.nEventsSkip:
