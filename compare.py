@@ -182,10 +182,6 @@ def singleFedPlots(fedId=None, d={}, book={}):
         frac0 = -999.  # dummy
 
     fedTime = utils.minutes(fedOrn, fedBcn)
-    book.fillGraph((fedEvn, frac0), "frac0_vs_EvN_%d" % fedId,
-                   title=("FED %d" % fedId) +
-                   ";FED EvN;frac. chan. with ErrF == 0")
-
     book.fillGraph((fedTime, frac0), "frac0_vs_time_%d" % fedId,
                    title=("FED %d" % fedId) +
                    ";time (minutes);frac. chan. with ErrF == 0")
