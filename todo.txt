@@ -1,12 +1,11 @@
 improve storage structures
-performance
+improve performance
 reduce memory usage
 git grep -in fixme
 
 zcat
 fwlite
 use bcn in event maps
-dq vs time (mismatched evn, frac0, nmatched?)
 bcn vs. fed
 restore cron
 move soi warning to decode

@@ -863,7 +863,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
                 names=names[:6],
                 doYx=False, retitle=False, gridX=True)
 
-        # pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_time"])
+        pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_time"])
 
         f.Close()
     canvas.Print(pdf + "]")
