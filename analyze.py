@@ -115,9 +115,6 @@ def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False, sparseLo
         if progress:
             iMask = reportProgress(iEntry, iMask)
 
-    if progress:
-        print
-
 
 def fillEventMap(chain, iEntry,
                  treeName, fedId0, branch0, s, kargs,
@@ -136,7 +133,7 @@ def fillEventMap(chain, iEntry,
     raw = unpacked(fedData=rawThisFed, **kargs)
     if not raw["nBytesSW"]:
         printer.error("the first listed FED (%d) has zero bytes in tree '%s'." % (fedId0, treeName))
-        sys.exit(2)
+        return True  # break!
 
     evn, orn, bcn = coords(raw)
     evnOrn = (evn, orn)
@@ -170,9 +167,9 @@ def eventMaps(chain, s={}, nMapMax=None):
              }
 
     def fillEventMap2(chain, iEntry):
-        fillEventMap(chain, iEntry,
-                     treeName, fedId0, branch0, s, kargs,
-                     forward, forwardBcn, backward)
+        return fillEventMap(chain, iEntry,
+                            treeName, fedId0, branch0, s, kargs,
+                            forward, forwardBcn, backward)
 
     # start from beginning, even when skipping events in the loop
     chainLoop(chain, 0, nMapMax, fillEventMap2, progress=s["progress"], sparseLoop=s["sparseLoop"])
@@ -511,7 +508,7 @@ def go(outer={}, inner={}, outputFile="",
     if chainI:
         utils.delete(chainI)
 
-    #write results to a ROOT file
+    # write results to a ROOT file
     dirName = os.path.dirname(outputFile)
     if not os.path.exists(dirName):
         print "Creating directory '%s'" % dirName
@@ -519,19 +516,21 @@ def go(outer={}, inner={}, outputFile="",
 
     f = r.TFile(outputFile, "RECREATE")
 
-    kargs = {"oFed": outer["fedIds"][0]}
-    if inner.get("fedIds"):
-        kargs["iFed"] = inner["fedIds"][0]
+    d = category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
+                         iMap=iMapF, iMapBcn=iMapBcn,
+                         innerEvent=innerEvent)
 
-    gr1, gr2, gr3, gr4 = graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
-                                                 iMap=iMapF, iMapBcn=iMapBcn,
-                                                 innerEvent=innerEvent), **kargs)
+    if outer["fedIds"]:
+        iFeds = inner.get("fedIds", [])
+        if not iFeds:
+            iFeds = [None]
+        for iGraph, gr in enumerate(graphs(d, oFed=outer["fedIds"][0], iFed=iFeds[0])):
+            if iGraph == 0:
+                gr.SetTitle("_".join(["only %s" % inner.get("label", ""), "only %s" % outer.get("label", ""), "both"]))
+            if iGraph == 1:
+                gr.SetTitle(",".join(outer["fileNames"]))
+            gr.Write()
 
-    gr1.SetTitle("_".join(["only %s" % inner.get("label", ""), "only %s" % outer.get("label", ""), "both"]))
-    gr2.SetTitle(",".join(outer["fileNames"]))
-
-    for gr in [gr1, gr2, gr3, gr4]:
-        gr.Write()
 
     for h in book.values():
         h.Write()
