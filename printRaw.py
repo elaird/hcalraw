@@ -160,13 +160,13 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
 
     anyHtrDataPrinted = False
     if 4 <= dump:
-        kargs = {"fibChs": [1] if dump == 4 else [0, 1, 2],
+        kargs = {"fibChs": [1] if (4 <= dump <= 5) else [0, 1, 2],
                  "nonMatched": nonMatchedQie,
                  "latency": p.get("Latency"),
                  "zs": p.get("ZS"),
                  "skipErrF": [3],
                  }
-        if 6 <= dump:
+        if 7 <= dump:
             kargs["skipErrF"] = []
         if p["IsTTP"]:
             cd = ttpData(p["ttpInput"], p["ttpOutput"], p["ttpAlgoDep"])
@@ -184,8 +184,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
             anyHtrDataPrinted = True
 
         if 5 <= dump:
-            skipZero = dump <= 5
-            kargs = {"skipZero": skipZero,
+            kargs = {"skipZeroTps": dump <= 6,
                      "crate": p["Crate"],
                      "slot": p["Slot"],
                      "top": p["Top"],
@@ -225,7 +224,7 @@ def qieString(qies=[], red=False):
     return out
 
 
-def htrTriggerData(d={}, skipZero=False, crate=None, slot=None, top="", nonMatched=[], zs={}):
+def htrTriggerData(d={}, skipZeroTps=False, crate=None, slot=None, top="", nonMatched=[], zs={}):
     columns = ["SLB-ch", "Peak", "SofI", "TP(hex)  0   1   2   3"]
     if zs:
         columns.append("  ZS?")
@@ -235,7 +234,7 @@ def htrTriggerData(d={}, skipZero=False, crate=None, slot=None, top="", nonMatch
         z = ""
         soi = ""
         tp = ""
-        if skipZero and not any([dct["TP"]]):
+        if skipZeroTps and not any([dct["TP"]]):
             continue
 
         for i in range(len(dct["TP"])):
@@ -264,7 +263,7 @@ def htrTriggerData(d={}, skipZero=False, crate=None, slot=None, top="", nonMatch
     return out
 
 
-def uhtrTriggerData(d={}, skipZero=False, crate=None, slot=None, top="", nonMatched=[]):
+def uhtrTriggerData(d={}, skipZeroTps=False, crate=None, slot=None, top="", nonMatched=[]):
     out = []
     out.append("  ".join([" TPid",
                           "Fl",
@@ -275,7 +274,7 @@ def uhtrTriggerData(d={}, skipZero=False, crate=None, slot=None, top="", nonMatc
                           ])
                )
     for channelId, data in sorted(d.iteritems()):
-        if skipZero and not any(data["TP"]):
+        if skipZeroTps and not any(data["TP"]):
             continue
         soi = ""
         ok = ""
