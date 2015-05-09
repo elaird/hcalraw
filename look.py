@@ -84,7 +84,7 @@ def report(fileNames, iFind):
     if len(fileNames) == 1 and iFind == 1:
         msg = "matching file"
     else:
-        msg = "files"
+        msg = "file(s)"
     print "Found %4d %s in %s/" % (len(fileNames), msg, "/".join(bases))
 
 
