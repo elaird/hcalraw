@@ -383,7 +383,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
     return matched, nonMatched
 
 
-def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False):
+def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQuality=True):
     doDump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
 
     if anyEmap:
@@ -405,8 +405,8 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False):
         if doDump:
             matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1, titlePrefix=titlePrefix)
 
-        tF1 = tpMap(raw1)[0]
-        tF2 = tpMap(raw2)[0]
+        tF1 = tpMap(raw1, warnQuality)[0]
+        tF2 = tpMap(raw2, warnQuality)[0]
 
         tMatched12, tNonMatched12 = adc_vs_adc(tF1, tF2, book=book,
                                                name="tp_vs_tp",
@@ -539,7 +539,7 @@ def dataMap(raw={}, book=None):
     return forward, backward, skipped
 
 
-def tpMap(raw={}):
+def tpMap(raw={}, warn=True):
     forward = {}
     backward = {}
     skipped = []
@@ -552,7 +552,7 @@ def tpMap(raw={}):
         for block in d["htrBlocks"].values():
             for key, triggerData in block["triggerData"].iteritems():
                 coords = (block["Crate"], block["Slot"], block["Top"], key)
-                if sum(triggerData["SOI"]) != 1:
+                if warn and sum(triggerData["SOI"]) != 1:
                     printer.warning("%s has !=1 SOIs: %s" % (coords, triggerData["SOI"]))
 
                 i = None
