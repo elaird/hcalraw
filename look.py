@@ -42,7 +42,7 @@ def find2(run):
         return "%s/%s" % (eosprefix, LS1)
 
 
-def find_gr(run, grdir, hhmmMin=None):
+def find_gr(run, grdir, hhmmMin=None, quiet=False):
     d = "%s/000/%03d/%03d/00000/" % (grdir, run/1000, run % 1000)
     stat = "%s stat %s" % (eos(), d)
     ls = stat.replace(" stat ", " ls -l ")
@@ -67,8 +67,9 @@ def find_gr(run, grdir, hhmmMin=None):
         mmMin = hhmmMin % 100
         hhMin = hhmmMin / 100
         coords = filter(lambda x: hhMin < x[2] or (hhMin == x[2] and mmMin <= x[3]), coords)
-        # for c in coords:
-        #     print c
+        if not quiet:
+            for c in coords:
+                print c
 
     files = [c[-1] for c in coords]
     if files:
@@ -133,7 +134,7 @@ def main(options, args, quiet=False):
         if grDir is None:
             options.file1 = eval("find%d" % iFind)(run)
         else:
-            options.file1 = find_gr(run, grDir, options.hhmm)
+            options.file1 = find_gr(run, grDir, options.hhmm, quiet)
 
         if not options.file1:
             continue
