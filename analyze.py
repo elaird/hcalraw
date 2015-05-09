@@ -185,7 +185,7 @@ def reportProgress(iEvent, iMask):
         return iMask
 
 
-def outerInnerCompare(chain, oEntry, outer, kargs, inner, innerEvent, chainI):
+def outerInnerCompare(chain, oEntry, outer, inner, innerEvent, chainI, kargs):
     kargs["raw1"] = collectedRaw(tree=chain, specs=outer)
 
     if innerEvent:
@@ -213,7 +213,7 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOpti
 
     try:
         def outerInnerCompare2(chain, iEntry):
-            return outerInnerCompare(chain, iEntry, outer, kargs, inner, innerEvent, chainI)
+            return outerInnerCompare(chain, iEntry, outer, inner, innerEvent, chainI, kargs)
 
         chainLoop(chain, outer["nEventsSkip"], outer["nEventsMax"], outerInnerCompare2,
                   progress=outer["progress"], sparseLoop=outer["sparseLoop"])
