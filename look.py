@@ -77,8 +77,7 @@ def find_gr(run, grdir, hhmmMin=None, quiet=False):
         return l
 
 
-def report(file1, iFind):
-    fileNames = file1.split(",")
+def report(fileNames, iFind):
     pieces = [f.split("/") for f in fileNames]
     bases = set(["/".join(piece[:-1]) for piece in pieces])
     assert len(bases) == 1, bases
@@ -139,7 +138,15 @@ def main(options, args, quiet=False):
         if not options.file1:
             continue
 
-        report(options.file1, iFind)
+        fileNames = options.file1.split(",")
+        report(fileNames, iFind)
+
+        n = len(fileNames)
+        if 2 <= n and options.hhmm is None:
+            options.sparseLoop = max(1, options.nEvents / n)
+        else:
+            options.sparseLoop = -1
+
         oneRun.main(options)
         return
 
