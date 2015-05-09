@@ -30,7 +30,7 @@ def eos():
 
 
 def find1(run):
-    for local in ["tmp/USC_%d.root" % run, "data/USC_%d.root" % run]:
+    for local in ["/tmp/USC_%d.root" % run, "data/USC_%d.root" % run]:
         if os.path.exists(local):
             return local
 
@@ -67,8 +67,8 @@ def find_gr(run, grdir, hhmmMin=None):
         mmMin = hhmmMin % 100
         hhMin = hhmmMin / 100
         coords = filter(lambda x: hhMin < x[2] or (hhMin == x[2] and mmMin <= x[3]), coords)
-        for c in coords:
-            print c
+        # for c in coords:
+        #     print c
 
     files = [c[-1] for c in coords]
     if files:
@@ -76,13 +76,16 @@ def find_gr(run, grdir, hhmmMin=None):
         return l
 
 
-def report(file1):
+def report(file1, iFind):
     fileNames = file1.split(",")
     pieces = [f.split("/") for f in fileNames]
     bases = set(["/".join(piece[:-1]) for piece in pieces])
     assert len(bases) == 1, bases
-    msg = "matching file" if len(fileNames) == 1 else "files"
-    print "Found %d %s in %s/" % (len(fileNames), msg, "/".join(bases))
+    if len(fileNames) == 1 and iFind == 1:
+        msg = "matching file"
+    else:
+        msg = "files"
+    print "Found %4d %s in %s/" % (len(fileNames), msg, "/".join(bases))
 
 
 def override(options, quiet, run):
@@ -135,7 +138,7 @@ def main(options, args, quiet=False):
         if not options.file1:
             continue
 
-        report(options.file1)
+        report(options.file1, iFind)
         oneRun.main(options)
         return
 
