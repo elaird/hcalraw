@@ -80,18 +80,19 @@ def chainLoopSparse(chain, nEntries, callback, nPerTree, progress=False):
             if nPerTree <= iTreeEntry:
                 break
 
-            tree.GetEntry(iTreeEntry)
+            tree.GetEntry(iTreeEntry)  # fixme: protect?
             entry = iTreeFirstEntry + iTreeEntry
             nSeen += 1
             # print "nTree %d  iTreeEntry %d   entry %d   nSeen %d" % (nTree, iTreeEntry, entry, nSeen)
-            if nEntries != None and nEntries <= nSeen:
-                return
 
             if callback(chain, entry):
                 return
 
             if progress:
                 iMask = reportProgress(nSeen, iMask)
+
+            if nEntries != None and nEntries <= nSeen:
+                return
 
         # tree.PrintCacheStats()
         iTreeFirstEntry += nTreeEntries
