@@ -790,12 +790,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
 
 
 def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
-            doYx=True, retitle=True, gridX=False, gridY=False, boxes=False):
-
-    n = len(names)
-    if not names:
-        names=["adc_vs_adc", "adc_vs_adc_soi_both", "",
-               "tp_vs_tp", "tp_vs_tp_soi_both", ""]
+            doYx=True, retitle=True, gridX=False, gridY=False, boxes=False, alsoZs=False):
 
     # don't print blank page
     if not any([f.Get(name) for name in names]):
@@ -811,7 +806,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
     keep = plotGlobal(f, pad0, offset=1, names=names, feds1=feds1, feds2=feds2,
                       doYx=doYx, retitle=retitle, gridX=gridX, gridY=gridY, boxes=boxes)
 
-    if n == 0:
+    if alsoZs:
         keep += plotZS(f, pad0, feds2)
 
     canvas.Print(pdf)
@@ -826,7 +821,7 @@ def pageThree(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[]):
     canvas.Print(pdf)
 
 
-def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", onePageOnly=False):
+def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", pages=range(1, 100)):
     r.gROOT.SetBatch(True)
     r.gROOT.SetStyle("Plain")
     r.gErrorIgnoreLevel = r.kWarning
@@ -846,26 +841,29 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         if (not f) or f.IsZombie():
             continue
 
-        pageOne(f, feds1, feds2, canvas, pdf)
+        if 1 in pages:
+            pageOne(f, feds1, feds2, canvas, pdf)
 
-        if onePageOnly:
-            f.Close()
-            continue
+        if feds2 and 2 in pages:
+            pageTwo(f, feds1, feds2, canvas, pdf,
+                    names=["adc_vs_adc", "adc_vs_adc_soi_both", "",
+                           "tp_vs_tp", "tp_vs_tp_soi_both", ""],
+                    alsoZs=True)
 
-        if feds2:
-            pageTwo(f, feds1, feds2, canvas, pdf)
+        if 3 in pages:
+            pageTwo(f, feds1, feds2, canvas, pdf,
+                    names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + \
+                    ["ErrFNZ_vs_slot_crate", "", ""],
+                    doYx=False, retitle=False, boxes=True)
 
-        pageTwo(f, feds1, feds2, canvas, pdf,
-                names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + \
-                      ["ErrFNZ_vs_slot_crate", "", ""],
-                doYx=False, retitle=False, boxes=True)
+        if 4 in pages:
+            names = ["frac0_vs_BcN_%d" % x for x in feds1[:3] + feds2[:3]] + [""] * 6
+            pageTwo(f, feds1, feds2, canvas, pdf,
+                    names=names[:6],
+                    doYx=False, retitle=False, gridX=True)
 
-        names = ["frac0_vs_BcN_%d" % x for x in feds1[:3] + feds2[:3]] + [""] * 6
-        pageTwo(f, feds1, feds2, canvas, pdf,
-                names=names[:6],
-                doYx=False, retitle=False, gridX=True)
-
-        pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_time"])
+        if 5 in pages:
+            pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_time"])
 
         f.Close()
     canvas.Print(pdf + "]")
