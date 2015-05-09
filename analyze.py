@@ -227,7 +227,7 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOpti
 def collectedRaw(tree=None, specs={}):
     raw = {}
     kargs = {}
-    for item in ["patterns", "warn", "dump", "unpack", "nBytesPer", "skipWords64"]:
+    for item in ["patterns", "dump", "unpack", "nBytesPer", "skipWords64"]:
         kargs[item] = specs[item]
 
     for fedId in specs["fedIds"]:
@@ -241,7 +241,9 @@ def collectedRaw(tree=None, specs={}):
         else:
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
 
-        raw[fedId] = unpacked(fedData=rawThisFed, **kargs)
+        raw[fedId] = unpacked(fedData=rawThisFed,
+                              warn=specs["warnUnpack"],
+                              **kargs)
 
         if not raw[fedId]["nBytesSW"]:
             printer.warning("removing FED %d from spec (read zero bytes)." % fedId)

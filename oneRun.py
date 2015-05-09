@@ -8,12 +8,19 @@ from configuration import sw, matching
 from options import opts
 
 
-def subset(options, l, process=False):
+def subset(options, l, process=False, invert=False):
+    assert not (process and invert)
+
     out = {}
     for item in l:
-        out[item] = getattr(options, item)
+        value = getattr(options, item)
         if process:
-            out[item] = sw.fedList(out[item])
+            out[item] = sw.fedList(value)
+        elif invert:
+            # "noFoo": True --> "foo": False
+            out[item[2].lower() + item[3:]] = not value
+        else:
+            out[item] = value
     return out
 
 
@@ -43,7 +50,7 @@ def go(options):
     kargs["compareOptions"] = subset(options, ["anyEmap", "printEmap"])
     kargs["mapOptions"] = subset(options, ["printEventMap", "identityMap"])
     kargs["printOptions"] = subset(options, ["dump", "progress"])
-    kargs["printOptions"]["warn"] = not options.noWarnUnpack
+    kargs["printOptions"].update(subset(options, ["noWarnUnpack", "noWarnQuality"], invert=True))
     kargs["printOptions"]["crateslots"] = sw.fedList(options.crateslots)
 
     for iFile in [1, 2]:
