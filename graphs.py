@@ -819,11 +819,16 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
 
 def pageThree(f=None, feds1=[], feds2=[], canvas=None, pdf="", title="", names=[]):
     pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
+    pad0.Divide(1, len(names))
     pad0.Draw()
 
-    keep = plotList(f, pad0, offset=1, names=names, logY=False, logX=False, logZ=False,
-                    feds1=feds1, feds2=feds2, func=graphLoop)
+    keep = []
+    for iName, name in enumerate(names):
+        keep += plotList(f, pad0, offset=1 + iName, names=[name],
+                         logY=False, logX=False, logZ=False,
+                         feds1=feds1, feds2=feds2, func=graphLoop)
 
+    pad0.cd(0)
     keep.append(stamp(title, size=0.045, x=0.01, y=0.99))
     canvas.Print(pdf)
 
@@ -874,7 +879,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
                     doYx=False, retitle=False, gridX=True)
 
         if 5 in pages:
-            pageThree(f, feds1, feds2, canvas, pdf, title, names=["frac0_vs_time"])
+            pageThree(f, feds1, feds2, canvas, pdf, title, names=["fracEvN_vs_time", "frac0_vs_time"])
 
         f.Close()
     canvas.Print(pdf + "]")
