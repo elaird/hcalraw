@@ -34,7 +34,13 @@ def plot(roots, feds1s, feds2s):
                                feds1s=feds1s,
                                feds2s=feds2s,
                                pdf="output/runs.pdf",
-                               onePageOnly=True,
+                               pages=[1],
+                               )
+    graphs.makeSummaryPdfMulti(inputFiles=roots,
+                               feds1s=feds1s,
+                               feds2s=feds2s,
+                               pdf="output/runs_trends.pdf",
+                               pages=[5],
                                )
 
 
