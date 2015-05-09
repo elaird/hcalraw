@@ -27,7 +27,7 @@ def evnMatchFrac(nMatch, nMisMatch):
 
 def htrSummary(blocks=[], book=None, fedId=None,
                fedEvn=None, fedOrn5=None, fedBcn=None,
-               msg=""):
+               msg="", warn=True):
     nBadHtrs = 0
     caps = {}
     ErrF = {}
@@ -56,6 +56,8 @@ def htrSummary(blocks=[], book=None, fedId=None,
             EvN_match += 1
         else:
             EvN_misMatch += 1
+            if warn:
+                printer.warning("%s: slot %2d%1s has EvN %d" % (msg, block["Slot"], block["Top"], block["EvN"]))
 
         book.fill(block["EvN"] - fedEvn, "EvN_HTRs_%d" % fedId,
                   11, -5.5, 5.5,
@@ -150,7 +152,7 @@ def htrOverviewBits(d={}, book={}, fedId=None):
                           xAxisLabels=letters)
 
 
-def singleFedPlots(fedId=None, d={}, book={}):
+def singleFedPlots(fedId=None, d={}, book={}, warn=True):
     book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 14, -0.5, 13.5,
               title="FED %d;nWord16 skipped during unpacking;Events / bin" % fedId)
 
@@ -183,7 +185,8 @@ def singleFedPlots(fedId=None, d={}, book={}):
                                                      fedEvn=fedEvn,
                                                      fedOrn5=fedOrn & 0x1f,
                                                      fedBcn=fedBcn,
-                                                     msg=msg)
+                                                     msg=msg,
+                                                     warn=warn)
 
     errFSum = 0.0 + sum(ErrF.values())
 
@@ -249,7 +252,7 @@ def nPerChannel(lst=[], iChannel=None):
     return len(filter(lambda x: x[-1] == iChannel, lst))
 
 
-def loop_over_feds(raw, book, adcTag=""):
+def loop_over_feds(raw, book, adcTag="", warn=True):
     okFeds = set()
     adcs = set()
 
@@ -265,7 +268,7 @@ def loop_over_feds(raw, book, adcTag=""):
             printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
             continue
 
-        nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book)
+        nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book, warn=warn)
         adcs = adcs.union(adcs1)
         if nBadHtrs:
             return
@@ -419,13 +422,13 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQual
         printRaw.oneEvent(raw1, nonMatchedQie=nonMatched12, nonMatchedTp=tNonMatched12, slim1=slim1)
         printRaw.oneEvent(raw2, nonMatchedQie=nonMatched21, nonMatchedTp=tNonMatched21)
 
-    okFeds = loop_over_feds(raw1, book, adcTag="feds1")
+    okFeds = loop_over_feds(raw1, book, adcTag="feds1", warn=warnQuality)
 
     noGood = [[], [None]]
     if raw1.keys() in noGood or raw2.keys() in noGood:
         return
 
-    okFeds = okFeds.union(loop_over_feds(raw2, book, adcTag="feds2"))
+    okFeds = okFeds.union(loop_over_feds(raw2, book, adcTag="feds2", warn=warnQuality))
 
     # histogram n matched
     nFib = 228  # = 2 2 3 19;  gt 14 HTRs * 16 fib / HTR

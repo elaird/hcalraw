@@ -10,5 +10,4 @@ bcn vs. fed
 restore cron
 map m&p
 warn about C
-warn about EvN mismatch
 make ticks visible in problem maps
