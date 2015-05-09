@@ -57,7 +57,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
         else:
             EvN_misMatch += 1
             if warn:
-                printer.warning("%s: slot %2d%1s has EvN %d" % (msg, block["Slot"], block["Top"], block["EvN"]))
+                printer.warning("%s / slot %2d%1s has EvN 0x%06x" % (msg, block["Slot"], block["Top"], block["EvN"]))
 
         book.fill(block["EvN"] - fedEvn, "EvN_HTRs_%d" % fedId,
                   11, -5.5, 5.5,
@@ -129,7 +129,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
     return nBadHtrs, ErrF, caps, adcs, evnMatchFrac(EvN_match, EvN_misMatch)
 
 
-def htrOverviewBits(d={}, book={}, fedId=None):
+def htrOverviewBits(d={}, book={}, fedId=None, msg="", warn=True):
     letters = ["L", "M", "S", "E", "!P", "!V", "!C"]
     abbr = "HTR" if "HTR0" in d else "uHTR"
     for iHtr in range(15):
@@ -150,6 +150,8 @@ def htrOverviewBits(d={}, book={}, fedId=None):
                 book.fill(i, "htrOverviewBits_%d" % fedId, 7, -0.5, 6.5,
                           title="FED %d;;HTRs / bin" % fedId,
                           xAxisLabels=letters)
+                if warn and d["utca"] and l[-1] == "C":
+                    printer.warning("%s / input %2d has bit %s set." % (msg, iHtr, l))
 
 
 def singleFedPlots(fedId=None, d={}, book={}, warn=True):
@@ -171,13 +173,13 @@ def singleFedPlots(fedId=None, d={}, book={}, warn=True):
     fedOrn = h.get("OrN")
     fedBcn = h.get("BcN")
 
-    if fedEvn is not None:
-        msg += " event %d" % fedEvn
+    if fedEvn is None:
+        printer.error("FED %d lacks EvN.  Keys: %s" % str(h.keys()))
+        msg = ""
     else:
-        msg2 = " header lacks EvN.  Keys: %s" % str(h.keys())
-        printer.error(msg + msg2)
+        msg = utils.coords(fedId, fedEvn, fedOrn, fedBcn)
 
-    htrOverviewBits(h, book, fedId)
+    htrOverviewBits(h, book, fedId, msg=msg, warn=warn)
 
     nBadHtrs, ErrF, caps, adcs, fracEvN = htrSummary(blocks=d["htrBlocks"].values(),
                                                      book=book,

@@ -9,5 +9,4 @@ use bcn in event maps
 bcn vs. fed
 restore cron
 map m&p
-warn about C
 make ticks visible in problem maps
