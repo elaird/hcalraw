@@ -605,9 +605,6 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
     latex.SetTextAngle(90)
     latex.SetTextSize(0.17)
     latex.SetTextAlign(33)
-    title = title.replace("output/", "").replace(".root:/", "")
-    if "_" not in title:
-        title = "Run %s" % title
     keep.append(latex.DrawLatex(0.01, 0.98, "#color[46]{%s}" % title))
 
     # padg.Print("output/%s_l1a.pdf" % title.replace("Run ", ""))
@@ -695,19 +692,23 @@ def plotZS(f, pad0, feds2):
     return [ha0, ha1, leg, ht1]
 
 
-def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
+def suffix(feds1, feds2):
+    out = "_%d" % feds1[0]
+    if feds2:
+        out += "_%d" % feds2[0]
+    return out
+
+
+def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
     pad20 = r.TPad("pad20", "pad20", 0.00, 0.00, 1.00, 1.00)
     pad20.Divide(5, 4, 0.001, 0.001)
     pad20.Draw()
 
     keep = []
 
-    title = f.GetPath()
-    suffix = "_%d" % feds1[0]
-    if feds2:
-        suffix += "_%d" % feds2[0]
+    sfx = suffix(feds1, feds2)
 
-    cats = f.Get("category_vs_time" + suffix)
+    cats = f.Get("category_vs_time" + sfx)
     if not cats:
         return
     if not cats.GetN():
@@ -720,7 +721,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
     else:
         ratemax = 5.0e7
 
-        evn_graph = f.Get("evn_vs_time" + suffix)
+        evn_graph = f.Get("evn_vs_time" + sfx)
         retitle(evn_graph)
 
         if "/239/895" in evn_graph.GetTitle():
@@ -734,8 +735,8 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
 
         keep += draw_graph(graph=evn_graph,
                            title=title, ratemax=ratemax,
-                           graph2=f.Get("bcn_delta_vs_time" + suffix),
-                           graph3=resyncs(f.Get("incr_evn_vs_time" + suffix), ratemax),
+                           graph2=f.Get("bcn_delta_vs_time" + sfx),
+                           graph3=resyncs(f.Get("incr_evn_vs_time" + sfx), ratemax),
                            graph4=graph4,
                            )
 
@@ -841,8 +842,12 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         if (not f) or f.IsZombie():
             continue
 
+        title = f.GetPath().replace("output/", "").replace(".root:/", "")
+        if "_" not in title:
+            title = "Run %s" % title
+
         if 1 in pages:
-            pageOne(f, feds1, feds2, canvas, pdf)
+            pageOne(f, feds1, feds2, canvas, pdf, title)
 
         if feds2 and 2 in pages:
             pageTwo(f, feds1, feds2, canvas, pdf,
