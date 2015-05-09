@@ -708,6 +708,8 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf=""):
         suffix += "_%d" % feds2[0]
 
     cats = f.Get("category_vs_time" + suffix)
+    if not cats:
+        return
     if not cats.GetN():
         return
 
