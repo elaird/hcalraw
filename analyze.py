@@ -204,12 +204,12 @@ def outerInnerCompare(chain, oEntry, outer, inner, innerEvent, chainI, kargs):
         compare.compare(**kargs)
 
 
-def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, compareOptions={}):
+def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={}):
     if outer["progress"]:
         print "Looping:"
 
     kargs = {"book": autoBook.autoBook("book")}
-    kargs.update(compareOptions)
+    kargs.update(options)
 
     try:
         def outerInnerCompare2(chain, iEntry):
@@ -461,7 +461,7 @@ def eventToEvent(mapF={}, mapB={}):
 
 
 def go(outer={}, inner={}, outputFile="",
-       mapOptions={}, compareOptions={},
+       mapOptions={}, loopOptions={},
        printEventSummary=None):
 
     innerEvent = {}
@@ -504,7 +504,7 @@ def go(outer={}, inner={}, outputFile="",
     book = loop(chain=chain, chainI=chainI,
                 outer=outer, inner=inner,
                 innerEvent=innerEvent,
-                compareOptions=compareOptions)
+                options=loopOptions)
 
     utils.delete(chain)
     if chainI:
@@ -674,10 +674,14 @@ def oneRun(files1=[],
                       })
         inner = spec2
 
+
+    loopOptions = {"warnQuality": printOptions["warnQuality"]}
+    loopOptions.update(compareOptions)
+
     go(outer=spec1,
        inner=inner,
        outputFile=outputFile,
        mapOptions=mapOptions,
-       compareOptions=compareOptions,
+       loopOptions=loopOptions,
        printEventSummary=(not patterns) and feds2 and (files1 != files2) and 0 <= common["dump"],
        )
