@@ -277,6 +277,8 @@ def graphLoop(f, lst, func):
         if not h0:
             h0 = r.TH2D("h0_%s" % g.GetName(), ";%s;%s" % (xTitle, yTitle), 1, min(mins), max(maxs), 1, -0.1, 1.1)
             h0.SetStats(False)
+            magnify(h0, factor=1.8)
+            h0.GetYaxis().SetTitleOffset(0.6)
             h0.Draw()
             out.append(h0)
 
@@ -829,13 +831,13 @@ def pageThree(f=None, feds1=[], feds2=[], canvas=None, pdf="", title="", names=[
                          feds1=feds1, feds2=feds2, func=graphLoop)
 
     pad0.cd(0)
-    keep.append(stamp(title, size=0.045, x=0.01, y=0.99))
+    if title:
+        keep.append(stamp(title, size=0.045, x=0.01, y=0.99))
     canvas.Print(pdf)
 
 
 def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", pages=range(1, 100)):
     r.gROOT.SetBatch(True)
-    r.gROOT.SetStyle("Plain")
     r.gErrorIgnoreLevel = r.kWarning
 
     r.gStyle.SetTitleBorderSize(0)
@@ -879,7 +881,10 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
                     doYx=False, retitle=False, gridX=True)
 
         if 5 in pages:
-            pageThree(f, feds1, feds2, canvas, pdf, title, names=["fracEvN_vs_time", "frac0_vs_time"])
+            pageThree(f, feds1, feds2, canvas, pdf,
+                      title=title if 1 not in pages else "",
+                      names=["fracEvN_vs_time", "frac0_vs_time"],
+            )
 
         f.Close()
     canvas.Print(pdf + "]")
