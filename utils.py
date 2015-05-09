@@ -9,6 +9,10 @@ def cmssw():
     return "CMSSW_VERSION" in os.environ
 
 
+def coords(fedId, evn, orn, bcn):
+    return "FED %4d / EvN 0x%06x (OrN 0x%08x BcN %04d)" % (fedId, evn, orn, bcn)
+
+
 def minutes(orn, bcn):
     orn += float(bcn) / hw.nBx
     orbPerSec = hw.f_lhc / hw.nBx
