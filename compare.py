@@ -17,12 +17,22 @@ def flavor(book, d, fedId):
               xAxisLabels=["#leq 3", "uTP", "Q 5", "M&P", "Q 6", "7"])
 
 
+def evnMatchFrac(nMatch, nMisMatch):
+    total = nMatch + nMisMatch
+    if total:
+        return (0.0 + nMatch) / total
+    else:
+        return -999  # dummy
+
+
 def htrSummary(blocks=[], book=None, fedId=None,
                fedEvn=None, fedOrn5=None, fedBcn=None,
                msg=""):
     nBadHtrs = 0
     caps = {}
     ErrF = {}
+    EvN_match = 0
+    EvN_misMatch = 0
     adcs = set()
     for i in range(4):
         caps[i] = 0
@@ -41,6 +51,11 @@ def htrSummary(blocks=[], book=None, fedId=None,
             printer.warning("%s block has no channelData" % msg)
             nBadHtrs += 1
             continue
+
+        if block["EvN"] == fedEvn:
+            EvN_match += 1
+        else:
+            EvN_misMatch += 1
 
         book.fill(block["EvN"] - fedEvn, "EvN_HTRs_%d" % fedId,
                   11, -5.5, 5.5,
@@ -109,7 +124,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                 book.fill(adc, "channel_peak_adc_mp%d_%d" % (mp, fedId), 14, -0.5, 13.5,
                           title="FED %d;Peak ADC (ErrF == 0);Channels / bin" % fedId)
 
-    return nBadHtrs, ErrF, caps, adcs
+    return nBadHtrs, ErrF, caps, adcs, evnMatchFrac(EvN_match, EvN_misMatch)
 
 
 def htrOverviewBits(d={}, book={}, fedId=None):
@@ -162,13 +177,13 @@ def singleFedPlots(fedId=None, d={}, book={}):
 
     htrOverviewBits(h, book, fedId)
 
-    nBadHtrs, ErrF, caps, adcs = htrSummary(blocks=d["htrBlocks"].values(),
-                                            book=book,
-                                            fedId=fedId,
-                                            fedEvn=fedEvn,
-                                            fedOrn5=fedOrn & 0x1f,
-                                            fedBcn=fedBcn,
-                                            msg=msg)
+    nBadHtrs, ErrF, caps, adcs, fracEvN = htrSummary(blocks=d["htrBlocks"].values(),
+                                                     book=book,
+                                                     fedId=fedId,
+                                                     fedEvn=fedEvn,
+                                                     fedOrn5=fedOrn & 0x1f,
+                                                     fedBcn=fedBcn,
+                                                     msg=msg)
 
     errFSum = 0.0 + sum(ErrF.values())
 
@@ -185,6 +200,10 @@ def singleFedPlots(fedId=None, d={}, book={}):
     book.fillGraph((fedTime, frac0), "frac0_vs_time_%d" % fedId,
                    title=("FED %d" % fedId) +
                    ";time (minutes);frac. chan. with ErrF == 0")
+
+    book.fillGraph((fedTime, fracEvN), "fracEvN_vs_time_%d" % fedId,
+                   title=("FED %d" % fedId) +
+                   ";time (minutes);frac. HTRs with EvN == FED's")
 
     book.fillGraph((fedTime, t["nWord64"] * 8.0 / 1024), "kB_vs_time_%d" % fedId,
                    title=("FED %d" % fedId) +
