@@ -86,6 +86,11 @@ def opts(alsoArgs=False):
                         default=False,
                         action="store_true",
                         help="suppress warnings during unpacking")
+    printing.add_option("--no-warn-quality",
+                        dest="noWarnQuality",
+                        default=False,
+                        action="store_true",
+                        help="suppress warnings about problems with data quality")
     printing.add_option("--crateslots",
                         dest="crateslots",
                         default=None,
