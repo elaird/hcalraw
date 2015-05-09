@@ -28,7 +28,7 @@ def check_and_adjust(options):
         if options.nEventsSkip:
             sys.exit("--sparse-loop does not work with --nevents-skip")
     if options.feds2 and (not options.file2) and (not options.noLoop):
-        print "INFO: using --file1 also for --file2; also using identity map"
+        # print "INFO: using --file1 also for --file2; also using identity map"
         options.file2 = options.file1
         options.identityMap = True
 
