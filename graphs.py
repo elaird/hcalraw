@@ -461,6 +461,15 @@ def anyVisible(graph=None, maximum=None):
     return False
 
 
+def stamp(title, size=0.17, x=0.01, y=0.98):
+    latex = r.TLatex()
+    latex.SetNDC()
+    latex.SetTextAngle(90)
+    latex.SetTextSize(size)
+    latex.SetTextAlign(33)
+    return latex.DrawLatex(x, y, "#color[46]{%s}" % title)
+
+
 def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, graph4=None):
     if not graph or not graph.GetN():
         return
@@ -600,12 +609,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
         null_coarse.GetYaxis().SetLabelSize(0.1)
 
     padg.cd(0)
-    latex = r.TLatex()
-    latex.SetNDC()
-    latex.SetTextAngle(90)
-    latex.SetTextSize(0.17)
-    latex.SetTextAlign(33)
-    keep.append(latex.DrawLatex(0.01, 0.98, "#color[46]{%s}" % title))
+    keep.append(stamp(title))
 
     # padg.Print("output/%s_l1a.pdf" % title.replace("Run ", ""))
     return keep
@@ -813,12 +817,14 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
     canvas.Print(pdf)
 
 
-def pageThree(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[]):
+def pageThree(f=None, feds1=[], feds2=[], canvas=None, pdf="", title="", names=[]):
     pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
     pad0.Draw()
 
     keep = plotList(f, pad0, offset=1, names=names, logY=False, logX=False, logZ=False,
                     feds1=feds1, feds2=feds2, func=graphLoop)
+
+    keep.append(stamp(title, size=0.045, x=0.01, y=0.99))
     canvas.Print(pdf)
 
 
@@ -868,7 +874,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
                     doYx=False, retitle=False, gridX=True)
 
         if 5 in pages:
-            pageThree(f, feds1, feds2, canvas, pdf, names=["frac0_vs_time"])
+            pageThree(f, feds1, feds2, canvas, pdf, title, names=["frac0_vs_time"])
 
         f.Close()
     canvas.Print(pdf + "]")
