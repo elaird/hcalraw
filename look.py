@@ -147,6 +147,7 @@ def main(options, args, quiet=False):
         else:
             options.sparseLoop = -1
 
+        options.file2 = ""  # clear from previous iterations
         if oneRun.main(options):
             continue
         else:
