@@ -19,7 +19,6 @@ def main(options, runs=[]):
 
         options.file1 = ""
         options.file2 = ""
-        options.noPlot = True
 
         if not look.main(options, [run], quiet=True):
             roots.append(options.outputFile)
