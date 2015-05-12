@@ -549,6 +549,8 @@ def go(outer={}, inner={}, outputFile="",
             s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
         printer.msg(s)
 
+    return not len(oMapF)
+
 
 def printChannelSummary(outputFile):
     f = r.TFile(outputFile)
@@ -679,10 +681,10 @@ def oneRun(files1=[],
     loopOptions = {"warnQuality": printOptions["warnQuality"]}
     loopOptions.update(compareOptions)
 
-    go(outer=spec1,
-       inner=inner,
-       outputFile=outputFile,
-       mapOptions=mapOptions,
-       loopOptions=loopOptions,
-       printEventSummary=(not patterns) and feds2 and (files1 != files2) and 0 <= common["dump"],
-       )
+    return go(outer=spec1,
+              inner=inner,
+              outputFile=outputFile,
+              mapOptions=mapOptions,
+              loopOptions=loopOptions,
+              printEventSummary=(not patterns) and feds2 and (files1 != files2) and 0 <= common["dump"],
+              )
