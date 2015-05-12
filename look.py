@@ -147,8 +147,10 @@ def main(options, args, quiet=False):
         else:
             options.sparseLoop = -1
 
-        oneRun.main(options)
-        return
+        if oneRun.main(options):
+            continue
+        else:
+            return
 
     printer.warning("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
     return 1

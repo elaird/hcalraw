@@ -58,7 +58,7 @@ def go(options):
         if value:
             kargs["files%d" % iFile] = value.split(",")
 
-    analyze.oneRun(**kargs)
+    return analyze.oneRun(**kargs)
 
 
 def main(options):
@@ -76,13 +76,15 @@ def main(options):
             import cProfile
             cProfile.runctx("go(options)", globals(), locals(), sort="time")
         else:
-            go(options)
+            goCode = go(options)
 
     if options.feds2 and 0 <= options.dump:
         analyze.printChannelSummary(options.outputFile)
 
     if not options.noPlot:
         graphs.main(options)
+
+    return goCode
 
 
 if __name__ == "__main__":
