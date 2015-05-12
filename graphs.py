@@ -231,7 +231,6 @@ def histoLoop(f, lst, func):
             if not ch:
                 ch = "TP  "
             t = "%s  %d#pm%d" % (ch, h.GetMean(), h.GetRMS())
-            h.GetXaxis().SetTitle("no. matched")
         else:
             t = h.GetTitle().replace("FED ", "")
 
@@ -749,8 +748,8 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
     # single FED
     keep += plotList(f, pad20, offset=5,
                      names=["BcN",
-                            "nBytesSW", "nWord16Skipped", "ChannelFlavor", "nQieSamples", "nTpSamples",
-                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "htrOverviewBits", "ErrF0",
+                            "nBytesSW", "ChannelFlavor", "nQieSamples", "nTpSamples", "htrOverviewBits",
+                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "ErrF0",
                             # "TTS", "PopCapFrac",
                             ], feds1=feds1, feds2=feds2)
 
@@ -771,6 +770,16 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
                           lambda x: "delta%s_%s_%s" % (x, fed1, fed2),
                           )
 
+    # TS
+    pad20.cd(15)
+    adjustPad(logY=True)
+    keep += histoLoop(f,
+                      [("nTS_for_matching_ADC", r.kBlue, 1),
+                       ("nTS_for_matching_TP", r.kCyan, 2),
+                       ],
+                      lambda x: x,
+                      )
+
     # fibers
     pad20.cd(19)
     adjustPad(logY=True)
@@ -783,12 +792,13 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
                       lambda x: x,
                       )
 
-    # TS
     pad20.cd(20)
     adjustPad(logY=True)
     keep += histoLoop(f,
-                      [("nTS_for_matching_ADC", r.kBlue, 1),
-                       ("nTS_for_matching_TP", r.kCyan, 2),
+                      [("MisMatchedFibersCh0", r.kBlue, 1),
+                       ("MisMatchedFibersCh1", r.kCyan, 2),
+                       ("MisMatchedFibersCh2", r.kBlack, 3),
+                       ("MisMatchedTriggerTowers", r.kGreen, 4),
                        ],
                       lambda x: x,
                       )
