@@ -44,21 +44,21 @@ def labelYAxis(h=None, labels={}):
 
 
 def xMin_xMax(graph=None):
-    """assumes that graph is sorted"""
     N = graph.GetN()
     X = graph.GetX()
-    if 1 <= N:
-        xMin = X[0]
-        xMax = X[N-1]
-        delta = xMax - xMin
-        if delta:
-            tenPercent = 0.1 * delta
-        else:
-            tenPercent = 0.1 / 60.0  # 1/10 second
-        return (xMin - tenPercent, xMax + tenPercent)
-    else:
+    if not N:
         printer.error("graph contains zero points.")
         return 0.0, 0.0
+
+    x = [X[i] for i in range(N)]
+    xMin = min(x)
+    xMax = max(x)
+    delta = xMax - xMin
+    if delta:
+        tenPercent = 0.1 * delta
+    else:
+        tenPercent = 0.1 / 60.0  # 1/10 second
+    return (xMin - tenPercent, xMax + tenPercent)
 
 
 def yCounts(graph=None):
