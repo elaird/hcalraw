@@ -318,11 +318,11 @@ def tsLoop(lst1, lst2, book=None, name=None,
         if n2 is not None and (j2 < 0 or n2 <= j2):
             continue
 
-        nTs += 1
         if qies2 is None:
             qie2 = xMin / 2  # avoid any match
         else:
             qie2 = qies2[j2]
+            nTs += 1
 
         if qie1 == qie2:
             nTsMatched += 1
@@ -347,7 +347,7 @@ def tsLoop(lst1, lst2, book=None, name=None,
 def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
                titlePrefix="", name="adc_vs_adc", xMin=-10.5, xMax=127.5):
     matched = []
-    nonMatched = []
+    misMatched = []
 
     nBins = int(xMax - xMin)
     titlea = "%s;Samples / bin" % titlePrefix
@@ -367,15 +367,15 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
         if mapF2 and book is not None:
             if name.startswith("adc"):
                 book.fill(nTs, "nTS_for_matching_ADC", 14, -0.5, 13.5,
-                          title="ADC;no. TS used for matching;Events / bin")
+                          title="ADC;number of TS used for matching;Channels / bin")
             else:
                 book.fill(nTs, "nTS_for_matching_TP", 14, -0.5, 13.5,
-                          title="TP;no. TS used for matching;Events / bin")
+                          title="TP;number of TS used for matching;Channels / bin")
 
         if nTsMatched == nTs:
             matched.append(coords1)
         else:
-            nonMatched.append(coords1)
+            misMatched.append(coords1)
             if loud and coords2 in mapF2:
                 samples1 = tuple(lst1[3:])
                 samples2 = tuple(lst2[3:])
@@ -385,7 +385,41 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
                 c2 = str(coords2)
                 print "%s  |  %s  :  %s  |  %s" % (c1, c2, q1, q2)
 
-    return matched, nonMatched
+    return matched, misMatched
+
+
+def histogram_nMatched(book, matched=None, misMatched=None, nonMatched=None, tMatched=None, tMisMatched=None):
+    # histogram n matched
+    nFib = 228  # = 2 2 3 19;  gt 14 HTRs * 16 fib / HTR
+    bins = (nFib, -0.5, nFib - 0.5)
+
+    nFib2 = 18
+    bins2 = (nFib2, -0.5, nFib2 - 0.5)
+
+    for iChannel in range(3):
+        title = "Ch%d;number matched;Events / bin" % iChannel
+        if matched is not None:
+            book.fill(nPerChannel(matched, iChannel),
+                      "MatchedFibersCh%d" % iChannel,
+                      *bins, title=title)
+
+        if misMatched is not None:
+            book.fill(nPerChannel(misMatched, iChannel),
+                      "MisMatchedFibersCh%d" % iChannel,
+                      *bins2, title=title.replace("matched", "mis-matched"))
+
+        if nonMatched is not None:
+            book.fill(nPerChannel(nonMatched, iChannel),
+                      "NonMatchedFibersCh%d" % iChannel,
+                      *bins2, title=title.replace("matched", "non-matched"))
+
+    if tMatched is not None:
+        book.fill(len(tMatched), "MatchedTriggerTowers", *bins,
+                  title="TPs;number matched;Events / bin")
+
+    if tMisMatched is not None:
+        book.fill(len(tMisMatched), "MisMatchedTriggerTowers", *bins,
+                  title="TPs;number mis-matched;Events / bin")
 
 
 def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQuality=True):
@@ -396,33 +430,37 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQual
         mapF2, mapB2, _ = dataMap(raw2, book)
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
-        tMatched12 = tNonMatched12 = []
-        tMatched21 = tNonMatched21 = []
-
         if printEmap:
            reportMatched(matched12)
            reportFailed(nonMatched12)
+        histogram_nMatched(book, matched=matched12.keys(), nonMatched=nonMatched12)
     else:
         mapF1, _, _ = dataMap(raw1, book)
         mapF2, _, _ = dataMap(raw2, book)
         titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF()])
-        matched12, nonMatched12 = adc_vs_adc(mapF1, mapF2, book=book, titlePrefix=titlePrefix)
+        matched12, misMatched12 = adc_vs_adc(mapF1, mapF2, book=book, titlePrefix=titlePrefix)
         if doDump:
-            matched21, nonMatched21 = adc_vs_adc(mapF2, mapF1, titlePrefix=titlePrefix)
+            matched21, misMatched21 = adc_vs_adc(mapF2, mapF1, titlePrefix=titlePrefix)
 
         tF1 = tpMap(raw1, warnQuality)[0]
         tF2 = tpMap(raw2, warnQuality)[0]
 
-        tMatched12, tNonMatched12 = adc_vs_adc(tF1, tF2, book=book,
+        tMatched12, tMisMatched12 = adc_vs_adc(tF1, tF2, book=book,
                                                name="tp_vs_tp",
                                                transf=hw.transformed_tp,
                                                xMin=-20.5, xMax=255.5)
-        tMatched21 = tNonMatched21 = []  # tp_vs_tp(tF2, tF1, book)  # FIXME
+        tMatched21 = tMisMatched21 = []  # tp_vs_tp(tF2, tF1, book)  # FIXME
+
+        histogram_nMatched(book,
+                           matched=matched12, misMatched=misMatched12,
+                           tMatched=tMatched12,
+                           tMisMatched=tMisMatched12)
+
 
     if doDump:
         slim1 = (raw1[None]["dump"] == 1) and (len(raw1) == 2) and not raw2
-        printRaw.oneEvent(raw1, nonMatchedQie=nonMatched12, nonMatchedTp=tNonMatched12, slim1=slim1)
-        printRaw.oneEvent(raw2, nonMatchedQie=nonMatched21, nonMatchedTp=tNonMatched21)
+        printRaw.oneEvent(raw1, nonMatchedQie=misMatched12, nonMatchedTp=tMisMatched12, slim1=slim1)
+        printRaw.oneEvent(raw2, nonMatchedQie=misMatched21, nonMatchedTp=tMisMatched21)
 
     okFeds = loop_over_feds(raw1, book, adcTag="feds1", warn=warnQuality)
 
@@ -431,21 +469,6 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQual
         return
 
     okFeds = okFeds.union(loop_over_feds(raw2, book, adcTag="feds2", warn=warnQuality))
-
-    # histogram n matched
-    nFib = 228  # = 2 2 3 19;  gt 14 HTRs * 16 fib / HTR
-    bins = (nFib, -0.5, nFib - 0.5)
-    for iChannel in range(3):
-        title = ";no. matched fibers (ch%d);Events / bin" % iChannel
-        book.fill(nPerChannel(matched12.keys() if anyEmap else matched12, iChannel),
-                  "MatchedFibersCh%d" % iChannel,
-                  *bins, title=title)
-        book.fill(nPerChannel(nonMatched12, iChannel),
-                  "NonMatchedFibersCh%d" % iChannel,
-                  *bins, title=title.replace("matched", "non-matched"))
-
-    book.fill(len(tMatched12), "MatchedTriggerTowers", *bins,
-              title=";no. matched TPs;Events / bin")
 
     # histogram some deltas
     fed1 = filter(lambda x: x is not None, sorted(raw1.keys()))[0]
