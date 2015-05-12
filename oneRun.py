@@ -70,11 +70,14 @@ def main(options):
     if options.noColor:
         printer.__color = False
 
-    if not options.noLoop:
+    if options.noLoop:
+        goCode = 0
+    else:
         analyze.setup()
         if options.profile:
             import cProfile
             cProfile.runctx("go(options)", globals(), locals(), sort="time")
+            goCode = 0  # FIXME
         else:
             goCode = go(options)
 
