@@ -881,7 +881,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         if 3 in pages:
             pageTwo(f, feds1, feds2, canvas, pdf,
                     names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + \
-                    ["ErrFNZ_vs_slot_crate", "", ""],
+                    ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", ""],
                     doYx=False, retitle=False, boxes=True)
 
         if 4 in pages:

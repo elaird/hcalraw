@@ -27,7 +27,7 @@ def evnMatchFrac(nMatch, nMisMatch):
 
 def htrSummary(blocks=[], book=None, fedId=None,
                fedEvn=None, fedOrn5=None, fedBcn=None,
-               msg="", warn=True):
+               msg="", warn=True, mismatches=[]):
     nBadHtrs = 0
     caps = {}
     ErrF = {}
@@ -117,6 +117,13 @@ def htrSummary(blocks=[], book=None, fedId=None,
                           yAxisLabels=yAxisLabels)
                 continue
 
+            coords = (block["Crate"], block["Slot"], block["Top"], channelData["Fiber"], channelData["FibCh"])
+            if coords in mismatches:
+                book.fill((block["Slot"], crate2bin.get(block["Crate"], 7)),
+                          "ADC_mismatch_vs_slot_crate", *misMatchMapBins,
+                          title="ADC mismatch;slot;crate;Channels / bin",
+                          yAxisLabels=yAxisLabels)
+
             caps[channelData["CapId0"]] += 1
 
             if channelData["QIE"]:
@@ -154,7 +161,7 @@ def htrOverviewBits(d={}, book={}, fedId=None, msg="", warn=True):
                     printer.warning("%s / input %2d has bit %s set." % (msg, iHtr, l))
 
 
-def singleFedPlots(fedId=None, d={}, book={}, warn=True):
+def singleFedPlots(fedId=None, d={}, book={}, warn=True, mismatches=[]):
     book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 14, -0.5, 13.5,
               title="FED %d;nWord16 skipped during unpacking;Events / bin" % fedId)
 
@@ -188,7 +195,8 @@ def singleFedPlots(fedId=None, d={}, book={}, warn=True):
                                                      fedOrn5=fedOrn & 0x1f,
                                                      fedBcn=fedBcn,
                                                      msg=msg,
-                                                     warn=warn)
+                                                     warn=warn,
+                                                     mismatches=mismatches)
 
     errFSum = 0.0 + sum(ErrF.values())
 
@@ -254,7 +262,7 @@ def nPerChannel(lst=[], iChannel=None):
     return len(filter(lambda x: x[-1] == iChannel, lst))
 
 
-def loop_over_feds(raw, book, adcTag="", warn=True):
+def loop_over_feds(raw, book, adcTag="", warn=True, mismatches=[]):
     okFeds = set()
     adcs = set()
 
@@ -270,7 +278,7 @@ def loop_over_feds(raw, book, adcTag="", warn=True):
             printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
             continue
 
-        nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book, warn=warn)
+        nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book, warn=warn, mismatches=mismatches)
         adcs = adcs.union(adcs1)
         if nBadHtrs:
             return
@@ -430,6 +438,7 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQual
         mapF2, mapB2, _ = dataMap(raw2, book)
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
+        misMatched12 = []  # passed to loop_over_feds
         if printEmap:
            reportMatched(matched12)
            reportFailed(nonMatched12)
@@ -462,7 +471,7 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQual
         printRaw.oneEvent(raw1, nonMatchedQie=misMatched12, nonMatchedTp=tMisMatched12, slim1=slim1)
         printRaw.oneEvent(raw2, nonMatchedQie=misMatched21, nonMatchedTp=tMisMatched21)
 
-    okFeds = loop_over_feds(raw1, book, adcTag="feds1", warn=warnQuality)
+    okFeds = loop_over_feds(raw1, book, adcTag="feds1", warn=warnQuality, mismatches=misMatched12)
 
     noGood = [[], [None]]
     if raw1.keys() in noGood or raw2.keys() in noGood:
