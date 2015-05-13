@@ -806,7 +806,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
     canvas.Print(pdf)
 
 
-def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
+def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
             doYx=True, retitle=True, gridX=False, gridY=False, boxes=False, alsoZs=False):
 
     # don't print blank page
@@ -825,6 +825,10 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[],
 
     if alsoZs:
         keep += plotZS(f, pad0, feds2)
+
+    pad0.cd(0)
+    if title:
+        keep.append(stamp(title, size=0.045, x=0.01, y=0.99))
 
     canvas.Print(pdf)
 
@@ -882,7 +886,9 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             pageTwo(f, feds1, feds2, canvas, pdf,
                     names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + \
                     ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", ""],
-                    doYx=False, retitle=False, boxes=True)
+                    doYx=False, retitle=False, boxes=True,
+                    title=title if 1 not in pages else "",
+                    )
 
         if 4 in pages:
             names = ["frac0_vs_BcN_%d" % x for x in feds1[:3] + feds2[:3]] + [""] * 6
