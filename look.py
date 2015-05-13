@@ -81,11 +81,10 @@ def report(fileNames, iFind):
     pieces = [f.split("/") for f in fileNames]
     bases = set(["/".join(piece[:-1]) for piece in pieces])
     assert len(bases) == 1, bases
-    if len(fileNames) == 1 and iFind == 1:
-        msg = "matching file"
+    if len(fileNames) == 1 and iFind <= 2:
+        print "Found matching file: %s" % fileNames[0]
     else:
-        msg = "file(s)"
-    print "Found %4d %s in %s/" % (len(fileNames), msg, "/".join(bases))
+        print "Found %4d file(s) in %s/" % (len(fileNames), "/".join(bases))
 
 
 def override(options, quiet, run):
