@@ -302,11 +302,12 @@ def drawCrates():
     b.SetFillStyle(0)
     b.SetLineColor(r.kBlack)
     b.SetLineStyle(3)
-    return [b.DrawBox( 0.5, 0.5, 12.5, 3.5),
-            b.DrawBox( 1.5, 3.5,  7.5, 6.5),
-            b.DrawBox( 7.5, 3.5,  8.5, 6.5),
-            b.DrawBox(12.5, 3.5, 18.5, 6.5),
-            b.DrawBox(20.5, 3.5, 21.5, 6.5),
+    y = 4.5
+    return [b.DrawBox( 0.5, 0.5, 12.5,   y),  # uTCA
+            b.DrawBox( 1.5,   y,  7.5, 6.5),
+            b.DrawBox( 7.5,   y,  8.5, 6.5),
+            b.DrawBox(12.5,   y, 18.5, 6.5),
+            b.DrawBox(20.5,   y, 21.5, 6.5),
             ]
 
 
