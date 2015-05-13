@@ -38,14 +38,20 @@ def plot(roots, feds1s, feds2s):
     graphs.makeSummaryPdfMulti(inputFiles=roots,
                                feds1s=feds1s,
                                feds2s=feds2s,
-                               pdf="output/runs_maps.pdf",
+                               pdf="output/runs_maps_counts.pdf",
                                pages=[3],
                                )
     graphs.makeSummaryPdfMulti(inputFiles=roots,
                                feds1s=feds1s,
                                feds2s=feds2s,
+                               pdf="output/runs_maps_rates.pdf",
+                               pages=[4],
+                               )
+    graphs.makeSummaryPdfMulti(inputFiles=roots,
+                               feds1s=feds1s,
+                               feds2s=feds2s,
                                pdf="output/runs_trends.pdf",
-                               pages=[5],
+                               pages=[6],
                                )
 
 
