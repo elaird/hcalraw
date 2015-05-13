@@ -311,10 +311,25 @@ def drawCrates():
             ]
 
 
+def divided(numer, denom):
+    for iBinX in range(2 + numer.GetNbinsX()):
+        for iBinY in range(2 + numer.GetNbinsY()):
+            a = numer.GetBinContent(iBinX, iBinY)
+            b = denom.GetBinContent(iBinX, iBinY)
+            if b == 0.0:
+                numer.SetBinContent(iBinX, iBinY, -1.0)
+            else:
+                numer.SetBinContent(iBinX, iBinY, a / b)
+    return numer
+
+
 def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
                gopts="colz", feds1=[], feds2=[], doYx=True, retitle=True,
-               gridX=False, gridY=False, boxes=False):
+               gridX=False, gridY=False, boxes=False, denom=None):
     keep = []
+    if denom:
+        denom = f.Get(denom)
+        logZ = False
 
     for iHisto, name in enumerate(names):
         if not name:
@@ -327,13 +342,25 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
             continue
 
         shiftFlows(h)
-
+        zTitle = "Samples / bin"
         if name.startswith("frac0_vs_BcN"):
             h.RebinX(36)
+        elif denom:
+            shiftFlows(denom)
+            h = divided(h, denom)
+            zTitle = "# (%s)  /  # (%s)" % (h.GetTitle(), denom.GetTitle())
+            h.GetZaxis().SetTitle(zTitle)
 
         h.Draw(gopts)
         stylize(h)
         magnify(h, factor=1.8)
+        if denom:
+            h.GetZaxis().SetRangeUser(-0.1, 1.1)
+            nContours = 12
+            r.gStyle.SetNumberContours(nContours)  # restored in pageTwo()
+            h.SetContour(nContours)
+        else:
+            h.GetZaxis().SetRangeUser(0.5, h.GetMaximum())
 
         if boxes:
             keep += drawCrates()
@@ -342,7 +369,7 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
             P = name[:name.find("_vs_")].upper()
             h.GetXaxis().SetTitle("%s" % fedString(feds1))
             h.GetYaxis().SetTitle("%s" % fedString(feds2))
-            h.GetZaxis().SetTitle("Samples / bin")
+            h.GetZaxis().SetTitle(zTitle)
 
             title = P
             if h.GetTitle():
@@ -391,6 +418,7 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         #     r.gPad.Print("adc.pdf")
         #     import os
         #     os.system("pdfcrop adc.pdf")
+
     return keep
 
 
@@ -807,7 +835,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
     canvas.Print(pdf)
 
 
-def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
+def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="", denom=None,
             doYx=True, retitle=True, gridX=False, gridY=False, boxes=False, alsoZs=False):
 
     # don't print blank page
@@ -821,9 +849,13 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
         pad0.DivideSquare(len(names))
 
     pad0.Draw()
-    keep = plotGlobal(f, pad0, offset=1, names=names, feds1=feds1, feds2=feds2,
-                      doYx=doYx, retitle=retitle, gridX=gridX, gridY=gridY, boxes=boxes)
 
+    kargs = {}
+    for item in ["feds1", "feds2", "names", "denom", "doYx", "retitle", "gridX", "gridY", "boxes"]:
+        kargs[item] = eval(item)
+
+    nContours = r.gStyle.GetNumberContours()
+    keep = plotGlobal(f, pad0, offset=1, **kargs)
     if alsoZs:
         keep += plotZS(f, pad0, feds2)
 
@@ -832,6 +864,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
         keep.append(stamp(title, size=0.045, x=0.01, y=0.99))
 
     canvas.Print(pdf)
+    r.gStyle.SetNumberContours(nContours)
 
 
 def pageThree(f=None, feds1=[], feds2=[], canvas=None, pdf="", title="", names=[]):
@@ -883,21 +916,26 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
                            "tp_vs_tp", "tp_vs_tp_soi_both", ""],
                     alsoZs=True)
 
+
+        kargs34 = {"names": ["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + \
+                       ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", ""],
+                   "title": title if 1 not in pages else "",
+                   "doYx": False, "retitle": False, "boxes": True,
+                   }
+
         if 3 in pages:
-            pageTwo(f, feds1, feds2, canvas, pdf,
-                    names=["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + \
-                    ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", ""],
-                    doYx=False, retitle=False, boxes=True,
-                    title=title if 1 not in pages else "",
-                    )
+            pageTwo(f, feds1, feds2, canvas, pdf, **kargs34)
 
         if 4 in pages:
+            pageTwo(f, feds1, feds2, canvas, pdf, denom="ErrF0_vs_slot_crate", **kargs34)
+
+        if 5 in pages:
             names = ["frac0_vs_BcN_%d" % x for x in feds1[:3] + feds2[:3]] + [""] * 6
             pageTwo(f, feds1, feds2, canvas, pdf,
                     names=names[:6],
                     doYx=False, retitle=False, gridX=True)
 
-        if 5 in pages:
+        if 6 in pages:
             pageThree(f, feds1, feds2, canvas, pdf,
                       title=title if 1 not in pages else "",
                       names=["fracEvN_vs_time", "frac0_vs_time"],
