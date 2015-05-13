@@ -25,6 +25,14 @@ def evnMatchFrac(nMatch, nMisMatch):
         return -999  # dummy
 
 
+def labels(crate2bin):
+    l = ["-1"] * (1 + len(crate2bin))
+    for (cr, top), bin in crate2bin.iteritems():
+        assert 1 <= bin
+        l[bin - 1] = "%2d%1s" % (cr, top)
+    return l
+
+
 def htrSummary(blocks=[], book=None, fedId=None,
                fedEvn=None, fedOrn5=None, fedBcn=None,
                msg="", warn=True, mismatches=[]):
@@ -38,8 +46,14 @@ def htrSummary(blocks=[], book=None, fedId=None,
         caps[i] = 0
         ErrF[i] = 0
 
-    crate2bin = {32: 1, 29: 2, 22: 3, 12: 4, 9: 5, 2: 6}
-    yAxisLabels = ["32", "29", "22", "12", "9", "2", "-1"]
+    crate2bin = {(36, " "): 1,
+                 (32, " "): 2,
+                 (29, " "): 3,
+                 (22, " "): 4,
+                 ( 2, "b"): 5,
+                 ( 2, "t"): 6,
+                 }
+    yAxisLabels = labels(crate2bin)
     misMatchMapBins = ((23, 7), (-0.5, 0.5), (22.5, 7.5))
 
     for block in blocks:
@@ -71,17 +85,19 @@ def htrSummary(blocks=[], book=None, fedId=None,
                   11, -5.5, 5.5,
                   title="FED %d;HTR BcN - FED BcN;HTRs / bin" % fedId)
 
+        slot = block["Slot"]
+        if slot <= 0:
+            slot = 0
+        if 22 <= slot:
+            slot = 22
+        crate = crate2bin.get((block["Crate"], block["Top"]), 7)
+
         for key, fedVar in [("EvN", fedEvn),
                             ("OrN5", fedOrn5),
                             ("BcN", fedBcn),
                          ]:
             if (block[key] - fedVar):
-                slot = block["Slot"]
-                if slot <= 0:
-                    slot = 0
-                if 22 <= slot:
-                    slot = 22
-                book.fill((slot, crate2bin.get(block["Crate"], 7)),
+                book.fill((slot, crate),
                           "%s_mismatch_vs_slot_crate" % key,
                           *misMatchMapBins,
                           title="%s;slot;crate;HTR - FED   mismatches" % key,
@@ -111,15 +127,20 @@ def htrSummary(blocks=[], book=None, fedId=None,
                       title="FED %d;number of QIE samples;Channels / bin" % fedId)
 
             if channelData["ErrF"]:
-                book.fill((block["Slot"], crate2bin.get(block["Crate"], 7)),
+                book.fill((slot, crate),
                           "ErrFNZ_vs_slot_crate", *misMatchMapBins,
                           title="ErrF != 0;slot;crate;Channels / bin",
                           yAxisLabels=yAxisLabels)
                 continue
 
+            book.fill((slot, crate),
+                      "ErrF0_vs_slot_crate", *misMatchMapBins,
+                      title="ADC mismatch;slot;crate;Channels / bin",
+                      yAxisLabels=yAxisLabels)
+
             coords = (block["Crate"], block["Slot"], block["Top"], channelData["Fiber"], channelData["FibCh"])
             if coords in mismatches:
-                book.fill((block["Slot"], crate2bin.get(block["Crate"], 7)),
+                book.fill((slot, crate),
                           "ADC_mismatch_vs_slot_crate", *misMatchMapBins,
                           title="ADC mismatch;slot;crate;Channels / bin",
                           yAxisLabels=yAxisLabels)
