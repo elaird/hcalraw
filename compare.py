@@ -135,7 +135,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
             book.fill((slot, crate),
                       "ErrF0_vs_slot_crate", *misMatchMapBins,
-                      title="ADC mismatch;slot;crate;Channels / bin",
+                      title="ErrF == 0;slot;crate;Channels / bin",
                       yAxisLabels=yAxisLabels)
 
             coords = (block["Crate"], block["Slot"], block["Top"], channelData["Fiber"], channelData["FibCh"])
