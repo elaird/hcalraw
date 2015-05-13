@@ -73,6 +73,16 @@ def htrSummary(blocks=[], book=None, fedId=None,
             if warn:
                 printer.warning("%s / slot %2d%1s has EvN 0x%06x" % (msg, block["Slot"], block["Top"], block["EvN"]))
 
+        evnMask = 0x7f
+        book.fill((fedEvn & evnMask, block["EvN"] & evnMask), "EvN_HTR_vs_FED_%d" % fedId,
+                  (evnMask, evnMask), (-0.5, -0.5), (evnMask - 0.5, evnMask - 0.5),
+                  title="FED %d;FED EvN & 0x%x;HTR EvN & 0x%x;HTRs / bin" % (fedId, evnMask, evnMask))
+
+        ornMask = 0x1f
+        book.fill((fedOrn5, block["OrN5"]), "OrN5_HTR_vs_FED_%d" % fedId,
+                  (ornMask, ornMask), (-0.5, -0.5), (ornMask - 0.5, ornMask - 0.5),
+                  title="FED %d;FED OrN5;HTR OrN5;HTRs / bin" % fedId)
+
         book.fill(block["EvN"] - fedEvn, "EvN_HTRs_%d" % fedId,
                   11, -5.5, 5.5,
                   title="FED %d;HTR EvN - FED EvN;HTRs / bin" % fedId)
