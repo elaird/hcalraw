@@ -3,6 +3,7 @@
 
 from options import opts
 from configuration import sw
+import array
 import math
 import collections
 import printer
@@ -368,6 +369,10 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         stylize(h)
         magnify(h, factor=1.8)
         if denom:
+            iGray = 56
+            colors = [19] * (iGray - 51) + range(iGray, 51 + 50)
+            r.gStyle.SetPalette(len(colors), array.array('i', colors))
+
             h.GetZaxis().SetRangeUser(-0.1, 1.1)
             nContours = 12
             r.gStyle.SetNumberContours(nContours)  # restored in pageTwo()
