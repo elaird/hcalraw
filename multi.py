@@ -29,30 +29,13 @@ def main(options, runs=[]):
 
 
 def plot(roots, feds1s, feds2s):
-    graphs.makeSummaryPdfMulti(inputFiles=roots,
-                               feds1s=feds1s,
-                               feds2s=feds2s,
-                               pdf="output/runs.pdf",
-                               pages=[1],
-                               )
-    graphs.makeSummaryPdfMulti(inputFiles=roots,
-                               feds1s=feds1s,
-                               feds2s=feds2s,
-                               pdf="output/runs_maps_counts.pdf",
-                               pages=[3],
-                               )
-    graphs.makeSummaryPdfMulti(inputFiles=roots,
-                               feds1s=feds1s,
-                               feds2s=feds2s,
-                               pdf="output/runs_maps_rates.pdf",
-                               pages=[4],
-                               )
-    graphs.makeSummaryPdfMulti(inputFiles=roots,
-                               feds1s=feds1s,
-                               feds2s=feds2s,
-                               pdf="output/runs_trends.pdf",
-                               pages=[6],
-                               )
+    for i, suffix in enumerate(["", "_vs", "_maps_counts", "_maps_rates", "_orbit", "_trends"]):
+        graphs.makeSummaryPdfMulti(inputFiles=roots,
+                                   feds1s=feds1s,
+                                   feds2s=feds2s,
+                                   pdf="output/runs%s.pdf" % suffix,
+                                   pages=[1 + i],
+                                  )
 
 
 def runs(file=None):
