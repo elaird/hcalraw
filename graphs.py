@@ -511,7 +511,7 @@ def anyVisible(graph=None, maximum=None):
     return False
 
 
-def stamp(title, size=0.17, x=0.01, y=0.98):
+def stamp(title, size=0.045, x=0.01, y=0.99):
     latex = r.TLatex()
     latex.SetNDC()
     latex.SetTextAngle(90)
@@ -659,7 +659,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
         null_coarse.GetYaxis().SetLabelSize(0.1)
 
     padg.cd(0)
-    keep.append(stamp(title))
+    keep.append(stamp(title, size=0.17, x=0.01, y=0.98))
 
     # padg.Print("output/%s_l1a.pdf" % title.replace("Run ", ""))
     return keep
