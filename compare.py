@@ -22,7 +22,7 @@ def matchFrac(nMatch, nMisMatch):
     if total:
         return (0.0 + nMatch) / total
     else:
-        return -999  # dummy
+        return None
 
 
 def labels(crate2bin):
@@ -254,13 +254,15 @@ def singleFedPlots(fedId=None, d={}, book={}, warn=True, matches=[], mismatches=
                    title=("FED %d" % fedId) +
                    ";time (minutes);frac. chan. with ErrF == 0")
 
-    book.fillGraph((fedTime, fracEvN), "fracEvN_vs_time_%d" % fedId,
-                   title=("FED %d" % fedId) +
-                   ";time (minutes);frac. HTRs with EvN == FED's")
+    if fracEvN is not None:
+        book.fillGraph((fedTime, fracEvN), "fracEvN_vs_time_%d" % fedId,
+                       title=("FED %d" % fedId) +
+                       ";time (minutes);frac. HTRs with EvN == FED's")
 
-    book.fillGraph((fedTime, fracADC), "ADC_misMatch_vs_time_%d" % fedId,
-                   title=("FED %d" % fedId) +
-                   ";time (minutes);#splitline{(# ch. match. ADCs) /}{(# ch. match. + ch. mismatch.)}")
+    if fracADC is not None:
+        book.fillGraph((fedTime, fracADC), "ADC_misMatch_vs_time_%d" % fedId,
+                       title=("FED %d" % fedId) +
+                       ";time (minutes);#splitline{(# ch. match. ADCs) /}{(# ch. match. + ch. mismatch.)}")
 
     book.fillGraph((fedTime, t["nWord64"] * 8.0 / 1024), "kB_vs_time_%d" % fedId,
                    title=("FED %d" % fedId) +
