@@ -325,10 +325,9 @@ def divided(numer, denom):
 
 def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
                gopts="colz", feds1=[], feds2=[], doYx=True, retitle=True,
-               gridX=False, gridY=False, boxes=False, denom=None):
+               gridX=False, gridY=False, boxes=False, denoms={}):
     keep = []
-    if denom:
-        denom = f.Get(denom)
+    if denoms:
         logZ = False
 
     for iHisto, name in enumerate(names):
@@ -345,10 +344,20 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         zTitle = "Samples / bin"
         if name.startswith("frac0_vs_BcN"):
             h.RebinX(36)
-        elif denom:
+
+        denom = None
+        denomLst = denoms.get(name, [])
+        for denomName in denomLst:
+            y = f.Get(denomName)
+            if denom is None:
+                denom = y.Clone()
+            else:
+                denom.Add(y)
+
+        if denom:
             shiftFlows(denom)
             h = divided(h, denom)
-            zTitle = "# (%s)  /  # (%s)" % (h.GetTitle(), denom.GetTitle())
+            zTitle = "# (%s)  /  # (%s)" % (h.GetTitle(), "  +  ".join([f.Get(x).GetTitle() for x in denomLst]))
             h.GetZaxis().SetTitle(zTitle)
 
         h.Draw(gopts)
@@ -837,7 +846,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
     canvas.Print(pdf)
 
 
-def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="", denom=None,
+def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="", denoms={},
             doYx=True, retitle=True, gridX=False, gridY=False, boxes=False, alsoZs=False):
 
     # don't print blank page
@@ -853,7 +862,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
     pad0.Draw()
 
     kargs = {}
-    for item in ["feds1", "feds2", "names", "denom", "doYx", "retitle", "gridX", "gridY", "boxes"]:
+    for item in ["feds1", "feds2", "names", "denoms", "doYx", "retitle", "gridX", "gridY", "boxes"]:
         kargs[item] = eval(item)
 
     nContours = r.gStyle.GetNumberContours()
@@ -919,8 +928,10 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
                     alsoZs=True)
 
 
-        kargs34 = {"names": ["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]] + \
-                       ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", ""],
+        names = ["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]]
+        names += ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", ""]
+
+        kargs34 = {"names": names,
                    "title": title if 1 not in pages else "",
                    "doYx": False, "retitle": False, "boxes": True,
                    }
@@ -929,7 +940,12 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             pageTwo(f, feds1, feds2, canvas, pdf, **kargs34)
 
         if 4 in pages:
-            pageTwo(f, feds1, feds2, canvas, pdf, denom="ErrF0_vs_slot_crate", **kargs34)
+            denoms = {}
+            for name in names:
+                denoms[name] = ["ErrF0_vs_slot_crate"]
+            denoms["ErrFNZ_vs_slot_crate"] += ["ErrFNZ_vs_slot_crate"]
+
+            pageTwo(f, feds1, feds2, canvas, pdf, denoms=denoms, **kargs34)
 
         if 5 in pages:
             for stem, yx in [("frac0_vs_BcN_%d", False),
