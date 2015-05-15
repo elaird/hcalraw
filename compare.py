@@ -58,6 +58,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                  ( 2, "b"): 5,
                  ( 2, "t"): 6,
                  }
+    crateFail = 7
     yAxisLabels = labels(crate2bin)
     misMatchMapBins = ((23, 7), (-0.5, 0.5), (22.5, 7.5))
 
@@ -105,7 +106,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
             slot = 0
         if 22 <= slot:
             slot = 22
-        crate = crate2bin.get((block["Crate"], block["Top"]), 7)
+        crate = crate2bin.get((block["Crate"], block["Top"]), crateFail)
 
         for key, fedVar in [("EvN", fedEvn),
                             ("OrN5", fedOrn5),
@@ -156,10 +157,13 @@ def htrSummary(blocks=[], book=None, fedId=None,
             coords = (block["Crate"], block["Slot"], block["Top"], channelData["Fiber"], channelData["FibCh"])
             if coords in mismatches:
                 ADC_misMatch += 1
-                book.fill((slot, crate),
-                          "ADC_mismatch_vs_slot_crate", *misMatchMapBins,
-                          title="ADC mismatch;slot;crate;Channels / bin",
-                          yAxisLabels=yAxisLabels)
+                crate2, slot2, top2 = hw.transformed_qie(*coords)[:3]
+                for t in [(slot, crate),
+                          (slot2, crate2bin.get((crate2, top2), crateFail)),
+                         ]:
+                    book.fill(t, "ADC_mismatch_vs_slot_crate", *misMatchMapBins,
+                              title="ADC mismatch;slot;crate;Channels / bin",
+                              yAxisLabels=yAxisLabels)
             elif coords in matches:
                 ADC_match += 1
 
