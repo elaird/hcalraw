@@ -311,15 +311,19 @@ def drawCrates():
             ]
 
 
-def divided(numer, denom):
+def divided(numer, denom, zero=-1.0e-3):
     for iBinX in range(2 + numer.GetNbinsX()):
         for iBinY in range(2 + numer.GetNbinsY()):
             a = numer.GetBinContent(iBinX, iBinY)
             b = denom.GetBinContent(iBinX, iBinY)
-            if b == 0.0:
-                numer.SetBinContent(iBinX, iBinY, -1.0)
+            if a == 0.0 and b != 0.0:
+                content = zero  # yikes!
+            elif b == 0.0:
+                content = -1.0  # below color range: white
             else:
-                numer.SetBinContent(iBinX, iBinY, a / b)
+                content = a / b
+
+            numer.SetBinContent(iBinX, iBinY, content)
     return numer
 
 
