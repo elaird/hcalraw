@@ -424,6 +424,7 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
 
 def plotList(f, pad, offset=None, names=[],
              logY=True, logX=False, logZ=False,
+             gridX=False, gridY=False,
              feds1=[], feds2=[],
              func=histoLoop):
 
@@ -438,7 +439,8 @@ def plotList(f, pad, offset=None, names=[],
         if not name:
             continue
         pad.cd(offset + iHisto)
-        adjustPad(logX=logX, logY=logY, logZ=logZ)
+        adjustPad(logX=logX, logY=logY, logZ=logZ,
+                  gridX=gridX, gridY=gridY)
 
         feds = []
         for iFed, fed in enumerate(sorted(fedList)):
@@ -875,7 +877,7 @@ def pageThree(f=None, feds1=[], feds2=[], canvas=None, pdf="", title="", names=[
     keep = []
     for iName, name in enumerate(names):
         keep += plotList(f, pad0, offset=1 + iName, names=[name],
-                         logY=False, logX=False, logZ=False,
+                         logY=False, logX=False, logZ=False, gridY=True,
                          feds1=feds1, feds2=feds2, func=graphLoop)
 
     pad0.cd(0)
@@ -942,7 +944,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         if 6 in pages:
             pageThree(f, feds1, feds2, canvas, pdf,
                       title=title if 1 not in pages else "",
-                      names=["fracEvN_vs_time", "frac0_vs_time"],
+                      names=["fracEvN_vs_time", "frac0_vs_time", "ADC_misMatch_vs_time"],
             )
 
         f.Close()
