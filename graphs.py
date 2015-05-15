@@ -881,9 +881,10 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
 
     pad0.cd(0)
     if title:
-        keep.append(stamp(title, size=0.045, x=0.01, y=0.99))
+        keep.append(stamp(title))
 
     canvas.Print(pdf)
+    r.gStyle.SetPalette(1)
     r.gStyle.SetNumberContours(nContours)
 
 
@@ -900,7 +901,7 @@ def pageThree(f=None, feds1=[], feds2=[], canvas=None, pdf="", title="", names=[
 
     pad0.cd(0)
     if title:
-        keep.append(stamp(title, size=0.045, x=0.01, y=0.99))
+        keep.append(stamp(title))
     canvas.Print(pdf)
 
 
@@ -927,34 +928,34 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         if "_" not in title:
             title = "Run %s" % title
 
+        kargs = {}
+        for item in ["f", "feds1", "feds2", "canvas", "pdf", "title"]:
+            kargs[item] = eval(item)
+
         if 1 in pages:
-            pageOne(f, feds1, feds2, canvas, pdf, title)
+            pageOne(**kargs)
+            kargs["title"] = ""  # don't stamp later pages
 
         if feds2 and 2 in pages:
-            pageTwo(f, feds1, feds2, canvas, pdf,
-                    names=["adc_vs_adc", "adc_vs_adc_soi_both", "",
+            pageTwo(names=["adc_vs_adc", "adc_vs_adc_soi_both", "",
                            "tp_vs_tp", "tp_vs_tp_soi_both", ""],
-                    alsoZs=True)
-
+                    alsoZs=True, **kargs)
 
         names = ["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]]
         names += ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", ""]
 
-        kargs34 = {"names": names,
-                   "title": title if 1 not in pages else "",
-                   "doYx": False, "retitle": False, "boxes": True,
-                   }
+        kargs34 = {"names": names, "doYx": False, "retitle": False, "boxes": True}
+        kargs34.update(kargs)
 
         if 3 in pages:
-            pageTwo(f, feds1, feds2, canvas, pdf, **kargs34)
+            pageTwo(**kargs34)
 
         if 4 in pages:
             denoms = {}
             for name in names:
                 denoms[name] = ["ErrF0_vs_slot_crate"]
             denoms["ErrFNZ_vs_slot_crate"] += ["ErrFNZ_vs_slot_crate"]
-
-            pageTwo(f, feds1, feds2, canvas, pdf, denoms=denoms, **kargs34)
+            pageTwo(denoms=denoms, **kargs34)
 
         if 5 in pages:
             for stem, yx in [("frac0_vs_BcN_%d", False),
@@ -962,15 +963,10 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
                              # ("OrN5_HTR_vs_FED_%d", True),
                             ]:
                 names = [stem % x for x in feds1[:3] + feds2[:3]] + [""] * 6
-                pageTwo(f, feds1, feds2, canvas, pdf,
-                        names=names[:6],
-                        doYx=yx, retitle=False, gridX=True)
+                pageTwo(names=names[:6], doYx=yx, retitle=False, gridX=True, **kargs)
 
         if 6 in pages:
-            pageThree(f, feds1, feds2, canvas, pdf,
-                      title=title if 1 not in pages else "",
-                      names=["fracEvN_vs_time", "frac0_vs_time", "ADC_misMatch_vs_time"],
-            )
+            pageThree(names=["fracEvN_vs_time", "frac0_vs_time", "ADC_misMatch_vs_time"], **kargs)
 
         f.Close()
     canvas.Print(pdf + "]")
