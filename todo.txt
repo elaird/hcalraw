@@ -9,5 +9,3 @@ use bcn in event maps
 bcn vs. fed
 restore cron
 make ticks visible in problem maps
-debug rate plots
-hack palette: change violet to gray
