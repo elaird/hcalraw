@@ -33,6 +33,14 @@ def labels(crate2bin):
     return l
 
 
+def slot2bin(slot, min=0, max=22):
+    if slot <= min:
+        return min
+    if max <= slot:
+        return max
+    return slot
+
+
 def htrSummary(blocks=[], book=None, fedId=None,
                fedEvn=None, fedOrn5=None, fedBcn=None,
                msg="", warn=True, matches=[], mismatches=[]):
@@ -101,11 +109,8 @@ def htrSummary(blocks=[], book=None, fedId=None,
                   11, -5.5, 5.5,
                   title="FED %d;HTR BcN - FED BcN;HTRs / bin" % fedId)
 
-        slot = block["Slot"]
-        if slot <= 0:
-            slot = 0
-        if 22 <= slot:
-            slot = 22
+
+        slot = slot2bin(block["Slot"])
         crate = crate2bin.get((block["Crate"], block["Top"]), crateFail)
 
         for key, fedVar in [("EvN", fedEvn),
@@ -159,7 +164,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                 ADC_misMatch += 1
                 crate2, slot2, top2 = hw.transformed_qie(*coords)[:3]
                 for t in [(slot, crate),
-                          (slot2, crate2bin.get((crate2, top2), crateFail)),
+                          (slot2bin(slot2), crate2bin.get((crate2, top2), crateFail)),
                          ]:
                     book.fill(t, "ADC_mismatch_vs_slot_crate", *misMatchMapBins,
                               title="ADC mismatch;slot;crate;Channels / bin",
