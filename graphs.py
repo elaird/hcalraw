@@ -942,7 +942,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
                     alsoZs=True, **kargs)
 
         names = ["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]]
-        names += ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", ""]
+        names += ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", "TP_mismatch_vs_slot_crate"]
 
         kargs34 = {"names": names, "doYx": False, "retitle": False, "boxes": True}
         kargs34.update(kargs)
@@ -955,6 +955,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             for name in names:
                 denoms[name] = ["ErrF0_vs_slot_crate"]
             denoms["ErrFNZ_vs_slot_crate"] += ["ErrFNZ_vs_slot_crate"]
+            denoms["TP_mismatch_vs_slot_crate"] = ["TP_matchable_vs_slot_crate"]
             pageTwo(denoms=denoms, **kargs34)
 
         if 5 in pages:
