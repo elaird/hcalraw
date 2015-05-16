@@ -48,11 +48,14 @@ def htrSummary(blocks=[], book=None, fedId=None,
     caps = {}
     ErrF = {}
 
-    EvN_match = 0
-    EvN_misMatch = 0
+    nEvnMatch = 0
+    nEvnMisMatch = 0
 
-    ADC_match = 0
-    ADC_misMatch = 0
+    nAdcMatch = 0
+    nAdcMisMatch = 0
+
+    nTpMatch = 0
+    nTpMisMatch = 0
 
     adcs = set()
     for i in range(4):
@@ -81,9 +84,9 @@ def htrSummary(blocks=[], book=None, fedId=None,
             continue
 
         if block["EvN"] == fedEvn:
-            EvN_match += 1
+            nEvnMatch += 1
         else:
-            EvN_misMatch += 1
+            nEvnMisMatch += 1
             if warn:
                 printer.warning("%s / slot %2d%1s has EvN 0x%06x" % (msg, block["Slot"], block["Top"], block["EvN"]))
 
@@ -161,7 +164,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
             coords = (block["Crate"], block["Slot"], block["Top"], channelData["Fiber"], channelData["FibCh"])
             if coords in mismatches:
-                ADC_misMatch += 1
+                nAdcMisMatch += 1
                 crate2, slot2, top2 = hw.transformed_qie(*coords)[:3]
                 for t in [(slot, crate),
                           (slot2bin(slot2), crate2bin.get((crate2, top2), crateFail)),
@@ -170,7 +173,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                               title="ADC mismatch;slot;crate;Channels / bin",
                               yAxisLabels=yAxisLabels)
             elif coords in matches:
-                ADC_match += 1
+                nAdcMatch += 1
 
             caps[channelData["CapId0"]] += 1
 
@@ -181,7 +184,11 @@ def htrSummary(blocks=[], book=None, fedId=None,
                 book.fill(adc, "channel_peak_adc_mp%d_%d" % (mp, fedId), 14, -0.5, 13.5,
                           title="FED %d;Peak ADC (ErrF == 0);Channels / bin" % fedId)
 
-    return nBadHtrs, ErrF, caps, adcs, matchFrac(EvN_match, EvN_misMatch), matchFrac(ADC_match, ADC_misMatch)
+    return [nBadHtrs, ErrF, caps, adcs,
+            matchFrac(nEvnMatch, nEvnMisMatch),
+            matchFrac(nAdcMatch, nAdcMisMatch),
+            matchFrac(nTpMatch, nTpMisMatch),
+            ]
 
 
 def htrOverviewBits(d={}, book={}, fedId=None, msg="", warn=True):
@@ -209,7 +216,7 @@ def htrOverviewBits(d={}, book={}, fedId=None, msg="", warn=True):
                     printer.warning("%s / input %2d has bit %s set." % (msg, iHtr, l))
 
 
-def singleFedPlots(fedId=None, d={}, book={}, warn=True, matches=[], mismatches=[]):
+def singleFedPlots(fedId=None, d={}, book={}, **other):
     book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 14, -0.5, 13.5,
               title="FED %d;nWord16 skipped during unpacking;Events / bin" % fedId)
 
@@ -234,18 +241,16 @@ def singleFedPlots(fedId=None, d={}, book={}, warn=True, matches=[], mismatches=
     else:
         msg = utils.coords(fedId, fedEvn, fedOrn, fedBcn)
 
-    htrOverviewBits(h, book, fedId, msg=msg, warn=warn)
+    htrOverviewBits(h, book, fedId, msg=msg, warn=other["warn"])
 
-    nBadHtrs, ErrF, caps, adcs, fracEvN, fracADC = htrSummary(blocks=d["htrBlocks"].values(),
-                                                              book=book,
-                                                              fedId=fedId,
-                                                              fedEvn=fedEvn,
-                                                              fedOrn5=fedOrn & 0x1f,
-                                                              fedBcn=fedBcn,
-                                                              msg=msg,
-                                                              warn=warn,
-                                                              matches=matches,
-                                                              mismatches=mismatches)
+    nBadHtrs, ErrF, caps, adcs, fracEvN, fracADC, fracTP = htrSummary(blocks=d["htrBlocks"].values(),
+                                                                      book=book,
+                                                                      fedId=fedId,
+                                                                      fedEvn=fedEvn,
+                                                                      fedOrn5=fedOrn & 0x1f,
+                                                                      fedBcn=fedBcn,
+                                                                      msg=msg,
+                                                                      **other)
 
     errFSum = 0.0 + sum(ErrF.values())
 
@@ -272,6 +277,11 @@ def singleFedPlots(fedId=None, d={}, book={}, warn=True, matches=[], mismatches=
         book.fillGraph((fedTime, fracADC), "ADC_misMatch_vs_time_%d" % fedId,
                        title=("FED %d" % fedId) +
                        ";time (minutes);#splitline{(# ch. match. ADCs) /}{(# ch. match. + ch. mismatch.)}")
+
+    if fracTP is not None:
+        book.fillGraph((fedTime, fracTP), "TP_misMatch_vs_time_%d" % fedId,
+                       title=("FED %d" % fedId) +
+                       ";time (minutes);#splitline{(# match. TPs) /}{(# match. + mismatch. TPs)}")
 
     book.fillGraph((fedTime, t["nWord64"] * 8.0 / 1024), "kB_vs_time_%d" % fedId,
                    title=("FED %d" % fedId) +
@@ -317,7 +327,7 @@ def nPerChannel(lst=[], iChannel=None):
     return len(filter(lambda x: x[-1] == iChannel, lst))
 
 
-def loop_over_feds(raw, book, adcTag="", warn=True, matches=[], mismatches=[]):
+def loop_over_feds(raw, book, adcTag="", **other):
     okFeds = set()
     adcs = set()
 
@@ -333,8 +343,7 @@ def loop_over_feds(raw, book, adcTag="", warn=True, matches=[], mismatches=[]):
             printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
             continue
 
-        nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book, warn=warn,
-                                         matches=matches, mismatches=mismatches)
+        nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book, **other)
         adcs = adcs.union(adcs1)
         if nBadHtrs:
             return
