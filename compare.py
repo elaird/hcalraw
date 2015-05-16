@@ -43,7 +43,9 @@ def slot2bin(slot, min=0, max=22):
 
 def htrSummary(blocks=[], book=None, fedId=None,
                fedEvn=None, fedOrn5=None, fedBcn=None,
-               msg="", warn=True, matches=[], mismatches=[]):
+               msg="", warn=True,
+               adcMatches=[], adcMismatches=[],
+               tpMatches=[], tpMismatches=[]):
     nBadHtrs = 0
     caps = {}
     ErrF = {}
@@ -135,12 +137,37 @@ def htrSummary(blocks=[], book=None, fedId=None,
             if techData["technicalDataType"] or techData["channelId"] or techData["words"]:
                 flavor(book, techData, fedId)
 
-        for triggerData in block["triggerData"].values():
+        for triggerKey, triggerData in block["triggerData"].iteritems():
             if "Flavor" in triggerData:
                 flavor(book, triggerData, fedId)
 
             book.fill(len(triggerData["TP"]), "nTpSamples_%d" % fedId, 14, -0.5, 13.5,
                       title="FED %d;number of TP samples;Towers / bin" % fedId)
+
+            tpCoords = (block["Crate"], block["Slot"], block["Top"], triggerKey)
+            tpCoords2 = hw.transformed_tp(*tpCoords)
+            if tpCoords2 is None:
+                continue
+
+            crate2, slot2, top2 = tpCoords2[:3]
+            slotsCrates = [(slot, crate),
+                           (slot2bin(slot2), crate2bin.get((crate2, top2), crateFail)),
+                           ]
+
+            for t in slotsCrates:
+                book.fill(t, "TP_matchable_vs_slot_crate", *misMatchMapBins,
+                          title="TP matchable;slot;crate;Channels / bin",
+                          yAxisLabels=yAxisLabels)
+
+            if tpCoords in tpMatches:
+                nTpMatch += 1
+            else:
+                nTpMisMatch += 1
+                for t in slotsCrates:
+                    book.fill(t, "TP_mismatch_vs_slot_crate", *misMatchMapBins,
+                              title="TP mismatch;slot;crate;Channels / bin",
+                              yAxisLabels=yAxisLabels)
+
 
         for channelData in block["channelData"].values():
             flavor(book, channelData, fedId)
@@ -163,7 +190,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                       yAxisLabels=yAxisLabels)
 
             coords = (block["Crate"], block["Slot"], block["Top"], channelData["Fiber"], channelData["FibCh"])
-            if coords in mismatches:
+            if coords in adcMismatches:
                 nAdcMisMatch += 1
                 crate2, slot2, top2 = hw.transformed_qie(*coords)[:3]
                 for t in [(slot, crate),
@@ -172,7 +199,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                     book.fill(t, "ADC_mismatch_vs_slot_crate", *misMatchMapBins,
                               title="ADC mismatch;slot;crate;Channels / bin",
                               yAxisLabels=yAxisLabels)
-            elif coords in matches:
+            elif coords in adcMatches:
                 nAdcMatch += 1
 
             caps[channelData["CapId0"]] += 1
@@ -503,7 +530,7 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQual
         mapF2, mapB2, _ = dataMap(raw2, book)
         matched12, nonMatched12 = matchStats(mapF1, mapB2)
         matched21, nonMatched21 = matchStats(mapF2, mapB1)
-        misMatched12 = []  # passed to loop_over_feds
+        tMatched12 = tMisMatched12 = misMatched12 = []  # passed to loop_over_feds
         if printEmap:
            reportMatched(matched12)
            reportFailed(nonMatched12)
@@ -536,7 +563,10 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQual
         printRaw.oneEvent(raw1, nonMatchedQie=misMatched12, nonMatchedTp=tMisMatched12, slim1=slim1)
         printRaw.oneEvent(raw2, nonMatchedQie=misMatched21, nonMatchedTp=tMisMatched21)
 
-    okFeds = loop_over_feds(raw1, book, adcTag="feds1", warn=warnQuality, matches=matched12, mismatches=misMatched12)
+    okFeds = loop_over_feds(raw1, book, adcTag="feds1", warn=warnQuality,
+                            adcMatches=matched12, adcMismatches=misMatched12,
+                            tpMatches=tMatched12, tpMismatches=tMisMatched12,
+                            )
 
     noGood = [[], [None]]
     if raw1.keys() in noGood or raw2.keys() in noGood:
