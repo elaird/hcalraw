@@ -350,20 +350,17 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         if name.startswith("frac0_vs_BcN"):
             h.RebinX(36)
 
-        denom = None
-        denomLst = denoms.get(name, [])
-        for denomName in denomLst:
-            y = f.Get(denomName)
-            if denom is None:
-                denom = y.Clone()
-            else:
-                denom.Add(y)
-
-        if denom:
+        if denoms.get(name):
+            denom = f.Get(denoms[name])
+            if not denom:
+                printer.error("%s not found" % denoms[name])
+                continue
             shiftFlows(denom)
             h = divided(h, denom)
-            zTitle = "# (%s)  /  # (%s)" % (h.GetTitle(), "  +  ".join([f.Get(x).GetTitle() for x in denomLst]))
+            zTitle = "# (%s)  /  # (%s)" % (h.GetTitle(), denom.GetTitle())
             h.GetZaxis().SetTitle(zTitle)
+        else:
+            denom = None
 
         h.Draw(gopts)
         stylize(h)
@@ -951,11 +948,13 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             pageTwo(**kargs34)
 
         if 4 in pages:
-            denoms = {}
-            for name in names:
-                denoms[name] = ["ErrF0_vs_slot_crate"]
-            denoms["ErrFNZ_vs_slot_crate"] += ["ErrFNZ_vs_slot_crate"]
-            denoms["TP_mismatch_vs_slot_crate"] = ["TP_matchable_vs_slot_crate"]
+            denoms = {"EvN_mismatch_vs_slot_crate": "block_vs_slot_crate",
+                      "OrN5_mismatch_vs_slot_crate": "block_vs_slot_crate",
+                      "BcN_mismatch_vs_slot_crate": "block_vs_slot_crate",
+                      "ErrFNZ_vs_slot_crate": "ErrFAny_vs_slot_crate",
+                      "ADC_mismatch_vs_slot_crate": "ErrF0_vs_slot_crate",
+                      "TP_mismatch_vs_slot_crate": "TP_matchable_vs_slot_crate",
+                      }
             pageTwo(denoms=denoms, **kargs34)
 
         if 5 in pages:
