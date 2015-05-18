@@ -504,7 +504,7 @@ def histogram_nMatched(book, matched=None, misMatched=None, nonMatched=None, tMa
     nFib = 228  # = 2 2 3 19;  gt 14 HTRs * 16 fib / HTR
     bins = (nFib, -0.5, nFib - 0.5)
 
-    nFib2 = 18
+    nFib2 = 26
     bins2 = (nFib2, -0.5, nFib2 - 0.5)
 
     for iChannel in range(3):
