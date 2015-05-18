@@ -118,6 +118,12 @@ def htrSummary(blocks=[], book=None, fedId=None,
         slot = slot2bin(block["Slot"])
         crate = crate2bin.get((block["Crate"], block["Top"]), crateFail)
 
+        book.fill((slot, crate),
+                  "block_vs_slot_crate",
+                  *misMatchMapBins,
+                  title="any;slot;crate;HTR / bin",
+                  yAxisLabels=yAxisLabels)
+
         for key, fedVar in [("EvN", fedEvn),
                             ("OrN5", fedOrn5),
                             ("BcN", fedBcn),
@@ -156,7 +162,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
             for t in slotsCrates:
                 book.fill(t, "TP_matchable_vs_slot_crate", *misMatchMapBins,
-                          title="TP matchable;slot;crate;Channels / bin",
+                          title="TP matchable;slot;crate;Towers / bin",
                           yAxisLabels=yAxisLabels)
 
             if tpCoords in tpMatches:
@@ -165,7 +171,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                 nTpMisMatch += 1
                 for t in slotsCrates:
                     book.fill(t, "TP_mismatch_vs_slot_crate", *misMatchMapBins,
-                              title="TP mismatch;slot;crate;Channels / bin",
+                              title="TP mismatch;slot;crate;Towers / bin",
                               yAxisLabels=yAxisLabels)
 
 
@@ -176,6 +182,11 @@ def htrSummary(blocks=[], book=None, fedId=None,
             nQie = len(channelData["QIE"])
             book.fill(nQie, "nQieSamples_%d" % fedId, 14, -0.5, 13.5,
                       title="FED %d;number of QIE samples;Channels / bin" % fedId)
+
+            book.fill((slot, crate),
+                      "ErrFAny_vs_slot_crate", *misMatchMapBins,
+                      title="any;slot;crate;Channels / bin",
+                      yAxisLabels=yAxisLabels)
 
             if channelData["ErrF"]:
                 book.fill((slot, crate),
