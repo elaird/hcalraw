@@ -312,6 +312,36 @@ def drawCrates():
             ]
 
 
+def frac0_all_good(f=None, names=[]):
+    nBad = 0
+    for name in names:
+        h = f.Get(name)
+        if not h:
+            continue
+
+        for iBinX in range(1, 1 + h.GetNbinsX()):
+            hy = h.ProjectionY("py_%s_%d" % (name, iBinX), iBinX, iBinX)
+            bin1 = hy.FindBin(1.0)
+            if hy.Integral(1, bin1 - 1):
+                nBad += 1
+    return not nBad
+
+
+def all_diagonal(f=None, names=[]):
+    for name in names:
+        h = f.Get(name)
+        if not h:
+            continue
+
+        for iBinX in range(1, 1 + h.GetNbinsX()):
+            for iBinY in range(1, 1 + h.GetNbinsY()):
+                if iBinX == iBinY:  # skip diagonal
+                    continue
+                if h.GetBinContent(iBinX, iBinY):
+                    return False
+    return True
+
+
 def divided(numer, denom, zero=-1.0e-3):
     for iBinX in range(2 + numer.GetNbinsX()):
         for iBinY in range(2 + numer.GetNbinsY()):
@@ -958,12 +988,15 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             pageTwo(denoms=denoms, **kargs34)
 
         if 5 in pages:
-            for stem, yx in [("frac0_vs_BcN_%d", False),
-                             # ("EvN_HTR_vs_FED_%d", True),
-                             # ("OrN5_HTR_vs_FED_%d", True),
-                            ]:
+            for stem, func, yx in [("frac0_vs_BcN_%d", frac0_all_good, False),
+                                   ("EvN_HTR_vs_FED_%d", all_diagonal, True),
+                                   ("OrN5_HTR_vs_FED_%d", all_diagonal, True),
+                                   ]:
                 names = [stem % x for x in feds1[:3] + feds2[:3]] + [""] * 6
-                pageTwo(names=names[:6], doYx=yx, retitle=False, gridX=True, **kargs)
+                names = names[:6]
+                if func(f, names):
+                    continue
+                pageTwo(names=names, doYx=yx, retitle=False, gridX=True, **kargs)
 
         if 6 in pages:
             pageThree(names=["fracEvN_vs_time", "frac0_vs_time", "ADC_misMatch_vs_time"], **kargs)
