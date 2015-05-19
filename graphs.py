@@ -915,7 +915,17 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
     r.gStyle.SetNumberContours(nContours)
 
 
-def pageThree(f=None, feds1=[], feds2=[], canvas=None, pdf="", title="", names=[]):
+def pageThree(stem, func, yx, **kargs):
+    names = []
+    for key in ["feds1", "feds2"]:
+        names += [stem % x for x in kargs[key][:3]]
+    names += [""] * 6
+    names = names[:6]
+    if not func(kargs["f"], names):
+        pageTwo(names=names, doYx=yx, retitle=False, gridX=True, **kargs)
+
+
+def pageTrends(f=None, feds1=[], feds2=[], canvas=None, pdf="", title="", names=[]):
     pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
     pad0.Divide(1, len(names))
     pad0.Draw()
@@ -988,18 +998,16 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             pageTwo(denoms=denoms, **kargs34)
 
         if 5 in pages:
-            for stem, func, yx in [("frac0_vs_BcN_%d", frac0_all_good, False),
-                                   ("EvN_HTR_vs_FED_%d", all_diagonal, True),
-                                   ("OrN5_HTR_vs_FED_%d", all_diagonal, True),
-                                   ]:
-                names = [stem % x for x in feds1[:3] + feds2[:3]] + [""] * 6
-                names = names[:6]
-                if func(f, names):
-                    continue
-                pageTwo(names=names, doYx=yx, retitle=False, gridX=True, **kargs)
+            pageThree(stem="frac0_vs_BcN_%d", func=frac0_all_good, yx=False, **kargs)
 
         if 6 in pages:
-            pageThree(names=["fracEvN_vs_time", "frac0_vs_time", "ADC_misMatch_vs_time"], **kargs)
+            pageThree(stem="EvN_HTR_vs_FED_%d", func=all_diagonal, yx=True, **kargs)
+
+        if 7 in pages:
+            pageThree(stem="OrN5_HTR_vs_FED_%d", func=all_diagonal, yx=True, **kargs)
+
+        if 8 in pages:
+            pageTrends(names=["fracEvN_vs_time", "frac0_vs_time", "ADC_misMatch_vs_time"], **kargs)
 
         f.Close()
     canvas.Print(pdf + "]")
