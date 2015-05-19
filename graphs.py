@@ -319,6 +319,7 @@ def frac0_all_good(f=None, names=[]):
         if not h:
             continue
 
+        h.RebinX(36)
         for iBinX in range(1, 1 + h.GetNbinsX()):
             hy = h.ProjectionY("py_%s_%d" % (name, iBinX), iBinX, iBinX)
             bin1 = hy.FindBin(1.0)
@@ -377,9 +378,6 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
 
         shiftFlows(h)
         zTitle = "Samples / bin"
-        if name.startswith("frac0_vs_BcN"):
-            h.RebinX(36)
-
         if denoms.get(name):
             denom = f.Get(denoms[name])
             if not denom:
