@@ -906,8 +906,8 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
     if alsoZs:
         keep += plotZS(f, pad0, feds2)
 
-    pad0.cd(0)
     if title:
+        pad0.cd(0)
         keep.append(stamp(title))
 
     canvas.Print(pdf)
@@ -936,8 +936,8 @@ def pageTrends(f=None, feds1=[], feds2=[], canvas=None, pdf="", title="", names=
                          logY=False, logX=False, logZ=False, gridY=True,
                          feds1=feds1, feds2=feds2, func=graphLoop)
 
-    pad0.cd(0)
     if title:
+        pad0.cd(0)
         keep.append(stamp(title))
     canvas.Print(pdf)
 
