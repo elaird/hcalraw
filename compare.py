@@ -529,7 +529,7 @@ def histogram_nMatched(book, matched=None, misMatched=None, nonMatched=None, tMa
                   title="TPs;number matched;Events / bin")
 
     if tMisMatched is not None:
-        book.fill(len(tMisMatched), "MisMatchedTriggerTowers", *bins,
+        book.fill(len(tMisMatched), "MisMatchedTriggerTowers", *bins2,
                   title="TPs;number mis-matched;Events / bin")
 
 
