@@ -200,6 +200,10 @@ def htrSummary(blocks=[], book=None, fedId=None,
                       title="ErrF == 0;slot;crate;Channels / bin",
                       yAxisLabels=yAxisLabels)
 
+            book.fill((block["Slot"], channelData["Fiber"]),
+                      "fiber_vs_slot_%d" % fedId, (12, 24), (0.5, -0.5), (12.5, 23.5),
+                      title="FED %d;Slot;Fiber;Channels (ErrF == 0) / bin" % fedId)
+
             coords = (block["Crate"], block["Slot"], block["Top"], channelData["Fiber"], channelData["FibCh"])
             if coords in adcMismatches:
                 nAdcMisMatch += 1
