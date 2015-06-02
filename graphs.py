@@ -312,34 +312,36 @@ def drawCrates():
             ]
 
 
-def frac0_all_good(f=None, names=[]):
-    nBad = 0
+def summed(f=None, names=[]):
+    out = None
     for name in names:
         h = f.Get(name)
         if not h:
             continue
-
-        h.RebinX(36)
-        for iBinX in range(1, 1 + h.GetNbinsX()):
-            hy = h.ProjectionY("py_%s_%d" % (name, iBinX), iBinX, iBinX)
-            bin1 = hy.FindBin(1.0)
-            if hy.Integral(1, bin1 - 1):
-                nBad += 1
-    return not nBad
+        if out is None:
+            out = h.Clone()
+        else:
+            out.Add(h)
+    return out
 
 
-def all_diagonal(f=None, names=[]):
-    for name in names:
-        h = f.Get(name)
-        if not h:
-            continue
+def frac0_all_good(h=None):
+    h.RebinX(36)
+    for iBinX in range(1, 1 + h.GetNbinsX()):
+        hy = h.ProjectionY("py_%d" % iBinX, iBinX, iBinX)
+        bin1 = hy.FindBin(1.0)
+        if hy.Integral(1, bin1 - 1):
+            return False
+    return True
 
-        for iBinX in range(1, 1 + h.GetNbinsX()):
-            for iBinY in range(1, 1 + h.GetNbinsY()):
-                if iBinX == iBinY:  # skip diagonal
-                    continue
-                if h.GetBinContent(iBinX, iBinY):
-                    return False
+
+def all_diagonal(h=None):
+    for iBinX in range(1, 1 + h.GetNbinsX()):
+        for iBinY in range(1, 1 + h.GetNbinsY()):
+            if iBinX == iBinY:  # skip diagonal
+                continue
+            if h.GetBinContent(iBinX, iBinY):
+                return False
     return True
 
 
@@ -913,13 +915,15 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
     r.gStyle.SetNumberContours(nContours)
 
 
-def pageThree(stem, func=lambda x, y: False, yx=False, keys=["feds1", "feds2"], **kargs):
+def pageThree(stem, suppress=lambda x: False, yx=False, keys=["feds1", "feds2"], **kargs):
     names = []
     for key in keys:
         names += [stem % x for x in kargs[key][:3]]
     names += [""] * 6
     names = names[:6]
-    if not func(kargs["f"], names):
+    h = summed(kargs["f"], names)
+
+    if not suppress(h):
         pageTwo(names=names, doYx=yx, retitle=False, gridX=True, **kargs)
 
 
@@ -996,13 +1000,13 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             pageTwo(denoms=denoms, **kargs34)
 
         if 5 in pages:
-            pageThree(stem="frac0_vs_BcN_%d", func=frac0_all_good, **kargs)
+            pageThree(stem="frac0_vs_BcN_%d", suppress=frac0_all_good, **kargs)
 
         if 6 in pages:
-            pageThree(stem="EvN_HTR_vs_FED_%d", func=all_diagonal, yx=True, **kargs)
+            pageThree(stem="EvN_HTR_vs_FED_%d", suppress=all_diagonal, yx=True, **kargs)
 
         if 7 in pages:
-            pageThree(stem="OrN5_HTR_vs_FED_%d", func=all_diagonal, yx=True, **kargs)
+            pageThree(stem="OrN5_HTR_vs_FED_%d", suppress=all_diagonal, yx=True, **kargs)
 
         if 8 in pages:
             pageTrends(names=["fracEvN_vs_time", "frac0_vs_time", "ADC_misMatch_vs_time"], **kargs)
