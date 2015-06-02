@@ -913,9 +913,9 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
     r.gStyle.SetNumberContours(nContours)
 
 
-def pageThree(stem, func, yx, **kargs):
+def pageThree(stem, func=lambda x, y: False, yx=False, keys=["feds1", "feds2"], **kargs):
     names = []
-    for key in ["feds1", "feds2"]:
+    for key in keys:
         names += [stem % x for x in kargs[key][:3]]
     names += [""] * 6
     names = names[:6]
@@ -996,7 +996,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             pageTwo(denoms=denoms, **kargs34)
 
         if 5 in pages:
-            pageThree(stem="frac0_vs_BcN_%d", func=frac0_all_good, yx=False, **kargs)
+            pageThree(stem="frac0_vs_BcN_%d", func=frac0_all_good, **kargs)
 
         if 6 in pages:
             pageThree(stem="EvN_HTR_vs_FED_%d", func=all_diagonal, yx=True, **kargs)
@@ -1006,6 +1006,9 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
 
         if 8 in pages:
             pageTrends(names=["fracEvN_vs_time", "frac0_vs_time", "ADC_misMatch_vs_time"], **kargs)
+
+        if 9 in pages:
+            pageThree(stem="fiber_vs_slot_%d", keys=["feds2"], **kargs)
 
         f.Close()
     canvas.Print(pdf + "]")
