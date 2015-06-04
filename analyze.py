@@ -89,7 +89,7 @@ def chainLoopSparse(chain, nEntries, callback, nPerTree, progress=False):
                 return
 
             if progress:
-                iMask = reportProgress(nSeen, iMask)
+                iMask = reportProgress(entry, nSeen, iMask)
 
             if nEntries != None and nEntries <= nSeen:
                 return
@@ -114,7 +114,7 @@ def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False, sparseLo
 
         iEntry += 1
         if progress:
-            iMask = reportProgress(iEntry, iMask)
+            iMask = reportProgress(iEntry, iEntry - iEntryStart, iMask)
 
 
 def fillEventMap(chain, iEntry,
@@ -180,9 +180,12 @@ def eventMaps(chain, s={}, nMapMin=0, nMapMax=None):
     return forward, backward, forwardBcn
 
 
-def reportProgress(iEvent, iMask):
+def reportProgress(globalEntry, iEvent, iMask):
     if iEvent and not (iEvent & (2**iMask - 1)):
-        print "%8d" % iEvent, time.ctime()
+        msg = "%8d %s" % (iEvent, time.ctime())
+        if globalEntry != iEvent:
+            msg += "  (entry %8d)" % globalEntry
+        print msg
         return iMask + 1
     else:
         return iMask
