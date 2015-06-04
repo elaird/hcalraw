@@ -350,7 +350,7 @@ def full_utca_crate(h):
 
 
 def full_crate(h=None, slots=[], fibers=[]):
-    # FIXME: since histograms are already added over FEDs,
+    # FIXME: since histogram is already summed over FEDs,
     # this function would fail to plot in the very unlikely
     # situation that different FEDs' problems compensate each others' counts
 
