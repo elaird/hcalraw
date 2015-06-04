@@ -345,6 +345,24 @@ def all_diagonal(h=None):
     return True
 
 
+def full_utca_crate(h):
+    return full_crate(h, slots=range(1, 13), fibers=(range(2, 10) + range(14, 22)))
+
+
+def full_crate(h=None, slots=[], fibers=[]):
+    # FIXME: since histograms are already added over FEDs,
+    # this function would fail to plot in the very unlikely
+    # situation that different FEDs' problems compensate each others' counts
+
+    s = set()
+    for slot in slots:
+        iBinX = h.GetXaxis().FindBin(slot)
+        for fiber in fibers:
+            iBinY = h.GetYaxis().FindBin(fiber)
+            s.add(h.GetBinContent(iBinX, iBinY))
+    return len(s) == 1
+
+
 def divided(numer, denom, zero=-1.0e-3):
     for iBinX in range(2 + numer.GetNbinsX()):
         for iBinY in range(2 + numer.GetNbinsY()):
@@ -1012,7 +1030,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             pageTrends(names=["fracEvN_vs_time", "frac0_vs_time", "ADC_misMatch_vs_time"], **kargs)
 
         if 9 in pages:
-            pageThree(stem="fiber_vs_slot_%d", keys=["feds2"], **kargs)
+            pageThree(stem="fiber_vs_slot_%d", suppress=full_utca_crate, keys=["feds2"], **kargs)
 
         f.Close()
     canvas.Print(pdf + "]")
