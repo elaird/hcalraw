@@ -218,7 +218,9 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={})
         def outerInnerCompare2(chain, iEntry):
             return outerInnerCompare(chain, iEntry, outer, inner, innerEvent, chainI, kargs)
 
-        chainLoop(chain, outer["nEventsSkip"], outer["nEventsMax"], outerInnerCompare2,
+        nMin = outer["nEventsSkip"]
+        nMax = outer["nEventsSkip"] + outer["nEventsMax"]
+        chainLoop(chain, nMin, nMax, outerInnerCompare2,
                   progress=outer["progress"], sparseLoop=outer["sparseLoop"])
 
     except KeyboardInterrupt:
