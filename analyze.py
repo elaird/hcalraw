@@ -147,7 +147,7 @@ def fillEventMap(chain, iEntry,
 # this function returns two dictionaries,
 # one maps TTree entry to (orn, evn)
 # the other maps the reverse
-def eventMaps(chain, s={}, nMapMax=None):
+def eventMaps(chain, s={}, nMapMin=0, nMapMax=None):
     forward = {}
     backward = {}
     forwardBcn = {}
@@ -167,13 +167,15 @@ def eventMaps(chain, s={}, nMapMax=None):
              "skipWords64": s["skipWords64"],
              }
 
-    def fillEventMap2(chain, iEntry):
-        return fillEventMap(chain, iEntry,
-                            treeName, fedId0, branch0, s, kargs,
-                            forward, forwardBcn, backward)
+    try:
+        def fillEventMap2(chain, iEntry):
+            return fillEventMap(chain, iEntry,
+                                treeName, fedId0, branch0, s, kargs,
+                                forward, forwardBcn, backward)
 
-    # start from beginning, even when skipping events in the loop
-    chainLoop(chain, 0, nMapMax, fillEventMap2, progress=s["progress"], sparseLoop=s["sparseLoop"])
+        chainLoop(chain, nMapMin, nMapMax, fillEventMap2, progress=s["progress"], sparseLoop=s["sparseLoop"])
+    except KeyboardInterrupt:
+        printer.warning("KeyboardInterrupt in eventMaps()")
 
     return forward, backward, forwardBcn
 
@@ -220,7 +222,7 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={})
                   progress=outer["progress"], sparseLoop=outer["sparseLoop"])
 
     except KeyboardInterrupt:
-        printer.warning("KeyboardInterrupt!")
+        printer.warning("KeyboardInterrupt in loop()")
 
     return kargs["book"]
 
@@ -470,11 +472,19 @@ def go(outer={}, inner={}, outputFile="",
 
     chain = tchain(outer)
 
-    nMapMax = outer["nEventsMax"]
-    if nMapMax and not mapOptions["identityMap"]:
-        nMapMax *= 2  # a guess for how far to look not to miss out-of-order events
+    # by default:
+    nMapMin = 0     # start from beginning
+    nMapMax = None  # look at all entries
 
-    oMapF, oMapB, oMapBcn = eventMaps(chain, outer, nMapMax)
+    nEv = outer["nEventsMax"] + outer["nEventsSkip"]
+    if nEv:
+        if mapOptions["identityMap"]:
+            nMapMin = outer["nEventsSkip"]
+            nMapMax = nEv
+        else:
+            nMapMax = nEv * 2  # a guess for how far to look not to miss out-of-order events
+
+    oMapF, oMapB, oMapBcn = eventMaps(chain, outer, nMapMin=nMapMin, nMapMax=nMapMax)
     iMapF = iMapB = iMapBcn = {}
 
     if inner.get("fileNames") == outer["fileNames"]:
