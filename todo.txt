@@ -6,6 +6,6 @@ git grep -in fixme
 zcat
 fwlite
 use bcn in event maps
-bcn vs. fed
 restore cron
 make ticks visible in problem maps
+split tps into fg and non-fg
