@@ -150,6 +150,15 @@ def htrSummary(blocks=[], book=None, fedId=None,
             book.fill(len(triggerData["TP"]), "nTpSamples_%d" % fedId, 14, -0.5, 13.5,
                       title="FED %d;number of TP samples;Towers / bin" % fedId)
 
+            maxTp = -1
+            for tp in triggerData["TP"]:
+                tp8 = tp & 0xff  # ignore fine-grain bit
+                if maxTp < tp8:
+                    maxTp = tp8
+            if 0 <= maxTp:
+                book.fill(maxTp, "channel_peak_tp_%d" % fedId, 14, -0.5, 13.5,
+                          title="FED %d;Peak TP E;Towers / bin" % fedId)
+
             tpCoords = (block["Crate"], block["Slot"], block["Top"], triggerKey)
             tpCoords2 = hw.transformed_tp(*tpCoords)
             if tpCoords2 is None:
