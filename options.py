@@ -22,7 +22,7 @@ def opts(alsoArgs=False):
     common = optparse.OptionGroup(parser, "Misc options")
     common.add_option("--nevents",
                       dest="nEvents",
-                      default=None,
+                      default=0,
                       metavar="N",
                       type="int",
                       help="Stop after N events (including skipped events).")

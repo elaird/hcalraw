@@ -39,8 +39,8 @@ def check_and_adjust(options):
         options.file2 = options.file1
         options.identityMap = True
 
-    if options.patterns and options.nEvents is None:
-        print "INFO: setting nEvents=1 (--patterns + nEvents was unset)"
+    if options.patterns:
+        print "INFO: setting nEvents=1 (--patterns was passed)"
         options.nEvents = 1
 
 
