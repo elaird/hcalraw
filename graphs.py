@@ -943,7 +943,7 @@ def pageThree(stem, suppress=lambda x: False, yx=False, keys=["feds1", "feds2"],
     names = names[:6]
     h = summed(kargs["f"], names)
 
-    if not suppress(h):
+    if h and not suppress(h):
         pageTwo(names=names, doYx=yx, retitle=False, gridX=True, **kargs)
 
 
