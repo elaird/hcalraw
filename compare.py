@@ -43,7 +43,7 @@ def slot2bin(slot, min=0, max=22):
 
 def htrSummary(blocks=[], book=None, fedId=None,
                fedEvn=None, fedOrn5=None, fedBcn=None,
-               msg="", warn=True,
+               msg="", warn=True, fedTime=None,
                adcMatches=[], adcMismatches=[],
                tpMatches=[], tpMismatches=[]):
     nBadHtrs = 0
@@ -235,6 +235,15 @@ def htrSummary(blocks=[], book=None, fedId=None,
                 book.fill(adc, "channel_peak_adc_mp%d_%d" % (mp, fedId), 14, -0.5, 13.5,
                           title="FED %d;Peak ADC (ErrF == 0);Channels / bin" % fedId)
 
+                if fedTime:
+                    adcMin = 9
+                    for i, adc in enumerate(channelData["QIE"]):
+                        if adcMin <= adc:
+                            book.fill(i, "ts_qie_%d" % fedId, 6, -0.5, 5.5,
+                                      title="FED %d;TS (when %s <= ADC);Channels / bin" % (fedId, adcMin))
+                            book.fill((fedTime/60., i), "ts_vs_time_%d" % fedId, (240, 6), (0.0, -0.5), (4.0, 5.5),
+                                      title="FED %d;time (hours);TS (when %d <= ADC);Channels / bin" % (fedId, adcMin))
+
     return [nBadHtrs, ErrF, caps, adcs,
             matchFrac(nEvnMatch, nEvnMisMatch),
             matchFrac(nAdcMatch, nAdcMisMatch),
@@ -294,6 +303,8 @@ def singleFedPlots(fedId=None, d={}, book={}, **other):
 
     htrOverviewBits(h, book, fedId, msg=msg, warn=other["warn"])
 
+    fedTime = utils.minutes(fedOrn, fedBcn)
+
     nBadHtrs, ErrF, caps, adcs, fracEvN, fracADC, fracTP = htrSummary(blocks=d["htrBlocks"].values(),
                                                                       book=book,
                                                                       fedId=fedId,
@@ -301,6 +312,7 @@ def singleFedPlots(fedId=None, d={}, book={}, **other):
                                                                       fedOrn5=fedOrn & 0x1f,
                                                                       fedBcn=fedBcn,
                                                                       msg=msg,
+                                                                      #fedTime=fedTime,
                                                                       **other)
 
     errFSum = 0.0 + sum(ErrF.values())
@@ -314,7 +326,6 @@ def singleFedPlots(fedId=None, d={}, book={}, **other):
     else:
         frac0 = -999.  # dummy
 
-    fedTime = utils.minutes(fedOrn, fedBcn)
     book.fillGraph((fedTime, frac0), "frac0_vs_time_%d" % fedId,
                    title=("FED %d" % fedId) +
                    ";time (minutes);frac. chan. with ErrF == 0")
