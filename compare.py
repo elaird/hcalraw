@@ -237,11 +237,12 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
                 if fedTime:
                     adcMin = 9
+                    nBins = 10
                     for i, adc in enumerate(channelData["QIE"]):
                         if adcMin <= adc:
-                            book.fill(i, "ts_qie_%d" % fedId, 6, -0.5, 5.5,
+                            book.fill(i, "ts_qie_%d" % fedId, nBins, -0.5, nBins - 0.5,
                                       title="FED %d;TS (when %s <= ADC);Channels / bin" % (fedId, adcMin))
-                            book.fill((fedTime/60., i), "ts_vs_time_%d" % fedId, (240, 6), (0.0, -0.5), (4.0, 5.5),
+                            book.fill((fedTime/60., i), "ts_vs_time_%d" % fedId, (40, nBins), (0.0, -0.5), (4.0, nBins - 0.5),
                                       title="FED %d;time (hours);TS (when %d <= ADC);Channels / bin" % (fedId, adcMin))
 
     return [nBadHtrs, ErrF, caps, adcs,
