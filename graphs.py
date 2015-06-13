@@ -737,7 +737,7 @@ def fedSum(f=None, prefix="", feds=[]):
     return h
 
 
-def plotZS(f, pad0, feds2):
+def plotZS(f, pad0, feds1, feds2):
     pad0.cd(3)
     adjustPad(logY=True)
 
@@ -791,6 +791,32 @@ def plotZS(f, pad0, feds2):
         magnify(ht1, factor=1.8)
 
     return [ha0, ha1, leg, ht1]
+
+
+def plotTS(f, pad0, feds1, feds2):
+    pad0.cd(3)
+    adjustPad(logY=True)
+
+    ht1 = f.Get("ts_qie1")
+    if ht1:
+        ht1.SetTitle(fedString(feds1))
+        shiftFlows(ht1)
+        ht1.Draw("hist")
+        stylize(ht1, r.kBlue, 1)
+        magnify(ht1, factor=1.8)
+
+    pad0.cd(6)
+    adjustPad(logY=True)
+
+    ht2 = f.Get("ts_qie2")
+    if ht2:
+        ht2.SetTitle(fedString(feds2))
+        shiftFlows(ht2)
+        ht2.Draw("hist")
+        stylize(ht2, r.kBlue, 1)
+        magnify(ht2, factor=1.8)
+
+    return [ht1, ht1]
 
 
 def suffix(feds1, feds2):
@@ -924,7 +950,8 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
     nContours = r.gStyle.GetNumberContours()
     keep = plotGlobal(f, pad0, offset=1, **kargs)
     if alsoZs:
-        keep += plotZS(f, pad0, feds2)
+        keep += plotZS(f, pad0, feds1, feds2)
+        #keep += plotTS(f, pad0, feds1, feds2)
 
     if title:
         pad0.cd(0)
@@ -1033,6 +1060,9 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
 
         if 9 in pages:
             pageThree(stem="fiber_vs_slot_%d", suppress=full_utca_crate, keys=["feds2"], **kargs)
+
+        if 10 in pages:
+            pageThree(stem="ts_vs_time_%d", **kargs)
 
         f.Close()
     canvas.Print(pdf + "]")

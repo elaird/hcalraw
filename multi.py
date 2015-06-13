@@ -29,7 +29,7 @@ def main(options, runs=[]):
 
 
 def plot(roots, feds1s, feds2s):
-    for i, stem in enumerate(["overview", "vs", "maps_counts", "maps_rates", "orbit", "evn", "orn", "trends", "occupancy"]):
+    for i, stem in enumerate(["overview", "vs", "maps_counts", "maps_rates", "orbit", "evn", "orn", "trends", "occupancy", "adc"]):
         graphs.makeSummaryPdfMulti(inputFiles=roots,
                                    feds1s=feds1s,
                                    feds2s=feds2s,
