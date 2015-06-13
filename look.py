@@ -130,7 +130,10 @@ def main(options, args, quiet=False):
                       7: "/store/data/Commissioning2015/MinimumBias/RAW/v1",
                       })
     else:
-        paths.update({3: "/store/data/Run2015A/HcalNZS/RAW/v1"})
+        paths.update({# 3: "/store/data/Run2015A/HcalNZS/RAW/v1",
+                      # 4: "/store/data/Run2015A/ZeroBias/RAW/v1",
+                      5: "/store/express/Run2015A/ExpressPhysics/FEVT/Express-v1/",
+                      })
 
     for iFind, grDir in sorted(paths.iteritems()):
         if grDir is None:
