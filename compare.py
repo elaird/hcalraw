@@ -313,7 +313,7 @@ def singleFedPlots(fedId=None, d={}, book={}, **other):
                                                                       fedOrn5=fedOrn & 0x1f,
                                                                       fedBcn=fedBcn,
                                                                       msg=msg,
-                                                                      #fedTime=fedTime,
+                                                                      fedTime=fedTime,
                                                                       **other)
 
     errFSum = 0.0 + sum(ErrF.values())
