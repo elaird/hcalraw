@@ -6,13 +6,18 @@ def fedMap():
     d = {"HBHE": range(700, 718),
          "HF": range(718, 724),
          "HO": range(724, 732),
-         "uHF": [1118, 1120, 1122],
+         "uHF": range(1118, 1124, 2),
+         "uHBHE": range(1100, 1118, 2),
          }
 
     d["HBHEHF"] = d["HBHE"] + d["HF"]
     d["HBEF"] = d["HBHEHF"]
     d["HCAL"] = d["HBEF"] + d["HO"]
-    d["uHCAL"] = d["HCAL"] + d["uHF"]
+
+    d["uHBHEHF"] = d["uHBHE"] + d["uHF"]
+    d["uHBEF"] = d["uHBHEHF"]
+    d["uHCAL"] = d["uHBEF"] + d["HO"]
+
     return d
 
 
