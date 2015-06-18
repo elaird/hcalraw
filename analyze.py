@@ -131,6 +131,9 @@ def fillEventMap(chain, iEntry,
     else:
         rawThisFed = wordsOneBranch(tree=chain, branch=branch0)
 
+    if rawThisFed is None:
+        sys.exit(" ")
+
     raw = unpacked(fedData=rawThisFed, **kargs)
     if not raw["nBytesSW"]:
         printer.error("the first listed FED (%d) has zero bytes in tree '%s'." % (fedId0, treeName))
@@ -232,6 +235,13 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={})
     return kargs["book"]
 
 
+def bailFed(raw, fedId, specs, reason=""):
+    printer.warning("removing FED %d from spec (%s)." % (fedId, reason))
+    specs["fedIds"].remove(fedId)
+    if fedId in raw:
+        del raw[fedId]
+
+
 def collectedRaw(tree=None, specs={}):
     raw = {}
     kargs = {}
@@ -249,14 +259,16 @@ def collectedRaw(tree=None, specs={}):
         else:
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
 
+        if rawThisFed is None:
+            bailFed(raw, fedId, specs, reason="see above")
+            continue
+
         raw[fedId] = unpacked(fedData=rawThisFed,
                               warn=specs["warnUnpack"],
                               **kargs)
 
         if not raw[fedId]["nBytesSW"]:
-            printer.warning("removing FED %d from spec (read zero bytes)." % fedId)
-            del raw[fedId]
-            specs["fedIds"].remove(fedId)
+            bailFed(raw, fedId, specs, reason="read zero bytes")
             continue
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
@@ -391,17 +403,21 @@ def wordsOneFed(tree=None, fedId=None, collection="", product=None):
 
 def wordsOneChunk(tree=None, branch=""):
     chunk = wordsOneBranch(tree, branch)
-    return r.CDFChunk2(chunk)
+    if chunk is None:
+        return chunk
+    else:
+        return r.CDFChunk2(chunk)
 
 
 def wordsOneBranch(tree=None, branch=""):
+    chunk = None
     try:
         chunk = getattr(tree, branch)
     except AttributeError:
         msg = ["Branch %s not found.  These branches are available:" % branch]
         names = [item.GetName() for item in tree.GetListOfBranches()]
         msg += sorted(names)
-        sys.exit("\n".join(msg))
+        print "\n".join(msg)
     return chunk
 
 
