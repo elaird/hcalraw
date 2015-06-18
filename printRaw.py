@@ -368,6 +368,7 @@ def ttpData(ttpInput=[], ttpOutput=[], ttpAlgoDep=[]):
 
 def patternData(d={}, moduleId="", utca=None):
     patternB = configuration.patterns.patternB
+    descr = configuration.patterns.lineStart
 
     if patternB:
         headers = ["ModuleId", "Fibers", "Pattern"]
@@ -394,10 +395,10 @@ def patternData(d={}, moduleId="", utca=None):
                 fibers = "     %2d" % (1 + fiber1_)
 
             if patternB:
-                out.append("   ".join([moduleId, fibers, "  %s" % key, "  "]) + ps)
+                out.append("   ".join([descr + moduleId, fibers, "  %s" % key, "  "]) + ps)
             else:
                 fiberNum = int(fibers)
-                out.append("%s %2d:  %s" % (moduleId, int(fibers), ps))
+                out.append("%s %2d:  %s" % (descr + moduleId, int(fibers), ps))
 
     return out
 
