@@ -303,12 +303,13 @@ def drawCrates():
     b.SetFillStyle(0)
     b.SetLineColor(r.kBlack)
     b.SetLineStyle(3)
-    y = 4.5
-    return [b.DrawBox( 0.5, 0.5, 12.5,   y),  # uTCA
-            b.DrawBox( 1.5,   y,  7.5, 6.5),
-            b.DrawBox( 7.5,   y,  8.5, 6.5),
-            b.DrawBox(12.5,   y, 18.5, 6.5),
-            b.DrawBox(20.5,   y, 21.5, 6.5),
+    y1 = 13.5
+    y2 = 33.5
+    return [b.DrawBox( 0.5, 0.5, 12.5,  y1),  # uTCA
+            b.DrawBox( 1.5,  y1,  7.5,  y2),
+            b.DrawBox( 7.5,  y1,  8.5,  y2),
+            b.DrawBox(12.5,  y1, 18.5,  y2),
+            b.DrawBox(20.5,  y1, 21.5,  y2),
             ]
 
 
@@ -491,10 +492,10 @@ def plotList(f, pad, offset=None, names=[],
              feds1=[], feds2=[],
              func=histoLoop):
 
-    fedList = (feds1 + feds2)[:5]
-    color = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kMagenta]
+    fedList = (feds1 + feds2)[:9]
+    color = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kMagenta, 40, 36, 30, 20]
     color += [r.kBlack] * (len(fedList) - len(color))
-    style = [1, 2, 3, 4, 5]
+    style = [1, 2, 3, 4, 5] * 2
     style += [1] * (len(fedList) - len(style))
 
     keep = []
