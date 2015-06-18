@@ -412,9 +412,8 @@ def loop_over_feds(raw, book, adcTag="", **other):
             return
 
         okFeds.add(fedId)
-        if (None in raw) and raw[None]["patterns"]:
-            if not raw[fedId]["header"]["utca"]:
-                checkHtrModules(fedId=fedId, htrBlocks=raw[fedId]["htrBlocks"])
+        if not raw[fedId]["header"]["utca"]:
+            checkHtrModules(fedId=fedId, htrBlocks=raw[fedId]["htrBlocks"])
 
     if adcs:
         book.fill(max(adcs), "max_adc_%s" % adcTag, 128, -0.5, 127.5,

@@ -12,15 +12,16 @@ def mapping(file=None, skip=[]):
         if any([item in line for item in skip]):
             continue
 
-        if ":" in line:
+        if line.startswith(conf.lineStart):
             fields = line.split(":")
             if len(fields) <= 1:
                 sys.exit("Problem processing this line (length %d < 2):\n%s" % (len(fields), line))
             else:
-                be = fields[0]
+                be = fields[0].replace(conf.lineStart, "").split()
+                be = (be[0], int(be[1]), int(be[2]))
                 fe = " ".join(fields[1:])
 
-            out[tuple(be.split())] = tuple(fe.split())
+            out[be] = tuple(fe.split())
         elif line != "\n":
             misc.append(line)
     return out, misc
@@ -143,12 +144,10 @@ def go(fileName="", nMissingMax=None):
     assert fileName
     with open(fileName) as f:
         ref, refMisc = mapping(f)
+    assert not refMisc, "refMisc='%s'" % refMisc
 
     cabled, misc = mapping(sys.stdin, skip=["Xrd", "TClassTable", "nologin"])
-
-    assert not refMisc
-    for item in sorted(misc):
-        print item
+    print "".join(misc)
 
     report(*diffs(ref, cabled), nMissingMax=nMissingMax)
 

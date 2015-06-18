@@ -9,3 +9,4 @@ use bcn in event maps
 restore cron
 make ticks visible in problem maps
 split tps into fg and non-fg
+autozoom time axis

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from configuration.patterns import rbxes
+from configuration.patterns import rbxes, lineStart
 
 #Generates .txt file in format same with oneRun.py from a list of RBXs
 
@@ -99,11 +99,9 @@ def ReformMap(iMapfile = "", ofile = "", oFileOpenMode = "w"):
     
         if RBXname in RBXnameRange:
             if rm in rmRange and fi_ch == "0": #save only once per 3 channels
-                if len(RBXname)==5: outline = fedid + " " + spigo + " " + htr_fib + ":  " + RBXname + "  " + rm + " " + rm_fib + "\n"
-                else: outline = fedid + " " + spigo + " " + htr_fib + ":  " + RBXname + " " + rm + " " + rm_fib + "\n"
-                output.writelines(outline)
+                output.writelines("%s%3s %02d %02d: %s %1d %1d\n" % (lineStart, fedid, int(spigo), int(htr_fib), RBXname, int(rm), int(rm_fib)))
 
-    output.close()   
+    output.close()
 
 
 if __name__ == "__main__":

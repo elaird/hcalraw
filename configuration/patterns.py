@@ -1,9 +1,10 @@
 import re
 
 
-patternB = False     # consider also patterns mixed across fibers
-rmRibbon = False     # pair central 6 fibers (of 8 or 12)
-compressed = True    # handle lack of per-TS capids
+patternB = False           # consider also patterns mixed across fibers
+rmRibbon = False           # pair central 6 fibers (of 8 or 12)
+compressed = True          # handle lack of per-TS capids
+lineStart = "pattern on "  # print with pattern; used by diff.py
 
 pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 
