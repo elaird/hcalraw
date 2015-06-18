@@ -64,16 +64,43 @@ def htrSummary(blocks=[], book=None, fedId=None,
         caps[i] = 0
         ErrF[i] = 0
 
-    crate2bin = {(36, " "): 1,
-                 (32, " "): 2,
-                 (29, " "): 3,
-                 (22, " "): 4,
-                 ( 2, "b"): 5,
-                 ( 2, "t"): 6,
+    crate2bin = {(37, " "):  1,
+                 (36, " "):  2,
+                 (35, " "):  3,
+                 (34, " "):  4,
+                 (32, " "):  5,
+                 (31, " "):  6,
+                 (30, " "):  7,
+                 (29, " "):  8,
+                 (25, " "):  9,
+                 (24, " "): 10,
+                 (22, " "): 11,
+                 (21, " "): 12,
+                 (20, " "): 13,
+                 (17, "b"): 14,
+                 (17, "t"): 15,
+                 (15, "b"): 16,
+                 (15, "t"): 17,
+                 (14, "b"): 18,
+                 (14, "t"): 19,
+                 (11, "b"): 20,
+                 (11, "t"): 21,
+                 (10, "b"): 22,
+                 (10, "t"): 23,
+                 ( 5, "b"): 24,
+                 ( 5, "t"): 25,
+                 ( 4, "b"): 26,
+                 ( 4, "t"): 27,
+                 ( 2, "b"): 28,
+                 ( 2, "t"): 29,
+                 ( 1, "b"): 30,
+                 ( 1, "t"): 31,
+                 ( 0, "b"): 32,
+                 ( 0, "t"): 33,
                  }
-    crateFail = 7
+    crateFail = 1 + max(crate2bin.values())
     yAxisLabels = labels(crate2bin)
-    misMatchMapBins = ((23, 7), (-0.5, 0.5), (22.5, 7.5))
+    misMatchMapBins = ((23, crateFail), (-0.5, 0.5), (22.5, 0.5 + crateFail))
 
     for block in blocks:
         if type(block) is not dict:
@@ -525,7 +552,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
 
 def histogram_nMatched(book, matched=None, misMatched=None, nonMatched=None, tMatched=None, tMisMatched=None):
     # histogram n matched
-    nFib = 228  # = 2 2 3 19;  gt 14 HTRs * 16 fib / HTR
+    nFib = 12 * 12 * 16
     bins = (nFib, -0.5, nFib - 0.5)
 
     nFib2 = 26
