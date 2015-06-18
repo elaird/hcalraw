@@ -99,7 +99,7 @@ def ReformMap(iMapfile = "", ofile = "", oFileOpenMode = "w"):
     
         if RBXname in RBXnameRange:
             if rm in rmRange and fi_ch == "0": #save only once per 3 channels
-                output.writelines(" ".join([lineStart+fedid, spigo, htr_fib+":", RBXname, rm, rm_fib+"\n"]))
+                output.writelines("%s%3s %02d %02d: %s %1d %1d\n" % (lineStart, fedid, int(spigo), int(htr_fib), RBXname, int(rm), int(rm_fib)))
 
     output.close()
 
