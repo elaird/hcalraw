@@ -235,19 +235,13 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={})
     return kargs["book"]
 
 
-def bailFed(raw, fedId, specs, reason=""):
-    printer.warning("removing FED %d from spec (%s)." % (fedId, reason))
-    specs["fedIds"].remove(fedId)
-    if fedId in raw:
-        del raw[fedId]
-
-
 def collectedRaw(tree=None, specs={}):
     raw = {}
     kargs = {}
     for item in ["patterns", "dump", "unpack", "nBytesPer", "skipWords64"]:
         kargs[item] = specs[item]
 
+    missingFeds = []
     for fedId in specs["fedIds"]:
         if "branch" in specs:
             branch = specs["branch"](fedId)
@@ -255,12 +249,13 @@ def collectedRaw(tree=None, specs={}):
         if specs["treeName"] == "Events":
             rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"], specs["product"])
         elif specs["treeName"] == "CMSRAW":
-            rawThisFed = wordsOneChunk(tree, branch)
+            rawThisFed = wordsOneChunk(tree, branch, loud=False)
         else:
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
 
         if rawThisFed is None:
-            bailFed(raw, fedId, specs, reason="see above")
+            printer.warning("removing FED %d from spec (no branch %s)." % (fedId, branch))
+            missingFeds.append(fedId)
             continue
 
         raw[fedId] = unpacked(fedData=rawThisFed,
@@ -268,8 +263,14 @@ def collectedRaw(tree=None, specs={}):
                               **kargs)
 
         if not raw[fedId]["nBytesSW"]:
-            bailFed(raw, fedId, specs, reason="read zero bytes")
+            printer.warning("removing FED %d from spec (read zero bytes)." % fedId)
+            missingFeds.append(fedId)
             continue
+
+    for fedId in missingFeds:
+        specs["fedIds"].remove(fedId)
+        if fedId in raw:
+            del raw[fedId]
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
     for key in ["label", "patterns", "dump", "crateslots"]:
@@ -401,15 +402,15 @@ def wordsOneFed(tree=None, fedId=None, collection="", product=None):
     return r.FEDRawDataWords(FEDRawData.FEDData(fedId))
 
 
-def wordsOneChunk(tree=None, branch=""):
-    chunk = wordsOneBranch(tree, branch)
+def wordsOneChunk(tree=None, branch="", loud=True):
+    chunk = wordsOneBranch(tree, branch, loud)
     if chunk is None:
         return chunk
     else:
         return r.CDFChunk2(chunk)
 
 
-def wordsOneBranch(tree=None, branch=""):
+def wordsOneBranch(tree=None, branch="", loud=True):
     chunk = None
     try:
         chunk = getattr(tree, branch)
@@ -417,7 +418,8 @@ def wordsOneBranch(tree=None, branch=""):
         msg = ["Branch %s not found.  These branches are available:" % branch]
         names = [item.GetName() for item in tree.GetListOfBranches()]
         msg += sorted(names)
-        print "\n".join(msg)
+        if loud:
+            print "\n".join(msg)
     return chunk
 
 
