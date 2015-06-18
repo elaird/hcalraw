@@ -17,10 +17,11 @@ def mapping(file=None, skip=[]):
             if len(fields) <= 1:
                 sys.exit("Problem processing this line (length %d < 2):\n%s" % (len(fields), line))
             else:
-                be = fields[0].replace(conf.lineStart, "")
+                be = fields[0].replace(conf.lineStart, "").split()
+                be = (be[0], int(be[1]), int(be[2]))
                 fe = " ".join(fields[1:])
 
-            out[tuple(be.split())] = tuple(fe.split())
+            out[be] = tuple(fe.split())
         elif line != "\n":
             misc.append(line)
     return out, misc
