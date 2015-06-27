@@ -394,12 +394,24 @@ def singleFedPlots(fedId=None, d={}, book={}, **other):
     return nBadHtrs, adcs
 
 
-def checkHtrModules(fedId=None, htrBlocks={}):
+def spigotList(header):
+    out = []
+    for key, value in header.iteritems():
+        if not key.startswith("HTR"):
+            continue
+        if not value["nWord16"]:
+            continue
+        out.append(int(key[3:]))
+    return sorted(out)
+
+
+def checkHtrModules(fedId=None, spigots=[], htrBlocks={}):
     crates = []
-    for spigot, block in htrBlocks.iteritems():
+    for iBlock, block in htrBlocks.iteritems():
         if block["IsTTP"]:
             continue
-        expected = patterns.expectedHtr(fedId, spigot)
+
+        expected = patterns.expectedHtr(fedId, spigots[iBlock])
         crates.append(block["Crate"])
         bad = [block["Top"] != expected["Top"],
                block["Slot"] != expected["Slot"],
@@ -440,7 +452,9 @@ def loop_over_feds(raw, book, adcTag="", **other):
 
         okFeds.add(fedId)
         if not raw[fedId]["header"]["utca"]:
-            checkHtrModules(fedId=fedId, htrBlocks=raw[fedId]["htrBlocks"])
+            checkHtrModules(fedId=fedId,
+                            spigots=spigotList(raw[fedId]["header"]),
+                            htrBlocks=raw[fedId]["htrBlocks"])
 
     if adcs:
         book.fill(max(adcs), "max_adc_%s" % adcTag, 128, -0.5, 127.5,
