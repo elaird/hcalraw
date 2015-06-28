@@ -394,17 +394,6 @@ def singleFedPlots(fedId=None, d={}, book={}, **other):
     return nBadHtrs, adcs
 
 
-def spigotList(header):
-    out = []
-    for key, value in header.iteritems():
-        if not key.startswith("HTR"):
-            continue
-        if not value["nWord16"]:
-            continue
-        out.append(int(key[3:]))
-    return sorted(out)
-
-
 def checkHtrModules(fedId=None, spigots=[], htrBlocks={}):
     crates = []
     for iBlock, block in htrBlocks.iteritems():
@@ -453,7 +442,7 @@ def loop_over_feds(raw, book, adcTag="", **other):
         okFeds.add(fedId)
         if not raw[fedId]["header"]["utca"]:
             checkHtrModules(fedId=fedId,
-                            spigots=spigotList(raw[fedId]["header"]),
+                            spigots=printRaw.spigotList(raw[fedId]["header"]),
                             htrBlocks=raw[fedId]["htrBlocks"])
 
     if adcs:
