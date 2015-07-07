@@ -29,12 +29,12 @@ def main(options, runs=[]):
 
 
 def plot(roots, feds1s, feds2s):
-    for i, stem in enumerate(["overview", "vs", "maps_counts", "maps_rates", "orbit", "evn", "orn", "trends", "occupancy", "adc"]):
+    for i, stem in enumerate(graphs.all_pages):
         graphs.makeSummaryPdfMulti(inputFiles=roots,
                                    feds1s=feds1s,
                                    feds2s=feds2s,
-                                   pdf="output/%s.pdf" % stem,
-                                   pages=[1 + i],
+                                   pdf="output/%d_%s.pdf" % (1 + i, stem),
+                                   pages=[stem],
                                   )
 
 
