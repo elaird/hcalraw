@@ -67,7 +67,18 @@ def htrOverview(d={}):
     printer.cyan(hyphens)
 
 
-def oneHtrPatterns(p={}, patterns={}, fedId=None, iOffset=None, utca=None):
+def spigotList(header):
+    out = []
+    for key, value in header.iteritems():
+        if not key.startswith("HTR"):
+            continue
+        if not value["nWord16"]:
+            continue
+        out.append(int(key[3:]))
+    return sorted(out)
+
+
+def oneHtrPatterns(p={}, patterns={}, header={}, iBlock=None):
     if p["IsTTP"]:
         cd = []
     else:
@@ -77,13 +88,14 @@ def oneHtrPatterns(p={}, patterns={}, fedId=None, iOffset=None, utca=None):
                             top=p["Top"],
                             fibChs=[1])
     if len(cd) >= 2:
-        if utca:
+        if header["utca"]:
             moduleId = "u%2d %2d" % (p["Crate"], p["Slot"])
         else:
-            moduleId = "%3d %2d" % (fedId, iOffset)
+            moduleId = "%3d %2d" % (header["FEDid"], spigotList(header)[iBlock])
+
         lines = patternData(p["patternData"],
                             moduleId=moduleId,
-                            utca=utca,
+                            utca=header["utca"],
                             )
         print "\n".join(lines)  # skip printer to facilitate diff
 
@@ -458,21 +470,15 @@ def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
         if 2 <= dump:
             htrOverview(h)
 
-    offsets = d["htrBlocks"].keys()
-    if not offsets:
-        return
-
     printColumnHeaders = True
-    for iOffset, offset in enumerate(sorted(offsets)):
-        p = d["htrBlocks"][offset]
-        if "patternData" in p:
-            oneHtrPatterns(p=p,
+    for iBlock, block in sorted(d["htrBlocks"].iteritems()):
+        if "patternData" in block:
+            oneHtrPatterns(p=block,
                            patterns=patterns,
-                           fedId=d["header"]["FEDid"],
-                           iOffset=iOffset,
-                           utca=h["utca"])
+                           header=h,
+                           iBlock=iBlock)
         elif 3 <= dump:
-            printColumnHeaders = oneHtr(p=p,
+            printColumnHeaders = oneHtr(p=block,
                                         printColumnHeaders=printColumnHeaders,
                                         dump=dump,
                                         crateslots=crateslots,

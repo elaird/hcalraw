@@ -10,4 +10,4 @@ restore cron
 make ticks visible in problem maps
 split tps into fg and non-fg
 autozoom time axis
-fix skipped HTR in ./oneRun.py --file1=data/USC_248332.root --feds1=703 --nevents=1 --dump=3
+compare cap-ids
