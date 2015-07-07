@@ -40,8 +40,10 @@ def check_and_adjust(options):
         options.identityMap = True
 
     if options.patterns:
-        print "INFO: setting nEvents=1 (--patterns was passed)"
+        printer.info("setting nEvents=1 (--patterns was passed)")
         options.nEvents = 1
+    elif not options.nEvents:
+        printer.warning("--nevents=%d" % options.nEvents)
 
 
 def go(options):
