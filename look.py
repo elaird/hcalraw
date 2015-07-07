@@ -110,8 +110,8 @@ def main(options, args, quiet=False):
     except ValueError:
         sys.exit("Could not convert %s to int." % args[0])
 
-    options.feds1 = "718,719"
-    options.feds2 = "uHF"
+    options.feds1 = "HBEF"
+    options.feds2 = "uHBEF"
     options.outputFile = "output/%d.root" % run
 
     override(options, quiet, run)
