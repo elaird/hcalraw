@@ -225,10 +225,13 @@ def htrSummary(blocks=[], book=None, fedId=None,
                       yAxisLabels=yAxisLabels)
 
             if channelData["ErrF"]:
-                book.fill((slot, crate),
-                          "ErrFNZ_vs_slot_crate", *misMatchMapBins,
-                          title="ErrF != 0;slot;crate;Channels / bin",
-                          yAxisLabels=yAxisLabels)
+                for name, title in [("ErrFNZ", "ErrF != 0"),
+                                    ("ErrF%d" % channelData["ErrF"], "ErrF == %d" % channelData["ErrF"]),
+                                    ]:
+                    book.fill((slot, crate),
+                              "%s_vs_slot_crate" % name, *misMatchMapBins,
+                              title="%s;slot;crate;Channels / bin" % title,
+                              yAxisLabels=yAxisLabels)
                 continue
 
             book.fill((slot, crate),
