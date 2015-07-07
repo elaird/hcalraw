@@ -470,10 +470,6 @@ def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
         if 2 <= dump:
             htrOverview(h)
 
-    offsets = d["htrBlocks"].keys()
-    if not offsets:
-        return
-
     printColumnHeaders = True
     for iBlock, block in sorted(d["htrBlocks"].iteritems()):
         if "patternData" in block:
