@@ -377,7 +377,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             utca=None, fedId=None, patterns={},
             warn=True, dump=-99):
 
-    if 9 <= dump:
+    if 10 <= dump:
         print "      (%5d 0x%04x)" % (iWord16, word16)
 
     if "htrIndex" not in d:

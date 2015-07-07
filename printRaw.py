@@ -172,13 +172,13 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
 
     anyHtrDataPrinted = False
     if 4 <= dump:
-        kargs = {"fibChs": [1] if (4 <= dump <= 5) else [0, 1, 2],
+        kargs = {"fibChs": [1] if (4 <= dump <= 6) else [0, 1, 2],
                  "nonMatched": nonMatchedQie,
                  "latency": p.get("Latency"),
                  "zs": p.get("ZS"),
                  "skipErrF": [3],
                  }
-        if 7 <= dump:
+        if dump == 6 or 8 <= dump:
             kargs["skipErrF"] = []
         if p["IsTTP"]:
             cd = ttpData(p["ttpInput"], p["ttpOutput"], p["ttpAlgoDep"])
@@ -196,7 +196,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
             anyHtrDataPrinted = True
 
         if 5 <= dump:
-            kargs = {"skipZeroTps": dump <= 6,
+            kargs = {"skipZeroTps": dump <= 7,
                      "crate": p["Crate"],
                      "slot": p["Slot"],
                      "top": p["Top"],
