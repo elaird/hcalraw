@@ -10,10 +10,9 @@ cd cpp; make -j 5; cd -
 # analyze a global run
 ./look.py 235316 --no-warn-unpack --no-warn-quality
 ./look.py 239342 --utca-pipeline-delta=4
-./look.py 239751 --nevents=100
 ./look.py 239895 --hhmm=2212 --nevents=20
 ./look.py 243484 --sparse-loop=2
-./look.py 246908 --nevents-skip=10000 --nevents=100
+./look.py 246908 --nevents=100
 
 # analyze several global runs
 cat gr_list.txt | ./multi.py --nevents=100
