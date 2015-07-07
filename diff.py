@@ -28,6 +28,7 @@ def mapping(file=None, skip=[]):
 
 
 def diffs(ref={}, cabled={}):
+    extra = {}
     missing = {}
     different = {}
     same = {}
@@ -40,7 +41,12 @@ def diffs(ref={}, cabled={}):
             different[be] = (fe, cabled[be])
         else:
             same[be] = fe
-    return missing, different, same
+
+    for be, fe in cabled.iteritems():
+        if be not in ref:
+            extra[be] = fe
+
+    return extra, missing, different, same
 
 
 def pretty(be=None, fe=None):
@@ -104,12 +110,12 @@ def printTable(rbxes={}, header="", zero="  "):
     print
 
 
-def report(missing=None, different=None, same=None, nMissingMax=None):
+def report(extra=None, missing=None, different=None, same=None, nMissingMax=None):
     assert nMissingMax is not None
 
     printTable(fiberCount(same.values()), header="Fibers matching reference")
     nMissing = fiberCount(missing.values())
-    printTable(nMissing, header="Missing Fibers")
+    printTable(nMissing, header="Fibers in reference, but either not acquired or having 8b/10b errors")
 
     header = "| RBXes with (1 <= n missing fibers <= %d) |" % nMissingMax
     print "-" * len(header)
@@ -129,13 +135,24 @@ def report(missing=None, different=None, same=None, nMissingMax=None):
             print pretty(be=be, fe=ref)
 
     print
-    print "---------------"
-    print "| Differences |"
-    print "---------------"
+    print "-----------------------------------"
+    print "| Fibers differing from reference |"
+    print "-----------------------------------"
     if different:
         print "DCC(CR) SP(HTR) FI: ref. RBX RM FI  |   cabled"
         for be, (ref, cabled) in sorted(different.iteritems()):
             print pretty(be=be, fe=ref) + "  | " + pretty(fe=cabled)
+    else:
+        print "None"
+
+    print
+    print "--------------------------------------------------------"
+    print "| Fibers acquired and valid, but absent from reference |"
+    print "--------------------------------------------------------"
+    if extra:
+        print "DCC(CR) SP(HTR) FI: cabled"
+        for be, fe in sorted(extra.iteritems()):
+            print pretty(be=be, fe=fe)
     else:
         print "None"
 
