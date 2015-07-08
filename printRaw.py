@@ -383,7 +383,7 @@ def patternData(d={}, moduleId="", utca=None):
     descr = configuration.patterns.lineStart
 
     if patternB:
-        headers = ["ModuleId", "Fibers", "Pattern"]
+        headers = [descr, "ModuleId", "Fibers", "Pattern"]
         chars = " ".join(["%2d" % i for i in range(20)])
         out = ["  ".join(headers+[chars])]
     else:
