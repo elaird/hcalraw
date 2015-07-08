@@ -403,6 +403,9 @@ def patternData(d={}, moduleId="", utca=None):
                 fibers = "     %2d" % (1 + fiber1_)
 
             ps = patternString(lst, key)
+            if ps is None:
+                continue
+
             if patternB:
                 out.append("   ".join([descr + moduleId, fibers, "  %s" % key, "  "]) + ps)
             else:
@@ -422,7 +425,11 @@ def patternString(patterns=[], key=""):
     iNone = codes.index(None)
     if iNone != -1:
         codes = codes[:iNone]
-    return configuration.patterns.string(codes)
+
+    if codes:
+        return configuration.patterns.string(codes)
+    else:
+        return None
 
 
 def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
