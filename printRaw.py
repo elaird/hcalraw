@@ -421,7 +421,7 @@ def patternString(patterns=[], key=""):
         for k in [key+"0", key+"1"]:
             codes.append(p.get(k))
 
-    # remove any codes appearing after first None
+    # remove Nones (and any codes appearing after first None)
     iNone = codes.index(None)
     if iNone != -1:
         codes = codes[:iNone]
