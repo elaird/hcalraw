@@ -418,13 +418,12 @@ def patternData(d={}, moduleId="", utca=None):
 def patternString(patterns=[], key=""):
     codes = []
     for p in patterns:
-        for k in [key+"0", key+"1"]:
-            codes.append(p.get(k))
-
-    # remove Nones (and any codes appearing after first None)
-    iNone = codes.index(None)
-    if iNone != -1:
-        codes = codes[:iNone]
+        c0 = p.get(key + "0")
+        c1 = p.get(key + "1")
+        if c0 is None or c1 is None:
+            break
+        else:
+            codes += [c0, c1]
 
     if codes:
         return configuration.patterns.string(codes)
