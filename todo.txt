@@ -11,3 +11,6 @@ make ticks visible in problem maps
 split tps into fg and non-fg
 autozoom time axis
 compare cap-ids
+improve summary plots to handle more feds
+fix ErrF=3 vs. missing patterns
+fix --rmribbon
