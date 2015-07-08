@@ -175,11 +175,11 @@ def opts(alsoArgs=False):
                     default=None,
                     type="int",
                     help="minimum hhmm")
-    look.add_option("--hf",
-                    dest="hf",
+    look.add_option("--hbhe",
+                    dest="hbhe",
                     default=False,
                     action="store_true",
-                    help="restrict FEDs to (u)HF")
+                    help="consider (u)HBHE rather than (u)HF")
     parser.add_option_group(look)
 
     options, args = parser.parse_args()
