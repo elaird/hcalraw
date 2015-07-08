@@ -4,7 +4,7 @@ eosprefix = "root://eoscms.cern.ch/"
 
 def fedMap():
     d = {"HBHE": range(700, 718),
-         "HF": range(718, 724),
+         "HF": range(718, 720),  # remove 720 - 723
          "HO": range(724, 732),
          "uHBHE": range(1100, 1118, 2),
          "uHF": [1118, 1120, 1122, 1132],
