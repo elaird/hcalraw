@@ -738,17 +738,16 @@ def fedSum(f=None, prefix="", feds=[]):
     return h
 
 
-def plotZS(f, pad0, feds1, feds2):
-    pad0.cd(3)
-    adjustPad(logY=True)
+def superimpose_two(f, names=[], label1="", feds=[]):
+    assert len(names) == 2, names
 
-    ha1 = fedSum(f, "channel_peak_adc_mp1", feds2)
-    ha0 = fedSum(f, "channel_peak_adc_mp0", feds2)
+    ha0 = fedSum(f, names[0], feds)
+    ha1 = fedSum(f, names[1], feds)
     maxes = []
     for h in [ha1, ha0]:
         if not h:
             continue
-        h.SetTitle(fedString(feds2))
+        h.SetTitle(fedString(feds))
         shiftFlows(h)
         stylize(h, r.kBlue, 1)
         magnify(h, factor=1.8)
@@ -769,29 +768,28 @@ def plotZS(f, pad0, feds1, feds2):
         stylize(ha1, color1, 2)
         ha1.Draw("hist")
         ha1.SetMaximum(hMax)
-        leg.AddEntry(ha1, "M&P", "l")
+        leg.AddEntry(ha1, label1, "l")
         same = "same"
     if ha0:
         stylize(ha0, r.kBlue, 1)
         ha0.Draw("hist%s" % same)
         ha0.SetMaximum(hMax)
     leg.Draw()
+    return [ha0, ha1, leg]
+
+
+def plotZS(f, pad0, feds1, feds2):
+    pad0.cd(3)
+    adjustPad(logY=True)
+    keep = []
+
+    keep += superimpose_two(f, names=["channel_peak_adc_mp%d" % i for i in range(2)], label1="M&P", feds=feds2)
 
     pad0.cd(6)
     adjustPad(logY=True)
 
-    ht1 = f.Get("tp_vs_tp_soi2_mp0")
-    # ht1 = fedSum(f, "channel_peak_tp", feds2)
-    if ht1:
-        ht1.SetTitle("%s;TP E_{SOI};Trigger Towers / bin" % fedString(feds2))
-        # ht1.SetTitle("%s;Peak TP E;Trigger Towers / bin" % fedString(feds2))
-        shiftFlows(ht1)
-        ht1.Draw("hist")
-        ht1.GetXaxis().SetRangeUser(-0.5, 13.5)
-        stylize(ht1, r.kBlue, 1)
-        magnify(ht1, factor=1.8)
-
-    return [ha0, ha1, leg, ht1]
+    keep += superimpose_two(f, names=["tp_soi_fg%d" % i for i in range(2)], label1="FG=1", feds=feds2)
+    return keep
 
 
 def plotTS(f, pad0, feds1, feds2):
