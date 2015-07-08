@@ -117,7 +117,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
         else:
             nEvnMisMatch += 1
             if warn:
-                printer.warning("%s / crate%3d slot%3d%1s has EvN 0x%06x" % (msg, block["Crate"], block["Slot"], block["Top"], block["EvN"]))
+                printer.warning("%s / crate %2d slot %2d%1s has EvN 0x%06x" % (msg, block["Crate"], block["Slot"], block["Top"], block["EvN"]))
 
         evnMask = 0x7f
         book.fill((fedEvn & evnMask, block["EvN"] & evnMask), "EvN_HTR_vs_FED_%d" % fedId,
