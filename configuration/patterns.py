@@ -10,9 +10,6 @@ pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 
 
 def string(codes=[], asciifyPatterns=True, regMatchPatterns=True):
-    if not any(codes):
-        return None
-
     l = []
     for code in codes:
         if compressed:

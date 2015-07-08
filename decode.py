@@ -612,10 +612,13 @@ def storePatternData(l={}, nFibers=None, nTsMax=20):
             feWords = []
             # Tullio says HTR f/w makes no distinction between optical cables 1 and 2
             for fiber in [fiber1, fiber2]:
-                feWord32 = 0
+                feWord32 = None
                 for fibCh in range(3):
                     key = channelId(fiber, fibCh)
                     if key not in d:
+                        continue
+
+                    if d[key]["ErrF"] == 3:  # 8b/10b errors
                         continue
 
                     qies = d[key]["QIE"]
@@ -632,6 +635,9 @@ def storePatternData(l={}, nFibers=None, nTsMax=20):
                                             ]))
                     else:
                         cap = 0
+
+                    if feWord32 is None:
+                        feWord32 = 0
                     if fibCh == 0:
                         feWord32 |= qie << 25
                         feWord32 |= cap << 7
@@ -644,37 +650,42 @@ def storePatternData(l={}, nFibers=None, nTsMax=20):
 
                 feWords.append(feWord32)
                 #print "iFiberPair =", iFiberPair, "iTs =", iTs, "qie0 =", hex(qie0), "feWord =", feWord32_1
+
             l["patternData"][fiber1].append(patternData(feWords))
 
 
 def patternData(feWords=[]):
     assert len(feWords) == 2, len(feWords)
+    d = {}
 
-    A0 = (feWords[0] >> 24) & 0xfe
-    A0 |= (feWords[0] >> 7) & 0x1
+    if feWords[0] is not None:
+        A0 = (feWords[0] >> 24) & 0xfe
+        A0 |= (feWords[0] >> 7) & 0x1
+        d["A0"] = flipped(A0)
 
-    A1 = (feWords[0] >> 17) & 0x7f
-    A1 |= (feWords[0] >> 1) & 0x80
+        A1 = (feWords[0] >> 17) & 0x7f
+        A1 |= (feWords[0] >> 1) & 0x80
+        d["A1"] = flipped(A1)
 
-    B0 = (feWords[0] >> 8) & 0xfe
-    B0 |= (feWords[0] >> 3) & 0x1
+        B0 = (feWords[0] >> 8) & 0xfe
+        B0 |= (feWords[0] >> 3) & 0x1
+        d["B0"] = flipped(B0)
 
-    B1 = (feWords[1] >> 9) & 0xfe
-    B1 |= (feWords[0] << 3) & 0x80
+        if feWords[1] is not None:
+            B1 = (feWords[1] >> 9) & 0xfe
+            B1 |= (feWords[0] << 3) & 0x80
+            d["B1"] = flipped(B1)
 
-    C0 = (feWords[1] >> 24) & 0xfe
-    C0 |= (feWords[1] >> 7) & 0x1
+    if feWords[1] is not None:
+        C0 = (feWords[1] >> 24) & 0xfe
+        C0 |= (feWords[1] >> 7) & 0x1
+        d["C0"] = flipped(C0)
 
-    C1 = (feWords[1] >> 17) & 0x7f
-    C1 |= (feWords[1] >> 1) & 0x80
+        C1 = (feWords[1] >> 17) & 0x7f
+        C1 |= (feWords[1] >> 1) & 0x80
+        d["C1"] = flipped(C1)
 
-    return {"A0": flipped(A0),
-            "A1": flipped(A1),
-            "B0": flipped(B0),
-            "B1": flipped(B1),
-            "C0": flipped(C0),
-            "C1": flipped(C1),
-            }
+    return d
 
 
 def flipped(raw=None, nBits=8):

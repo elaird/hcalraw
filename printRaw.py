@@ -383,7 +383,7 @@ def patternData(d={}, moduleId="", utca=None):
     descr = configuration.patterns.lineStart
 
     if patternB:
-        headers = ["ModuleId", "Fibers", "Pattern"]
+        headers = [descr, "ModuleId", "Fibers", "Pattern"]
         chars = " ".join(["%2d" % i for i in range(20)])
         out = ["  ".join(headers+[chars])]
     else:
@@ -394,10 +394,6 @@ def patternData(d={}, moduleId="", utca=None):
             if (not patternB) and key == "B":
                 continue
 
-            ps = patternString(lst, key)
-            if not ps:
-                continue
-
             fiber1_ = fiber1 + (0 if utca else 1)
             if key == "B":
                 fibers = "  %2d,%2d" % (fiber1_, 1 + fiber1_)
@@ -405,6 +401,10 @@ def patternData(d={}, moduleId="", utca=None):
                 fibers = "     %2d" % (fiber1_)
             elif key == "C":
                 fibers = "     %2d" % (1 + fiber1_)
+
+            ps = patternString(lst, key)
+            if ps is None:
+                continue
 
             if patternB:
                 out.append("   ".join([descr + moduleId, fibers, "  %s" % key, "  "]) + ps)
@@ -418,9 +418,17 @@ def patternData(d={}, moduleId="", utca=None):
 def patternString(patterns=[], key=""):
     codes = []
     for p in patterns:
-        for k in [key+"0", key+"1"]:
-            codes.append(p[k])
-    return configuration.patterns.string(codes)
+        c0 = p.get(key + "0")
+        c1 = p.get(key + "1")
+        if c0 is None or c1 is None:
+            break
+        else:
+            codes += [c0, c1]
+
+    if codes:
+        return configuration.patterns.string(codes)
+    else:
+        return None
 
 
 def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
