@@ -618,8 +618,8 @@ def storePatternData(l={}, nFibers=None, nTsMax=20):
                     if key not in d:
                         continue
 
-                    # if  d[key]["ErrF"] == 3:  # 8b/10b errors
-                    #     continue
+                    if  d[key]["ErrF"] == 3:  # 8b/10b errors
+                        continue
 
                     qies = d[key]["QIE"]
                     if len(qies) <= iTs:
