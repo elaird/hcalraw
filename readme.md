@@ -10,10 +10,9 @@ cd cpp; make -j 5; cd -
 # analyze a global run
 ./look.py 235316 --no-warn-unpack --no-warn-quality
 ./look.py 239342 --utca-pipeline-delta=4
-./look.py 239751 --nevents=100
 ./look.py 239895 --hhmm=2212 --nevents=20
 ./look.py 243484 --sparse-loop=2
-./look.py 246908 --nevents-skip=10000 --nevents=100
+./look.py 246908 --nevents=100
 
 # analyze several global runs
 cat gr_list.txt | ./multi.py --nevents=100
@@ -46,9 +45,8 @@ cat gr_list.txt | ./dqReport.py
 # analyze FE pattern runs
 # (before HO refibering) ./oneRun.py --file1=$LS1/USC_235576.root --feds1=HCAL --patterns | ./diff.py data/ref_2014.txt
 # (before move to uTCA ) ./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --patterns | ./diff.py data/ref_vme_G.txt
-./oneRun.py --file1=$LS1/USC_239099.root --feds1=HCAL --patterns | ./diff.py data/ref_vme_G.txt
-./oneRun.py --file1=$LS1/USC_239099.root --feds1=uHF  --patterns | ./diff.py data/ref_utca_G.txt
-
+./oneRun.py --file1=$LS1/USC_250056.root --feds1=HCAL --patterns | ./diff.py data/ref_vme_G.txt
+./oneRun.py --file1=$LS1/USC_250056.root --feds1=uHBEF --patterns | ./diff.py data/ref_utca_G.txt
 
 # read about usage
 ./oneRun.py --help

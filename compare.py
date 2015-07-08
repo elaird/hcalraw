@@ -117,7 +117,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
         else:
             nEvnMisMatch += 1
             if warn:
-                printer.warning("%s / slot %2d%1s has EvN 0x%06x" % (msg, block["Slot"], block["Top"], block["EvN"]))
+                printer.warning("%s / crate %2d slot %2d%1s has EvN 0x%06x" % (msg, block["Crate"], block["Slot"], block["Top"], block["EvN"]))
 
         evnMask = 0x7f
         book.fill((fedEvn & evnMask, block["EvN"] & evnMask), "EvN_HTR_vs_FED_%d" % fedId,
@@ -225,10 +225,13 @@ def htrSummary(blocks=[], book=None, fedId=None,
                       yAxisLabels=yAxisLabels)
 
             if channelData["ErrF"]:
-                book.fill((slot, crate),
-                          "ErrFNZ_vs_slot_crate", *misMatchMapBins,
-                          title="ErrF != 0;slot;crate;Channels / bin",
-                          yAxisLabels=yAxisLabels)
+                for name, title in [("ErrFNZ", "ErrF != 0"),
+                                    ("ErrF%d" % channelData["ErrF"], "ErrF == %d" % channelData["ErrF"]),
+                                    ]:
+                    book.fill((slot, crate),
+                              "%s_vs_slot_crate" % name, *misMatchMapBins,
+                              title="%s;slot;crate;Channels / bin" % title,
+                              yAxisLabels=yAxisLabels)
                 continue
 
             book.fill((slot, crate),

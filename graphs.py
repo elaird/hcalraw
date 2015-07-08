@@ -966,9 +966,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
 def pageThree(stem, suppress=lambda x: False, yx=False, keys=["feds1", "feds2"], **kargs):
     names = []
     for key in keys:
-        names += [stem % x for x in kargs[key][:3]]
-    names += [""] * 6
-    names = names[:6]
+        names += [stem % x for x in kargs[key]]
     h = summed(kargs["f"], names)
 
     if h and not suppress(h):
@@ -992,7 +990,7 @@ def pageTrends(f=None, feds1=[], feds2=[], canvas=None, pdf="", title="", names=
     canvas.Print(pdf)
 
 
-def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", pages=range(1, 100)):
+def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", pages=None):
     r.gROOT.SetBatch(True)
     r.gErrorIgnoreLevel = r.kWarning
 
@@ -1005,6 +1003,9 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
 
     canvas = r.TCanvas()
     canvas.Print(pdf + "[")
+
+    if pages is None:
+        pages = all_pages
 
     for fileName, feds1, feds2 in zip(inputFiles, feds1s, feds2s):
         f = r.TFile(fileName)
@@ -1019,11 +1020,11 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         for item in ["f", "feds1", "feds2", "canvas", "pdf", "title"]:
             kargs[item] = eval(item)
 
-        if 1 in pages:
+        if "overview" in pages:
             pageOne(**kargs)
             kargs["title"] = ""  # don't stamp later pages
 
-        if feds2 and 2 in pages:
+        if feds2 and "vs" in pages:
             pageTwo(names=["adc_vs_adc", "adc_vs_adc_soi_both", "",
                            "tp_vs_tp", "tp_vs_tp_soi_both", ""],
                     alsoZs=True, **kargs)
@@ -1034,35 +1035,48 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         kargs34 = {"names": names, "doYx": False, "retitle": False, "boxes": True}
         kargs34.update(kargs)
 
-        if 3 in pages:
+        if "maps_rates" in pages:
             pageTwo(**kargs34)
 
-        if 4 in pages:
+        if "maps_evn_orn_bcn" in pages:
             denoms = {"EvN_mismatch_vs_slot_crate": "block_vs_slot_crate",
                       "OrN5_mismatch_vs_slot_crate": "block_vs_slot_crate",
                       "BcN_mismatch_vs_slot_crate": "block_vs_slot_crate",
-                      "ErrFNZ_vs_slot_crate": "ErrFAny_vs_slot_crate",
-                      "ADC_mismatch_vs_slot_crate": "ErrF0_vs_slot_crate",
-                      "TP_mismatch_vs_slot_crate": "TP_matchable_vs_slot_crate",
                       }
+            kargs34["names"] = denoms.keys()
             pageTwo(denoms=denoms, **kargs34)
 
-        if 5 in pages:
+        if "maps_errf" in pages:
+            denoms = {"ErrF1_vs_slot_crate": "ErrFAny_vs_slot_crate",
+                      "ErrF3_vs_slot_crate": "ErrFAny_vs_slot_crate",
+                      "ErrFNZ_vs_slot_crate": "ErrFAny_vs_slot_crate",
+                      }
+            kargs34["names"] = sorted(denoms.keys())
+            pageTwo(denoms=denoms, **kargs34)
+
+        if "maps_adc_tp" in pages:
+            denoms = {"ADC_mismatch_vs_slot_crate": "ErrF0_vs_slot_crate",
+                      "TP_mismatch_vs_slot_crate": "TP_matchable_vs_slot_crate",
+                      }
+            kargs34["names"] = denoms.keys()
+            pageTwo(denoms=denoms, **kargs34)
+
+        if "frac0_orbit" in pages:
             pageThree(stem="frac0_vs_BcN_%d", suppress=frac0_all_good, **kargs)
 
-        if 6 in pages:
+        if "evn" in pages:
             pageThree(stem="EvN_HTR_vs_FED_%d", suppress=all_diagonal, yx=True, **kargs)
 
-        if 7 in pages:
+        if "orn" in pages:
             pageThree(stem="OrN5_HTR_vs_FED_%d", suppress=all_diagonal, yx=True, **kargs)
 
-        if 8 in pages:
+        if "trends" in pages:
             pageTrends(names=["fracEvN_vs_time", "frac0_vs_time", "ADC_misMatch_vs_time"], **kargs)
 
-        if 9 in pages:
+        if "occupancy" in pages:
             pageThree(stem="fiber_vs_slot_%d", suppress=full_utca_crate, keys=["feds2"], **kargs)
 
-        if 10 in pages:
+        if "ts" in pages:
             pageThree(stem="ts_vs_time_%d", **kargs)
 
         f.Close()
@@ -1079,6 +1093,13 @@ def main(options):
                    feds2=sw.fedList(options.feds2),
                    pdf=options.outputFile.replace(".root", ".pdf"),
     )
+
+
+all_pages = ["overview", "vs", "page3",
+             "maps_counts",
+             "maps_evn_orn_bcn", "maps_errf", "maps_adc_tp",
+             "frac0_orbit", "evn", "orn",
+             "trends", "occupancy", "ts"]
 
 
 if __name__ == "__main__":

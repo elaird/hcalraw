@@ -17,6 +17,10 @@ def warning(s=''):
     __line('91m', 'WARNING: '+s)
 
 
+def info(s=''):
+    __line('0m', 'INFO: '+s)
+
+
 def msg(s=''):
     __line('0m', s)
 

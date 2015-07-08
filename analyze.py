@@ -323,7 +323,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
 
         iWord64 = jWord64 - len(skipped64)
 
-        if 8 <= dump:
+        if 9 <= dump:
             if not iWord64:
                 print "#iw64 w64"
             print "%5d" % iWord64, "%016x" % word64
