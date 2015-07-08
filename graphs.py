@@ -966,9 +966,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
 def pageThree(stem, suppress=lambda x: False, yx=False, keys=["feds1", "feds2"], **kargs):
     names = []
     for key in keys:
-        names += [stem % x for x in kargs[key][:3]]
-    names += [""] * 6
-    names = names[:6]
+        names += [stem % x for x in kargs[key][:]]
     h = summed(kargs["f"], names)
 
     if h and not suppress(h):
