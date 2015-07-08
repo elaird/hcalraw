@@ -611,8 +611,8 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQual
         if doDump:
             matched21, misMatched21 = adc_vs_adc(mapF2, mapF1, titlePrefix=titlePrefix)
 
-        tF1 = tpMap(raw1, warnQuality)[0]
-        tF2 = tpMap(raw2, warnQuality)[0]
+        tF1 = tpMap(raw1, warnQuality, book)[0]
+        tF2 = tpMap(raw2, warnQuality, book)[0]
 
         tMatched12, tMisMatched12 = adc_vs_adc(tF1, tF2, book=book,
                                                name="tp_vs_tp",
@@ -739,7 +739,7 @@ def dataMap(raw={}, book=None):
     return forward, backward, skipped
 
 
-def tpMap(raw={}, warn=True):
+def tpMap(raw={}, warn=True, book=None):
     forward = {}
     backward = {}
     skipped = []
@@ -755,17 +755,19 @@ def tpMap(raw={}, warn=True):
                 if warn and sum(triggerData["SOI"]) != 1:
                     printer.warning("%s has !=1 SOIs: %s" % (coords, triggerData["SOI"]))
 
-                i = None
-                for i, yes in enumerate(triggerData["SOI"]):
-                    if yes:
-                        break
-
-                if i is None:
+                soi = triggerData["SOI"].index(1)
+                if soi == -1:
                     continue
 
-                l = [i, delta, 0]
-                for tp9 in triggerData["TP"]:
-                    l.append(tp9 & 0xff)  # ignore fine-grain bit
+                l = [soi, delta, 0]
+                for i, tp9 in enumerate(triggerData["TP"]):
+                    fg = tp9 >> 8
+                    tp8 = tp9 & 0xff
+                    l.append(tp8)
+
+                    if i == soi:
+                        nBins = 14
+                        book.fill(tp8, "tp_soi_fg%d_%d" % (fg, fedId), nBins, -0.5, nBins - 0.5, title="FED %d;TP E_{SOI};Trigger Towers / bin" % fedId)
                 forward[coords] = l
 
     return forward, backward, skipped

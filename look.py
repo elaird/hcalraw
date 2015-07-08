@@ -115,8 +115,8 @@ def main(options, args, quiet=False):
         options.feds1 = "HF"
         options.feds2 = "uHF"
     else:
-        options.feds1 = "HBEF"
-        options.feds2 = "uHBEF"
+        options.feds1 = "HF"
+        options.feds2 = "uHF"
 
     override(options, quiet, run)
 
@@ -133,10 +133,14 @@ def main(options, args, quiet=False):
                       6: "/store/data/Commissioning2015/Cosmics/RAW/v1",
                       7: "/store/data/Commissioning2015/MinimumBias/RAW/v1",
                       })
-    else:
+    elif run < 250985:
         paths.update({# 3: "/store/data/Run2015A/HcalNZS/RAW/v1",
-                      # 4: "/store/data/Run2015A/ZeroBias/RAW/v1",
-                      5: "/store/express/Run2015A/ExpressPhysics/FEVT/Express-v1/",
+                      4: "/store/express/Run2015A/ExpressPhysics/FEVT/Express-v1/",
+                      })
+
+    else:
+        paths.update({# 3: "/store/data/Run2015B/HcalNZS/RAW/v1",
+                      4: "/store/express/Run2015B/ExpressPhysics/FEVT/Express-v1/",
                       })
 
     for iFind, grDir in sorted(paths.iteritems()):
