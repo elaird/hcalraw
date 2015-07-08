@@ -394,10 +394,6 @@ def patternData(d={}, moduleId="", utca=None):
             if (not patternB) and key == "B":
                 continue
 
-            ps = patternString(lst, key)
-            if not ps:
-                continue
-
             fiber1_ = fiber1 + (0 if utca else 1)
             if key == "B":
                 fibers = "  %2d,%2d" % (fiber1_, 1 + fiber1_)
@@ -406,6 +402,7 @@ def patternData(d={}, moduleId="", utca=None):
             elif key == "C":
                 fibers = "     %2d" % (1 + fiber1_)
 
+            ps = patternString(lst, key)
             if patternB:
                 out.append("   ".join([descr + moduleId, fibers, "  %s" % key, "  "]) + ps)
             else:
@@ -419,7 +416,12 @@ def patternString(patterns=[], key=""):
     codes = []
     for p in patterns:
         for k in [key+"0", key+"1"]:
-            codes.append(p[k])
+            codes.append(p.get(k))
+
+    # remove any codes appearing after first None
+    iNone = codes.index(None)
+    if iNone != -1:
+        codes = codes[:iNone]
     return configuration.patterns.string(codes)
 
 
