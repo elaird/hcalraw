@@ -8,11 +8,11 @@ cd cpp; make -j 5; cd -
 
 
 # analyze a global run
-./look.py 235316 --no-warn-unpack --no-warn-quality
-./look.py 239342 --utca-pipeline-delta=4
-./look.py 239895 --hhmm=2212 --nevents=20
-./look.py 246908 --nevents=100
-./look.py 251244 --nevents=300
+./look.py 235316 --no-warn-unpack --no-warn-quality --hf
+./look.py 239342 --utca-pipeline-delta=4 --hf
+./look.py 239895 --hhmm=2212 --nevents=20 --hf
+./look.py 246908 --nevents=100 --hf
+./look.py 251244 --nevents=300 --hf
 
 
 # analyze several global runs
@@ -25,7 +25,7 @@ cat gr_list.txt | ./dqReport.py
 
 
 # compare payloads of different sets of FEDs, within one file
-./look.py 239480
+./look.py 239480 --hf
 ./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF \
 --dump=0 --output-file=output/239480.root --progress --utca-bcn-delta=-131
 
