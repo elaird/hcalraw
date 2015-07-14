@@ -477,21 +477,30 @@ def tsLoop(lst1, lst2, book=None, name=None,
 
     assert xMin <= -2  # xMin / 2 used below as a (negative) code
 
-    nPre1, delta1, mp1 = lst1[:3]
-    qies1 = lst1[3:]
+    nPre1, delta1, mp1, cap1 = lst1[:4]
+    cap1 = (cap1 + delta1) % 4
+    qies1 = lst1[4:]
     n1 = len(qies1)
 
     if lst2 is None:
         nPre2 = delta2 = mp2 = 0
+        cap2 = -2  # dummy
         qies2 = None
         n2 = None
     else:
-        nPre2, delta2, mp2 = lst2[:3]
-        qies2 = lst2[3:]
+        nPre2, delta2, mp2, cap2 = lst2[:4]
+        cap2 = (cap2 + delta2) % 4
+        qies2 = lst2[4:]
         n2 = len(qies2)
 
     nTsMatched = 0
     nTs = 0
+
+    if "adc" in name:
+        nCap = 6  # accommodate dummy value above
+        book.fill((cap1, cap2), "capid0_vs_capid0",
+                  (nCap, nCap), (3.5 - nCap, 3.5 - nCap), (3.5, 3.5),
+                  title=titlea)
 
     for i1, qie1 in enumerate(qies1):
         j1 = i1 + delta1
@@ -561,8 +570,8 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
         else:
             misMatched.append(coords1)
             if loud and coords2 in mapF2:
-                samples1 = tuple(lst1[3:])
-                samples2 = tuple(lst2[3:])
+                samples1 = tuple(lst1[4:])
+                samples2 = tuple(lst2[4:])
                 q1 = " ".join(["%2x"] * len(samples1)) % samples1
                 q2 = " ".join(["%2x"] * len(samples2)) % samples2
                 c1 = str(coords1)
@@ -748,7 +757,8 @@ def dataMap(raw={}, book=None):
                     skipped.append(coords)
                     continue
 
-                data = tuple([nPre, delta, mp] + channelData["QIE"])
+                cap0 = channelData["CapId0"]
+                data = tuple([nPre, delta, mp, cap0] + channelData["QIE"])
                 # print coords, data
                 forward[coords] = data
                 backward[data] = coords
@@ -775,7 +785,7 @@ def tpMap(raw={}, warn=True, book=None):
                 if soi == -1:
                     continue
 
-                l = [soi, delta, 0]
+                l = [soi, delta, 0, 0]
                 for i, tp9 in enumerate(triggerData["TP"]):
                     fg = tp9 >> 8
                     tp8 = tp9 & 0xff
