@@ -235,8 +235,7 @@ def histogramChannelData(book, block, channelData, fedId,
     nAdcMisMatch = 0
 
     ErrF[channelData["ErrF"]] += 1
-    nQie = len(channelData["QIE"])
-    book.fill(nQie, "nQieSamples_%d" % fedId, 14, -0.5, 13.5,
+    book.fill(len(channelData["QIE"]), "nQieSamples_%d" % fedId, 14, -0.5, 13.5,
               title="FED %d;number of QIE samples;Channels / bin" % fedId)
 
     book.fill(slotCrate,
