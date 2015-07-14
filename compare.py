@@ -142,10 +142,9 @@ def htrSummary(blocks=[], book=None, fedId=None,
                   title="FED %d;HTR BcN - FED BcN;HTRs / bin" % fedId)
 
 
-        slot = slot2bin(block["Slot"])
-        crate = crate2bin.get((block["Crate"], block["Top"]), crateFail)
+        slotCrate = (slot2bin(block["Slot"]), crate2bin.get((block["Crate"], block["Top"]), crateFail))
 
-        book.fill((slot, crate),
+        book.fill(slotCrate,
                   "block_vs_slot_crate",
                   *misMatchMapBins,
                   title="any;slot;crate;HTR / bin",
@@ -156,7 +155,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
                             ("BcN", fedBcn),
                          ]:
             if (block[key] - fedVar):
-                book.fill((slot, crate),
+                book.fill(slotCrate,
                           "%s_mismatch_vs_slot_crate" % key,
                           *misMatchMapBins,
                           title="%s mismatch;slot;crate;HTR - FED   mismatches / bin" % key,
@@ -192,9 +191,9 @@ def htrSummary(blocks=[], book=None, fedId=None,
                 continue
 
             crate2, slot2, top2 = tpCoords2[:3]
-            slotsCrates = [(slot, crate),
-                           (slot2bin(slot2), crate2bin.get((crate2, top2), crateFail)),
-                           ]
+            slotsCrates = [slotCrate,
+                          (slot2bin(slot2), crate2bin.get((crate2, top2), crateFail)),
+                          ]
 
             for t in slotsCrates:
                 book.fill(t, "TP_matchable_vs_slot_crate", *misMatchMapBins,
@@ -213,73 +212,90 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
         for channelData in block["channelData"].values():
             flavor(book, channelData, fedId)
-
-            ErrF[channelData["ErrF"]] += 1
-            nQie = len(channelData["QIE"])
-            book.fill(nQie, "nQieSamples_%d" % fedId, 14, -0.5, 13.5,
-                      title="FED %d;number of QIE samples;Channels / bin" % fedId)
-
-            book.fill((slot, crate),
-                      "ErrFAny_vs_slot_crate", *misMatchMapBins,
-                      title="any;slot;crate;Channels / bin",
-                      yAxisLabels=yAxisLabels)
-
-            if channelData["ErrF"]:
-                for name, title in [("ErrFNZ", "ErrF != 0"),
-                                    ("ErrF%d" % channelData["ErrF"], "ErrF == %d" % channelData["ErrF"]),
-                                    ]:
-                    book.fill((slot, crate),
-                              "%s_vs_slot_crate" % name, *misMatchMapBins,
-                              title="%s;slot;crate;Channels / bin" % title,
-                              yAxisLabels=yAxisLabels)
-                continue
-
-            book.fill((slot, crate),
-                      "ErrF0_vs_slot_crate", *misMatchMapBins,
-                      title="ErrF == 0;slot;crate;Channels / bin",
-                      yAxisLabels=yAxisLabels)
-
-            book.fill((block["Slot"], channelData["Fiber"]),
-                      "fiber_vs_slot_%d" % fedId, (12, 24), (0.5, -0.5), (12.5, 23.5),
-                      title="FED %d;Slot;Fiber;Channels (ErrF == 0) / bin" % fedId)
-
-            coords = (block["Crate"], block["Slot"], block["Top"], channelData["Fiber"], channelData["FibCh"])
-            if coords in adcMismatches:
-                nAdcMisMatch += 1
-                crate2, slot2, top2 = hw.transformed_qie(*coords)[:3]
-                for t in [(slot, crate),
-                          (slot2bin(slot2), crate2bin.get((crate2, top2), crateFail)),
-                         ]:
-                    book.fill(t, "ADC_mismatch_vs_slot_crate", *misMatchMapBins,
-                              title="ADC mismatch;slot;crate;Channels / bin",
-                              yAxisLabels=yAxisLabels)
-            elif coords in adcMatches:
-                nAdcMatch += 1
-
-            caps[channelData["CapId0"]] += 1
-
-            if channelData["QIE"]:
-                adc = max(channelData["QIE"])
-                adcs.add(adc)
-                mp = channelData.get("M&P", 0)
-                book.fill(adc, "channel_peak_adc_mp%d_%d" % (mp, fedId), 14, -0.5, 13.5,
-                          title="FED %d;Peak ADC (ErrF == 0);Channels / bin" % fedId)
-
-                if fedTime:
-                    adcMin = 9
-                    nBins = 10
-                    for i, adc in enumerate(channelData["QIE"]):
-                        if adcMin <= adc:
-                            book.fill(i, "ts_qie_%d" % fedId, nBins, -0.5, nBins - 0.5,
-                                      title="FED %d;TS (when %s <= ADC);Channels / bin" % (fedId, adcMin))
-                            book.fill((fedTime/60., i), "ts_vs_time_%d" % fedId, (40, nBins), (0.0, -0.5), (4.0, nBins - 0.5),
-                                      title="FED %d;time (hours);TS (when %d <= ADC);Channels / bin" % (fedId, adcMin))
+            a, b = histogramChannelData(book, block, channelData, fedId,
+                                        caps, ErrF, adcs, adcMatches, adcMismatches,
+                                        slotCrate, misMatchMapBins, yAxisLabels,
+                                        fedTime)
+            nAdcMatch += a
+            nAdcMisMatch += b
 
     return [nBadHtrs, ErrF, caps, adcs,
             matchFrac(nEvnMatch, nEvnMisMatch),
             matchFrac(nAdcMatch, nAdcMisMatch),
             matchFrac(nTpMatch, nTpMisMatch),
             ]
+
+
+def histogramChannelData(book, block, channelData, fedId,
+                         caps, ErrF, adcs, adcMatches, adcMismatches,
+                         slotCrate, misMatchMapBins, yAxisLabels,
+                         fedTime):
+
+    nAdcMatch = 0
+    nAdcMisMatch = 0
+
+    ErrF[channelData["ErrF"]] += 1
+    book.fill(len(channelData["QIE"]), "nQieSamples_%d" % fedId, 14, -0.5, 13.5,
+              title="FED %d;number of QIE samples;Channels / bin" % fedId)
+
+    book.fill(slotCrate,
+              "ErrFAny_vs_slot_crate", *misMatchMapBins,
+              title="any;slot;crate;Channels / bin",
+              yAxisLabels=yAxisLabels)
+
+    if channelData["ErrF"]:
+        for name, title in [("ErrFNZ", "ErrF != 0"),
+                            ("ErrF%d" % channelData["ErrF"], "ErrF == %d" % channelData["ErrF"]),
+                            ]:
+            book.fill(slotCrate,
+                      "%s_vs_slot_crate" % name, *misMatchMapBins,
+                      title="%s;slot;crate;Channels / bin" % title,
+                      yAxisLabels=yAxisLabels)
+        return nAdcMatch, nAdcMisMatch
+
+    book.fill(slotCrate,
+              "ErrF0_vs_slot_crate", *misMatchMapBins,
+              title="ErrF == 0;slot;crate;Channels / bin",
+              yAxisLabels=yAxisLabels)
+
+    book.fill((block["Slot"], channelData["Fiber"]),
+              "fiber_vs_slot_%d" % fedId, (12, 24), (0.5, -0.5), (12.5, 23.5),
+              title="FED %d;Slot;Fiber;Channels (ErrF == 0) / bin" % fedId)
+
+    coords = (block["Crate"], block["Slot"], block["Top"], channelData["Fiber"], channelData["FibCh"])
+    if coords in adcMismatches:
+        nAdcMisMatch = 1
+        crate2, slot2, top2 = hw.transformed_qie(*coords)[:3]
+        for t in [slotCrate,
+                  (slot2bin(slot2), crate2bin.get((crate2, top2), crateFail)),
+                 ]:
+            book.fill(t, "ADC_mismatch_vs_slot_crate", *misMatchMapBins,
+                      title="ADC mismatch;slot;crate;Channels / bin",
+                      yAxisLabels=yAxisLabels)
+    elif coords in adcMatches:
+        nAdcMatch = 1
+
+    caps[channelData["CapId0"]] += 1
+
+    if channelData["QIE"]:
+        adc = max(channelData["QIE"])
+        adcs.add(adc)
+        mp = channelData.get("M&P", 0)
+        book.fill(adc, "channel_peak_adc_mp%d_%d" % (mp, fedId), 14, -0.5, 13.5,
+                  title="FED %d;Peak ADC (ErrF == 0);Channels / bin" % fedId)
+
+        if fedTime:
+            histogramTsVsTime(book, fedTime, fedId, channelData["QIE"])
+    return nAdcMatch, nAdcMisMatch
+
+
+def histogramTsVsTime(book, fedTime, fedId, qies, adcMin=9, nBins=10):
+    for i, adc in enumerate(qies):
+        if adcMin <= adc:
+            book.fill(i, "ts_qie_%d" % fedId, nBins, -0.5, nBins - 0.5,
+                      title="FED %d;TS (when %s <= ADC);Channels / bin" % (fedId, adcMin))
+            book.fill((fedTime/60., i), "ts_vs_time_%d" % fedId, (40, nBins), (0.0, -0.5), (4.0, nBins - 0.5),
+                      title="FED %d;time (hours);TS (when %d <= ADC);Channels / bin" % (fedId, adcMin))
 
 
 def htrOverviewBits(d={}, book={}, fedId=None, msg="", warn=True):
