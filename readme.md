@@ -23,7 +23,11 @@ cat gr_list.txt | ./dqReport.py
 
 
 # analyze AMC13/DCC2 monitor buffer dumps
-./dumps2root2pdf.py data/239713_*.dat
+# from USC:
+./dumps2root2pdf-HF.py data/239713_*.dat
+# from a teststand:
+cat foo.dat | cpp/badcoffee ${FEDID}
+./oneRun.py --file1=badcoffee${FEDID}.root --feds1=${FEDID} --progress
 
 
 # compare payloads of different sets of FEDs, within one file
