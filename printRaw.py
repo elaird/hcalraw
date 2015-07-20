@@ -172,7 +172,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
 
     anyHtrDataPrinted = False
     if 4 <= dump:
-        kargs = {"fibChs": [1] if (4 <= dump <= 6) else [0, 1, 2],
+        kargs = {"skipFibChs": [0, 2, 3, 4, 5, 6, 7] if (4 <= dump <= 6) else [],
                  "nonMatched": nonMatchedQie,
                  "latency": p.get("Latency"),
                  "zs": p.get("ZS"),
@@ -305,7 +305,7 @@ def uhtrTriggerData(d={}, skipZeroTps=False, crate=None, slot=None, top="", nonM
 
 
 def htrChannelData(lst=[], crate=0, slot=0, top="",
-                   fibChs=[], skipErrF=[],
+                   skipFibChs=[], skipErrF=[],
                    nonMatched=[], latency={}, zs={},
                    utcaFiberBlackList=[0,1,10,11,12,13,22,23][:0]):
     out = []
@@ -327,7 +327,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
     for data in lst:
         if (top not in "tb") and data["Fiber"] in utcaFiberBlackList:
             continue
-        if data["FibCh"] not in fibChs:
+        if data["FibCh"] in skipFibChs:
             continue
         if data["ErrF"] in skipErrF:
             continue
