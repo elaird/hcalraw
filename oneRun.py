@@ -42,8 +42,6 @@ def check_and_adjust(options):
     if options.patterns:
         printer.info("setting nEvents=1 (--patterns was passed)")
         options.nEvents = 1
-    elif not options.nEvents:
-        printer.warning("--nevents=%d" % options.nEvents)
 
 
 def go(options):

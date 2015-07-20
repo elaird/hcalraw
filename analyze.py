@@ -225,7 +225,7 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={})
             return outerInnerCompare(chain, iEntry, outer, inner, innerEvent, chainI, kargs)
 
         nMin = outer["nEventsSkip"]
-        nMax = outer["nEventsSkip"] + outer["nEventsMax"]
+        nMax = (outer["nEventsSkip"] + outer["nEventsMax"]) if outer["nEventsMax"] else None
         chainLoop(chain, nMin, nMax, outerInnerCompare2,
                   progress=outer["progress"], sparseLoop=outer["sparseLoop"])
 
