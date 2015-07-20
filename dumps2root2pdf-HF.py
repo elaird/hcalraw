@@ -21,7 +21,7 @@ def command(dat):
 
     fields = dat.split("_")
     if len(fields) != 3:
-        bail(dat, fields, "nFields != 3")
+        bail(dat, fields, "Expected filename prefix_cratenumber[_mb].dat")
 
     prefix2, crate, suffix = fields
     if suffix not in [".dat", "mb.dat"]:
