@@ -23,9 +23,9 @@ cat gr_list.txt | ./dqReport.py
 
 
 # analyze AMC13/DCC2 monitor buffer dumps
-# from USC:
+# HF (USC FEDs):
 ./dumps2root2pdf-HF.py data/239713_*.dat
-# from a teststand:
+# from a single AMC13:
 cat foo.dat | cpp/badcoffee ${FEDID}
 ./oneRun.py --file1=badcoffee${FEDID}.root --feds1=${FEDID} --progress
 
