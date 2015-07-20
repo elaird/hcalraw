@@ -520,12 +520,20 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
                      "iWord16": iWord16,
                      }
 
-    if flavor == 4:
+    if 2 <= flavor <= 3:
+        dataKey = "channelData"
+        channelHeader["ErrF"] = (word16 >> 11) & 0x1  # compat
+        channelHeader["M&P"] = (word16 >> 8) & 0x1
+        channelId = word16 & 0xff
+        channelHeader["Fiber"] = channelId >> 3
+        channelHeader["FibCh"] = channelId & 0x7
+        for key in ["SOI", "OK", "QIE", "CapId", "TDC_TE", "TDC_LE"]:
+            channelHeader[key] = []
+    elif flavor == 4:
         channelHeader["ErrF"] = (word16 >> 10) & 0x3
         dataKey = "triggerData"
         for key in ["SOI", "OK", "TP"]:
             channelHeader[key] = []
-
     elif 5 <= flavor <= 6:
         channelId = word16 & 0x7f
         dataKey = "channelData"
@@ -540,14 +548,6 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
         channelHeader["FibCh"] = channelId % 4
         channelHeader["QIE"] = []
         channelHeader["CapId"] = []
-
-        # if 0 <= flavor <= 1:
-        #     for key in ["SOI", "TDC"]:
-        #         channelHeader[key] = {}
-        # if 2 <= flavor <= 3:
-        #     for key in ["SOI", "OK", "TDCRise", "TDCFall"]:
-        #         channelHeader[key] = {}
-
     elif flavor == 7:
         dataKey = "technicalData"
         channelHeader["channelId"] = channelId
@@ -561,25 +561,24 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
 
 
 def storeChannelData(dct={}, iWord16=None, word16=None):
-    # j = iWord16 - dct["iWord16"] - 1
-    # if 0 <= dct["Flavor"] <= 1:
-    #     dct["SOI"][j] = (word16 >> 14) & 0x1
-    #     dct["TDC"][j] = (word16 >> 8) & 0x3f
-    #     dct["QIE"][j] = word16 & 0xff
-    # elif 2 <= dct["Flavor"] <= 3:
-    #     k = j / 2
-    #     if j % 2:
-    #         dct["TDCRise"][k] = word16 & 0x3f
-    #         dct["TDCFall"][k] = (word16 >> 6) & 0x3f
-    #     else:
-    #         dct["SOI"][k] = (word16 >> 13) & 0x1
-    #         dct["OK"][k] = (word16 >> 12) & 0x1
-    #         dct["QIE"][k] = word16 & 0xff
-
+    j = iWord16 - dct["iWord16"] - 1
     flavor = dct["Flavor"]
-    if flavor <= 3 or 7 <= flavor:
-        dct["words"].append(word16)
 
+    if 0 <= flavor <= 1:
+        dct["words"].append(word16)
+        # dct["SOI"][j] = (word16 >> 14) & 0x1
+        # dct["TDC"][j] = (word16 >> 8) & 0x3f
+        # dct["QIE"][j] = word16 & 0xff
+    elif 2 <= flavor <= 3:
+        if j % 2:
+            dct["CapId"].append((word16 >> 12) & 0x3)
+            dct["TDC_TE"].append((word16 >> 6) & 0x1f)
+            dct["TDC_LE"].append(word16 & 0x3f)
+            dct["CapId0"] = dct["CapId"][0]  # compat
+        else:
+            dct["SOI"].append((word16 >> 13) & 0x1)
+            dct["OK"].append((word16 >> 12) & 0x1)
+            dct["QIE"].append(word16 & 0xff)
     elif flavor == 4:
         dct["SOI"].append((word16 >> 14) & 0x1)
         dct["OK"].append((word16 >> 13) & 0x1)
@@ -590,6 +589,8 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
     elif flavor == 6:
         dct["QIE"].append(word16 & 0x7f)
         dct["CapId"].append((word16 >> 8) & 0x3)
+    elif 7 <= flavor:
+        dct["words"].append(word16)
 
 
 def channelId(fiber=None, fibCh=None):
