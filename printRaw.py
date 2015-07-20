@@ -86,7 +86,7 @@ def oneHtrPatterns(p={}, patterns={}, header={}, iBlock=None):
                             crate=p["Crate"],
                             slot=p["Slot"],
                             top=p["Top"],
-                            fibChs=[1])
+                            skipFibChs=[0, 2])
     if len(cd) >= 2:
         if header["utca"]:
             moduleId = "u%2d %2d" % (p["Crate"], p["Slot"])
