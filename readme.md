@@ -26,6 +26,7 @@ cat gr_list.txt | ./dqReport.py
 # HF (USC FEDs):
 ./dumps2root2pdf-HF.py data/239713_*.dat
 # from a single AMC13:
+export FEDID=999
 cat foo.dat | cpp/badcoffee ${FEDID}
 ./oneRun.py --file1=badcoffee${FEDID}.root --feds1=${FEDID} --progress
 
