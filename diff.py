@@ -115,7 +115,7 @@ def report(extra=None, missing=None, different=None, same=None, nMissingMax=None
 
     printTable(fiberCount(same.values()), header="Fibers matching reference")
     nMissing = fiberCount(missing.values())
-    printTable(nMissing, header="Fibers in reference, but either not acquired or having 8b/10b errors")
+    printTable(nMissing, header="Fibers in reference, but either not acquired or having FE link errors")
 
     header = "| RBXes with (1 <= n missing fibers <= %d) |" % nMissingMax
     print "-" * len(header)
