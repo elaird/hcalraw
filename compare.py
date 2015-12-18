@@ -621,9 +621,10 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQual
     if anyEmap:
         mapF1, mapB1, _ = dataMap(raw1, book)
         mapF2, mapB2, _ = dataMap(raw2, book)
-        matched12, nonMatched12 = matchStats(mapF1, mapB2)
-        matched21, nonMatched21 = matchStats(mapF2, mapB1)
-        tMatched12 = tMisMatched12 = misMatched12 = []  # passed to loop_over_feds
+        matched12, nonMatched12 = matchStatsAnyMap(mapF1, mapB2, iStart=4)
+        matched21, nonMatched21 = matchStatsAnyMap(mapF2, mapB1, iStart=4)
+        tMatched12 = tMisMatched12 = misMatched12 = []  # dummy
+        tMatched21 = tMisMatched21 = misMatched21 = []  # dummy
         if printEmap:
            reportMatched(matched12)
            reportFailed(nonMatched12)
@@ -721,7 +722,15 @@ def reportFailed(failed=[]):
             print "(%s)" % coordString(*c)
 
 
-def matchStats(f={}, b={}):
+def matchStatsAnyMap(fIn={}, bIn={}, iStart=None):
+    f = {}
+    for coords, dataAll in fIn.iteritems():
+        f[coords] = dataAll[iStart:]
+
+    b = {}
+    for dataAll, coords in bIn.iteritems():
+        b[dataAll[iStart:]] = coords
+
     matched = {}
     failed = []
     for coords, data in f.iteritems():
