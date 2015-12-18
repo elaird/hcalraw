@@ -14,8 +14,14 @@ import printer
 
 def setup():
     r.gROOT.SetBatch(True)
-    r.gSystem.Load("%s/cpp/cdf.so" % os.environ["PWD"])
-    r.gSystem.Load("%s/cpp/cms.so" % os.environ["PWD"])
+
+    if r.gROOT.GetVersionInt(): # < 60000:  # before ROOT6
+        r.gSystem.Load("%s/cpp/cdf.so" % os.environ["PWD"])
+        r.gSystem.Load("%s/cpp/cms.so" % os.environ["PWD"])
+    else:
+        r.gInterpreter.SetClassAutoloading(False)
+        r.gInterpreter.ProcessLine('#include "cpp/cdf.h"')
+        r.gInterpreter.ProcessLine('#include "cpp/cms.h"')
 
     if sw.use_fwlite and utils.cmssw():
         r.gSystem.Load("libFWCoreFWLite.so")
