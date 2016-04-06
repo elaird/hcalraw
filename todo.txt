@@ -9,6 +9,5 @@ use bcn in event maps
 restore cron
 make ticks visible in problem maps
 autozoom time axis
-improve summary plots to handle more feds
 fix --rmribbon
-investigate 246908 HBHE matches
+restore trends using suppression
