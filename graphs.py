@@ -183,11 +183,6 @@ def legends(legEntries=[], twoLines=False, gopts="l"):
     return out
 
 
-def justOne(s):
-    fields = s.split("_")
-    return 2 <= len(fields) and fields[0] == "BcN" and fields[1] != "HTRs"
-
-
 def histoLoop(f, lst, func):
     out = []
     maxes = []
@@ -203,11 +198,6 @@ def histoLoop(f, lst, func):
 
         if not h.GetEntries():
             continue
-
-        if justOne(func(x)):
-            if didOne:
-                continue
-            didOne = True
 
         gopts = "hist"
         if h0:
@@ -235,7 +225,7 @@ def histoLoop(f, lst, func):
         else:
             t = h.GetTitle().replace("FED ", "")
 
-        if justOne(func(x)):
+        if len(lst) == 1:
             t += "   (%d entries)" % h.GetEntries()
 
         legEntries.append((h, t))
@@ -866,10 +856,9 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
                            graph4=graph4,
                            )
 
-    # single FED
-    keep += plotList(f, pad20, offset=4,
-                     names=["BcN",
-                            "nBytesSW", "ChannelFlavor", "nQieSamples", "nTpSamples",
+    keep += plotList(f, pad20, offset=4, names=["BcN"], feds1=sorted(feds1)[:1])
+    keep += plotList(f, pad20, offset=5,
+                     names=["nBytesSW", "ChannelFlavor", "nQieSamples", "nTpSamples",
                             "htrOverviewBits", "ErrF0", "", "",
                             "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs",
                             # "TTS", "PopCapFrac",
