@@ -480,9 +480,7 @@ def plotList(f, pad, offset=None, names=[],
              logY=True, logX=False, logZ=False,
              gridX=False, gridY=False,
              feds1=[], feds2=[],
-             func=None):
-
-    assert func
+             func=histoLoop):
 
     fedList = (feds1 + feds2)[:9]
     color = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kMagenta, 40, 36, 30, 20]
@@ -529,21 +527,22 @@ def plotMerged(f, pad, offset=None, names=[],
 
         h1, found1 = fedSum(f, name, feds1)
         h2, found2 = fedSum(f, name, feds2)
-        shiftFlows(h1)
-        shiftFlows(h2)
 
+        shiftFlows(h1)
         gopts = "hist"
         h1.Draw(gopts)
-        gopts += "same"
-        h2.Draw(gopts)
+        h1.SetTitle("")
 
         stylize(h1, r.kBlack, 1)
-        stylize(h2, r.kMagenta, 2)
         magnify(h1, factor=1.8)
-        magnify(h2, factor=1.8)
 
-        h1.SetTitle("")
-        h1.SetMaximum(2.0 * max([h1.GetMaximum(), h2.GetMaximum()]))
+        if h2:
+            shiftFlows(h2)
+            gopts += "same"
+            h2.Draw(gopts)
+            stylize(h2, r.kMagenta, 2)
+            magnify(h2, factor=1.8)
+            h1.SetMaximum(2.0 * max([h1.GetMaximum(), h2.GetMaximum()]))
 
         keep += legends([(h1, shortList(found1)),
                          (h2, shortList(found2)),
@@ -911,16 +910,12 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
     adjustPad(logY=True)
     keep += histoLoop(f, [("BcN_%d" % sorted(feds1)[0], r.kBlack, 1)], lambda x: x)
 
-    keep += plotMerged(f, pad20, offset=5,
-                       names=["nBytesSW", "ChannelFlavor", "nQieSamples", "nTpSamples",
-                              "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "PopCapFrac",
-                              "htrOverviewBits", "ErrF0", "TTS", "",
-                              ], feds1=feds1, feds2=feds2)
-
-    # EvN, OrN, BcN agreement
-    if not feds1:
-        printer.error(" in graphs.py pageOne: feds1 = %s" % str(feds1))
-        return
+    plotFunc = plotMerged if feds2 or 4 <= len(feds1) else plotList
+    keep += plotFunc(f, pad20, offset=5,
+                     names=["nBytesSW", "ChannelFlavor", "nQieSamples", "nTpSamples",
+                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "PopCapFrac",
+                            "htrOverviewBits", "ErrF0", "TTS", "",
+                            ], feds1=feds1, feds2=feds2)
 
     pad20.cd(16)
     adjustPad(logY=True)
