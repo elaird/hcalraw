@@ -480,7 +480,9 @@ def plotList(f, pad, offset=None, names=[],
              logY=True, logX=False, logZ=False,
              gridX=False, gridY=False,
              feds1=[], feds2=[],
-             func=histoLoop):
+             func=None):
+
+    assert func
 
     fedList = (feds1 + feds2)[:9]
     color = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kMagenta, 40, 36, 30, 20]
@@ -856,13 +858,16 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
                            graph4=graph4,
                            )
 
-    keep += plotList(f, pad20, offset=4, names=["BcN"], feds1=sorted(feds1)[:1])
+    pad20.cd(4)
+    adjustPad(logY=True)
+    keep += histoLoop(f, [("BcN_%d" % sorted(feds1)[0], r.kBlack, 1)], lambda x: x)
+
     keep += plotList(f, pad20, offset=5,
                      names=["nBytesSW", "ChannelFlavor", "nQieSamples", "nTpSamples",
                             "htrOverviewBits", "ErrF0", "", "",
                             "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs",
                             # "TTS", "PopCapFrac",
-                            ], feds1=feds1, feds2=feds2)
+                            ], feds1=feds1, feds2=feds2, func=histoLoop)
 
     # EvN, OrN, BcN agreement
     if not feds1:
