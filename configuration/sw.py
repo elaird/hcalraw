@@ -1,10 +1,10 @@
-use_fwlite = True
+use_fwlite = False
 eosprefix = "root://eoscms.cern.ch/"
-
+#root://cms-xrd-global.cern.ch/
 
 def fedMap():
     d = {"HBHE": range(700, 718),
-         "HF": range(718, 720),  # remove 720 - 723
+         "HF": range(718, 724),
          "HO": range(724, 732),
          "uHBHE": range(1100, 1118, 2),
          "uHF": [1118, 1120, 1122, 1132],
