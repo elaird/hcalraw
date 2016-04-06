@@ -110,7 +110,7 @@ def main(options, args, quiet=False):
     except ValueError:
         sys.exit("Could not convert %s to int." % args[0])
 
-    subdet = "HBHE" if options.hbhe else "HF"
+    subdet = "HBHE" if not options.hf else "HF"
     options.feds1 = subdet
     options.feds2 = "u%s" % subdet
     options.outputFile = "output/%d_%s.root" % (run, subdet)
