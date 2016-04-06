@@ -563,18 +563,19 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
                 book.fill(nTs, "nTS_for_matching_TP", 14, -0.5, 13.5,
                           title="TP;number of TS used for matching;Channels / bin")
 
-        if nTsMatched == nTs:
-            matched.append(coords1)
-        else:
-            misMatched.append(coords1)
-            if loud and coords2 in mapF2:
-                samples1 = tuple(lst1[4:])
-                samples2 = tuple(lst2[4:])
-                q1 = " ".join(["%2x"] * len(samples1)) % samples1
-                q2 = " ".join(["%2x"] * len(samples2)) % samples2
-                c1 = str(coords1)
-                c2 = str(coords2)
-                print "%s  |  %s  :  %s  |  %s" % (c1, c2, q1, q2)
+        if nTs:
+            if nTsMatched == nTs:
+                matched.append(coords1)
+            else:
+                misMatched.append(coords1)
+                if loud and coords2 in mapF2:
+                    samples1 = tuple(lst1[4:])
+                    samples2 = tuple(lst2[4:])
+                    q1 = " ".join(["%2x"] * len(samples1)) % samples1
+                    q2 = " ".join(["%2x"] * len(samples2)) % samples2
+                    c1 = str(coords1)
+                    c2 = str(coords2)
+                    print "%s  |  %s  :  %s  |  %s" % (c1, c2, q1, q2)
 
     return matched, misMatched
 
