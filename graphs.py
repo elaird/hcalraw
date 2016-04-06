@@ -506,6 +506,53 @@ def plotList(f, pad, offset=None, names=[],
     return keep
 
 
+def shortList(feds):
+    for step in range(1, 3):
+        if 3 <= len(feds) and feds == range(feds[0], 1 + feds[-1], step):
+            return "%d: %d - %d" % (len(feds), feds[0], feds[-1])
+    return ",".join(["%d" % iFed for iFed in feds])
+
+
+def plotMerged(f, pad, offset=None, names=[],
+             logY=True, logX=False, logZ=False,
+             gridX=False, gridY=False,
+             feds1=[], feds2=[]):
+
+    keep = []
+    for iHisto, name in enumerate(names):
+        if not name:
+            continue
+
+        pad.cd(offset + iHisto)
+        adjustPad(logX=logX, logY=logY, logZ=logZ,
+                  gridX=gridX, gridY=gridY)
+
+        h1, found1 = fedSum(f, name, feds1)
+        h2, found2 = fedSum(f, name, feds2)
+        shiftFlows(h1)
+        shiftFlows(h2)
+
+        gopts = "hist"
+        h1.Draw(gopts)
+        gopts += "same"
+        h2.Draw(gopts)
+
+        stylize(h1, r.kBlack, 1)
+        stylize(h2, r.kMagenta, 2)
+        magnify(h1, factor=1.8)
+        magnify(h2, factor=1.8)
+
+        h1.SetTitle("")
+        h1.SetMaximum(2.0 * max([h1.GetMaximum(), h2.GetMaximum()]))
+
+        keep += legends([(h1, shortList(found1)),
+                         (h2, shortList(found2)),
+                         ])
+        keep += [h1, h2]
+
+    return keep
+
+
 def resyncs(graph=None, maximum=None):
     n = graph.GetN()
     x = graph.GetX()
@@ -718,23 +765,25 @@ def retitle(evn_graph):
 
 
 def fedSum(f=None, prefix="", feds=[]):
+    found = []
     h = None
     for fed in feds:
         h1 = f.Get("%s_%d" % (prefix, fed))
         if not h1:
             continue
+        found.append(fed)
         if h:
             h.Add(h1)
         else:
             h = h1.Clone()
-    return h
+    return h, found
 
 
 def superimpose_two(f, names=[], label1="", feds=[]):
     assert len(names) == 2, names
 
-    ha0 = fedSum(f, names[0], feds)
-    ha1 = fedSum(f, names[1], feds)
+    ha0, _ = fedSum(f, names[0], feds)
+    ha1, _ = fedSum(f, names[1], feds)
     maxes = []
     for h in [ha1, ha0]:
         if not h:
@@ -862,19 +911,18 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
     adjustPad(logY=True)
     keep += histoLoop(f, [("BcN_%d" % sorted(feds1)[0], r.kBlack, 1)], lambda x: x)
 
-    keep += plotList(f, pad20, offset=5,
-                     names=["nBytesSW", "ChannelFlavor", "nQieSamples", "nTpSamples",
-                            "htrOverviewBits", "ErrF0", "", "",
-                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs",
-                            # "TTS", "PopCapFrac",
-                            ], feds1=feds1, feds2=feds2, func=histoLoop)
+    keep += plotMerged(f, pad20, offset=5,
+                       names=["nBytesSW", "ChannelFlavor", "nQieSamples", "nTpSamples",
+                              "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "PopCapFrac",
+                              "htrOverviewBits", "ErrF0", "TTS", "",
+                              ], feds1=feds1, feds2=feds2)
 
     # EvN, OrN, BcN agreement
     if not feds1:
         printer.error(" in graphs.py pageOne: feds1 = %s" % str(feds1))
         return
 
-    pad20.cd(11)
+    pad20.cd(16)
     adjustPad(logY=True)
     keep += histoLoop(f,
                       [("nTS_for_matching_ADC", r.kBlue, 1),
