@@ -91,12 +91,10 @@ def htrSummary(blocks=[], book=None, fedId=None,
                  ( 5, "t"): 25,
                  ( 4, "b"): 26,
                  ( 4, "t"): 27,
-                 ( 2, "b"): 28,
-                 ( 2, "t"): 29,
-                 ( 1, "b"): 30,
-                 ( 1, "t"): 31,
-                 ( 0, "b"): 32,
-                 ( 0, "t"): 33,
+                 ( 1, "b"): 28,
+                 ( 1, "t"): 29,
+                 ( 0, "b"): 30,
+                 ( 0, "t"): 31,
                  }
     crateFail = 1 + max(crate2bin.values())
     yAxisLabels = labels(crate2bin)

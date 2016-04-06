@@ -304,7 +304,7 @@ def drawCrates():
     b.SetLineColor(r.kBlack)
     b.SetLineStyle(3)
     y1 = 13.5
-    y2 = 33.5
+    y2 = 31.5
     return [b.DrawBox( 0.5, 0.5, 12.5,  y1),  # uTCA
             b.DrawBox( 1.5,  y1,  7.5,  y2),
             b.DrawBox( 7.5,  y1,  8.5,  y2),
