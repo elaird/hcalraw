@@ -570,7 +570,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
     if not graph or not graph.GetN():
         return
 
-    padg = r.TPad("padg", "padg", 0.00, 0.75, 0.80, 1.00)
+    padg = r.TPad("padg", "padg", 0.00, 0.75, 0.75, 1.00)
     padg.Draw()
     keep = [padg]
 
@@ -827,7 +827,7 @@ def suffix(feds1, feds2):
 
 def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
     pad20 = r.TPad("pad20", "pad20", 0.00, 0.00, 1.00, 1.00)
-    pad20.Divide(5, 4, 0.001, 0.001)
+    pad20.Divide(4, 4, 0.001, 0.001)
     pad20.Draw()
 
     keep = []
@@ -867,10 +867,11 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
                            )
 
     # single FED
-    keep += plotList(f, pad20, offset=5,
+    keep += plotList(f, pad20, offset=4,
                      names=["BcN",
-                            "nBytesSW", "ChannelFlavor", "nQieSamples", "nTpSamples", "htrOverviewBits",
-                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "ErrF0",
+                            "nBytesSW", "ChannelFlavor", "nQieSamples", "nTpSamples",
+                            "htrOverviewBits", "ErrF0", "", "",
+                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs",
                             # "TTS", "PopCapFrac",
                             ], feds1=feds1, feds2=feds2)
 
@@ -879,20 +880,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
         printer.error(" in graphs.py pageOne: feds1 = %s" % str(feds1))
         return
 
-    fed1 = sorted(feds1)[0]
-    for i, fed2 in enumerate(feds2[:3]):
-        pad20.cd(16 + i)
-        adjustPad(logY=True)
-        keep += histoLoop(f,
-                          [("EvN", r.kBlue, 1),
-                           ("OrN", r.kCyan, 2),
-                           ("BcN", r.kBlack, 3),
-                           ],
-                          lambda x: "delta%s_%s_%s" % (x, fed1, fed2),
-                          )
-
-    # TS
-    pad20.cd(15)
+    pad20.cd(11)
     adjustPad(logY=True)
     keep += histoLoop(f,
                       [("nTS_for_matching_ADC", r.kBlue, 1),
@@ -901,8 +889,39 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
                       lambda x: x,
                       )
 
-    # fibers
-    pad20.cd(19)
+
+    canvas.Print(pdf)
+
+
+def plotEvnOrnBcnPerFed(f, feds1, feds2):
+    pad0 = r.TPad("pad0", "pad0", 0.00, 0.00, 1.00, 1.00)
+    n = len(feds2)
+    if n <= 3:
+        pad0.Divide(n, 1)
+    else:
+        pad0.DivideSquare(n)
+
+    pad0.Draw()
+    keep = [pad0]
+
+    fed1 = sorted(feds1)[0]
+    for i, fed2 in enumerate(feds2):
+        pad0.cd(1 + i)
+        adjustPad(logY=True)
+        keep += histoLoop(f,
+                          [("EvN", r.kBlue, 1),
+                           ("OrN", r.kCyan, 2),
+                           ("BcN", r.kBlack, 3),
+                           ],
+                          lambda x: "delta%s_%s_%s" % (x, fed1, fed2),
+                          )
+    return keep
+
+
+def plotMatch(f, pad0, feds1, feds2):
+    keep = []
+
+    pad0.cd(3)
     adjustPad(logY=True)
     keep += histoLoop(f,
                       [("MatchedFibersCh0", r.kBlue, 1),
@@ -913,7 +932,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
                       lambda x: x,
                       )
 
-    pad20.cd(20)
+    pad0.cd(6)
     adjustPad(logY=True)
     keep += histoLoop(f,
                       [("MisMatchedFibersCh0", r.kBlue, 1),
@@ -923,12 +942,11 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
                        ],
                       lambda x: x,
                       )
-
-    canvas.Print(pdf)
+    return keep
 
 
 def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="", denoms={},
-            doYx=True, retitle=True, gridX=False, gridY=False, boxes=False, alsoZs=False):
+            doYx=True, retitle=True, gridX=False, gridY=False, boxes=False, alsoZs=False, alsoMatch=False):
 
     # don't print blank page
     if not any([f.Get(name) for name in names]):
@@ -951,6 +969,9 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
     if alsoZs:
         keep += plotZS(f, pad0, feds1, feds2)
         #keep += plotTS(f, pad0, feds1, feds2)
+
+    if alsoMatch:
+        keep += plotMatch(f, pad0, feds1, feds2)
 
     if title:
         pad0.cd(0)
@@ -1027,7 +1048,11 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         if feds2 and "vs" in pages:
             pageTwo(names=["adc_vs_adc", "adc_vs_adc_soi_both", "",
                            "tp_vs_tp", "tp_vs_tp_soi_both", ""],
-                    alsoZs=False, **kargs)
+                    alsoMatch=True, **kargs)
+
+            _ = plotEvnOrnBcnPerFed(f, feds1, feds2)
+            canvas.cd(0)
+            canvas.Print(pdf)
 
         names = ["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]]
         names += ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", "TP_mismatch_vs_slot_crate"]
@@ -1098,8 +1123,12 @@ def main(options):
 all_pages = ["overview", "vs", "page3",
              "maps_counts",
              "maps_evn_orn_bcn", "maps_errf", "maps_adc_tp",
-             "frac0_orbit", "evn", "orn",
-             "trends", "occupancy", "ts"]
+             # "frac0_orbit",
+             "evn", "orn",
+             # "trends",
+             "occupancy",
+             # "ts",
+             ]
 
 
 if __name__ == "__main__":
