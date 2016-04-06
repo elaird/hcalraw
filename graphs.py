@@ -705,7 +705,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
         null_coarse.GetYaxis().SetLabelSize(0.1)
 
     padg.cd(0)
-    keep.append(stamp(title, size=0.17, x=0.01, y=0.98))
+    keep.append(stamp(title, size=0.15, x=0.01, y=0.98))
 
     # padg.Print("output/%s_l1a.pdf" % title.replace("Run ", ""))
     return keep
@@ -1013,6 +1013,8 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         title = f.GetPath().replace("output/", "").replace(".root:/", "")
         if "_" not in title:
             title = "Run %s" % title
+        else:
+            title = title.replace("_", "/")
 
         kargs = {}
         for item in ["f", "feds1", "feds2", "canvas", "pdf", "title"]:
@@ -1025,7 +1027,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         if feds2 and "vs" in pages:
             pageTwo(names=["adc_vs_adc", "adc_vs_adc_soi_both", "",
                            "tp_vs_tp", "tp_vs_tp_soi_both", ""],
-                    alsoZs=True, **kargs)
+                    alsoZs=False, **kargs)
 
         names = ["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]]
         names += ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", "TP_mismatch_vs_slot_crate"]
