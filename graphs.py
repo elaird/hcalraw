@@ -284,10 +284,6 @@ def graphLoop(f, lst, func):
     return out
 
 
-def fedString(lst=[]):
-    return ",".join(["%d" % i for i in lst])
-
-
 def drawCrates():
     b = r.TBox()
     b.SetFillStyle(0)
@@ -504,7 +500,7 @@ def plotList(f, pad, offset=None, names=[],
     return keep
 
 
-def shortList(feds):
+def fedString(feds):
     for step in range(1, 3):
         if 3 <= len(feds) and feds == range(feds[0], 1 + feds[-1], step):
             return "%d: %d - %d" % (len(feds), feds[0], feds[-1])
@@ -544,8 +540,8 @@ def plotMerged(f, pad, offset=None, names=[],
             magnify(h2, factor=1.8)
             h1.SetMaximum(2.0 * max([h1.GetMaximum(), h2.GetMaximum()]))
 
-        keep += legends([(h1, shortList(found1)),
-                         (h2, shortList(found2)),
+        keep += legends([(h1, fedString(found1)),
+                         (h2, fedString(found2)),
                          ])
         keep += [h1, h2]
 
