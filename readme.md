@@ -8,14 +8,13 @@ cd cpp; make -j 5; cd -
 
 
 # analyze a global or local run
-./look.py 235316 --no-warn-unpack --no-warn-quality
-./look.py 239342 --utca-pipeline-delta=4
-./look.py 239895 --hhmm=2212 --nevents=20
-./look.py 246908 --nevents=100
-./look.py 251244 --nevents=300
+./look.py 235316 --hf --no-warn-unpack --no-warn-quality
+./look.py 239342 --hf --utca-pipeline-delta=4
+./look.py 239895 --hf --hhmm=2212 --nevents=20
+./look.py 246908 --hf --nevents=100
+./look.py 251244 --hf --nevents=300
 
-./look.py 248765
-./look.py 248765 --hbhe
+./look.py 268148
 
 # analyze several global runs
 cat gr_list.txt | ./multi.py --nevents=100
@@ -53,7 +52,7 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 # analyze FE pattern runs
 # (before HO refibering) ./oneRun.py --file1=$LS1/USC_235576.root --feds1=HCAL --patterns | ./diff.py data/ref_2014.txt
 # (before move to uTCA ) ./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --patterns | ./diff.py data/ref_vme_G.txt
-./fiberId.sh 251678
+./fiberId.sh 255825
 
 
 # read about usage
