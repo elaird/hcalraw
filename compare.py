@@ -167,6 +167,14 @@ def htrSummary(blocks=[], book=None, fedId=None,
             if techData["technicalDataType"] or techData["channelId"] or techData["words"]:
                 flavor(book, techData, fedId)
 
+        nTpTowerBins = 50
+        book.fill(len(block["triggerData"]), "nTpTowers_%d" % fedId, nTpTowerBins, -0.5, nTpTowerBins - 0.5,
+                  title="FED %d;number of TP towers;HTRs / bin" % fedId)
+
+        nChannelBins = 1 + 24*3
+        book.fill(len(block["channelData"]), "nChannels_%d" % fedId, nChannelBins, -0.5, nChannelBins - 0.5,
+                  title="FED %d;number of channels;HTRs / bin" % fedId)
+
         for triggerKey, triggerData in block["triggerData"].iteritems():
             if "Flavor" in triggerData:
                 flavor(book, triggerData, fedId)
@@ -186,6 +194,9 @@ def htrSummary(blocks=[], book=None, fedId=None,
             tpCoords = (block["Crate"], block["Slot"], block["Top"], triggerKey)
             tpCoords2 = hw.transformed_tp(*tpCoords)
             if tpCoords2 is None:
+                book.fill(slotCrate, "TP_unmatchable_vs_slot_crate", *misMatchMapBins,
+                          title="TP unmatchable;slot;crate;Towers / bin",
+                          yAxisLabels=yAxisLabels)
                 continue
 
             crate2, slot2, top2 = tpCoords2[:3]
