@@ -183,9 +183,23 @@ def legends(legEntries=[], twoLines=False, gopts="l"):
     return out
 
 
-def histoLoop(f, lst, func):
+def x_first_filled(h):
+    for iBin in range(1, 1 + h.GetNbinsX()):
+        if h.GetBinContent(iBin):
+            return h.GetBinLowEdge(iBin)
+
+
+def x_last_filled(h):
+    for iBin in range(1 + h.GetNbinsX(), 1, -1):
+        if h.GetBinContent(iBin):
+            return h.GetBinLowEdge(iBin) + h.GetBinWidth(iBin)
+
+
+def histoLoop(f, lst, func, zoom=False):
     out = []
-    maxes = []
+    ymaxes = []
+    xmins = []
+    xmaxes = []
     legEntries = []
     h0 = None
 
@@ -204,7 +218,7 @@ def histoLoop(f, lst, func):
             gopts += "same"
         else:
             h0 = h
-        maxes.append(h.GetMaximum())
+
         shiftFlows(h)
         h.Draw(gopts)
         stylize(h, color, style)
@@ -214,6 +228,11 @@ def histoLoop(f, lst, func):
         if h.GetXaxis().GetTitle() == "channel flavor":
             h.GetXaxis().SetLabelSize(0.10)
         out.append(h)
+
+        ymaxes.append(h.GetMaximum())
+        xmins.append(x_first_filled(h))
+        xmaxes.append(x_last_filled(h))
+
 
         s = "Matched"
         if func(x).startswith(s):
@@ -231,8 +250,10 @@ def histoLoop(f, lst, func):
         legEntries.append((h, t))
         h.SetTitle("")
 
-    if maxes and h0:
-        h0.SetMaximum(2.0*max(maxes))
+    if ymaxes and h0:
+        h0.SetMaximum(2.0 * max(ymaxes))
+        if xmins and xmaxes and zoom:
+            h0.GetXaxis().SetRangeUser(0.9 * min(xmins), 1.1 * max(xmaxes))
     out += legends(legEntries, twoLines=twoLines)
     return out
 
@@ -963,6 +984,7 @@ def plotMatch(f, pad0, feds1, feds2):
                        ("MatchedTriggerTowers", r.kGreen, 4),
                        ],
                       lambda x: x,
+                      zoom=True,
                       )
 
     pad0.cd(6)

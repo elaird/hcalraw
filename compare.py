@@ -582,7 +582,8 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
 
 def histogram_nMatched(book, matched=None, misMatched=None, nonMatched=None, tMatched=None, tMisMatched=None):
     # histogram n matched
-    nFib = 12 * 12 * 16
+    # nFib = 12 * 12 * 16
+    nFib = 14 * 4 * 12 * 8
     bins = (nFib, -0.5, nFib - 0.5)
 
     nFib2 = 26
