@@ -536,7 +536,7 @@ def plotMerged(f, pad, offset=None, names=[],
             shiftFlows(h2)
             gopts += "same"
             h2.Draw(gopts)
-            stylize(h2, r.kMagenta, 2)
+            stylize(h2, r.kPink + 7, 2)
             magnify(h2, factor=1.8)
             h1.SetMaximum(2.0 * max([h1.GetMaximum(), h2.GetMaximum()]))
 
