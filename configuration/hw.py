@@ -61,17 +61,38 @@ def transformed_tp(crate, slot, top, key):
     if slot2 is None:
         return None
 
-    if type(key) is tuple and len(key) == 2 and key[0] == 6:  # VME
-        top2 = " "
-        slb, ch = key
+    if type(key) is not tuple or len(key) != 2:  # !VME
+        return None
+
+    top2 = " "
+    slb, ch = key
+
+    if crate in [2, 9, 12]:  # HF
         if top == "b":
             ch -= 2
         if slot in [2, 4, 6, 13, 15, 17]:
             ch -= 2
         key2 = 0xc0 + ch
     else:
-        return None
+        key2 = (slb - 1) << 4
+        ch2 = ch
+        if slb == 4 and slot in [3, 4, 14, 15]:
+            ch2 = {0: 4,
+                   1: 5,
+                   2: 0,
+                   3: 1,
+                   4: 6,
+                   5: 7,
+                   6: 2,
+                   7: 3,
+                   }[ch]
+        else:
+            if 2 <= ch <= 3:
+                ch2 += 2
+            if 4 <= ch <= 5:
+                ch2 -= 2
 
+        key2 += ch2
     return (crate2, slot2, top2, key2)
 
 
