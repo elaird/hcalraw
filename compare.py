@@ -505,7 +505,7 @@ def tsLoop(lst1, lst2, book=None, name=None,
     nTsMatched = 0
     nTs = 0
 
-    if "adc" in name:
+    if "adc" in name and book is not None:
         nCap = 6  # accommodate dummy value above
         book.fill((cap1, cap2), "capid0_vs_capid0",
                   (nCap, nCap), (3.5 - nCap, 3.5 - nCap), (3.5, 3.5),
@@ -626,9 +626,9 @@ def histogram_nMatched(book, matched=None, misMatched=None, nonMatched=None, tMa
                   title="TPs;number mis-matched;Events / bin")
 
 
-def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQuality=True):
+def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, warnQuality=True):
     doDump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
-    # assert book is not None
+
     if anyEmap:
         mapF1, mapB1, _ = dataMap(raw1, book)
         mapF2, mapB2, _ = dataMap(raw2, book)
@@ -646,7 +646,7 @@ def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQual
         titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF()])
         matched12, misMatched12 = adc_vs_adc(mapF1, mapF2, book=book, titlePrefix=titlePrefix)
         if doDump:
-            matched21, misMatched21 = adc_vs_adc(mapF2, mapF1, titlePrefix=titlePrefix)
+            matched21, misMatched21 = adc_vs_adc(mapF2, mapF1, book=None, titlePrefix=titlePrefix)
 
         tF1 = tpMap(raw1, warnQuality, book)[0]
         tF2 = tpMap(raw2, warnQuality, book)[0]
