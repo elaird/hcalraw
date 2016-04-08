@@ -15,7 +15,7 @@ import printer
 def setup():
     r.gROOT.SetBatch(True)
 
-    if r.gROOT.GetVersionInt(): # < 60000:  # before ROOT6
+    if r.gROOT.GetVersionInt() < 60000:  # before ROOT6
         r.gSystem.Load("%s/cpp/cdf.so" % os.environ["PWD"])
         r.gSystem.Load("%s/cpp/cms.so" % os.environ["PWD"])
     else:
