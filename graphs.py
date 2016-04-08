@@ -553,6 +553,7 @@ def plotMerged(f, pad, offset=None, names=[],
         stylize(h1, r.kBlack, 1)
         magnify(h1, factor=1.8)
 
+        legEntries = [(h1, fedString(found1))]
         if h2:
             shiftFlows(h2)
             gopts += "same"
@@ -560,10 +561,9 @@ def plotMerged(f, pad, offset=None, names=[],
             stylize(h2, r.kPink + 7, 2)
             magnify(h2, factor=1.8)
             h1.SetMaximum(2.0 * max([h1.GetMaximum(), h2.GetMaximum()]))
+            legEntries.append((h2, fedString(found2)))
 
-        keep += legends([(h1, fedString(found1)),
-                         (h2, fedString(found2)),
-                         ])
+        keep += legends(legEntries)
         keep += [h1, h2]
 
     return keep
@@ -930,8 +930,9 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
     plotFunc = plotMerged if feds2 or 4 <= len(feds1) else plotList
     keep += plotFunc(f, pad20, offset=5,
                      names=["nBytesSW", "ChannelFlavor", "nQieSamples", "nTpSamples",
-                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "PopCapFrac",
-                            "htrOverviewBits", "ErrF0", "TTS", "",
+                            "htrOverviewBits", "ErrF0", "nChannels", "nTpTowers",
+                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs",
+                            # "TTS", "PopCapFrac",
                             ], feds1=feds1, feds2=feds2)
 
     pad20.cd(16)
@@ -1111,6 +1112,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
 
         names = ["%s_mismatch_vs_slot_crate" % k for k in ["EvN", "OrN5", "BcN"]]
         names += ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", "TP_mismatch_vs_slot_crate"]
+        # names = ["ADC_mismatch_vs_slot_crate", "TP_mismatch_vs_slot_crate", "TP_unmatchable_vs_slot_crate"]
 
         kargs34 = {"names": names, "doYx": False, "retitle": False, "boxes": True}
         kargs34.update(kargs)
@@ -1176,7 +1178,7 @@ def main(options):
 
 
 all_pages = ["overview", "vs", "page3",
-             "maps_counts",
+             # "maps_rates",
              "maps_evn_orn_bcn", "maps_errf", "maps_adc_tp",
              # "frac0_orbit",
              "evn", "orn",
