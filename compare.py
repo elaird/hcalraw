@@ -328,7 +328,7 @@ def htrOverviewBits(d={}, book={}, fedId=None, msg="", warn=True):
                 book.fill(i, "htrOverviewBits_%d" % fedId, 7, -0.5, 6.5,
                           title="FED %d;;HTRs / bin" % fedId,
                           xAxisLabels=letters)
-                if warn and d["utca"] and l[-1] == "C":
+                if warn and d["utca"] and l[-1] in "CV":
                     printer.warning("%s / input %2d has bit %s set." % (msg, iHtr, l))
 
 
