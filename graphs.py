@@ -545,6 +545,9 @@ def plotMerged(f, pad, offset=None, names=[],
         h1, found1 = fedSum(f, name, feds1)
         h2, found2 = fedSum(f, name, feds2)
 
+        if not h1:
+            continue
+
         shiftFlows(h1)
         gopts = "hist"
         h1.Draw(gopts)
