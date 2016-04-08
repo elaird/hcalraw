@@ -321,6 +321,9 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
     skipped64 = []
 
     for jWord64 in range(nWord64):
+        if not unpack:
+            continue
+
         word64 = w64(fedData, jWord64, nBytesPer)
 
         if jWord64 in skipWords64:
@@ -333,9 +336,6 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
             if not iWord64:
                 print "#iw64 w64"
             print "%5d" % iWord64, "%016x" % word64
-
-        if not unpack:
-            continue
 
         if iWord64 < header["iWordPayload0"]:
             decode.header(header, iWord64, word64)
