@@ -190,7 +190,7 @@ def x_first_filled(h):
 
 
 def x_last_filled(h):
-    for iBin in range(1 + h.GetNbinsX(), 1, -1):
+    for iBin in range(1 + h.GetNbinsX(), 0, -1):
         if h.GetBinContent(iBin):
             return h.GetBinLowEdge(iBin) + h.GetBinWidth(iBin)
 
