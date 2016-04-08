@@ -223,8 +223,8 @@ def htrSummary(blocks=[], book=None, fedId=None,
             flavor(book, channelData, fedId)
             a, b = histogramChannelData(book, block, channelData, fedId,
                                         caps, ErrF, adcs, adcMatches, adcMismatches,
-                                        slotCrate, misMatchMapBins, yAxisLabels,
-                                        fedTime)
+                                        crate2bin, crateFail, slotCrate, misMatchMapBins,
+                                        yAxisLabels, fedTime)
             nAdcMatch += a
             nAdcMisMatch += b
 
@@ -237,8 +237,8 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
 def histogramChannelData(book, block, channelData, fedId,
                          caps, ErrF, adcs, adcMatches, adcMismatches,
-                         slotCrate, misMatchMapBins, yAxisLabels,
-                         fedTime):
+                         crate2bin, crateFail, slotCrate, misMatchMapBins,
+                         yAxisLabels, fedTime):
 
     nAdcMatch = 0
     nAdcMisMatch = 0
@@ -628,7 +628,7 @@ def histogram_nMatched(book, matched=None, misMatched=None, nonMatched=None, tMa
 
 def compare(raw1={}, raw2={}, book={}, anyEmap=False,  printEmap=False, warnQuality=True):
     doDump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
-
+    # assert book is not None
     if anyEmap:
         mapF1, mapB1, _ = dataMap(raw1, book)
         mapF2, mapB2, _ = dataMap(raw2, book)
