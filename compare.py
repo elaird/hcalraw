@@ -41,6 +41,49 @@ def slot2bin(slot, min=0, max=22):
     return slot
 
 
+def histogramBlock(book, block, fedId, fedEvn, fedOrn5, fedBcn):
+    evnMask = 0x7f
+    book.fill((fedEvn & evnMask, block["EvN"] & evnMask), "EvN_HTR_vs_FED_%d" % fedId,
+              (evnMask, evnMask), (-0.5, -0.5), (evnMask - 0.5, evnMask - 0.5),
+              title="FED %d;FED EvN & 0x%x;HTR EvN & 0x%x;HTRs / bin" % (fedId, evnMask, evnMask))
+
+    ornMask = 0x1f
+    book.fill((fedOrn5, block["OrN5"]), "OrN5_HTR_vs_FED_%d" % fedId,
+              (ornMask, ornMask), (-0.5, -0.5), (ornMask - 0.5, ornMask - 0.5),
+              title="FED %d;FED OrN5;HTR OrN5;HTRs / bin" % fedId)
+
+    book.fill(block["EvN"] - fedEvn, "EvN_HTRs_%d" % fedId,
+              11, -5.5, 5.5,
+              title="FED %d;HTR EvN - FED EvN;HTRs / bin" % fedId)
+
+    book.fill(block["OrN5"] - fedOrn5, "OrN5_HTRs_%d" % fedId,
+              11, -5.5, 5.5,
+              title="FED %d;HTR OrN5 - FED OrN5;HTRs / bin" % fedId)
+
+    book.fill(block["BcN"] - fedBcn, "BcN_HTRs_%d" % fedId,
+              11, -5.5, 5.5,
+              title="FED %d;HTR BcN - FED BcN;HTRs / bin" % fedId)
+
+
+def histogramBlock2(book, block, fedEvn, fedOrn5, fedBcn, slotCrate, misMatchMapBins, yAxisLabels):
+    book.fill(slotCrate,
+              "block_vs_slot_crate",
+              *misMatchMapBins,
+              title="any;slot;crate;HTR / bin",
+              yAxisLabels=yAxisLabels)
+
+    for key, fedVar in [("EvN", fedEvn),
+                        ("OrN5", fedOrn5),
+                        ("BcN", fedBcn),
+                         ]:
+        if (block[key] - fedVar):
+            book.fill(slotCrate,
+                      "%s_mismatch_vs_slot_crate" % key,
+                      *misMatchMapBins,
+                      title="%s mismatch;slot;crate;HTR - FED   mismatches / bin" % key,
+                      yAxisLabels=yAxisLabels)
+
+
 def htrSummary(blocks=[], book=None, fedId=None,
                fedEvn=None, fedOrn5=None, fedBcn=None,
                msg="", warn=True, fedTime=None,
@@ -64,38 +107,27 @@ def htrSummary(blocks=[], book=None, fedId=None,
         caps[i] = 0
         ErrF[i] = 0
 
-    crate2bin = {(37, " "):  1,
-                 (36, " "):  2,
-                 (35, " "):  3,
-                 (34, " "):  4,
-                 (32, " "):  5,
-                 (31, " "):  6,
-                 (30, " "):  7,
-                 (29, " "):  8,
-                 (25, " "):  9,
-                 (24, " "): 10,
-                 (22, " "): 11,
-                 (21, " "): 12,
-                 (20, " "): 13,
-                 (17, "b"): 14,
-                 (17, "t"): 15,
-                 (15, "b"): 16,
-                 (15, "t"): 17,
-                 (14, "b"): 18,
-                 (14, "t"): 19,
-                 (11, "b"): 20,
-                 (11, "t"): 21,
-                 (10, "b"): 22,
-                 (10, "t"): 23,
-                 ( 5, "b"): 24,
-                 ( 5, "t"): 25,
-                 ( 4, "b"): 26,
-                 ( 4, "t"): 27,
-                 ( 1, "b"): 28,
-                 ( 1, "t"): 29,
-                 ( 0, "b"): 30,
-                 ( 0, "t"): 31,
-                 }
+    crate2bin = {
+        # 13 uTCA crates
+        (37, " "):  1, (36, " "):  2,
+        (35, " "):  3, (34, " "):  4,
+        (32, " "):  5, (31, " "):  6,
+        (30, " "):  7, (29, " "):  8,
+        (25, " "):  9, (24, " "): 10,
+        (22, " "): 11, (21, " "): 12,
+        (20, " "): 13,
+        # 9 VME HBHE crates
+        (17, "b"): 14, (17, "t"): 15,
+        (15, "b"): 16, (15, "t"): 17,
+        (14, "b"): 18, (14, "t"): 19,
+        (11, "b"): 20, (11, "t"): 21,
+        (10, "b"): 22, (10, "t"): 23,
+        ( 5, "b"): 24, ( 5, "t"): 25,
+        ( 4, "b"): 26, ( 4, "t"): 27,
+        ( 1, "b"): 28, ( 1, "t"): 29,
+        ( 0, "b"): 30, ( 0, "t"): 31,
+    }
+
     crateFail = 1 + max(crate2bin.values())
     yAxisLabels = labels(crate2bin)
     misMatchMapBins = ((23, crateFail), (-0.5, 0.5), (22.5, 0.5 + crateFail))
@@ -117,55 +149,9 @@ def htrSummary(blocks=[], book=None, fedId=None,
             if warn:
                 printer.warning("%s / crate %2d slot %2d%1s has EvN 0x%06x" % (msg, block["Crate"], block["Slot"], block["Top"], block["EvN"]))
 
-        evnMask = 0x7f
-        book.fill((fedEvn & evnMask, block["EvN"] & evnMask), "EvN_HTR_vs_FED_%d" % fedId,
-                  (evnMask, evnMask), (-0.5, -0.5), (evnMask - 0.5, evnMask - 0.5),
-                  title="FED %d;FED EvN & 0x%x;HTR EvN & 0x%x;HTRs / bin" % (fedId, evnMask, evnMask))
-
-        ornMask = 0x1f
-        book.fill((fedOrn5, block["OrN5"]), "OrN5_HTR_vs_FED_%d" % fedId,
-                  (ornMask, ornMask), (-0.5, -0.5), (ornMask - 0.5, ornMask - 0.5),
-                  title="FED %d;FED OrN5;HTR OrN5;HTRs / bin" % fedId)
-
-        book.fill(block["EvN"] - fedEvn, "EvN_HTRs_%d" % fedId,
-                  11, -5.5, 5.5,
-                  title="FED %d;HTR EvN - FED EvN;HTRs / bin" % fedId)
-
-        book.fill(block["OrN5"] - fedOrn5, "OrN5_HTRs_%d" % fedId,
-                  11, -5.5, 5.5,
-                  title="FED %d;HTR OrN5 - FED OrN5;HTRs / bin" % fedId)
-
-        book.fill(block["BcN"] - fedBcn, "BcN_HTRs_%d" % fedId,
-                  11, -5.5, 5.5,
-                  title="FED %d;HTR BcN - FED BcN;HTRs / bin" % fedId)
-
-
+        histogramBlock(book, block, fedId, fedEvn, fedOrn5, fedBcn)
         slotCrate = (slot2bin(block["Slot"]), crate2bin.get((block["Crate"], block["Top"]), crateFail))
-
-        book.fill(slotCrate,
-                  "block_vs_slot_crate",
-                  *misMatchMapBins,
-                  title="any;slot;crate;HTR / bin",
-                  yAxisLabels=yAxisLabels)
-
-        for key, fedVar in [("EvN", fedEvn),
-                            ("OrN5", fedOrn5),
-                            ("BcN", fedBcn),
-                         ]:
-            if (block[key] - fedVar):
-                book.fill(slotCrate,
-                          "%s_mismatch_vs_slot_crate" % key,
-                          *misMatchMapBins,
-                          title="%s mismatch;slot;crate;HTR - FED   mismatches / bin" % key,
-                          yAxisLabels=yAxisLabels)
-
-        for otherData in block["otherData"].values():
-            flavor(book, otherData, fedId)
-
-        for techData in block["technicalData"].values():
-            # remove uHTR pad words from flavor histogram
-            if techData["technicalDataType"] or techData["channelId"] or techData["words"]:
-                flavor(book, techData, fedId)
+        histogramBlock2(book, block, fedEvn, fedOrn5, fedBcn, slotCrate, misMatchMapBins, yAxisLabels)
 
         nTpTowerBins = 50
         book.fill(len(block["triggerData"]), "nTpTowers_%d" % fedId, nTpTowerBins, -0.5, nTpTowerBins - 0.5,
@@ -174,6 +160,14 @@ def htrSummary(blocks=[], book=None, fedId=None,
         nChannelBins = 1 + 24*3
         book.fill(len(block["channelData"]), "nChannels_%d" % fedId, nChannelBins, -0.5, nChannelBins - 0.5,
                   title="FED %d;number of channels;HTRs / bin" % fedId)
+
+        for otherData in block["otherData"].values():
+            flavor(book, otherData, fedId)
+
+        for techData in block["technicalData"].values():
+            # remove uHTR pad words from flavor histogram
+            if techData["technicalDataType"] or techData["channelId"] or techData["words"]:
+                flavor(book, techData, fedId)
 
         for triggerKey, triggerData in block["triggerData"].iteritems():
             if "Flavor" in triggerData:
