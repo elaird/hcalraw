@@ -42,8 +42,9 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 
 
 # compare payloads of different sets of FEDs, across two files
-./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 --ok-errf=0,1 \
---file2=data/mol_run55.root --feds2=931 --utca-bcn-delta=-119 --any-emap --dump=0
+./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 \
+--file2=data/mol_run55.root --feds2=931 --dump=0 --any-emap \
+--no-warn-quality --ok-errf=0,1 --utca-bcn-delta=-119
 
 ./oneRun.py --file1=$USC/USC_211154.root --feds1=714,722 --nevents=51 --progress \
 --file2=$USC/USC_211155.root --feds2=989 --utca-bcn-delta=-119 --any-emap --dump=0
