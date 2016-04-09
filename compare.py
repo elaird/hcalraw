@@ -161,6 +161,8 @@ def htrSummary(blocks=[], book=None, fedId=None,
         book.fill(len(block["channelData"]), "nChannels_%d" % fedId, nChannelBins, -0.5, nChannelBins - 0.5,
                   title="FED %d;number of channels;HTRs / bin" % fedId)
 
+        # continue
+
         for otherData in block["otherData"].values():
             flavor(book, otherData, fedId)
 
@@ -623,7 +625,7 @@ def histogram_nMatched(book, matched=None, misMatched=None, nonMatched=None, tMa
 def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, warnQuality=True):
     doDump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
 
-    if anyEmap:
+    if raw2 and anyEmap:
         mapF1, mapB1, _ = dataMap(raw1, book)
         mapF2, mapB2, _ = dataMap(raw2, book)
         matched12, nonMatched12 = matchStatsAnyMap(mapF1, mapB2, iStart=4)
@@ -634,7 +636,7 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, warnQu
            reportMatched(matched12)
            reportFailed(nonMatched12)
         histogram_nMatched(book, matched=matched12.keys(), nonMatched=nonMatched12)
-    else:
+    elif raw2:
         mapF1, _, _ = dataMap(raw1, book)
         mapF2, _, _ = dataMap(raw2, book)
         titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF()])
@@ -655,7 +657,12 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, warnQu
                            matched=matched12, misMatched=misMatched12,
                            tMatched=tMatched12,
                            tMisMatched=tMisMatched12)
-
+    else:
+        # dummy
+        matched12 = misMatched12 = {}
+        matched21 = misMatched21 = {}
+        tMatched12 = tMisMatched12 = []
+        tMatched21 = tMisMatched21 = []
 
     if doDump:
         slim1 = (raw1[None]["dump"] == 1) and (len(raw1) == 2) and not raw2
