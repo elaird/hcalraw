@@ -932,13 +932,13 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
 
     plotFunc = plotMerged if feds2 or 4 <= len(feds1) else plotList
     keep += plotFunc(f, pad20, offset=5,
-                     names=["nBytesSW", "ChannelFlavor", "nQieSamples", "nTpSamples",
-                            "htrOverviewBits", "ErrF0", "nChannels", "nTpTowers",
-                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs",
+                     names=["nBytesSW", "htrOverviewBits", "nChannels", "nTpTowers",
+                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "",
+                            "ChannelFlavor", "ErrF0", "nQieSamples", "nTpSamples",
                             # "TTS", "PopCapFrac",
                             ], feds1=feds1, feds2=feds2)
 
-    pad20.cd(16)
+    pad20.cd(12)
     adjustPad(logY=True)
     keep += histoLoop(f,
                       [("nTS_for_matching_ADC", r.kBlue, 1),
