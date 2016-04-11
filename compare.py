@@ -175,45 +175,13 @@ def htrSummary(blocks=[], book=None, fedId=None,
             if "Flavor" in triggerData:
                 flavor(book, triggerData, fedId)
 
-            book.fill(len(triggerData["TP"]), "nTpSamples_%d" % fedId, 14, -0.5, 13.5,
-                      title="FED %d;number of TP samples;Towers / bin" % fedId)
-
-            maxTp = -1
-            for tp in triggerData["TP"]:
-                tp8 = tp & 0xff  # ignore fine-grain bit
-                if maxTp < tp8:
-                    maxTp = tp8
-            if 0 <= maxTp:
-                book.fill(maxTp, "channel_peak_tp_%d" % fedId, 14, -0.5, 13.5,
-                          title="FED %d;Peak TP E;Towers / bin" % fedId)
-
-            tpCoords = (block["Crate"], block["Slot"], block["Top"], triggerKey)
-            tpCoords2 = hw.transformed_tp(*tpCoords)
-            if tpCoords2 is None:
-                book.fill(slotCrate, "TP_unmatchable_vs_slot_crate", *misMatchMapBins,
-                          title="TP unmatchable;slot;crate;Towers / bin",
-                          yAxisLabels=yAxisLabels)
-                continue
-
-            crate2, slot2, top2 = tpCoords2[:3]
-            slotsCrates = [slotCrate,
-                          (slot2bin(slot2), crate2bin.get((crate2, top2), crateFail)),
-                          ]
-
-            for t in slotsCrates:
-                book.fill(t, "TP_matchable_vs_slot_crate", *misMatchMapBins,
-                          title="TP matchable;slot;crate;Towers / bin",
-                          yAxisLabels=yAxisLabels)
-
-            if tpCoords in tpMatches:
+            tpMatch = histogramTriggerData(book, block, triggerData, triggerKey, fedId,
+                                           tpMatches, # tpMismatches,
+                                           crate2bin, crateFail, slotCrate, misMatchMapBins, yAxisLabels)
+            if tpMatch:
                 nTpMatch += 1
             else:
                 nTpMisMatch += 1
-                for t in slotsCrates:
-                    book.fill(t, "TP_mismatch_vs_slot_crate", *misMatchMapBins,
-                              title="TP mismatch;slot;crate;Towers / bin",
-                              yAxisLabels=yAxisLabels)
-
 
         for channelData in block["channelData"].values():
             flavor(book, channelData, fedId)
@@ -229,6 +197,50 @@ def htrSummary(blocks=[], book=None, fedId=None,
             matchFrac(nAdcMatch, nAdcMisMatch),
             matchFrac(nTpMatch, nTpMisMatch),
             ]
+
+
+def histogramTriggerData(book, block, triggerData, triggerKey, fedId,
+                         tpMatches, # tpMismatches,
+                         crate2bin, crateFail, slotCrate, misMatchMapBins, yAxisLabels):
+
+    book.fill(len(triggerData["TP"]), "nTpSamples_%d" % fedId, 14, -0.5, 13.5,
+              title="FED %d;number of TP samples;Towers / bin" % fedId)
+
+    maxTp = -1
+    for tp in triggerData["TP"]:
+        tp8 = tp & 0xff  # ignore fine-grain bit
+        if maxTp < tp8:
+            maxTp = tp8
+    if 0 <= maxTp:
+        book.fill(maxTp, "channel_peak_tp_%d" % fedId, 14, -0.5, 13.5,
+                  title="FED %d;Peak TP E;Towers / bin" % fedId)
+
+    tpCoords = (block["Crate"], block["Slot"], block["Top"], triggerKey)
+    tpCoords2 = hw.transformed_tp(*tpCoords)
+    if tpCoords2 is None:
+        book.fill(slotCrate, "TP_unmatchable_vs_slot_crate", *misMatchMapBins,
+                  title="TP unmatchable;slot;crate;Towers / bin",
+                  yAxisLabels=yAxisLabels)
+        return
+
+    crate2, slot2, top2 = tpCoords2[:3]
+    slotsCrates = [slotCrate,
+                   (slot2bin(slot2), crate2bin.get((crate2, top2), crateFail)),
+                   ]
+
+    for t in slotsCrates:
+        book.fill(t, "TP_matchable_vs_slot_crate", *misMatchMapBins,
+                  title="TP matchable;slot;crate;Towers / bin",
+                  yAxisLabels=yAxisLabels)
+
+    if tpCoords in tpMatches:
+        return True
+    else:
+        for t in slotsCrates:
+            book.fill(t, "TP_mismatch_vs_slot_crate", *misMatchMapBins,
+                      title="TP mismatch;slot;crate;Towers / bin",
+                      yAxisLabels=yAxisLabels)
+        return False
 
 
 def histogramChannelData(book, block, channelData, fedId,
@@ -650,7 +662,7 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, warnQu
         tMatched12, tMisMatched12 = adc_vs_adc(tF1, tF2, book=book,
                                                name="tp_vs_tp",
                                                transf=hw.transformed_tp,
-                                               xMin=-20.5, xMax=255.5)
+                                               xMin=-20.5, xMax=275.5)
         tMatched21 = tMisMatched21 = []  # tp_vs_tp(tF2, tF1, book)  # FIXME
 
         histogram_nMatched(book,
