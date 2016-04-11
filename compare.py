@@ -554,7 +554,7 @@ def tsLoop(lst1, lst2, book=None, name=None,
     return nTs, nTsMatched
 
 
-def adc_vs_adc(mapF1, mapF2, book=None, printMismatches=False, transf=hw.transformed_qie,
+def adc_vs_adc(mapF1, mapF2, book=None, printMismatches=False, iEntry=None, transf=hw.transformed_qie,
                titlePrefix="", name="adc_vs_adc", xMin=-10.5, xMax=127.5):
     matched = []
     misMatched = []
@@ -594,7 +594,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, printMismatches=False, transf=hw.transfo
                     q2 = " ".join(["%2x"] * len(samples2)) % samples2
                     c1 = str(coords1)
                     c2 = str(coords2)
-                    print "%s  |  %s  :  %s  |  %s" % (c1, c2, q1, q2)
+                    print "iEntry %d: %s  |  %s  :  %s  |  %s" % (iEntry, c1, c2, q1, q2)
 
     return matched, misMatched
 
@@ -654,7 +654,8 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printM
         titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF()])
         matched12, misMatched12 = adc_vs_adc(mapF1, mapF2,
                                              book=book, titlePrefix=titlePrefix,
-                                             printMismatches=printMismatches)
+                                             printMismatches=printMismatches,
+                                             iEntry=raw1[None]["iEntry"])
         if doDump:
             matched21, misMatched21 = adc_vs_adc(mapF2, mapF1, book=None, titlePrefix=titlePrefix)
 
@@ -665,7 +666,8 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printM
                                                name="tp_vs_tp",
                                                transf=hw.transformed_tp,
                                                xMin=-20.5, xMax=275.5,
-                                               printMismatches=printMismatches)
+                                               printMismatches=printMismatches,
+                                               iEntry=raw1[None]["iEntry"])
         tMatched21 = tMisMatched21 = []  # tp_vs_tp(tF2, tF1, book)  # FIXME
 
         histogram_nMatched(book,
@@ -814,14 +816,14 @@ def tpMap(raw={}, warn=True, book=None):
         for block in d["htrBlocks"].values():
             for key, triggerData in block["triggerData"].iteritems():
                 coords = (block["Crate"], block["Slot"], block["Top"], key)
-                if warn and sum(triggerData["SOI"]) != 1:
-                    printer.warning("%s has !=1 SOIs: %s" % (coords, triggerData["SOI"]))
+                nSoi = sum(triggerData["SOI"])
+                if warn and nSoi != 1:
+                    printer.warning("iEntry %d / %s has !=1 SOIs: %s" % (raw[None]["iEntry"], coords, triggerData["SOI"]))
 
-                try:
-                    soi = triggerData["SOI"].index(1)
-                except ValueError as e:
-                    print e
+                if not nSoi:
                     continue
+
+                soi = triggerData["SOI"].index(1)
 
                 l = [soi, delta, 0, 0]
                 for i, tp9 in enumerate(triggerData["TP"]):
