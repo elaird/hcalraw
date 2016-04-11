@@ -167,6 +167,11 @@ def opts(alsoArgs=False):
                        default=False,
                        action="store_true",
                        help="Print emap found with --any-emap.")
+    matchCh.add_option("--print-mismatches",
+                       dest="printMismatches",
+                       default=False,
+                       action="store_true",
+                       help="Print mismatching ADCs or TPs.")
     parser.add_option_group(matchCh)
 
     look = optparse.OptionGroup(parser, "Options solely for use with look.py")
