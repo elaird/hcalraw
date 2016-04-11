@@ -554,7 +554,7 @@ def tsLoop(lst1, lst2, book=None, name=None,
     return nTs, nTsMatched
 
 
-def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
+def adc_vs_adc(mapF1, mapF2, book=None, printMismatches=False, transf=hw.transformed_qie,
                titlePrefix="", name="adc_vs_adc", xMin=-10.5, xMax=127.5):
     matched = []
     misMatched = []
@@ -587,7 +587,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, loud=False, transf=hw.transformed_qie,
                 matched.append(coords1)
             else:
                 misMatched.append(coords1)
-                if loud and coords2 in mapF2:
+                if printMismatches and coords2 in mapF2:
                     samples1 = tuple(lst1[4:])
                     samples2 = tuple(lst2[4:])
                     q1 = " ".join(["%2x"] * len(samples1)) % samples1
@@ -634,7 +634,7 @@ def histogram_nMatched(book, matched=None, misMatched=None, nonMatched=None, tMa
                   title="TPs;number mis-matched;Events / bin")
 
 
-def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, warnQuality=True):
+def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printMismatches=False, warnQuality=True):
     doDump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
 
     if raw2 and anyEmap:
@@ -652,7 +652,9 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, warnQu
         mapF1, _, _ = dataMap(raw1, book)
         mapF2, _, _ = dataMap(raw2, book)
         titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF()])
-        matched12, misMatched12 = adc_vs_adc(mapF1, mapF2, book=book, titlePrefix=titlePrefix)
+        matched12, misMatched12 = adc_vs_adc(mapF1, mapF2,
+                                             book=book, titlePrefix=titlePrefix,
+                                             printMismatches=printMismatches)
         if doDump:
             matched21, misMatched21 = adc_vs_adc(mapF2, mapF1, book=None, titlePrefix=titlePrefix)
 
@@ -662,7 +664,8 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, warnQu
         tMatched12, tMisMatched12 = adc_vs_adc(tF1, tF2, book=book,
                                                name="tp_vs_tp",
                                                transf=hw.transformed_tp,
-                                               xMin=-20.5, xMax=275.5)
+                                               xMin=-20.5, xMax=275.5,
+                                               printMismatches=printMismatches)
         tMatched21 = tMisMatched21 = []  # tp_vs_tp(tF2, tF1, book)  # FIXME
 
         histogram_nMatched(book,
@@ -814,8 +817,10 @@ def tpMap(raw={}, warn=True, book=None):
                 if warn and sum(triggerData["SOI"]) != 1:
                     printer.warning("%s has !=1 SOIs: %s" % (coords, triggerData["SOI"]))
 
-                soi = triggerData["SOI"].index(1)
-                if soi == -1:
+                try:
+                    soi = triggerData["SOI"].index(1)
+                except ValueError as e:
+                    print e
                     continue
 
                 l = [soi, delta, 0, 0]
