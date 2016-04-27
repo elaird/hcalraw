@@ -600,13 +600,14 @@ def printChannelSummary(outputFile):
         if h:
             hs.append(h)
 
+    lines = []
     if hs:
         words = ["nMatched"]
         words += ["FibCh%d" % i for i in range(3)]
         words.append("  TPs")
         words = "   ".join(words)
-        print words
-        print "-" * len(words)
+        lines.append(words)
+        lines.append("-" * len(words))
     else:
         return
 
@@ -627,7 +628,14 @@ def printChannelSummary(outputFile):
         if any(cs):
             s = ["   %4d" % x]
             s += ["%4d" % c for c in cs]
-            print "     ".join(s)
+            lines.append("     ".join(s))
+
+    if len(lines) > 12:
+        printer.info("suppressed printing of match histogram (more than 10 different occupancies)")
+    else:
+        for line in lines:
+            print line
+
     f.Close()
 
 
