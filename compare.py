@@ -595,6 +595,9 @@ def adc_vs_adc(mapF1, mapF2, book=None, printMismatches=False, iEntry=None, tran
                     c1 = str(coords1)
                     c2 = str(coords2)
                     print "iEntry %d: %s  |  %s  :  %s  |  %s" % (iEntry, c1, c2, q1, q2)
+        else:
+            # FIXME: handle missing
+            pass
 
     return matched, misMatched
 
