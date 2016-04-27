@@ -236,6 +236,7 @@ def histoLoop(f, lst, func, zoom=False):
 
         s = "Matched"
         if func(x).startswith(s):
+            h.GetXaxis().SetLabelSize(0.04)
             twoLines = True
             ch = func(x).replace(s, "").replace("Fibers", "").replace("TriggerTowers", "")
             if not ch:
