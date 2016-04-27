@@ -86,7 +86,7 @@ def histogramBlock2(book, block, fedEvn, fedOrn5, fedBcn, slotCrate, misMatchMap
 
 def htrSummary(blocks=[], book=None, fedId=None,
                fedEvn=None, fedOrn5=None, fedBcn=None,
-               msg="", warn=True, fedTime=None,
+               msg="", warn=True, fewerHistos=False, fedTime=None,
                adcMatches=[], adcMismatches=[],
                tpMatches=[], tpMismatches=[]):
     nBadHtrs = 0
@@ -161,7 +161,8 @@ def htrSummary(blocks=[], book=None, fedId=None,
         book.fill(len(block["channelData"]), "nChannels_%d" % fedId, nChannelBins, -0.5, nChannelBins - 0.5,
                   title="FED %d;number of channels;HTRs / bin" % fedId)
 
-        # continue
+        if fewerHistos:
+            continue
 
         for otherData in block["otherData"].values():
             flavor(book, otherData, fedId)
@@ -637,7 +638,7 @@ def histogram_nMatched(book, matched=None, misMatched=None, nonMatched=None, tMa
                   title="TPs;number mis-matched;Events / bin")
 
 
-def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printMismatches=False, warnQuality=True):
+def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printMismatches=False, warnQuality=True, fewerHistos=False):
     doDump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
 
     if raw2 and anyEmap:
@@ -689,7 +690,8 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printM
         printRaw.oneEvent(raw1, nonMatchedQie=misMatched12, nonMatchedTp=tMisMatched12, slim1=slim1)
         printRaw.oneEvent(raw2, nonMatchedQie=misMatched21, nonMatchedTp=tMisMatched21)
 
-    okFeds = loop_over_feds(raw1, book, adcTag="feds1", warn=warnQuality,
+    okFeds = loop_over_feds(raw1, book, adcTag="feds1",
+                            warn=warnQuality, fewerHistos=fewerHistos,
                             adcMatches=matched12, adcMismatches=misMatched12,
                             tpMatches=tMatched12, tpMismatches=tMisMatched12,
                             )
