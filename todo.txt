@@ -11,3 +11,5 @@ make ticks visible in problem maps
 autozoom time axis
 fix --rmribbon
 restore trends using suppression
+add hbhe tps to test_transformations.py
+if not nTs: handle missing
