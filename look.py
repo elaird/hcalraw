@@ -136,8 +136,8 @@ def main(options, args, quiet=False):
                       })
 
     else:
-        paths.update({# 3: "/store/data/Run2015B/HcalNZS/RAW/v1",
-                      4: "/store/express/Run2015B/ExpressPhysics/FEVT/Express-v1/",
+        paths.update({3: "/store/data/Run2016A/HcalNZS/RAW/v1",
+                      4: "/store/data/Run2016A/ZeroBias1/RAW/v1",
                       })
 
     for iFind, grDir in sorted(paths.iteritems()):
