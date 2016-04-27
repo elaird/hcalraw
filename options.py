@@ -53,6 +53,11 @@ def opts(alsoArgs=False):
                       default=False,
                       action="store_true",
                       help="Loop over raw data, but do not unpack it.")
+    common.add_option("--fewer-histos",
+                      dest="fewerHistos",
+                      default=False,
+                      action="store_true",
+                      help="Save time by making fewer histograms.")
     common.add_option("--no-plot",
                       dest="noPlot",
                       default=False,
