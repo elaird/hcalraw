@@ -114,7 +114,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
     out = []
     if printColumnHeaders:
         columns = ["iWord16",
-                   "   EvN",
+                   "    EvN",
                    "  OrN5",
                    " BcN",
                    "Cr",
@@ -132,7 +132,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
             columns += [" ", "ZSMask:  Thr1, Thr24, ThrTP"]
         out.append("  ".join(columns))
 
-    strings = [" %04d" % p["0Word16"],
+    strings = [" %05d" % p["0Word16"],
                " 0x%07x" % p["EvN"],
                "0x%02x" % p["OrN5"],
                "%4d" % p["BcN"],
