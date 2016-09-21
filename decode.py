@@ -523,6 +523,7 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
     if 0 <= flavor <= 1:
         dataKey = "channelData"
         channelHeader["ErrF"] = (word16 >> 10) & 0x3
+        channelHeader["CapId0"] = (word16 >> 8) & 0x3
         channelId = word16 & 0xff
         channelHeader["Fiber"] = channelId >> 3
         channelHeader["FibCh"] = channelId & 0x7
