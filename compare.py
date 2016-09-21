@@ -108,29 +108,32 @@ def htrSummary(blocks=[], book=None, fedId=None,
         ErrF[i] = 0
 
     crate2bin = {
-        # 13 uTCA crates
-        (37, " "):  1, (36, " "):  2,
-        (35, " "):  3, (34, " "):  4,
-        (32, " "):  5, (31, " "):  6,
-        (30, " "):  7, (29, " "):  8,
-        (25, " "):  9, (24, " "): 10,
-        (22, " "): 11, (21, " "): 12,
-        (20, " "): 13,
-        # 9 VME HBHE crates
-        (17, "b"): 14, (17, "t"): 15,
-        (15, "b"): 16, (15, "t"): 17,
-        (14, "b"): 18, (14, "t"): 19,
-        (11, "b"): 20, (11, "t"): 21,
-        (10, "b"): 22, (10, "t"): 23,
-        ( 5, "b"): 24, ( 5, "t"): 25,
-        ( 4, "b"): 26, ( 4, "t"): 27,
-        ( 1, "b"): 28, ( 1, "t"): 29,
-        ( 0, "b"): 30, ( 0, "t"): 31,
+        #  3 904 uTCA crates
+        # 13 USC uTCA crates
+        (63, " "):  1, (62, " "):  2,
+        (61, " "):  3,
+        (37, " "):  4, (36, " "):  5,
+        (35, " "):  6, (34, " "):  7,
+        (32, " "):  8, (31, " "):  9,
+        (30, " "): 10, (29, " "): 11,
+        (25, " "): 12, (24, " "): 13,
+        (22, " "): 14, (21, " "): 15,
+        (20, " "): 16,
+        # 9 USC VME HBHE crates
+        # (17, "b"): 14, (17, "t"): 15,
+        # (15, "b"): 16, (15, "t"): 17,
+        # (14, "b"): 18, (14, "t"): 19,
+        # (11, "b"): 20, (11, "t"): 21,
+        # (10, "b"): 22, (10, "t"): 23,
+        # ( 5, "b"): 24, ( 5, "t"): 25,
+        # ( 4, "b"): 26, ( 4, "t"): 27,
+        # ( 1, "b"): 28, ( 1, "t"): 29,
+        # ( 0, "b"): 30, ( 0, "t"): 31,
     }
 
     crateFail = 1 + max(crate2bin.values())
     yAxisLabels = labels(crate2bin)
-    misMatchMapBins = ((23, crateFail), (-0.5, 0.5), (22.5, 0.5 + crateFail))
+    misMatchMapBins = ((13, crateFail), (-0.5, 0.5), (12.5, 0.5 + crateFail))
 
     for block in blocks:
         if type(block) is not dict:
@@ -157,8 +160,8 @@ def htrSummary(blocks=[], book=None, fedId=None,
         book.fill(len(block["triggerData"]), "nTpTowers_%d" % fedId, nTpTowerBins, -0.5, nTpTowerBins - 0.5,
                   title="FED %d;number of TP towers;HTRs / bin" % fedId)
 
-        nChannelBins = 1 + 24*3
-        book.fill(len(block["channelData"]), "nChannels_%d" % fedId, nChannelBins, -0.5, nChannelBins - 0.5,
+        nChannelBins = 75
+        book.fill(len(block["channelData"]), "nChannels_%d" % fedId, nChannelBins, -0.5, 2*nChannelBins - 0.5,
                   title="FED %d;number of channels;HTRs / bin" % fedId)
 
         if fewerHistos:
