@@ -764,7 +764,7 @@ def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, gra
         null_coarse.GetYaxis().SetLabelSize(0.1)
 
     padg.cd(0)
-    keep.append(stamp(title, size=0.15, x=0.01, y=0.98))
+    keep.append(stamp(title, size=0.13, x=0.01, y=0.98))
 
     # padg.Print("output/%s_l1a.pdf" % title.replace("Run ", ""))
     return keep
@@ -1118,7 +1118,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         names += ["ErrFNZ_vs_slot_crate", "ADC_mismatch_vs_slot_crate", "TP_mismatch_vs_slot_crate"]
         # names = ["ADC_mismatch_vs_slot_crate", "TP_mismatch_vs_slot_crate", "TP_unmatchable_vs_slot_crate"]
 
-        kargs34 = {"names": names, "doYx": False, "retitle": False, "boxes": True}
+        kargs34 = {"names": names, "doYx": False, "retitle": False, "boxes": False}
         kargs34.update(kargs)
 
         if "maps_rates" in pages:
