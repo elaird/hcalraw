@@ -6,15 +6,15 @@ import utils
 
 def flavor(book, d, fedId):
     x = d["Flavor"]
-    if x <= 3:
-        x = 3
-    if 6 <= x:
-        x += 1
-    if d.get("M&P"):
-        x += 1
-    book.fill(x, "ChannelFlavor_%d" % fedId, 6, 2.5, 8.5,
+    if x == 0:
+        x = 1
+    if x == 3:
+        x = 7
+    if 4 <= x:
+        x -= 1
+    book.fill(x, "ChannelFlavor_%d" % fedId, 7, 0.5, 7.5,
               title="FED %d;channel flavor;Channels / bin" % fedId,
-              xAxisLabels=["#leq 3", "uTP", "Q 5", "M&P", "Q 6", "7"])
+              xAxisLabels=["HE", "HF", "uTP", "Q5", "Q6", "7", "?"])
 
 
 def matchFrac(nMatch, nMisMatch):
@@ -463,7 +463,7 @@ def loop_over_feds(raw, book, adcTag="", **other):
         if fedId is None:
             continue
 
-        book.fill(dct["nBytesSW"] / 1024.0, "nBytesSW_%d" % fedId, 16*8, 0, 16,
+        book.fill(dct["nBytesSW"] / 1024.0, "nBytesSW_%d" % fedId, 64, 0, 64,
                   title="FED %d; kBytes;Events / bin" % fedId)
 
         fedIdHw = dct["header"]["FEDid"]
