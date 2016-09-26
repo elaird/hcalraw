@@ -144,7 +144,7 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
                #"  %3d  " % p["nWord16Tp"],
                ]
     if utca:
-        s = "    %3d/%3d" % (p.get(col, -1), p.get(col+"T", -1))
+        s = "  %4d/%4d" % (p.get(col, -1), p.get(col+"T", -1))
         strings.append(s)
     else:
         strings.append("     %3d " % p.get(col, -1))
