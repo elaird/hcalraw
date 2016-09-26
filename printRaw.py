@@ -316,7 +316,9 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                "Fl",
                "ErrF",
                "CapId0",
-               "QIE(hex)  0  1  2  3  4  5  6  7  8  9",
+               "0x  A0 A1 A2 A3 A4 A5 A6 A7 A8 A9",
+               " L0 L1 L2 L3 L4 L5 L6 L7 L8 L9",
+               " T0 T1 T2 T3 T4 T5 T6 T7 T8 T9",
     ]
     if latency:
         columns += [" ", " EF", "Cnt", "IDLE"]
@@ -339,8 +341,10 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                                "%1d" % data["Flavor"],
                                "%2d" % data["ErrF"],
                                "  %1d" % data["CapId0"],
-                               "   %2d %s" % (len(data["QIE"]), " "*5)
-                               ])+qieString(data["QIE"], red=red)
+                               "  %2d  " % len(data["QIE"]) + qieString(data["QIE"], red=red),
+                               qieString(data.get("TDC", [])),
+                               qieString(data.get("TDC_TE", []))
+                               ])
                    )
         if latency:
             dct = latency.get("Fiber%d" % data["Fiber"])
