@@ -451,7 +451,7 @@ def checkHtrModules(fedId=None, spigots=[], htrBlocks={}):
                       expected["Slot"], expected["Top"])
             printer.error("FED %3d spigot %2d has moduleId decode to crate %2d slot %2d%s (expected slot %2d%s)" % fields)
     if len(set(crates)) != 1:
-        printer.error("FED %s contains modules with crate labels %s." % (str(fedId), str(crates)))
+        printer.warning("FED %s contains modules with crate labels %s." % (str(fedId), str(crates)))
 
 
 def nPerChannel(lst=[], iChannel=None):
