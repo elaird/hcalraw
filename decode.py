@@ -620,7 +620,7 @@ def feWord(d, fiber, iTs, nFibChMax=6):
             continue
 
         flavor = d[key]["Flavor"]
-        if flavor == 5:
+        if 5 <= flavor <= 6:
             qie = qies[iTs]
             if d[key].get("CapId"):
                 cap = d[key]["CapId"][iTs]
@@ -647,6 +647,7 @@ def feWord(d, fiber, iTs, nFibChMax=6):
             pass
         elif flavor == 2:
             pass
+
     return feWord32
 
 
