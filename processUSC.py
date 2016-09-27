@@ -244,7 +244,7 @@ def go(baseDir="",
             print run, ready, procFlag, doneFlag, process
 
         if ready:
-            fileName = "/store/group/dpg_hcal/comm_hcal/LS1/USC_%d.root" % run
+            fileName = "/store/group/dpg_hcal/comm_hcal/USC/USC_%d.root" % run
             if utils.commandOutputFull("%s stat %s" % (eos(), fileName))["returncode"]:
                 not_found.append(run)
                 continue
