@@ -36,10 +36,10 @@ def find1(run):
 
 
 def find2(run):
-    LS1 = "/store/group/dpg_hcal/comm_hcal/LS1/USC_%d.root" % run
-    stat = "%s stat %s" % (eos(), LS1)
+    USC = "/store/group/dpg_hcal/comm_hcal/USC/USC_%d.root" % run
+    stat = "%s stat %s" % (eos(), USC)
     if not utils.commandOutputFull(stat)["returncode"]:
-        return "%s/%s" % (eosprefix, LS1)
+        return "%s/%s" % (eosprefix, USC)
 
 
 def find_gr(run, grdir, hhmmMin=None, quiet=False):
