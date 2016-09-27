@@ -6,6 +6,6 @@ eval `scramv1 runtime -sh`
 cd - > /dev/null
 
 source /afs/cern.ch/project/eos/installation/cms/etc/setup.sh
-export EOS=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/
+EOS=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/
 export LS1=$EOS/archival/20160914_USC_LS1_runs212958-264260/
 export USC=$EOS/USC/
