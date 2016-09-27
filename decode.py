@@ -605,13 +605,58 @@ def channelId(fiber=None, fibCh=None):
     return 4*fiber + fibCh
 
 
+def feWord(d, fiber, iTs, nFibChMax=6):
+    feWord32 = None
+    for fibCh in range(nFibChMax):
+        key = channelId(fiber, fibCh)
+        if key not in d:
+            continue
+
+        if d[key]["ErrF"] == 3:  # 8b/10b errors
+            continue
+
+        qies = d[key]["QIE"]
+        if len(qies) <= iTs:
+            continue
+
+        flavor = d[key]["Flavor"]
+        if flavor == 5:
+            qie = qies[iTs]
+            if d[key].get("CapId"):
+                cap = d[key]["CapId"][iTs]
+            elif not patterns.compressed:
+                sys.exit("\n".join(["Cap-ids per time-slice not found.",
+                                    "Either set 'configuration.patterns.compressed = True'",
+                                    "or do not pass '--patterns'.",
+                                    ]))
+            else:
+                cap = 0
+
+            if feWord32 is None:
+                feWord32 = 0
+            if fibCh == 0:
+                feWord32 |= qie << 25
+                feWord32 |= cap << 7
+            if fibCh == 1:
+                feWord32 |= qie << 17
+                feWord32 |= cap << 5
+            if fibCh == 2:
+                feWord32 |= qie << 9
+                feWord32 |= cap << 3
+        elif 0 <= flavor <= 1:
+            pass
+        elif flavor == 2:
+            pass
+    return feWord32
+
+
 def storePatternData(l={}, nFibers=None, nTsMax=20):
-    compressed = patterns.compressed
     offset = 1 if patterns.rmRibbon else 0
 
     l["patternData"] = {}
     d = l["channelData"]
 
+    # print "Crate=%2d, Slot=%2d" % (l["Crate"], l["Slot"])
     for iFiberPair in range(nFibers/2):
         fiber1 = 2*iFiberPair + offset
         fiber2 = 2*iFiberPair + 1 + offset
@@ -621,45 +666,7 @@ def storePatternData(l={}, nFibers=None, nTsMax=20):
             feWords = []
             # Tullio says HTR f/w makes no distinction between optical cables 1 and 2
             for fiber in [fiber1, fiber2]:
-                feWord32 = None
-                for fibCh in range(3):
-                    key = channelId(fiber, fibCh)
-                    if key not in d:
-                        continue
-
-                    if d[key]["ErrF"] == 3:  # 8b/10b errors
-                        continue
-
-                    qies = d[key]["QIE"]
-                    if len(qies) <= iTs:
-                        continue
-
-                    qie = qies[iTs]
-                    if d[key]["CapId"]:
-                        cap = d[key]["CapId"][iTs]
-                    elif not compressed:
-                        sys.exit("\n".join(["Cap-ids per time-slice not found.",
-                                            "Either set 'configuration.patterns.compressed = True'",
-                                            "or do not pass '--patterns'.",
-                                            ]))
-                    else:
-                        cap = 0
-
-                    if feWord32 is None:
-                        feWord32 = 0
-                    if fibCh == 0:
-                        feWord32 |= qie << 25
-                        feWord32 |= cap << 7
-                    if fibCh == 1:
-                        feWord32 |= qie << 17
-                        feWord32 |= cap << 5
-                    if fibCh == 2:
-                        feWord32 |= qie << 9
-                        feWord32 |= cap << 3
-
-                feWords.append(feWord32)
-                #print "iFiberPair =", iFiberPair, "iTs =", iTs, "qie0 =", hex(qie0), "feWord =", feWord32_1
-
+                feWords.append(feWord(d, fiber, iTs))
             l["patternData"][fiber1].append(patternData(feWords))
 
 
