@@ -307,7 +307,8 @@ def uhtrTriggerData(d={}, skipZeroTps=False, crate=None, slot=None, top="", nonM
 def htrChannelData(lst=[], crate=0, slot=0, top="",
                    skipFibChs=[], skipErrF=[],
                    nonMatched=[], latency={}, zs={},
-                   utcaFiberBlackList=[0,1,10,11,12,13,22,23][:0]):
+                   utcaFiberBlackList=[0,1,10,11,12,13,22,23][:0],
+                   tdc=False):
     out = []
     columns = ["Crate",
                "Slot",
@@ -317,9 +318,11 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                "ErrF",
                "CapId0",
                "0x  A0 A1 A2 A3 A4 A5 A6 A7 A8 A9",
-               " L0 L1 L2 L3 L4 L5 L6 L7 L8 L9",
-               " T0 T1 T2 T3 T4 T5 T6 T7 T8 T9",
-    ]
+               ]
+    if tdc:
+        columns += [" L0 L1 L2 L3 L4 L5 L6 L7 L8 L9",
+                    " T0 T1 T2 T3 T4 T5 T6 T7 T8 T9",
+                    ]
     if latency:
         columns += [" ", " EF", "Cnt", "IDLE"]
     if zs:
@@ -334,18 +337,20 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
         if data["ErrF"] in skipErrF:
             continue
         red = (crate, slot, top, data["Fiber"], data["FibCh"]) in nonMatched
-        out.append("   ".join([" %3d" % crate,
-                               "%3d%1s" % (slot, top),
-                               "%2d" % data["Fiber"],
-                               "%1d" % data["FibCh"],
-                               "%1d" % data["Flavor"],
-                               "%2d" % data["ErrF"],
-                               "  %1d" % data["CapId0"],
-                               "  %2d  " % len(data["QIE"]) + qieString(data["QIE"], red=red),
-                               qieString(data.get("TDC", [])),
-                               qieString(data.get("TDC_TE", []))
-                               ])
-                   )
+
+        fields = [" %3d" % crate,
+                  "%3d%1s" % (slot, top),
+                  "%2d" % data["Fiber"],
+                  "%1d" % data["FibCh"],
+                  "%1d" % data["Flavor"],
+                  "%2d" % data["ErrF"],
+                  "  %1d" % data["CapId0"],
+                  "  %2d  " % len(data["QIE"]) + qieString(data["QIE"], red=red)
+                  ]
+        if tdc:
+            fields += [qieString(data.get("TDC", [])), qieString(data.get("TDC_TE", []))]
+        out.append("   ".join(fields))
+
         if latency:
             dct = latency.get("Fiber%d" % data["Fiber"])
             if dct and data["FibCh"] == 1:
