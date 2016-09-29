@@ -317,7 +317,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                "Fl",
                "ErrF",
                "CapId0",
-               "0x  A0 A1 A2 A3 A4 A5 A6 A7 A8 A9",
+               "NS 0xA0 A1 A2 A3 A4 A5 A6 A7 A8 A9",
                ]
     if tdc:
         columns += [" L0 L1 L2 L3 L4 L5 L6 L7 L8 L9",
@@ -345,7 +345,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                   "%1d" % data["Flavor"],
                   "%2d" % data["ErrF"],
                   "  %1d" % data["CapId0"],
-                  "  %2d  " % len(data["QIE"]) + qieString(data["QIE"], red=red)
+                  "  %2d   " % len(data["QIE"]) + qieString(data["QIE"], red=red)
                   ]
         if tdc:
             fields += [qieString(data.get("TDC", [])), qieString(data.get("TDC_TE", []))]
