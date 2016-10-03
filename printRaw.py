@@ -329,7 +329,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
         columns += [" ", "ZS?"]
     out.append("  ".join(columns))
 
-    for data in lst:
+    for data in sorted(lst, key=lambda x: (x["Fiber"], x["FibCh"])):
         if (top not in "tb") and data["Fiber"] in utcaFiberBlackList:
             continue
         if data["FibCh"] in skipFibChs:
