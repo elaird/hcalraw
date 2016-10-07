@@ -308,7 +308,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                    skipFibChs=[], skipErrF=[],
                    nonMatched=[], latency={}, zs={},
                    utcaFiberBlackList=[0,1,10,11,12,13,22,23][:0],
-                   tdc=False):
+                   te_tdc=False):
     out = []
     columns = ["Crate",
                "Slot",
@@ -318,11 +318,10 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                "ErrF",
                "CapId0",
                "NS 0xA0 A1 A2 A3 A4 A5 A6 A7 A8 A9",
+               "0xL0 L1 L2 L3 L4 L5 L6 L7 L8 L9",
                ]
-    if tdc:
-        columns += [" L0 L1 L2 L3 L4 L5 L6 L7 L8 L9",
-                    " T0 T1 T2 T3 T4 T5 T6 T7 T8 T9",
-                    ]
+    if te_tdc:
+        columns += [" T0 T1 T2 T3 T4 T5 T6 T7 T8 T9"]
     if latency:
         columns += [" ", " EF", "Cnt", "IDLE"]
     if zs:
@@ -345,10 +344,11 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                   "%1d" % data["Flavor"],
                   "%2d" % data["ErrF"],
                   "  %1d" % data["CapId0"],
-                  "  %2d   " % len(data["QIE"]) + qieString(data["QIE"], red=red)
+                  "  %2d   " % len(data["QIE"]) + qieString(data["QIE"], red=red),
+                  " " + qieString(data.get("TDC", []))
                   ]
-        if tdc:
-            fields += [qieString(data.get("TDC", [])), qieString(data.get("TDC_TE", []))]
+        if te_tdc:
+            fields += [qieString(data.get("TDC_TE", []))]
         out.append("   ".join(fields))
 
         if latency:
