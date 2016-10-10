@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-Wall -Wextra
-ROOT=$(shell root-config --cflags) -L$(shell root-config --libdir) -lCore -lTree -lRIO
+ROOT0=$(shell root-config --cflags) -L$(shell root-config --libdir) -lCore -lTree -lRIO
 SO=-shared -fPIC
 
 # NOTE! LinkDefs must come last
@@ -15,10 +15,12 @@ RV=$(shell root-config --version | cut -c 1)
 ifeq ($(RV), 6)
 	RC1=rootcling -f $(TMP1) $(HS1)
 	RC2=rootcling -f $(TMP2) $(HS2)
+        ROOT=$(ROOT0)
 endif
 ifeq ($(RV), 5)
 	RC1=rootcint -f $(TMP1) -c $(HS1)
 	RC2=rootcint -f $(TMP2) -c $(HS2)
+        ROOT=$(ROOT0) -lCint -lNet -lMathCore -lThread
 endif
 
 all: mol deadbeef badcoffee cdf.so cms.so
