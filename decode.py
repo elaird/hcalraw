@@ -577,7 +577,7 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
         dct["SOI"].append((word16 >> 14) & 0x1)
         dct["TDC"].append((word16 >> 8) & 0x3f)
         dct["QIE"].append(word16 & 0xff)
-    elif 2 <= flavor <= 3:
+    elif flavor == 2:
         if j % 2:
             dct["CapId"].append((word16 >> 12) & 0x3)
             dct["TDC_TE"].append((word16 >> 6) & 0x1f)
