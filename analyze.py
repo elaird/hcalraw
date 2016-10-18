@@ -18,6 +18,7 @@ def setup():
     if r.gROOT.GetVersionInt() < 60000:  # before ROOT6
         r.gSystem.Load("%s/cpp/cdf.so" % os.environ["PWD"])
         r.gSystem.Load("%s/cpp/cms.so" % os.environ["PWD"])
+        r.gROOT.SetStyle("Plain")
     else:
         r.gInterpreter.SetClassAutoloading(False)
         r.gInterpreter.ProcessLine('#include "cpp/cdf.h"')
