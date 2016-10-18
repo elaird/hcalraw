@@ -108,8 +108,12 @@ def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
         col = "nWord16Qie"
     elif utca:
         col = "DataLength16"
-    elif p["IsTTP"]:
+    elif p.get("IsTTP"):
         col = "          "
+    else:
+        coords = "crate %2d slot %2d%1s" % (p.get("Crate", -1), p.get("Slot", -1), p.get("Top", "x"))
+        printer.warning("unpacking did not succeed enough to print more about %s" % coords)
+        return
 
     out = []
     if printColumnHeaders:
@@ -489,7 +493,13 @@ def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
 
     printColumnHeaders = True
     for iBlock, block in sorted(d["htrBlocks"].iteritems()):
-        if "patternData" in block:
+        try:
+           isPattern = "patternData" in block
+        except TypeError as e:
+            print "iBlock='%s':" % str(iBlock), e
+            continue
+
+        if isPattern:
             oneHtrPatterns(p=block,
                            patterns=patterns,
                            header=h,
