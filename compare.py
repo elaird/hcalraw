@@ -413,9 +413,10 @@ def singleFedPlots(fedId=None, d={}, book={}, **other):
                        title=("FED %d" % fedId) +
                        ";time (minutes);#splitline{(# match. TPs) /}{(# match. + mismatch. TPs)}")
 
-    book.fillGraph((fedTime, t["nWord64"] * 8.0 / 1024), "kB_vs_time_%d" % fedId,
-                   title=("FED %d" % fedId) +
-                   ";time (minutes);kB")
+    if "nWord64" in t:
+        book.fillGraph((fedTime, t["nWord64"] * 8.0 / 1024), "kB_vs_time_%d" % fedId,
+                       title=("FED %d" % fedId) +
+                       ";time (minutes);kB")
 
     book.fill((fedBcn / 100.0, frac0), "frac0_vs_BcN_%d" % fedId,
               (hw.nBx, 6), (0.0, 0.0), (hw.nBx / 100.0, 1.2),
