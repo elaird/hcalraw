@@ -316,11 +316,11 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
     out = []
     columns = ["Crate",
                "Slot",
-               " Fi",
+               "Fi",
                "Ch",
                "Fl",
                "ErrF",
-               "CapId0",
+               "Cap0",
                "NS 0xA0 A1 A2 A3 A4 A5 A6 A7 A8 A9",
                "0xL0 L1 L2 L3 L4 L5 L6 L7 L8 L9",
                ]
@@ -330,7 +330,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
         columns += [" ", " EF", "Cnt", "IDLE"]
     if zs:
         columns += [" ", "ZS?"]
-    out.append("  ".join(columns))
+    out.append(" ".join(columns))
 
     for data in sorted(lst, key=lambda x: (x["Fiber"], x["FibCh"])):
         if (top not in "tb") and data["Fiber"] in utcaFiberBlackList:
@@ -342,18 +342,18 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
         red = (crate, slot, top, data["Fiber"], data["FibCh"]) in nonMatched
 
         fields = [" %3d" % crate,
-                  "%3d%1s" % (slot, top),
+                  "  %2d%1s" % (slot, top),
                   "%2d" % data["Fiber"],
-                  "%1d" % data["FibCh"],
-                  "%1d" % data["Flavor"],
-                  "%2d" % data["ErrF"],
+                  " %1d" % data["FibCh"],
+                  " %1d" % data["Flavor"],
+                  " %2d" % data["ErrF"],
                   "  %1d" % data["CapId0"],
                   "  %2d   " % len(data["QIE"]) + qieString(data["QIE"], red=red),
-                  " " + qieString(data.get("TDC", []))
+                  "  " + qieString(data.get("TDC", []))
                   ]
         if te_tdc:
             fields += [qieString(data.get("TDC_TE", []))]
-        out.append("   ".join(fields))
+        out.append(" ".join(fields))
 
         if latency:
             dct = latency.get("Fiber%d" % data["Fiber"])
@@ -456,8 +456,7 @@ def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
                   "    BcN",
                   "minutes",
                   " TTS",
-                  " nBytesHW",
-                  "nBytesSW",
+                  "nBytesHW(   SW)",
                   #"CRC16",
                   "nSkip16",
                   "BcN12",
@@ -466,7 +465,7 @@ def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
                   ]
 
         if printHeaders:
-            headers = "   ".join(fields)
+            headers = "  ".join(fields)
             printer.blue("-" * len(headers))
             printer.blue(headers)
 
@@ -476,18 +475,17 @@ def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
                  "%4d" % h["BcN"],
                  "%7.3f" % utils.minutes(h["OrN"], h["BcN"]),
                  ("  %1x" % t["TTS"]) if "TTS" in t else "  - ",
-                 ("   %5d" % (t["nWord64"]*8)) if "nWord64" in t else "    --  ",
-                 "   %5d" % d["nBytesSW"],
+                 "    %5d(%5d)" % (t["nWord64"]*8 if "nWord64" in t else "  -1", d["nBytesSW"]),
                  #(" 0x%04x" % t["CRC16"]) if "CRC16" in t else "   - ",
                  "%7d" % d["nWord16Skipped"],
                  ]
         if h["uFoV"]:
-            sList += ["   %4d" % t["BcN12"],
+            sList += [" %4d" % t["BcN12"],
                       "0x%02x" % t["EvN8"],
                       "  %2d" % t["Blk_no8"],
                       ]
 
-        printer.blue("   ".join(sList))
+        printer.blue("  ".join(sList))
         if 2 <= dump:
             htrOverview(h)
 
