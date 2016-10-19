@@ -264,6 +264,12 @@ def histogramChannelData(book, block, channelData, fedId,
               title="any;slot;crate;Channels / bin",
               yAxisLabels=yAxisLabels)
 
+    # if block["Slot"] == 9 and block["Crate"] == 41 and channelData["Fiber"] == 2 and channelData["FibCh"] == 3:
+    #     for i in [0, 1]:
+    #         title = "cr41_sl9_fib2_fibch3_ts%d" % i
+    #         book.fill(channelData["QIE"][i], title, 256, -0.5, 255.5,
+    #                   title="%s;ADC;Counts / bin" % title)
+
     if channelData["ErrF"]:
         for name, title in [("ErrFNZ", "ErrF != 0"),
                             ("ErrF%d" % channelData["ErrF"], "ErrF == %d" % channelData["ErrF"]),
