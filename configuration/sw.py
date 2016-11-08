@@ -3,23 +3,17 @@ eosprefix = "root://eoscms.cern.ch/"
 #root://cms-xrd-global.cern.ch/
 
 def fedMap():
-    d = {"HBHE": range(700, 718),
-         "HF": range(718, 724),
+    d = {"vHBHE": range(700, 718),
+         "vHF": range(718, 724),
          "HO": range(724, 732),
-         "uHBHE": range(1100, 1118, 2),
-         "uHF": [1118, 1120, 1122],
-         "uC": [1132],
+         "HBHE": range(1100, 1118, 2),
+         "HF": range(1118, 1124),
+         "HC": [1132, 1134],
          }
 
-    d["HBHEHF"] = d["HBHE"] + d["HF"]
-    d["HBEF"] = d["HBHEHF"]
-    d["HCAL"] = d["HBEF"] + d["HO"]
-
-    d["uHBHEHF"] = d["uHBHE"] + d["uHF"]
-    d["uHBEF"] = d["uHBHEHF"]
-    d["uHBECF"] = d["uHBEF"] + d["uC"]
-    d["uHCAL"] = d["uHBECF"] + d["HO"]
-
+    d["vHCAL"] = d["vHBHE"] + d["vHF"] + d["HO"]
+    d["uHCAL"] = d["HBHE"] + d["HF"] + d["HC"]
+    d["HCAL"] = d["HBHE"] + d["HF"] + d["HO"] + d["HC"]
     return d
 
 
