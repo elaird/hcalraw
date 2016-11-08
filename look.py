@@ -30,7 +30,7 @@ def eos():
 
 
 def find1(run):
-    for local in ["/tmp/USC_%d.root" % run, "data/USC_%d.root" % run]:
+    for local in ["/tmp/USC_%d.root" % run, "data/USC_%d.root" % run, "data/run%d.root" % run]:
         if os.path.exists(local):
             return local
 
@@ -112,7 +112,7 @@ def main(options, args, quiet=False):
 
     subdet = "HBHE" if not options.hf else "HF"
     options.feds1 = subdet
-    options.feds2 = "u%s" % subdet
+    # options.feds2 = "v%s" % subdet
     options.outputFile = "output/%d_%s.root" % (run, subdet)
 
     override(options, quiet, run)
