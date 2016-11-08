@@ -1184,7 +1184,7 @@ def main(options):
 all_pages = ["overview", "vs", "page3",
              # "maps_rates",
              "maps_evn_orn_bcn", "maps_errf", "maps_adc_tp",
-             # "frac0_orbit",
+             "frac0_orbit",
              "evn", "orn",
              # "trends",
              "occupancy",
