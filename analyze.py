@@ -12,7 +12,7 @@ import printer
 import plugins
 
 
-def setup(plugins=[]):
+def setup(plugin_names=[]):
     r.gROOT.SetBatch(True)
 
     if r.gROOT.GetVersionInt() < 60000:  # before ROOT6
@@ -39,7 +39,7 @@ def setup(plugins=[]):
         # TClass::TClass:0: RuntimeWarning: no dictionary for class x::y::z is available
         r.gErrorIgnoreLevel = r.kError
 
-    for p in plugins:
+    for p in plugin_names:
         exec("from plugins import %s" % p)
 
 
