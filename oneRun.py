@@ -43,10 +43,12 @@ def check_and_adjust(options):
         printer.info("setting nEvents=1 (--patterns was passed)")
         options.nEvents = 1
 
+    options.plugins = options.plugins.split(",")
+
 
 def go(options):
     kargs = subset(options, ["feds1", "feds2"], process=True)
-    kargs.update(subset(options, ["nEvents", "nEventsSkip", "outputFile", "noUnpack", "patterns", "sparseLoop"]))
+    kargs.update(subset(options, ["nEvents", "nEventsSkip", "outputFile", "noUnpack", "patterns", "sparseLoop", "plugins"]))
     kargs["compareOptions"] = subset(options, ["anyEmap", "printEmap", "printMismatches", "fewerHistos"])
     kargs["mapOptions"] = subset(options, ["printEventMap", "identityMap"])
     kargs["printOptions"] = subset(options, ["dump", "progress"])
@@ -73,7 +75,7 @@ def main(options):
     if options.noLoop:
         goCode = 0
     else:
-        analyze.setup()
+        analyze.setup(options.plugins)
         if options.profile:
             import cProfile
             cProfile.runctx("go(options)", globals(), locals(), sort="time")
