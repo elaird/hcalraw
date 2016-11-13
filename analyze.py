@@ -6,13 +6,13 @@ import utils
 
 r = utils.ROOT()
 import autoBook
-import compare
 from configuration import hw, sw
 import decode
 import printer
+import plugins
 
 
-def setup():
+def setup(plugin_names=[]):
     r.gROOT.SetBatch(True)
 
     if r.gROOT.GetVersionInt() < 60000:  # before ROOT6
@@ -38,6 +38,9 @@ def setup():
     else:
         # TClass::TClass:0: RuntimeWarning: no dictionary for class x::y::z is available
         r.gErrorIgnoreLevel = r.kError
+
+    for p in plugin_names:
+        exec("from plugins import %s" % p)
 
 
 def coords(d):
@@ -216,8 +219,12 @@ def outerInnerCompare(chain, oEntry, outer, inner, innerEvent, chainI, kargs):
     if inner:
         kargs["raw2"] = collectedRaw(tree=chainI, specs=inner)
 
-    if outer["unpack"]:
-        compare.compare(**kargs)
+    if not outer["unpack"]:
+        return
+
+    for p in outer["plugins"]:
+        f = getattr(eval("plugins.%s" % p), p)
+        f(**kargs)
 
 
 def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={}):
@@ -695,6 +702,7 @@ def oneRun(files1=[],
            nEventsSkip=None,
            sparseLoop=None,
            outputFile="",
+           plugins=[],
            ):
 
     assert files1
@@ -705,6 +713,7 @@ def oneRun(files1=[],
               "sparseLoop": sparseLoop,
               "patterns": patterns,
               "unpack": not noUnpack,
+              "plugins": plugins,
               }
     common.update(printOptions)
 

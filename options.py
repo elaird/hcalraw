@@ -64,15 +64,27 @@ def opts(alsoArgs=False):
                       action="store_true",
                       help="Do not make .pdf from .root file")
     common.add_option("--patterns",
-                        dest="patterns",
-                        default=False,
-                        action="store_true",
-                        help="interpret QIE data as FE patterns: see configuration/patterns.py")
+                      dest="patterns",
+                      default=False,
+                      action="store_true",
+                      help="Interpret QIE data as FE patterns: see configuration/patterns.py")
     common.add_option("--profile",
                       dest="profile",
                       default=False,
                       action="store_true",
                       help="Profile this program.")
+
+    plugins = ["Comma-separated list of plugins to run on each event.",
+               "E.g., --plugins=compare,foo will execute",
+               "first the function compare from plugins/compare.py",
+               "and then the function foo from plugins/foo.py"
+              ]
+    common.add_option("--plugins",
+                      dest="plugins",
+                      type="str",
+                      metavar="compare,...",
+                      default="compare",
+                      help=" ".join([l.ljust(60) for l in plugins]))
     parser.add_option_group(common)
 
     printing = optparse.OptionGroup(parser, "Options for printing to stdout")
