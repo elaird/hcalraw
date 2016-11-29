@@ -649,7 +649,7 @@ def histogram_nMatched(book, matched=None, misMatched=None, nonMatched=None, tMa
 
 
 def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printMismatches=False, warnQuality=True, fewerHistos=False):
-    doDump = (1 <= raw1[None]["dump"]) or raw1[None]["patterns"]
+    doDump = (1 <= raw1[None]["dump"])
 
     if raw2 and anyEmap:
         mapF1, mapB1, _ = dataMap(raw1, book)
