@@ -7,7 +7,7 @@
 # MOL/FEROL https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
 
 
-from configuration import hw, matching, patterns
+from configuration import hw, matching
 import printer
 import sys
 
@@ -366,16 +366,13 @@ def htrPreTrailer(l={}, w=None, k=None):
         l["CRC"] = w
 
 
-def end(d, l, utca, patterns):
+def end(d):
     d["htrIndex"] += 1
-    if patterns:
-        storePatternData(l, hw.nFibers(utca))
     clearChannel(d)  # in case event is malformed
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, fedId=None, patterns={},
-            warn=True, dump=-99):
+            utca=None, fedId=None, warn=True, dump=-99):
 
     if 10 <= dump:
         print "      (%5d 0x%04x)" % (iWord16, word16)
@@ -425,14 +422,14 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             l["CRC"] = word16
         if k == 1:
             l["CRC"] |= word16 << 16
-            end(d, l, utca, patterns)
+            end(d)
 
         return
 
     if (not l["V1"]) and k <= 2:
         if k == 1:
             l["EvN8"] = word16 >> 8
-            end(d, l, utca, patterns)
+            end(d)
         return
 
 
@@ -456,7 +453,6 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
                 l=l,
                 iWord16=iWord16,
                 word16=word16,
-                patterns=patterns,
                 utca=utca,
                 fedId=fedId,
                 warn=warn,
@@ -484,7 +480,7 @@ def ttpData(l={}, iDataMod6=None, word16=None):
 
 
 def htrData(d={}, l={}, iWord16=None, word16=None,
-            patterns={}, utca=None, fedId=None, warn=True):
+            utca=None, fedId=None, warn=True):
 
     if (word16 >> 15):
         flavor = (word16 >> 12) & 0x7
@@ -603,111 +599,3 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
 
 def channelId(fiber=None, fibCh=None):
     return 4*fiber + fibCh
-
-
-def feWord(d, fiber, iTs, nFibChMax=6):
-    feWord32 = None
-    for fibCh in range(nFibChMax):
-        key = channelId(fiber, fibCh)
-        if key not in d:
-            continue
-
-        if d[key]["ErrF"] == 3:  # 8b/10b errors
-            continue
-
-        qies = d[key]["QIE"]
-        if len(qies) <= iTs:
-            continue
-
-        flavor = d[key]["Flavor"]
-        if 5 <= flavor <= 6:
-            qie = qies[iTs]
-            if d[key].get("CapId"):
-                cap = d[key]["CapId"][iTs]
-            elif not patterns.compressed:
-                sys.exit("\n".join(["Cap-ids per time-slice not found.",
-                                    "Either set 'configuration.patterns.compressed = True'",
-                                    "or do not pass '--patterns'.",
-                                    ]))
-            else:
-                cap = 0
-
-            if feWord32 is None:
-                feWord32 = 0
-            if fibCh == 0:
-                feWord32 |= qie << 25
-                feWord32 |= cap << 7
-            if fibCh == 1:
-                feWord32 |= qie << 17
-                feWord32 |= cap << 5
-            if fibCh == 2:
-                feWord32 |= qie << 9
-                feWord32 |= cap << 3
-        elif 0 <= flavor <= 1:
-            pass
-        elif flavor == 2:
-            pass
-
-    return feWord32
-
-
-def storePatternData(l={}, nFibers=None, nTsMax=20):
-    offset = 1 if patterns.rmRibbon else 0
-
-    l["patternData"] = {}
-    d = l["channelData"]
-
-    # print "Crate=%2d, Slot=%2d" % (l["Crate"], l["Slot"])
-    for iFiberPair in range(nFibers/2):
-        fiber1 = 2*iFiberPair + offset
-        fiber2 = 2*iFiberPair + 1 + offset
-        l["patternData"][fiber1] = []
-
-        for iTs in range(nTsMax):
-            feWords = []
-            # Tullio says HTR f/w makes no distinction between optical cables 1 and 2
-            for fiber in [fiber1, fiber2]:
-                feWords.append(feWord(d, fiber, iTs))
-            l["patternData"][fiber1].append(patternData(feWords))
-
-
-def patternData(feWords=[]):
-    assert len(feWords) == 2, len(feWords)
-    d = {}
-
-    if feWords[0] is not None:
-        A0 = (feWords[0] >> 24) & 0xfe
-        A0 |= (feWords[0] >> 7) & 0x1
-        d["A0"] = flipped(A0)
-
-        A1 = (feWords[0] >> 17) & 0x7f
-        A1 |= (feWords[0] >> 1) & 0x80
-        d["A1"] = flipped(A1)
-
-        B0 = (feWords[0] >> 8) & 0xfe
-        B0 |= (feWords[0] >> 3) & 0x1
-        d["B0"] = flipped(B0)
-
-        if feWords[1] is not None:
-            B1 = (feWords[1] >> 9) & 0xfe
-            B1 |= (feWords[0] << 3) & 0x80
-            d["B1"] = flipped(B1)
-
-    if feWords[1] is not None:
-        C0 = (feWords[1] >> 24) & 0xfe
-        C0 |= (feWords[1] >> 7) & 0x1
-        d["C0"] = flipped(C0)
-
-        C1 = (feWords[1] >> 17) & 0x7f
-        C1 |= (feWords[1] >> 1) & 0x80
-        d["C1"] = flipped(C1)
-
-    return d
-
-
-def flipped(raw=None, nBits=8):
-    out = 0
-    for iBit in range(nBits):
-        bit = (raw >> iBit) & 0x1
-        out |= (bit << (nBits - 1 - iBit))
-    return out
