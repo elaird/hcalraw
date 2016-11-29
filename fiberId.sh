@@ -9,7 +9,7 @@ else
 fi
 
 echo "VME (run $RUN)"
-./oneRun.py --file1=${FILE} --feds1=vHCAL  --patterns | ./diff.py data/ref_vme_G.txt
+./oneRun.py --file1=${FILE} --feds1=vHCAL  --plugins=patterns | ./diff.py data/ref_vme_G.txt
 echo
 echo "uTCA (run $RUN)"
-./oneRun.py --file1=${FILE} --feds1=uHCAL --patterns | ./diff.py data/ref_utca_G.txt
+./oneRun.py --file1=${FILE} --feds1=uHCAL --plugins=patterns | ./diff.py data/ref_utca_G.txt
