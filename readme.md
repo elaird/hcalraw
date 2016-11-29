@@ -51,8 +51,8 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 
 
 # analyze FE pattern runs
-# (before HO refibering) ./oneRun.py --file1=$LS1/USC_235576.root --feds1=HCAL --patterns | ./diff.py data/ref_2014.txt
-# (before move to uTCA ) ./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --patterns | ./diff.py data/ref_vme_G.txt
+# (before HO refibering) ./oneRun.py --file1=$LS1/USC_235576.root --feds1=HCAL --plugins=patterns | ./diff.py data/ref_2014.txt
+# (before move to uTCA ) ./oneRun.py --file1=$LS1/USC_236631.root --feds1=HCAL --plugins=patterns | ./diff.py data/ref_vme_G.txt
 ./fiberId.sh 260773
 ./fiberId.sh 270688
 
