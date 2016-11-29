@@ -39,16 +39,15 @@ def check_and_adjust(options):
         options.file2 = options.file1
         options.identityMap = True
 
-    if options.patterns:
-        printer.info("setting nEvents=1 (--patterns was passed)")
-        options.nEvents = 1
-
     options.plugins = options.plugins.split(",")
+    if "patterns" in options.plugins:
+        printer.info("setting nEvents=1 ('patterns' was in list of plugins)")
+        options.nEvents = 1
 
 
 def go(options):
     kargs = subset(options, ["feds1", "feds2"], process=True)
-    kargs.update(subset(options, ["nEvents", "nEventsSkip", "outputFile", "noUnpack", "patterns", "sparseLoop", "plugins"]))
+    kargs.update(subset(options, ["nEvents", "nEventsSkip", "outputFile", "noUnpack", "sparseLoop", "plugins"]))
     kargs["compareOptions"] = subset(options, ["anyEmap", "printEmap", "printMismatches", "fewerHistos"])
     kargs["mapOptions"] = subset(options, ["printEventMap", "identityMap"])
     kargs["printOptions"] = subset(options, ["dump", "progress"])

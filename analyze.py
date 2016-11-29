@@ -252,7 +252,7 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={})
 def collectedRaw(tree=None, specs={}):
     raw = {}
     kargs = {}
-    for item in ["patterns", "dump", "unpack", "nBytesPer", "skipWords64"]:
+    for item in ["dump", "unpack", "nBytesPer", "skipWords64"]:
         kargs[item] = specs[item]
 
     missingFeds = []
@@ -287,7 +287,7 @@ def collectedRaw(tree=None, specs={}):
             del raw[fedId]
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
-    for key in ["label", "patterns", "dump", "crateslots"]:
+    for key in ["label", "dump", "crateslots"]:
         raw[None][key] = specs[key]
 
     return raw
@@ -310,7 +310,7 @@ def w64(fedData, jWord64, nBytesPer):
 
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
-             warn=True, skipWords64=[], patterns=False, dump=-99):
+             warn=True, skipWords64=[], dump=-99):
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
@@ -362,7 +362,6 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
                                             word16Counts=header["word16Counts"],
                                             utca=header["utca"],
                                             fedId=header["FEDid"],
-                                            patterns=patterns,
                                             warn=warn,
                                             dump=dump)
                 if returnCode is None:
@@ -693,7 +692,6 @@ def oneRun(files1=[],
            feds1=[],
            files2=[],
            feds2=[],
-           patterns=False,
            mapOptions={},
            compareOptions={},
            printOptions={},
@@ -711,7 +709,6 @@ def oneRun(files1=[],
     common = {"nEventsMax": nEvents,
               "nEventsSkip": nEventsSkip,
               "sparseLoop": sparseLoop,
-              "patterns": patterns,
               "unpack": not noUnpack,
               "plugins": plugins,
               }
@@ -743,5 +740,5 @@ def oneRun(files1=[],
               outputFile=outputFile,
               mapOptions=mapOptions,
               loopOptions=loopOptions,
-              printEventSummary=(not patterns) and feds2 and (files1 != files2) and 0 <= common["dump"],
+              printEventSummary=(plugins != ["patterns"]) and feds2 and (files1 != files2) and 0 <= common["dump"],
               )
