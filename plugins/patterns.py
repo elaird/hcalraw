@@ -47,7 +47,7 @@ def feWord(d, fiber, iTs):
             else:
                 cap = 0
 
-            if feWord32 is None:
+            if (feWord32 is None) and (0 <= fibCh <= 2):
                 feWord32 = 0
             if fibCh == 0:
                 feWord32 |= qie << 25
