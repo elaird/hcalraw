@@ -15,7 +15,7 @@ def patterns(raw1={}, **_):
 
         nFibers = configuration.hw.nFibers(raw["header"]["utca"])
         for block in raw["htrBlocks"].values():
-            storePatternData(block, nFibers)
+            block["patternData"] = storePatternData(block["channelData"], nFibers)
 
     printRaw.oneEvent(raw1)
 
@@ -66,24 +66,24 @@ def feWord(d, fiber, iTs):
     return feWord32
 
 
-def storePatternData(l={}, nFibers=None):
+def storePatternData(d={}, nFibers=None):
     offset = 1 if configuration.patterns.rmRibbon else 0
 
-    l["patternData"] = {}
-    d = l["channelData"]
+    out = {}
 
     # print "Crate=%2d, Slot=%2d" % (l["Crate"], l["Slot"])
     for iFiberPair in range(nFibers/2):
         fiber1 = 2*iFiberPair + offset
         fiber2 = 2*iFiberPair + 1 + offset
-        l["patternData"][fiber1] = []
+        out[fiber1] = []
 
         for iTs in range(configuration.patterns.nTsMax):
             feWords = []
             # Tullio says HTR f/w makes no distinction between optical cables 1 and 2
             for fiber in [fiber1, fiber2]:
                 feWords.append(feWord(d, fiber, iTs))
-            l["patternData"][fiber1].append(patternData(feWords))
+            out[fiber1].append(patternData(feWords))
+    return out
 
 
 def patternData(feWords=[]):
