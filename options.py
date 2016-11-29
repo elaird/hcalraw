@@ -63,11 +63,6 @@ def opts(alsoArgs=False):
                       default=False,
                       action="store_true",
                       help="Do not make .pdf from .root file")
-    common.add_option("--patterns",
-                      dest="patterns",
-                      default=False,
-                      action="store_true",
-                      help="Interpret QIE data as FE patterns: see configuration/patterns.py")
     common.add_option("--profile",
                       dest="profile",
                       default=False,
