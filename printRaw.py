@@ -10,13 +10,12 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[], slim1=False):
     aux = d[None]
     dump = aux["dump"]
 
-    if not aux["patterns"]:
-        if dump <= 0:
-            return
+    if dump <= 0:
+        return
 
-        if not slim1:
-            printer.purple("-" * 85)
-            printer.purple("%4s iEntry 0x%08x (%d)" % (aux["label"], aux["iEntry"], aux["iEntry"]))
+    if not slim1:
+        printer.purple("-" * 85)
+        printer.purple("%4s iEntry 0x%08x (%d)" % (aux["label"], aux["iEntry"], aux["iEntry"]))
 
     printHeaders = not (slim1 and aux["iEntry"])
     for fedId, data in sorted(d.iteritems()):
@@ -29,7 +28,6 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[], slim1=False):
                 oneFedMol(data["other"])
 
         oneFedHcal(data,
-                   patterns=aux["patterns"],
                    dump=dump,
                    crateslots=aux["crateslots"],
                    nonMatchedQie=nonMatchedQie,
@@ -78,7 +76,7 @@ def spigotList(header):
     return sorted(out)
 
 
-def oneHtrPatterns(p={}, patterns={}, header={}, iBlock=None):
+def oneHtrPatterns(p={}, header={}, iBlock=None):
     if p["IsTTP"]:
         cd = []
     else:
@@ -444,12 +442,12 @@ def patternString(patterns=[], key=""):
         return None
 
 
-def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
+def oneFedHcal(d={}, dump=None, crateslots=[],
                nonMatchedQie=[], nonMatchedTp=[],
                printHeaders=None):
     h = d["header"]
     t = d["trailer"]
-    if (not patterns) and (1 <= dump):
+    if (1 <= dump):
         fields = [" FEDid",
                   "  EvN",
                   "       OrN",
@@ -491,18 +489,13 @@ def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
 
     printColumnHeaders = True
     for iBlock, block in sorted(d["htrBlocks"].iteritems()):
-        try:
+        try:  # FIXME
            isPattern = "patternData" in block
         except TypeError as e:
             print "iBlock='%s':" % str(iBlock), e
             continue
 
-        if isPattern:
-            oneHtrPatterns(p=block,
-                           patterns=patterns,
-                           header=h,
-                           iBlock=iBlock)
-        elif 3 <= dump:
+        if 3 <= dump:
             printColumnHeaders = oneHtr(p=block,
                                         printColumnHeaders=printColumnHeaders,
                                         dump=dump,

@@ -10,14 +10,12 @@ from decode import channelId
 def patterns(raw1={}, **_):
     for fedId, raw in sorted(raw1.iteritems()):
         if fedId is None:
-            raw["patterns"] = True
             continue
 
         nFibers = configuration.hw.nFibers(raw["header"]["utca"])
-        for block in raw["htrBlocks"].values():
+        for iBlock, block in sorted(raw["htrBlocks"].iteritems()):
             block["patternData"] = storePatternData(block["channelData"], nFibers)
-
-    printRaw.oneEvent(raw1)
+            printRaw.oneHtrPatterns(p=block, header=raw["header"], iBlock=iBlock)
 
 
 def feWord(d, fiber, iTs):
