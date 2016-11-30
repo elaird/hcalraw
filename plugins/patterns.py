@@ -90,6 +90,7 @@ def patternString(patterns=[], key=""):
 
 def feWord(d, fiber, iTs):
     word = None
+    flavor = None
 
     for key, v in d.iteritems():
         if v["Fiber"] != fiber:
@@ -101,17 +102,18 @@ def feWord(d, fiber, iTs):
         if len(v["QIE"]) <= iTs:
             continue
 
-        if 5 <= v["Flavor"] <= 6:
-            word = qie8(word, v, iTs)
-        elif 0 <= v["Flavor"] <= 1:
+        flavor = v["Flavor"]
+        if 0 <= flavor <= 1:
             pass
-        elif v["Flavor"] == 2:
-            word = qie10(word, v, iTs)
+        elif flavor == 2:
+            word = fe_word_qie10(word, v, iTs)
+        elif 5 <= flavor <= 6:
+            word = fe_word_qie8(word, v, iTs)
 
-    return word
+    return flavor, word
 
 
-def qie10(feWord80, dct, iTs):
+def fe_word_qie10(feWord80, dct, iTs):
     fibCh = dct["FibCh"]
 
     if feWord80 is None:
@@ -149,7 +151,7 @@ def qie10(feWord80, dct, iTs):
     return feWord80
 
 
-def qie8(feWord32, dct, iTs):
+def fe_word_qie8(feWord32, dct, iTs):
     fibCh = dct["FibCh"]
 
     if dct.get("CapId"):
@@ -194,14 +196,32 @@ def storePatternData(d={}, utca=None):
 
         for iTs in range(configuration.patterns.nTsMax):
             feWords = []
+            flavors = []
             # Tullio says HTR f/w makes no distinction between optical cables 1 and 2
             for fiber in [fiber1, fiber2]:
-                feWords.append(feWord(d, fiber, iTs))
-            out[fiber1].append(patternData(feWords))
+                flavor, word = feWord(d, fiber, iTs)
+                flavors.append(flavor)
+                feWords.append(word)
+
+            flavors = filter(lambda x: x is not None, set(flavors))
+            assert len(flavors) <= 1, flavors
+            if not flavors:
+                continue
+            elif 0 <= flavors[0] <= 1:
+                pass
+            elif flavors[0] == 2:
+                out[fiber1].append(pattern_data_qie10(feWords))
+            elif 5 <= flavors[0] <= 6:
+                out[fiber1].append(pattern_data_qie8(feWords))
+
     return out
 
 
-def patternData(feWords=[]):
+def pattern_data_qie10(feWords):
+    return pattern_data_qie8(feWords)
+
+
+def pattern_data_qie8(feWords=[]):
     assert len(feWords) == 2, len(feWords)
     d = {}
 
