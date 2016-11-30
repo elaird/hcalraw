@@ -14,17 +14,15 @@ def patterns(raw1={}, **_):
         if fedId is None:
             continue
 
-        h = raw["header"]
-        nFibers = configuration.hw.nFibers(h["utca"])
         for iBlock, block in sorted(raw["htrBlocks"].iteritems()):
             if block["IsTTP"]:
-                return
+                continue
 
-            lines = blob(h, iBlock, block, storePatternData(block["channelData"], nFibers))
-            print "\n".join(lines)  # skip printer to facilitate diff
+            # skip printer to facilitate diff
+            print "\n".join(lines(raw["header"], iBlock, block))
 
 
-def blob(h, iBlock, block, d={}):
+def lines(h, iBlock, block):
     patternB = configuration.patterns.patternB
     descr = configuration.patterns.lineStart
 
@@ -40,28 +38,38 @@ def blob(h, iBlock, block, d={}):
     else:
         out = [""]
 
+    d = storePatternData(block["channelData"],
+                         configuration.hw.nFibers(h["utca"])
+                         )
+
     for fiber1, lst in sorted(d.iteritems()):
-        for key in ["A", "B", "C"]:
-            if (not patternB) and key == "B":
-                continue
+        out += lines_one_fiber(fiber1, lst, h["utca"], moduleId, patternB, descr)
+    return out
 
-            fiber1_ = fiber1 + (0 if h["utca"] else 1)
-            if key == "B":
-                fibers = "  %2d,%2d" % (fiber1_, 1 + fiber1_)
-            elif key == "A":
-                fibers = "     %2d" % (fiber1_)
-            elif key == "C":
-                fibers = "     %2d" % (1 + fiber1_)
 
-            ps = patternString(lst, key)
-            if ps is None:
-                continue
+def lines_one_fiber(fiber1, lst, utca, moduleId, patternB, descr):
+    out = []
+    for key in ["A", "B", "C"]:
+        if (not patternB) and key == "B":
+            continue
 
-            if patternB:
-                out.append("   ".join([descr + moduleId, fibers, "  %s" % key, "  "]) + ps)
-            else:
-                fiberNum = int(fibers)
-                out.append("%s %2d:  %s" % (descr + moduleId, int(fibers), ps))
+        fiber1_ = fiber1 + (0 if utca else 1)
+        if key == "B":
+            fibers = "  %2d,%2d" % (fiber1_, 1 + fiber1_)
+        elif key == "A":
+            fibers = "     %2d" % (fiber1_)
+        elif key == "C":
+            fibers = "     %2d" % (1 + fiber1_)
+
+        ps = patternString(lst, key)
+        if ps is None:
+            continue
+
+        if patternB:
+            out.append("   ".join([descr + moduleId, fibers, "  %s" % key, "  "]) + ps)
+        else:
+            fiberNum = int(fibers)
+            out.append("%s %2d:  %s" % (descr + moduleId, int(fibers), ps))
 
     return out
 
