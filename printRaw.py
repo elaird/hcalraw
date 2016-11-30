@@ -75,9 +75,14 @@ def spigotList(header):
     return sorted(out)
 
 
-def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
+def oneHtr(iBlock=None, p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
            nonMatchedQie=[], nonMatchedTp=[]):
-    zs = p.get("ZS")
+
+    try:
+        zs = p.get("ZS")
+    except TypeError as e:
+        print "iBlock='%s':" % str(iBlock), e
+        return
 
     if "nWord16Qie" in p:
         col = "nWord16Qie"
@@ -411,23 +416,20 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
         if 2 <= dump:
             htrOverview(h)
 
+    if dump <= 2:
+        return
+
     printColumnHeaders = True
     for iBlock, block in sorted(d["htrBlocks"].iteritems()):
-        try:  # FIXME
-           isPattern = "patternData" in block
-        except TypeError as e:
-            print "iBlock='%s':" % str(iBlock), e
-            continue
-
-        if 3 <= dump:
-            printColumnHeaders = oneHtr(p=block,
-                                        printColumnHeaders=printColumnHeaders,
-                                        dump=dump,
-                                        crateslots=crateslots,
-                                        utca=h["utca"],
-                                        nonMatchedQie=nonMatchedQie,
-                                        nonMatchedTp=nonMatchedTp,
-                                        )
+        printColumnHeaders = oneHtr(iBlock=iBlock,
+                                    p=block,
+                                    printColumnHeaders=printColumnHeaders,
+                                    dump=dump,
+                                    crateslots=crateslots,
+                                    utca=h["utca"],
+                                    nonMatchedQie=nonMatchedQie,
+                                    nonMatchedTp=nonMatchedTp,
+                                   )
 
 
 def oneFedMol(d):
