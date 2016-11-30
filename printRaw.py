@@ -78,24 +78,18 @@ def spigotList(header):
 
 def oneHtrPatterns(p={}, header={}, iBlock=None):
     if p["IsTTP"]:
-        cd = []
-    else:
-        cd = htrChannelData(p["channelData"].values(),
-                            crate=p["Crate"],
-                            slot=p["Slot"],
-                            top=p["Top"],
-                            skipFibChs=[0, 2])
-    if len(cd) >= 2:
-        if header["utca"]:
-            moduleId = "u%2d %2d" % (p["Crate"], p["Slot"])
-        else:
-            moduleId = "%3d %2d" % (header["FEDid"], spigotList(header)[iBlock])
+        return
 
-        lines = patternData(p["patternData"],
-                            moduleId=moduleId,
-                            utca=header["utca"],
-                            )
-        print "\n".join(lines)  # skip printer to facilitate diff
+    if header["utca"]:
+        moduleId = "u%2d %2d" % (p["Crate"], p["Slot"])
+    else:
+        moduleId = "%3d %2d" % (header["FEDid"], spigotList(header)[iBlock])
+
+    lines = patternData(p["patternData"],
+                        moduleId=moduleId,
+                        utca=header["utca"],
+                       )
+    print "\n".join(lines)  # skip printer to facilitate diff
 
 
 def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
