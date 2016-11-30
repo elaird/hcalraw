@@ -23,16 +23,13 @@ def patterns(raw1={}, **_):
 
 
 def lines(h, iBlock, block):
-    patternB = configuration.patterns.patternB
-    descr = configuration.patterns.lineStart
-
     if h["utca"]:
         moduleId = "u%2d %2d" % (block["Crate"], block["Slot"])
     else:
         moduleId = "%3d %2d" % (h["FEDid"], spigotList(h)[iBlock])
 
-    if patternB:
-        headers = [descr, "ModuleId", "Fibers", "Pattern"]
+    if configuration.patterns.patternB:
+        headers = [configuration.patterns.lineStart, "ModuleId", "Fibers", "Pattern"]
         chars = " ".join(["%2d" % i for i in range(20)])
         out = ["  ".join(headers + [chars])]
     else:
@@ -43,15 +40,17 @@ def lines(h, iBlock, block):
                          )
 
     for fiber1, lst in sorted(d.iteritems()):
-        out += lines_fiber_pair(fiber1, lst, h["utca"], moduleId, patternB, descr)
+        out += lines_fiber_pair(fiber1, lst, h["utca"], moduleId)
 
     return out
 
 
-def lines_fiber_pair(fiber1, lst, utca, moduleId, patternB, descr):
+def lines_fiber_pair(fiber1, lst, utca, moduleId):
+    descr = configuration.patterns.lineStart
+
     out = []
     for key in ["A", "B", "C"]:
-        if (not patternB) and key == "B":
+        if (not configuration.patterns.patternB) and key == "B":
             continue
 
         fiber1_ = fiber1 + (0 if utca else 1)
@@ -66,7 +65,7 @@ def lines_fiber_pair(fiber1, lst, utca, moduleId, patternB, descr):
         if ps is None:
             continue
 
-        if patternB:
+        if configuration.patterns.patternB:
             out.append("   ".join([descr, moduleId, fibers, "   %s" % key, "  "]) + ps)
         else:
             fiberNum = int(fibers)
