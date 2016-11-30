@@ -1,4 +1,3 @@
-import configuration.patterns
 import printer
 import utils
 
@@ -10,13 +9,12 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[], slim1=False):
     aux = d[None]
     dump = aux["dump"]
 
-    if not aux["patterns"]:
-        if dump <= 0:
-            return
+    if dump <= 0:
+        return
 
-        if not slim1:
-            printer.purple("-" * 85)
-            printer.purple("%4s iEntry 0x%08x (%d)" % (aux["label"], aux["iEntry"], aux["iEntry"]))
+    if not slim1:
+        printer.purple("-" * 85)
+        printer.purple("%4s iEntry 0x%08x (%d)" % (aux["label"], aux["iEntry"], aux["iEntry"]))
 
     printHeaders = not (slim1 and aux["iEntry"])
     for fedId, data in sorted(d.iteritems()):
@@ -29,7 +27,6 @@ def oneEvent(d={}, nonMatchedQie=[], nonMatchedTp=[], slim1=False):
                 oneFedMol(data["other"])
 
         oneFedHcal(data,
-                   patterns=aux["patterns"],
                    dump=dump,
                    crateslots=aux["crateslots"],
                    nonMatchedQie=nonMatchedQie,
@@ -78,31 +75,14 @@ def spigotList(header):
     return sorted(out)
 
 
-def oneHtrPatterns(p={}, patterns={}, header={}, iBlock=None):
-    if p["IsTTP"]:
-        cd = []
-    else:
-        cd = htrChannelData(p["channelData"].values(),
-                            crate=p["Crate"],
-                            slot=p["Slot"],
-                            top=p["Top"],
-                            skipFibChs=[0, 2])
-    if len(cd) >= 2:
-        if header["utca"]:
-            moduleId = "u%2d %2d" % (p["Crate"], p["Slot"])
-        else:
-            moduleId = "%3d %2d" % (header["FEDid"], spigotList(header)[iBlock])
-
-        lines = patternData(p["patternData"],
-                            moduleId=moduleId,
-                            utca=header["utca"],
-                            )
-        print "\n".join(lines)  # skip printer to facilitate diff
-
-
-def oneHtr(p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
+def oneHtr(iBlock=None, p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
            nonMatchedQie=[], nonMatchedTp=[]):
-    zs = p.get("ZS")
+
+    try:
+        zs = p.get("ZS")
+    except TypeError as e:
+        print "iBlock='%s':" % str(iBlock), e
+        return
 
     if "nWord16Qie" in p:
         col = "nWord16Qie"
@@ -391,65 +371,12 @@ def ttpData(ttpInput=[], ttpOutput=[], ttpAlgoDep=[]):
     return l
 
 
-def patternData(d={}, moduleId="", utca=None):
-    patternB = configuration.patterns.patternB
-    descr = configuration.patterns.lineStart
-
-    if patternB:
-        headers = [descr, "ModuleId", "Fibers", "Pattern"]
-        chars = " ".join(["%2d" % i for i in range(20)])
-        out = ["  ".join(headers+[chars])]
-    else:
-        out = [""]
-
-    for fiber1, lst in sorted(d.iteritems()):
-        for key in ["A", "B", "C"]:
-            if (not patternB) and key == "B":
-                continue
-
-            fiber1_ = fiber1 + (0 if utca else 1)
-            if key == "B":
-                fibers = "  %2d,%2d" % (fiber1_, 1 + fiber1_)
-            elif key == "A":
-                fibers = "     %2d" % (fiber1_)
-            elif key == "C":
-                fibers = "     %2d" % (1 + fiber1_)
-
-            ps = patternString(lst, key)
-            if ps is None:
-                continue
-
-            if patternB:
-                out.append("   ".join([descr + moduleId, fibers, "  %s" % key, "  "]) + ps)
-            else:
-                fiberNum = int(fibers)
-                out.append("%s %2d:  %s" % (descr + moduleId, int(fibers), ps))
-
-    return out
-
-
-def patternString(patterns=[], key=""):
-    codes = []
-    for p in patterns:
-        c0 = p.get(key + "0")
-        c1 = p.get(key + "1")
-        if c0 is None or c1 is None:
-            break
-        else:
-            codes += [c0, c1]
-
-    if codes:
-        return configuration.patterns.string(codes)
-    else:
-        return None
-
-
-def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
+def oneFedHcal(d={}, dump=None, crateslots=[],
                nonMatchedQie=[], nonMatchedTp=[],
                printHeaders=None):
     h = d["header"]
     t = d["trailer"]
-    if (not patterns) and (1 <= dump):
+    if 1 <= dump:
         fields = [" FEDid",
                   "  EvN",
                   "       OrN",
@@ -489,28 +416,20 @@ def oneFedHcal(d={}, patterns=False, dump=None, crateslots=[],
         if 2 <= dump:
             htrOverview(h)
 
+    if dump <= 2:
+        return
+
     printColumnHeaders = True
     for iBlock, block in sorted(d["htrBlocks"].iteritems()):
-        try:
-           isPattern = "patternData" in block
-        except TypeError as e:
-            print "iBlock='%s':" % str(iBlock), e
-            continue
-
-        if isPattern:
-            oneHtrPatterns(p=block,
-                           patterns=patterns,
-                           header=h,
-                           iBlock=iBlock)
-        elif 3 <= dump:
-            printColumnHeaders = oneHtr(p=block,
-                                        printColumnHeaders=printColumnHeaders,
-                                        dump=dump,
-                                        crateslots=crateslots,
-                                        utca=h["utca"],
-                                        nonMatchedQie=nonMatchedQie,
-                                        nonMatchedTp=nonMatchedTp,
-                                        )
+        printColumnHeaders = oneHtr(iBlock=iBlock,
+                                    p=block,
+                                    printColumnHeaders=printColumnHeaders,
+                                    dump=dump,
+                                    crateslots=crateslots,
+                                    utca=h["utca"],
+                                    nonMatchedQie=nonMatchedQie,
+                                    nonMatchedTp=nonMatchedTp,
+                                   )
 
 
 def oneFedMol(d):

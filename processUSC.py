@@ -137,7 +137,7 @@ def dumpFibering(inputFile="", outputDir="", run=0):
     outputFile = "%s/cabled.txt" % outputDir
     args = ["--file1='%s'" % inputFile,
             "--feds1=uHCAL",
-            "--patterns",
+            "--plugins=patterns",
             ]
     return commandOutput(oneRun(args, outputFile))
 
