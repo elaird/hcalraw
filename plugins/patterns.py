@@ -7,7 +7,6 @@
 import configuration.hw
 import configuration.patterns
 from printRaw import spigotList
-from decode import channelId
 
 
 def patterns(raw1={}, **_):
@@ -36,9 +35,8 @@ def lines(h, iBlock, block):
     else:
         out = [""]
 
-    d = storePatternData(block["channelData"],
-                         configuration.hw.nFibers(h["utca"])
-                         )
+    # print "Crate=%2d, Slot=%2d" % (block["Crate"], block["Slot"])
+    d = storePatternData(block["channelData"], h["utca"])
 
     for fiber1, lst in sorted(d.iteritems()):
         out += lines_fiber_pair(fiber1, lst, h["utca"], moduleId)
@@ -54,13 +52,12 @@ def lines_fiber_pair(fiber1, lst, utca, moduleId):
         if (not configuration.patterns.patternB) and key == "B":
             continue
 
-        fiber1_ = fiber1 + (0 if utca else 1)
         if key == "B":
-            fibers = "%2d,%2d" % (fiber1_, 1 + fiber1_)
+            fibers = "%2d,%2d" % (fiber1, 1 + fiber1)
         elif key == "A":
-            fibers = "   %2d" % (fiber1_)
+            fibers = "   %2d" % (fiber1)
         elif key == "C":
-            fibers = "   %2d" % (1 + fiber1_)
+            fibers = "   %2d" % (1 + fiber1)
 
         ps = patternString(lst, key)
         if ps is None:
@@ -93,36 +90,31 @@ def patternString(patterns=[], key=""):
 
 def feWord(d, fiber, iTs):
     word = None
-    for fibCh in range(configuration.patterns.nFibChMax):
-        key = channelId(fiber, fibCh)
-        if key not in d:
+
+    for key, v in d.iteritems():
+        if v["Fiber"] != fiber:
             continue
 
-        if d[key]["ErrF"] == 3:  # 8b/10b errors
+        if v["ErrF"] == 3:  # 8b/10b errors
             continue
 
-        if len(d[key]["QIE"]) <= iTs:
+        if len(v["QIE"]) <= iTs:
             continue
 
-        flavor = d[key]["Flavor"]
-        if 5 <= flavor <= 6:
-            word = qie8(word, d[key], iTs, fibCh)
-        elif 0 <= flavor <= 1:
+        if 5 <= v["Flavor"] <= 6:
+            word = qie8(word, v, iTs)
+        elif 0 <= v["Flavor"] <= 1:
             pass
-        elif flavor == 2:
-            word = qie10(word, d[key], iTs, fibCh)
-            # if word is not None:
-            #     print "%020x" % word
+        elif v["Flavor"] == 2:
+            word = qie10(word, v, iTs)
 
     return word
 
 
-def qie10(feWord80, dct, iTs, fibCh):
-    # each TS contains the same bytes
-    if iTs != 1:
-        return feWord80
+def qie10(feWord80, dct, iTs):
+    fibCh = dct["FibCh"]
 
-    if (feWord80 is None) and (0 <= fibCh <= 3):
+    if feWord80 is None:
         feWord80 = 0
 
     if fibCh == 0:
@@ -157,7 +149,9 @@ def qie10(feWord80, dct, iTs, fibCh):
     return feWord80
 
 
-def qie8(feWord32, dct, iTs, fibCh):
+def qie8(feWord32, dct, iTs):
+    fibCh = dct["FibCh"]
+
     if dct.get("CapId"):
         cap = dct["CapId"][iTs]
     elif not configuration.patterns.compressed:
@@ -170,8 +164,9 @@ def qie8(feWord32, dct, iTs, fibCh):
 
     qie = dct["QIE"][iTs]
 
-    if (feWord32 is None) and (0 <= fibCh <= 2):
+    if feWord32 is None:
         feWord32 = 0
+
     if fibCh == 0:
         feWord32 |= qie << 25
         feWord32 |= cap << 7
@@ -185,12 +180,13 @@ def qie8(feWord32, dct, iTs, fibCh):
     return feWord32
 
 
-def storePatternData(d={}, nFibers=None):
+def storePatternData(d={}, utca=None):
+    nFibers = configuration.hw.nFibers(utca)
     offset = 1 if configuration.patterns.rmRibbon else 0
+    if not utca:
+        offset += 1
 
     out = {}
-
-    # print "Crate=%2d, Slot=%2d" % (l["Crate"], l["Slot"])
     for iFiberPair in range(nFibers/2):
         fiber1 = 2*iFiberPair + offset
         fiber2 = 2*iFiberPair + 1 + offset
