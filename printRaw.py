@@ -376,7 +376,7 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
                printHeaders=None):
     h = d["header"]
     t = d["trailer"]
-    if (1 <= dump):
+    if 1 <= dump:
         fields = [" FEDid",
                   "  EvN",
                   "       OrN",
