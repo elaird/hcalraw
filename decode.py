@@ -595,7 +595,3 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
         dct["CapId"].append((word16 >> 8) & 0x3)
     elif 7 <= flavor:
         dct["words"].append(word16)
-
-
-def channelId(fiber=None, fibCh=None):
-    return 4*fiber + fibCh
