@@ -1,6 +1,7 @@
 # QIE  8: https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
-#         e-log post
-# QIE 10: 
+# errata: http://cmsonline.cern.ch/cms-elog/807780
+#
+# QIE 10: https://svnweb.cern.ch/trac/cms-firmwsrc/browser/hcal/HF_RM_igloo2/trunk/docs/HF_RM_DataFormat.txt
 # QIE 11: 
 
 import configuration.hw
@@ -91,7 +92,7 @@ def patternString(patterns=[], key=""):
 
 
 def feWord(d, fiber, iTs):
-    feWord32 = None
+    word = None
     for fibCh in range(configuration.patterns.nFibChMax):
         key = channelId(fiber, fibCh)
         if key not in d:
@@ -100,38 +101,52 @@ def feWord(d, fiber, iTs):
         if d[key]["ErrF"] == 3:  # 8b/10b errors
             continue
 
-        qies = d[key]["QIE"]
-        if len(qies) <= iTs:
+        if len(d[key]["QIE"]) <= iTs:
             continue
 
         flavor = d[key]["Flavor"]
         if 5 <= flavor <= 6:
-            qie = qies[iTs]
-            if d[key].get("CapId"):
-                cap = d[key]["CapId"][iTs]
-            elif not configuration.patterns.compressed:
-                sys.exit("\n".join(["Cap-ids per time-slice not found.",
-                                    "Either set 'configuration.patterns.compressed = True'",
-                                    "or do not pass '--patterns'.",
-                                    ]))
-            else:
-                cap = 0
-
-            if (feWord32 is None) and (0 <= fibCh <= 2):
-                feWord32 = 0
-            if fibCh == 0:
-                feWord32 |= qie << 25
-                feWord32 |= cap << 7
-            if fibCh == 1:
-                feWord32 |= qie << 17
-                feWord32 |= cap << 5
-            if fibCh == 2:
-                feWord32 |= qie << 9
-                feWord32 |= cap << 3
+            word = qie8(word, d[key], iTs, fibCh)
         elif 0 <= flavor <= 1:
             pass
         elif flavor == 2:
-            pass
+            word = qie10(word, d[key], iTs, fibCh)
+
+    return word
+
+
+def qie10(feWord80, dct, iTs, fibCh):
+    # each TS contains the same bytes
+    if iTs != 1:
+        return feWord80
+
+    return feWord80
+
+
+def qie8(feWord32, dct, iTs, fibCh):
+    if dct.get("CapId"):
+        cap = dct["CapId"][iTs]
+    elif not configuration.patterns.compressed:
+        sys.exit("\n".join(["Cap-ids per time-slice not found.",
+                            "Either set 'configuration.patterns.compressed = True'",
+                            "or do not pass '--patterns'.",
+                            ]))
+    else:
+        cap = 0
+
+    qie = dct["QIE"][iTs]
+
+    if (feWord32 is None) and (0 <= fibCh <= 2):
+        feWord32 = 0
+    if fibCh == 0:
+        feWord32 |= qie << 25
+        feWord32 |= cap << 7
+    if fibCh == 1:
+        feWord32 |= qie << 17
+        feWord32 |= cap << 5
+    if fibCh == 2:
+        feWord32 |= qie << 9
+        feWord32 |= cap << 3
 
     return feWord32
 
