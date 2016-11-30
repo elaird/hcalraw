@@ -111,6 +111,8 @@ def feWord(d, fiber, iTs):
             pass
         elif flavor == 2:
             word = qie10(word, d[key], iTs, fibCh)
+            # if word is not None:
+            #     print "%020x" % word
 
     return word
 
@@ -119,6 +121,38 @@ def qie10(feWord80, dct, iTs, fibCh):
     # each TS contains the same bytes
     if iTs != 1:
         return feWord80
+
+    if (feWord80 is None) and (0 <= fibCh <= 3):
+        feWord80 = 0
+
+    if fibCh == 0:
+        feWord80 |= ( dct["TDC_TE"][iTs]    &  0xf ) <<  0
+        feWord80 |= ( dct["CapId"][iTs]     &  0x3 ) <<  8
+        feWord80 |= ( dct["QIE"][iTs]       & 0xff ) << 16
+        feWord80 |= ((dct["TDC"][iTs] >> 4) &  0x3 ) << 48
+        feWord80 |= ((dct["TDC"][iTs] >> 2) &  0x3 ) << 56
+        feWord80 |= ((dct["TDC"][iTs] >> 0) &  0x3 ) << 64
+    if fibCh == 1:
+        feWord80 |= ( dct["TDC_TE"][iTs]    &  0xf ) <<  4
+        feWord80 |= ( dct["CapId"][iTs]     &  0x3 ) << 10
+        feWord80 |= ( dct["QIE"][iTs]       & 0xff ) << 24
+        feWord80 |= ((dct["TDC"][iTs] >> 4) &  0x3 ) << 50
+        feWord80 |= ((dct["TDC"][iTs] >> 2) &  0x3 ) << 58
+        feWord80 |= ((dct["TDC"][iTs] >> 0) &  0x3 ) << 66
+    if fibCh == 2:
+        feWord80 |= ( dct["CapId"][iTs]     &  0x3 ) << 12
+        feWord80 |= ( dct["QIE"][iTs]       & 0xff ) << 32
+        feWord80 |= ((dct["TDC"][iTs] >> 4) &  0x3 ) << 52
+        feWord80 |= ((dct["TDC"][iTs] >> 2) &  0x3 ) << 60
+        feWord80 |= ((dct["TDC"][iTs] >> 0) &  0x3 ) << 68
+        feWord80 |= ( dct["TDC_TE"][iTs]    &  0xf ) << 72
+    if fibCh == 3:
+        feWord80 |= ( dct["CapId"][iTs]     &  0x3 ) << 14
+        feWord80 |= ( dct["QIE"][iTs]       & 0xff ) << 40
+        feWord80 |= ((dct["TDC"][iTs] >> 4) &  0x3 ) << 54
+        feWord80 |= ((dct["TDC"][iTs] >> 2) &  0x3 ) << 62
+        feWord80 |= ((dct["TDC"][iTs] >> 0) &  0x3 ) << 70
+        feWord80 |= ( dct["TDC_TE"][iTs]    &  0xf ) << 76
 
     return feWord80
 
