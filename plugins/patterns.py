@@ -43,12 +43,12 @@ def lines(h, iBlock, block):
                          )
 
     for fiber1, lst in sorted(d.iteritems()):
-        out += lines_one_fiber(fiber1, lst, h["utca"], moduleId, patternB, descr)
+        out += lines_fiber_pair(fiber1, lst, h["utca"], moduleId, patternB, descr)
 
     return out
 
 
-def lines_one_fiber(fiber1, lst, utca, moduleId, patternB, descr):
+def lines_fiber_pair(fiber1, lst, utca, moduleId, patternB, descr):
     out = []
     for key in ["A", "B", "C"]:
         if (not patternB) and key == "B":
