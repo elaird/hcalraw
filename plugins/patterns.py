@@ -3,7 +3,9 @@
 # QIE 10: 
 # QIE 11: 
 
-import configuration, printRaw
+import configuration.hw
+import configuration.patterns
+from printRaw import spigotList
 from decode import channelId
 
 
@@ -12,26 +14,73 @@ def patterns(raw1={}, **_):
         if fedId is None:
             continue
 
-        nFibers = configuration.hw.nFibers(raw["header"]["utca"])
+        h = raw["header"]
+        nFibers = configuration.hw.nFibers(h["utca"])
         for iBlock, block in sorted(raw["htrBlocks"].iteritems()):
-            block["patternData"] = storePatternData(block["channelData"], nFibers)
-            oneHtrPatterns(p=block, header=raw["header"], iBlock=iBlock)
+            if block["IsTTP"]:
+                return
+
+            if h["utca"]:
+                moduleId = "u%2d %2d" % (block["Crate"], block["Slot"])
+            else:
+                moduleId = "%3d %2d" % (h["FEDid"], spigotList(h)[iBlock])
+
+            lines = blob(storePatternData(block["channelData"], nFibers),
+                         moduleId=moduleId, utca=h["utca"])
+            print "\n".join(lines)  # skip printer to facilitate diff
 
 
-def oneHtrPatterns(p={}, header={}, iBlock=None):
-    if p["IsTTP"]:
-        return
+def blob(d={}, moduleId="", utca=None):
+    patternB = configuration.patterns.patternB
+    descr = configuration.patterns.lineStart
 
-    if header["utca"]:
-        moduleId = "u%2d %2d" % (p["Crate"], p["Slot"])
+    if patternB:
+        headers = [descr, "ModuleId", "Fibers", "Pattern"]
+        chars = " ".join(["%2d" % i for i in range(20)])
+        out = ["  ".join(headers+[chars])]
     else:
-        moduleId = "%3d %2d" % (header["FEDid"], printRaw.spigotList(header)[iBlock])
+        out = [""]
 
-    lines = printRaw.patternData(p["patternData"],
-                                 moduleId=moduleId,
-                                 utca=header["utca"],
-                                )
-    print "\n".join(lines)  # skip printer to facilitate diff
+    for fiber1, lst in sorted(d.iteritems()):
+        for key in ["A", "B", "C"]:
+            if (not patternB) and key == "B":
+                continue
+
+            fiber1_ = fiber1 + (0 if utca else 1)
+            if key == "B":
+                fibers = "  %2d,%2d" % (fiber1_, 1 + fiber1_)
+            elif key == "A":
+                fibers = "     %2d" % (fiber1_)
+            elif key == "C":
+                fibers = "     %2d" % (1 + fiber1_)
+
+            ps = patternString(lst, key)
+            if ps is None:
+                continue
+
+            if patternB:
+                out.append("   ".join([descr + moduleId, fibers, "  %s" % key, "  "]) + ps)
+            else:
+                fiberNum = int(fibers)
+                out.append("%s %2d:  %s" % (descr + moduleId, int(fibers), ps))
+
+    return out
+
+
+def patternString(patterns=[], key=""):
+    codes = []
+    for p in patterns:
+        c0 = p.get(key + "0")
+        c1 = p.get(key + "1")
+        if c0 is None or c1 is None:
+            break
+        else:
+            codes += [c0, c1]
+
+    if codes:
+        return configuration.patterns.string(codes)
+    else:
+        return None
 
 
 def feWord(d, fiber, iTs):

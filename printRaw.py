@@ -1,4 +1,3 @@
-import configuration.patterns
 import printer
 import utils
 
@@ -365,59 +364,6 @@ def ttpData(ttpInput=[], ttpOutput=[], ttpAlgoDep=[]):
                              ])
                  )
     return l
-
-
-def patternData(d={}, moduleId="", utca=None):
-    patternB = configuration.patterns.patternB
-    descr = configuration.patterns.lineStart
-
-    if patternB:
-        headers = [descr, "ModuleId", "Fibers", "Pattern"]
-        chars = " ".join(["%2d" % i for i in range(20)])
-        out = ["  ".join(headers+[chars])]
-    else:
-        out = [""]
-
-    for fiber1, lst in sorted(d.iteritems()):
-        for key in ["A", "B", "C"]:
-            if (not patternB) and key == "B":
-                continue
-
-            fiber1_ = fiber1 + (0 if utca else 1)
-            if key == "B":
-                fibers = "  %2d,%2d" % (fiber1_, 1 + fiber1_)
-            elif key == "A":
-                fibers = "     %2d" % (fiber1_)
-            elif key == "C":
-                fibers = "     %2d" % (1 + fiber1_)
-
-            ps = patternString(lst, key)
-            if ps is None:
-                continue
-
-            if patternB:
-                out.append("   ".join([descr + moduleId, fibers, "  %s" % key, "  "]) + ps)
-            else:
-                fiberNum = int(fibers)
-                out.append("%s %2d:  %s" % (descr + moduleId, int(fibers), ps))
-
-    return out
-
-
-def patternString(patterns=[], key=""):
-    codes = []
-    for p in patterns:
-        c0 = p.get(key + "0")
-        c1 = p.get(key + "1")
-        if c0 is None or c1 is None:
-            break
-        else:
-            codes += [c0, c1]
-
-    if codes:
-        return configuration.patterns.string(codes)
-    else:
-        return None
 
 
 def oneFedHcal(d={}, dump=None, crateslots=[],
