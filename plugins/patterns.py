@@ -34,7 +34,7 @@ def lines(h, iBlock, block):
     if patternB:
         headers = [descr, "ModuleId", "Fibers", "Pattern"]
         chars = " ".join(["%2d" % i for i in range(20)])
-        out = ["  ".join(headers+[chars])]
+        out = ["  ".join(headers + [chars])]
     else:
         out = [""]
 
@@ -44,6 +44,7 @@ def lines(h, iBlock, block):
 
     for fiber1, lst in sorted(d.iteritems()):
         out += lines_one_fiber(fiber1, lst, h["utca"], moduleId, patternB, descr)
+
     return out
 
 
@@ -55,18 +56,18 @@ def lines_one_fiber(fiber1, lst, utca, moduleId, patternB, descr):
 
         fiber1_ = fiber1 + (0 if utca else 1)
         if key == "B":
-            fibers = "  %2d,%2d" % (fiber1_, 1 + fiber1_)
+            fibers = "%2d,%2d" % (fiber1_, 1 + fiber1_)
         elif key == "A":
-            fibers = "     %2d" % (fiber1_)
+            fibers = "   %2d" % (fiber1_)
         elif key == "C":
-            fibers = "     %2d" % (1 + fiber1_)
+            fibers = "   %2d" % (1 + fiber1_)
 
         ps = patternString(lst, key)
         if ps is None:
             continue
 
         if patternB:
-            out.append("   ".join([descr + moduleId, fibers, "  %s" % key, "  "]) + ps)
+            out.append("   ".join([descr, moduleId, fibers, "   %s" % key, "  "]) + ps)
         else:
             fiberNum = int(fibers)
             out.append("%s %2d:  %s" % (descr + moduleId, int(fibers), ps))
