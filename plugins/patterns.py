@@ -15,7 +15,23 @@ def patterns(raw1={}, **_):
         nFibers = configuration.hw.nFibers(raw["header"]["utca"])
         for iBlock, block in sorted(raw["htrBlocks"].iteritems()):
             block["patternData"] = storePatternData(block["channelData"], nFibers)
-            printRaw.oneHtrPatterns(p=block, header=raw["header"], iBlock=iBlock)
+            oneHtrPatterns(p=block, header=raw["header"], iBlock=iBlock)
+
+
+def oneHtrPatterns(p={}, header={}, iBlock=None):
+    if p["IsTTP"]:
+        return
+
+    if header["utca"]:
+        moduleId = "u%2d %2d" % (p["Crate"], p["Slot"])
+    else:
+        moduleId = "%3d %2d" % (header["FEDid"], printRaw.spigotList(header)[iBlock])
+
+    lines = printRaw.patternData(p["patternData"],
+                                 moduleId=moduleId,
+                                 utca=header["utca"],
+                                )
+    print "\n".join(lines)  # skip printer to facilitate diff
 
 
 def feWord(d, fiber, iTs):
