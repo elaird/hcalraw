@@ -204,12 +204,14 @@ def storePatternData(d={}, utca=None):
                 feWords.append(word)
 
             flavors = filter(lambda x: x is not None, set(flavors))
-            assert len(flavors) <= 1, flavors
+            assert (len(flavors) <= 1) or set(flavors) == set([0L, 1L]), flavors
+
             if not flavors:
                 continue
             elif 0 <= flavors[0] <= 1:
                 pass
-            elif flavors[0] == 2:
+            elif flavors[0] == 2 and iTs == 1:
+                # all time slices have the same pattern; use TS1
                 out[fiber1].append(pattern_data_qie10(feWords))
             elif 5 <= flavors[0] <= 6:
                 out[fiber1].append(pattern_data_qie8(feWords))
@@ -218,7 +220,18 @@ def storePatternData(d={}, utca=None):
 
 
 def pattern_data_qie10(feWords):
-    return pattern_data_qie8(feWords)
+    assert len(feWords) == 2, len(feWords)
+    d = {}
+    print feWords
+    if feWords[0] is not None:
+        d["A0"] = feWords[0]
+        d["A1"] = 0
+
+    if feWords[1] is not None:
+        d["C0"] = feWords[1]
+        d["C1"] = 0
+
+    return d
 
 
 def pattern_data_qie8(feWords=[]):
