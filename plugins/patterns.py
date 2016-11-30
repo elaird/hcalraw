@@ -20,19 +20,18 @@ def patterns(raw1={}, **_):
             if block["IsTTP"]:
                 return
 
-            if h["utca"]:
-                moduleId = "u%2d %2d" % (block["Crate"], block["Slot"])
-            else:
-                moduleId = "%3d %2d" % (h["FEDid"], spigotList(h)[iBlock])
-
-            lines = blob(storePatternData(block["channelData"], nFibers),
-                         moduleId=moduleId, utca=h["utca"])
+            lines = blob(h, iBlock, block, storePatternData(block["channelData"], nFibers))
             print "\n".join(lines)  # skip printer to facilitate diff
 
 
-def blob(d={}, moduleId="", utca=None):
+def blob(h, iBlock, block, d={}):
     patternB = configuration.patterns.patternB
     descr = configuration.patterns.lineStart
+
+    if h["utca"]:
+        moduleId = "u%2d %2d" % (block["Crate"], block["Slot"])
+    else:
+        moduleId = "%3d %2d" % (h["FEDid"], spigotList(h)[iBlock])
 
     if patternB:
         headers = [descr, "ModuleId", "Fibers", "Pattern"]
@@ -46,7 +45,7 @@ def blob(d={}, moduleId="", utca=None):
             if (not patternB) and key == "B":
                 continue
 
-            fiber1_ = fiber1 + (0 if utca else 1)
+            fiber1_ = fiber1 + (0 if h["utca"] else 1)
             if key == "B":
                 fibers = "  %2d,%2d" % (fiber1_, 1 + fiber1_)
             elif key == "A":
