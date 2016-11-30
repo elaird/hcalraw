@@ -740,5 +740,5 @@ def oneRun(files1=[],
               outputFile=outputFile,
               mapOptions=mapOptions,
               loopOptions=loopOptions,
-              printEventSummary=(plugins != ["patterns"]) and feds2 and (files1 != files2) and 0 <= common["dump"],
+              printEventSummary=("compare" in plugins) and feds2 and (files1 != files2) and 0 <= common["dump"],
               )
