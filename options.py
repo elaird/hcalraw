@@ -77,8 +77,8 @@ def opts(alsoArgs=False):
     common.add_option("--plugins",
                       dest="plugins",
                       type="str",
-                      metavar="compare,printraw,...",
-                      default="compare,printraw",
+                      metavar="compare,...",
+                      default="compare",
                       help=" ".join([l.ljust(60) for l in plugins]))
     parser.add_option_group(common)
 

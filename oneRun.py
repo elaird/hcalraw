@@ -44,6 +44,10 @@ def check_and_adjust(options):
         printer.info("setting nEvents=1 ('patterns' was in list of plugins)")
         options.nEvents = 1
 
+    if 1 <= options.dump and "printraw" not in options.plugins:
+        printer.info("adding printraw to list of plugins ('--dump' was at least 1)")
+        options.plugins.append("printraw")
+
 
 def go(options):
     kargs = subset(options, ["feds1", "feds2"], process=True)
