@@ -209,22 +209,22 @@ def fe_word_qie8(feWord32, dct, iTs):
 
 
 def storePatternData(d={}, utca=None):
-    nFibers = configuration.hw.nFibers(utca)
-    offset = 1 if configuration.patterns.rmRibbon else 0
+    offset = 0
     if not utca:
+        offset += 1
+    if configuration.patterns.rmRibbon:
         offset += 1
 
     out = {}
-    for iFiberPair in range(nFibers/2):
+    for iFiberPair in range(configuration.hw.nFibers(utca) / 2):
         fiber1 = 2*iFiberPair + offset
-        fiber2 = 2*iFiberPair + 1 + offset
         out[fiber1] = []
 
         for iTs in range(configuration.patterns.nTsMax):
             feWords = []
             flavors = []
             # Tullio says HTR f/w makes no distinction between optical cables 1 and 2
-            for fiber in [fiber1, fiber2]:
+            for fiber in [fiber1, 1 + fiber1]:
                 flavor, word = feWord(d, fiber, iTs)
                 flavors.append(flavor)
                 feWords.append(word)
