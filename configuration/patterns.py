@@ -1,6 +1,5 @@
 import re
 
-nFibChMax = 6
 nTsMax = 20
 
 patternB = False           # consider also patterns mixed across fibers
@@ -11,7 +10,7 @@ lineStart = "pattern on "  # print with pattern; used by diff.py
 pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
 
 
-def string(codes=[], asciifyPatterns=True, regMatchPatterns=True):
+def string56(codes=[], asciifyPatterns=True, regMatchPatterns=True):
     l = []
     for code in codes:
         if compressed:
@@ -31,6 +30,13 @@ def string(codes=[], asciifyPatterns=True, regMatchPatterns=True):
         return "%s %s %s" % (m[:-2].ljust(6), m[-2], m[-1])
     else:
         return s
+
+
+def string012(code=None):
+    # RBX: 8bits
+    # RM: 3bits
+    # FI: 3bits
+    return "%022x" % code
 
 
 def rbxes():

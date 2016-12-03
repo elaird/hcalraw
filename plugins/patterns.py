@@ -1,12 +1,12 @@
 # QIE  8: https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
-#         e-log post
-# QIE 10: 
-# QIE 11: 
+# errata: http://cmsonline.cern.ch/cms-elog/807780
+#
+# QIE 10: https://svnweb.cern.ch/trac/cms-firmwsrc/browser/hcal/HF_RM_igloo2/trunk/docs/HF_RM_DataFormat.txt
+# QIE 11: https://svnweb.cern.ch/trac/cms-firmwsrc/browser/hcal/HE_RM_igloo2/trunk/docs/HE_RM_DataFormat.txt
 
 import configuration.hw
 import configuration.patterns
 from printRaw import spigotList
-from decode import channelId
 
 
 def patterns(raw1={}, **_):
@@ -35,17 +35,16 @@ def lines(h, iBlock, block):
     else:
         out = [""]
 
-    d = storePatternData(block["channelData"],
-                         configuration.hw.nFibers(h["utca"])
-                         )
+    # print "Crate=%2d, Slot=%2d" % (block["Crate"], block["Slot"])
+    d = storePatternData(block["channelData"], h["utca"])
 
-    for fiber1, lst in sorted(d.iteritems()):
-        out += lines_fiber_pair(fiber1, lst, h["utca"], moduleId)
+    for fiber1, fd in sorted(d.iteritems()):
+        out += lines_fiber_pair(fiber1, fd["flavor"], fd["patternData"], h["utca"], moduleId)
 
     return out
 
 
-def lines_fiber_pair(fiber1, lst, utca, moduleId):
+def lines_fiber_pair(fiber1, flavor, patterns, utca, moduleId):
     descr = configuration.patterns.lineStart
 
     out = []
@@ -53,15 +52,14 @@ def lines_fiber_pair(fiber1, lst, utca, moduleId):
         if (not configuration.patterns.patternB) and key == "B":
             continue
 
-        fiber1_ = fiber1 + (0 if utca else 1)
         if key == "B":
-            fibers = "%2d,%2d" % (fiber1_, 1 + fiber1_)
+            fibers = "%2d,%2d" % (fiber1, 1 + fiber1)
         elif key == "A":
-            fibers = "   %2d" % (fiber1_)
+            fibers = "   %2d" % (fiber1)
         elif key == "C":
-            fibers = "   %2d" % (1 + fiber1_)
+            fibers = "   %2d" % (1 + fiber1)
 
-        ps = patternString(lst, key)
+        ps = patternString(flavor, patterns, key)
         if ps is None:
             continue
 
@@ -74,7 +72,7 @@ def lines_fiber_pair(fiber1, lst, utca, moduleId):
     return out
 
 
-def patternString(patterns=[], key=""):
+def patternString(flavor=None, patterns=[], key=""):
     codes = []
     for p in patterns:
         c0 = p.get(key + "0")
@@ -84,79 +82,200 @@ def patternString(patterns=[], key=""):
         else:
             codes += [c0, c1]
 
-    if codes:
-        return configuration.patterns.string(codes)
-    else:
+    if not codes:
         return None
+
+    if 0 <= flavor <= 2:
+        return configuration.patterns.string012(codes[0])
+    if 5 <= flavor <= 6:
+        return configuration.patterns.string56(codes)
 
 
 def feWord(d, fiber, iTs):
-    feWord32 = None
-    for fibCh in range(configuration.patterns.nFibChMax):
-        key = channelId(fiber, fibCh)
-        if key not in d:
+    word = None
+    flavor = None
+
+    for key, v in d.iteritems():
+        if v["Fiber"] != fiber:
             continue
 
-        if d[key]["ErrF"] == 3:  # 8b/10b errors
+        if v["ErrF"] == 3:  # 8b/10b errors
             continue
 
-        qies = d[key]["QIE"]
-        if len(qies) <= iTs:
+        if len(v["QIE"]) <= iTs:
             continue
 
-        flavor = d[key]["Flavor"]
-        if 5 <= flavor <= 6:
-            qie = qies[iTs]
-            if d[key].get("CapId"):
-                cap = d[key]["CapId"][iTs]
-            elif not configuration.patterns.compressed:
-                sys.exit("\n".join(["Cap-ids per time-slice not found.",
-                                    "Either set 'configuration.patterns.compressed = True'",
-                                    "or do not pass '--patterns'.",
-                                    ]))
-            else:
-                cap = 0
-
-            if (feWord32 is None) and (0 <= fibCh <= 2):
-                feWord32 = 0
-            if fibCh == 0:
-                feWord32 |= qie << 25
-                feWord32 |= cap << 7
-            if fibCh == 1:
-                feWord32 |= qie << 17
-                feWord32 |= cap << 5
-            if fibCh == 2:
-                feWord32 |= qie << 9
-                feWord32 |= cap << 3
-        elif 0 <= flavor <= 1:
-            pass
+        flavor = v["Flavor"]
+        if 0 <= flavor <= 1:
+            word = fe_word_qie11(word, v, iTs)
         elif flavor == 2:
-            pass
+            word = fe_word_qie10(word, v, iTs)
+        elif 5 <= flavor <= 6:
+            word = fe_word_qie8(word, v, iTs)
+
+    return flavor, word
+
+
+def fe_word_qie11(feWord88, dct, iTs):
+    if feWord88 is None:
+        feWord88 = 0
+
+    # FIXME: add missing 4 bits
+    # Byte1  = {LE_TDC0[3:0], 2-bit consensus_CapID, CapEr, BC0};
+
+    if dct["FibCh"] == 0:
+        feWord88 |= ((dct["TDC"][iTs] >> 0) &  0xf ) <<  4
+        feWord88 |= ( dct["QIE"][iTs]       & 0xff ) <<  8
+        feWord88 |= ((dct["TDC"][iTs] >> 4) &  0x3 ) << 56
+    elif dct["FibCh"] == 1:
+        feWord88 |= ( dct["QIE"][iTs]       & 0xff ) << 16
+        feWord88 |= ((dct["TDC"][iTs] >> 0) & 0x3f ) << 58
+    elif dct["FibCh"] == 2:
+        feWord88 |= ( dct["QIE"][iTs]       & 0xff ) << 24
+        feWord88 |= ((dct["TDC"][iTs] >> 0) & 0x3f ) << 64
+    elif dct["FibCh"] == 3:
+        feWord88 |= ( dct["QIE"][iTs]       & 0xff ) << 32
+        feWord88 |= ((dct["TDC"][iTs] >> 0) & 0x3f ) << 70
+    elif dct["FibCh"] == 4:
+        feWord88 |= ( dct["QIE"][iTs]       & 0xff ) << 40
+        feWord88 |= ((dct["TDC"][iTs] >> 0) & 0x3f ) << 76
+    elif dct["FibCh"] == 5:
+        feWord88 |= ( dct["QIE"][iTs]       & 0xff ) << 48
+        feWord88 |= ((dct["TDC"][iTs] >> 0) & 0x3f ) << 82
+
+    return feWord88
+
+
+def fe_word_qie10(feWord80, dct, iTs):
+    if feWord80 is None:
+        feWord80 = 0
+
+    if dct["FibCh"] == 0:
+        feWord80 |= ( dct["TDC_TE"][iTs]    &  0xf ) <<  0
+        feWord80 |= ( dct["CapId"][iTs]     &  0x3 ) <<  8
+        feWord80 |= ( dct["QIE"][iTs]       & 0xff ) << 16
+        feWord80 |= ((dct["TDC"][iTs] >> 4) &  0x3 ) << 48
+        feWord80 |= ((dct["TDC"][iTs] >> 2) &  0x3 ) << 56
+        feWord80 |= ((dct["TDC"][iTs] >> 0) &  0x3 ) << 64
+    elif dct["FibCh"] == 1:
+        feWord80 |= ( dct["TDC_TE"][iTs]    &  0xf ) <<  4
+        feWord80 |= ( dct["CapId"][iTs]     &  0x3 ) << 10
+        feWord80 |= ( dct["QIE"][iTs]       & 0xff ) << 24
+        feWord80 |= ((dct["TDC"][iTs] >> 4) &  0x3 ) << 50
+        feWord80 |= ((dct["TDC"][iTs] >> 2) &  0x3 ) << 58
+        feWord80 |= ((dct["TDC"][iTs] >> 0) &  0x3 ) << 66
+    elif dct["FibCh"] == 2:
+        feWord80 |= ( dct["CapId"][iTs]     &  0x3 ) << 12
+        feWord80 |= ( dct["QIE"][iTs]       & 0xff ) << 32
+        feWord80 |= ((dct["TDC"][iTs] >> 4) &  0x3 ) << 52
+        feWord80 |= ((dct["TDC"][iTs] >> 2) &  0x3 ) << 60
+        feWord80 |= ((dct["TDC"][iTs] >> 0) &  0x3 ) << 68
+        feWord80 |= ( dct["TDC_TE"][iTs]    &  0xf ) << 72
+    elif dct["FibCh"] == 3:
+        feWord80 |= ( dct["CapId"][iTs]     &  0x3 ) << 14
+        feWord80 |= ( dct["QIE"][iTs]       & 0xff ) << 40
+        feWord80 |= ((dct["TDC"][iTs] >> 4) &  0x3 ) << 54
+        feWord80 |= ((dct["TDC"][iTs] >> 2) &  0x3 ) << 62
+        feWord80 |= ((dct["TDC"][iTs] >> 0) &  0x3 ) << 70
+        feWord80 |= ( dct["TDC_TE"][iTs]    &  0xf ) << 76
+
+    return feWord80
+
+
+def fe_word_qie8(feWord32, dct, iTs):
+    if dct.get("CapId"):
+        cap = dct["CapId"][iTs]
+    elif not configuration.patterns.compressed:
+        sys.exit("\n".join(["Cap-ids per time-slice not found.",
+                            "Either set 'configuration.patterns.compressed = True'",
+                            "or do not pass '--patterns'.",
+                            ]))
+    else:
+        cap = 0
+
+    qie = dct["QIE"][iTs]
+
+    if feWord32 is None:
+        feWord32 = 0
+
+    if dct["FibCh"] == 0:
+        feWord32 |= qie << 25
+        feWord32 |= cap << 7
+    elif dct["FibCh"] == 1:
+        feWord32 |= qie << 17
+        feWord32 |= cap << 5
+    elif dct["FibCh"] == 2:
+        feWord32 |= qie << 9
+        feWord32 |= cap << 3
 
     return feWord32
 
 
-def storePatternData(d={}, nFibers=None):
-    offset = 1 if configuration.patterns.rmRibbon else 0
+def storePatternData(d={}, utca=None):
+    offset = 0
+    if not utca:
+        offset += 1
+    if configuration.patterns.rmRibbon:
+        offset += 1
 
     out = {}
-
-    # print "Crate=%2d, Slot=%2d" % (l["Crate"], l["Slot"])
-    for iFiberPair in range(nFibers/2):
+    for iFiberPair in range(configuration.hw.nFibers(utca) / 2):
         fiber1 = 2*iFiberPair + offset
-        fiber2 = 2*iFiberPair + 1 + offset
-        out[fiber1] = []
+        out[fiber1] = {"flavor": None,
+                       "patternData": [],
+                       }
 
         for iTs in range(configuration.patterns.nTsMax):
             feWords = []
+            flavors = []
             # Tullio says HTR f/w makes no distinction between optical cables 1 and 2
-            for fiber in [fiber1, fiber2]:
-                feWords.append(feWord(d, fiber, iTs))
-            out[fiber1].append(patternData(feWords))
+            for fiber in [fiber1, 1 + fiber1]:
+                flavor, word = feWord(d, fiber, iTs)
+                flavors.append(flavor)
+                feWords.append(word)
+
+            flavors = filter(lambda x: x is not None, set(flavors))
+            assert (len(flavors) <= 1) or set(flavors) == set([0L, 1L]), flavors
+
+            pd = None
+            if not flavors:
+                continue
+
+            # for flavors 0-2, all time slices have the same pattern; use TS1
+            elif 0 <= flavors[0] <= 1 and iTs == 1:
+                pd = pattern_data_qie11(feWords)
+            elif flavors[0] == 2 and iTs == 1:
+                pd = pattern_data_qie10(feWords)
+            elif 5 <= flavors[0] <= 6:
+                pd = pattern_data_qie8(feWords)
+
+            if pd is not None:
+                out[fiber1]["flavor"] = flavors[0]
+                out[fiber1]["patternData"].append(pd)
+
     return out
 
 
-def patternData(feWords=[]):
+def pattern_data_qie11(feWords):
+    return pattern_data_qie10(feWords)
+
+
+def pattern_data_qie10(feWords):
+    assert len(feWords) == 2, len(feWords)
+    d = {}
+    # print feWords
+    if feWords[0] is not None:
+        d["A0"] = feWords[0]
+        d["A1"] = 0
+
+    if feWords[1] is not None:
+        d["C0"] = feWords[1]
+        d["C1"] = 0
+
+    return d
+
+
+def pattern_data_qie8(feWords=[]):
     assert len(feWords) == 2, len(feWords)
     d = {}
 
