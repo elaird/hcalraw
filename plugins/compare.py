@@ -644,53 +644,50 @@ def histogram_nMatched(d, book):
                   title="TPs;number mis-matched;Events / bin")
 
 
-def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printMismatches=False, warnQuality=True, fewerHistos=False):
+def compare0(raw1, raw2, book, printEmap):
     N1 = raw1[None]
     N2 = raw2[None]
-    if raw2 and anyEmap:
-        mapF1, mapB1, _ = dataMap(raw1, book)
-        mapF2, mapB2, _ = dataMap(raw2, book)
-        N1["matched"], N1["misMatched"] = matchStatsAnyMap(mapF1, mapB2, iStart=4)
-        N2["matched"], N2["misMatched"] = matchStatsAnyMap(mapF2, mapB1, iStart=4)
-        if printEmap:
-           reportMatched(N1["matched"])
-           reportFailed(N1["misMatched"])
-        histogram_nMatched(N1, book)
-    elif raw2:
-        mapF1, _, _ = dataMap(raw1, book)
-        mapF2, _, _ = dataMap(raw2, book)
-        titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF()])
-        N1["matched"], N1["misMatched"] \
-            = adc_vs_adc(mapF1, mapF2, book=book, titlePrefix=titlePrefix,
-                         printMismatches=printMismatches,
-                         iEntry=N1["iEntry"])
+    mapF1, mapB1, _ = dataMap(raw1, book)
+    mapF2, mapB2, _ = dataMap(raw2, book)
 
-        N2["matched"], N2["misMatched"] \
-            = adc_vs_adc(mapF2, mapF1, book=None, titlePrefix=titlePrefix)
+    N1["matched"], N1["misMatched"] = matchStatsAnyMap(mapF1, mapB2, iStart=4)
+    N2["matched"], N2["misMatched"] = matchStatsAnyMap(mapF2, mapB1, iStart=4)
+    if printEmap:
+        reportMatched(N1["matched"])
+        reportFailed(N1["misMatched"])
+    histogram_nMatched(N1, book)
 
-        tF1 = tpMap(raw1, warnQuality, book)[0]
-        tF2 = tpMap(raw2, warnQuality, book)[0]
 
-        N1["tMatched"], N1["tMisMatched"] \
-            = adc_vs_adc(tF1, tF2, book=book,
-                         name="tp_vs_tp",
-                         transf=hw.transformed_tp,
-                         xMin=-20.5, xMax=275.5,
-                         printMismatches=printMismatches,
-                         iEntry=N1["iEntry"])
-        # FIXME: N2["tMatched"], N2["tMisMatched"]
-        histogram_nMatched(N1, book)
+def compare1(raw1, raw2, book, printMismatches):
+    N1 = raw1[None]
+    N2 = raw2[None]
+    mapF1, _, _ = dataMap(raw1, book)
+    mapF2, _, _ = dataMap(raw2, book)
 
-    okFeds = loop_over_feds(raw1, book, adcTag="feds1",
-                            warn=warnQuality, fewerHistos=fewerHistos)
+    titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF()])
+    N1["matched"], N1["misMatched"] \
+        = adc_vs_adc(mapF1, mapF2, book=book, titlePrefix=titlePrefix,
+                     printMismatches=printMismatches,
+                     iEntry=N1["iEntry"])
 
-    noGood = [[], [None]]
-    if raw1.keys() in noGood or raw2.keys() in noGood:
-        return
+    N2["matched"], N2["misMatched"] \
+        = adc_vs_adc(mapF2, mapF1, book=None, titlePrefix=titlePrefix)
 
-    okFeds = okFeds.union(loop_over_feds(raw2, book, adcTag="feds2", warn=warnQuality))
+    tF1 = tpMap(raw1, warnQuality, book)[0]
+    tF2 = tpMap(raw2, warnQuality, book)[0]
 
-    # histogram some deltas
+    N1["tMatched"], N1["tMisMatched"] \
+        = adc_vs_adc(tF1, tF2, book=book,
+                     name="tp_vs_tp",
+                     transf=hw.transformed_tp,
+                     xMin=-20.5, xMax=275.5,
+                     printMismatches=printMismatches,
+                     iEntry=N1["iEntry"])
+    # FIXME: N2["tMatched"], N2["tMisMatched"]
+    histogram_nMatched(N1, book)
+
+
+def histogram_deltas(raw1, raw2, book, okFeds):
     fed1 = filter(lambda x: x is not None, sorted(raw1.keys()))[0]
     d1 = raw1[fed1]
     for fed2, d2 in raw2.iteritems():
@@ -709,6 +706,25 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printM
                                   ])
                 delta = d1["header"][x] - d2["header"][x]
                 book.fill(delta, "delta%s_%s_%s" % (x, fed1, fed2), 11, -5.5, 5.5, title=title)
+
+
+def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printMismatches=False, warnQuality=True, fewerHistos=False):
+    if raw2:
+        if anyEmap:
+            compare0(raw1, raw2, book, printEmap)
+        else:
+            compare1(raw1, raw2, book, printMismatches)
+
+    okFeds = loop_over_feds(raw1, book, adcTag="feds1",
+                            warn=warnQuality, fewerHistos=fewerHistos)
+
+    noGood = [[], [None]]
+    if raw1.keys() in noGood or raw2.keys() in noGood:
+        return
+
+    okFeds = okFeds.union(loop_over_feds(raw2, book, adcTag="feds2", warn=warnQuality))
+
+    histogram_deltas(raw1, raw2, book, okFeds)
 
 
 def coordString(crate, slot, tb, fiber, channel):
