@@ -38,13 +38,13 @@ def lines(h, iBlock, block):
     # print "Crate=%2d, Slot=%2d" % (block["Crate"], block["Slot"])
     d = storePatternData(block["channelData"], h["utca"])
 
-    for fiber1, lst in sorted(d.iteritems()):
-        out += lines_fiber_pair(fiber1, lst, h["utca"], moduleId)
+    for fiber1, fd in sorted(d.iteritems()):
+        out += lines_fiber_pair(fiber1, fd["flavor"], fd["patternData"], h["utca"], moduleId)
 
     return out
 
 
-def lines_fiber_pair(fiber1, lst, utca, moduleId):
+def lines_fiber_pair(fiber1, flavor, patterns, utca, moduleId):
     descr = configuration.patterns.lineStart
 
     out = []
@@ -59,7 +59,7 @@ def lines_fiber_pair(fiber1, lst, utca, moduleId):
         elif key == "C":
             fibers = "   %2d" % (1 + fiber1)
 
-        ps = patternString(lst, key)
+        ps = patternString(flavor, patterns, key)
         if ps is None:
             continue
 
@@ -72,7 +72,7 @@ def lines_fiber_pair(fiber1, lst, utca, moduleId):
     return out
 
 
-def patternString(patterns=[], key=""):
+def patternString(flavor=None, patterns=[], key=""):
     codes = []
     for p in patterns:
         c0 = p.get(key + "0")
@@ -82,10 +82,13 @@ def patternString(patterns=[], key=""):
         else:
             codes += [c0, c1]
 
-    if codes:
-        return configuration.patterns.string(codes)
-    else:
+    if not codes:
         return None
+
+    if 0 <= flavor <= 2:
+        return configuration.patterns.string012(codes[0])
+    if 5 <= flavor <= 6:
+        return configuration.patterns.string56(codes)
 
 
 def feWord(d, fiber, iTs):
@@ -218,7 +221,9 @@ def storePatternData(d={}, utca=None):
     out = {}
     for iFiberPair in range(configuration.hw.nFibers(utca) / 2):
         fiber1 = 2*iFiberPair + offset
-        out[fiber1] = []
+        out[fiber1] = {"flavor": None,
+                       "patternData": [],
+                       }
 
         for iTs in range(configuration.patterns.nTsMax):
             feWords = []
@@ -232,16 +237,21 @@ def storePatternData(d={}, utca=None):
             flavors = filter(lambda x: x is not None, set(flavors))
             assert (len(flavors) <= 1) or set(flavors) == set([0L, 1L]), flavors
 
+            pd = None
             if not flavors:
                 continue
-            elif 0 <= flavors[0] <= 1 and iTs ==1:
-                # all time slices have the same pattern; use TS1
-                out[fiber1].append(pattern_data_qie11(feWords))
+
+            # for flavors 0-2, all time slices have the same pattern; use TS1
+            elif 0 <= flavors[0] <= 1 and iTs == 1:
+                pd = pattern_data_qie11(feWords)
             elif flavors[0] == 2 and iTs == 1:
-                # all time slices have the same pattern; use TS1
-                out[fiber1].append(pattern_data_qie10(feWords))
+                pd = pattern_data_qie10(feWords)
             elif 5 <= flavors[0] <= 6:
-                out[fiber1].append(pattern_data_qie8(feWords))
+                pd = pattern_data_qie8(feWords)
+
+            if pd is not None:
+                out[fiber1]["flavor"] = flavors[0]
+                out[fiber1]["patternData"].append(pd)
 
     return out
 
