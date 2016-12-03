@@ -3,12 +3,10 @@ import utils
 
 
 def printraw(raw1={}, raw2={}, **_):
-    if raw1[None]["dump"] <= 0:
-        return
-
-    slim1 = (raw1[None]["dump"] == 1) and (len(raw1) == 2) and not raw2
-    oneEvent(raw1, slim1=slim1)
-    oneEvent(raw2)
+    if None in raw1 and 1 <= raw1[None]["dump"]:
+        slim1 = (raw1[None]["dump"] == 1) and (len(raw1) == 2) and not raw2
+        oneEvent(raw1, slim1=slim1)
+        oneEvent(raw2)
 
 
 def oneEvent(d={}, slim1=False):
