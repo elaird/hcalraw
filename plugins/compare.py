@@ -1,6 +1,6 @@
 from configuration import hw, matching, patterns
+from plugins.printraw import spigotList
 import printer
-import printRaw
 import utils
 
 
@@ -489,7 +489,7 @@ def loop_over_feds(raw, book, adcTag="", **other):
         okFeds.add(fedId)
         if not raw[fedId]["header"]["utca"]:
             checkHtrModules(fedId=fedId,
-                            spigots=printRaw.spigotList(raw[fedId]["header"]),
+                            spigots=spigotList(raw[fedId]["header"]),
                             htrBlocks=raw[fedId]["htrBlocks"])
 
     if adcs:
@@ -649,8 +649,6 @@ def histogram_nMatched(book, matched=None, misMatched=None, nonMatched=None, tMa
 
 
 def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printMismatches=False, warnQuality=True, fewerHistos=False):
-    doDump = (1 <= raw1[None]["dump"])
-
     if raw2 and anyEmap:
         mapF1, mapB1, _ = dataMap(raw1, book)
         mapF2, mapB2, _ = dataMap(raw2, book)
@@ -670,7 +668,7 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printM
                                              book=book, titlePrefix=titlePrefix,
                                              printMismatches=printMismatches,
                                              iEntry=raw1[None]["iEntry"])
-        if doDump:
+        if 1 <= raw1[None]["dump"]:
             matched21, misMatched21 = adc_vs_adc(mapF2, mapF1, book=None, titlePrefix=titlePrefix)
 
         tF1 = tpMap(raw1, warnQuality, book)[0]
@@ -694,11 +692,6 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printM
         matched21 = misMatched21 = {}
         tMatched12 = tMisMatched12 = []
         tMatched21 = tMisMatched21 = []
-
-    if doDump:
-        slim1 = (raw1[None]["dump"] == 1) and (len(raw1) == 2) and not raw2
-        printRaw.oneEvent(raw1, nonMatchedQie=misMatched12, nonMatchedTp=tMisMatched12, slim1=slim1)
-        printRaw.oneEvent(raw2, nonMatchedQie=misMatched21, nonMatchedTp=tMisMatched21)
 
     okFeds = loop_over_feds(raw1, book, adcTag="feds1",
                             warn=warnQuality, fewerHistos=fewerHistos,
