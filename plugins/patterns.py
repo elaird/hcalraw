@@ -6,7 +6,7 @@
 
 import configuration.hw
 import configuration.patterns
-from printRaw import spigotList
+from plugins.printraw import spigotList
 
 
 def patterns(raw1={}, **_):
