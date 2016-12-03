@@ -645,39 +645,41 @@ def histogram_nMatched(d, book):
 
 
 def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printMismatches=False, warnQuality=True, fewerHistos=False):
+    N1 = raw1[None]
+    N2 = raw2[None]
     if raw2 and anyEmap:
         mapF1, mapB1, _ = dataMap(raw1, book)
         mapF2, mapB2, _ = dataMap(raw2, book)
-        raw1[None]["matched"], raw1[None]["misMatched"] = matchStatsAnyMap(mapF1, mapB2, iStart=4)
-        raw2[None]["matched"], raw2[None]["misMatched"] = matchStatsAnyMap(mapF2, mapB1, iStart=4)
+        N1["matched"], N1["misMatched"] = matchStatsAnyMap(mapF1, mapB2, iStart=4)
+        N2["matched"], N2["misMatched"] = matchStatsAnyMap(mapF2, mapB1, iStart=4)
         if printEmap:
-           reportMatched(raw1[None]["matched"])
-           reportFailed(raw1[None]["misMatched"])
-        histogram_nMatched(raw1[None], book)
+           reportMatched(N1["matched"])
+           reportFailed(N1["misMatched"])
+        histogram_nMatched(N1, book)
     elif raw2:
         mapF1, _, _ = dataMap(raw1, book)
         mapF2, _, _ = dataMap(raw2, book)
         titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF()])
-        raw1[None]["matched"], raw1[None]["misMatched"] \
+        N1["matched"], N1["misMatched"] \
             = adc_vs_adc(mapF1, mapF2, book=book, titlePrefix=titlePrefix,
                          printMismatches=printMismatches,
-                         iEntry=raw1[None]["iEntry"])
+                         iEntry=N1["iEntry"])
 
-        raw2[None]["matched"], raw2[None]["misMatched"] \
+        N2["matched"], N2["misMatched"] \
             = adc_vs_adc(mapF2, mapF1, book=None, titlePrefix=titlePrefix)
 
         tF1 = tpMap(raw1, warnQuality, book)[0]
         tF2 = tpMap(raw2, warnQuality, book)[0]
 
-        raw1[None]["tMatched"], raw1[None]["tMisMatched"] \
+        N1["tMatched"], N1["tMisMatched"] \
             = adc_vs_adc(tF1, tF2, book=book,
                          name="tp_vs_tp",
                          transf=hw.transformed_tp,
                          xMin=-20.5, xMax=275.5,
                          printMismatches=printMismatches,
-                         iEntry=raw1[None]["iEntry"])
-        # FIXME: raw2[None]["tMatched"], raw2[None]["tMisMatched"]
-        histogram_nMatched(raw1[None], book)
+                         iEntry=N1["iEntry"])
+        # FIXME: N2["tMatched"], N2["tMisMatched"]
+        histogram_nMatched(N1, book)
 
     okFeds = loop_over_feds(raw1, book, adcTag="feds1",
                             warn=warnQuality, fewerHistos=fewerHistos)
