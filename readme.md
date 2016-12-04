@@ -32,8 +32,9 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 
 # compare payloads of different sets of FEDs, within one file
 ./look.py 239480 --hf
-./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=uHF \
---dump=0 --output-file=output/239480.root --progress --utca-bcn-delta=-131
+./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=HF \
+--dump=0 --output-file=output/239480.root --progress \
+ --utca-bcn-delta=-131 --no-warn-quality
 
 
 # dump decoded data to stdout
