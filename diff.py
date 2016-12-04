@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from configuration import patterns as conf
+import configuration.hw
 import optparse
 import sys
 
@@ -58,7 +59,7 @@ def pretty(be=None, fe=None):
             s = "    %2s     %2s   %2s:  " % (crate, slot, fi)
         else:
             crate = conf.expectedCrate(int(dcc))
-            exp = conf.expectedHtr(int(dcc), int(sp))
+            exp = configuration.hw.expectedVmeHtr(int(dcc), int(sp))
             htr = "%2d%1s" % (exp["Slot"], exp["Top"])
             s = "%2s(%2d) %2s(%3s) %2s:  " % (dcc, crate, sp, htr, fi)
     else:

@@ -1,4 +1,4 @@
-from configuration import hw, matching, patterns
+from configuration import hw, matching
 from plugins.printraw import spigotList
 import printer
 import utils
@@ -448,7 +448,8 @@ def checkHtrModules(fedId=None, spigots=[], htrBlocks={}):
         if block["IsTTP"]:
             continue
 
-        expected = patterns.expectedHtr(fedId, spigots[iBlock])
+        spigot = spigots[iBlock]
+        expected = hw.expectedVmeHtr(fedId, spigot)
         crates.append(block["Crate"])
         bad = [block["Top"] != expected["Top"],
                block["Slot"] != expected["Slot"],
