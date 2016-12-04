@@ -6,7 +6,6 @@
 
 import configuration.hw
 import configuration.patterns
-from plugins.printraw import spigotList
 
 
 def patterns(raw1={}, **_):
@@ -26,7 +25,7 @@ def lines(h, iBlock, block):
     if h["utca"]:
         moduleId = "u%2d %2d" % (block["Crate"], block["Slot"])
     else:
-        moduleId = "%3d %2d" % (h["FEDid"], spigotList(h)[iBlock])
+        moduleId = "%3d %2d" % (h["FEDid"], h["spigotList"][iBlock])
 
     if configuration.patterns.patternB:
         headers = [configuration.patterns.lineStart, "ModuleId", "Fibers", "Pattern"]

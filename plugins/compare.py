@@ -1,5 +1,4 @@
 from configuration import hw, matching
-from plugins.printraw import spigotList
 import printer
 import utils
 
@@ -489,9 +488,10 @@ def loop_over_feds(raw, book, adcTag="", **other):
             return
 
         okFeds.add(fedId)
-        if not raw[fedId]["header"]["utca"]:
+        h = raw[fedId]["header"]
+        if not h["utca"]:
             checkHtrModules(fedId=fedId,
-                            spigots=spigotList(raw[fedId]["header"]),
+                            spigots=h["spigotList"],
                             htrBlocks=raw[fedId]["htrBlocks"])
 
     if adcs:
