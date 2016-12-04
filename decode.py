@@ -142,6 +142,19 @@ def header_ufov0(d={}, iWord64=None, word64=None):
             d["HTR%d" % j] = htrDict(w, d["word16Counts"])
             if iWord64 != 10:
                 d["HTR%d" % (j+1)] = htrDict(w >> 32, d["word16Counts"])
+            else:
+                d["spigotList"] = spigotList(d)
+
+
+def spigotList(header):
+    out = []
+    for key, value in header.iteritems():
+        if not key.startswith("HTR"):
+            continue
+        if not value["nWord16"]:
+            continue
+        out.append(int(key[3:]))
+    return sorted(out)
 
 
 def other(d={}, words64=[]):

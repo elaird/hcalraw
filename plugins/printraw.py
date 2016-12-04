@@ -67,17 +67,6 @@ def htrOverview(d={}):
     printer.cyan(hyphens)
 
 
-def spigotList(header):
-    out = []
-    for key, value in header.iteritems():
-        if not key.startswith("HTR"):
-            continue
-        if not value["nWord16"]:
-            continue
-        out.append(int(key[3:]))
-    return sorted(out)
-
-
 def oneHtr(iBlock=None, p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
            nonMatchedQie=[], nonMatchedTp=[]):
 
