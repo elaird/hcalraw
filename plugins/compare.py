@@ -658,7 +658,7 @@ def compare0(raw1, raw2, book, printEmap):
     histogram_nMatched(N1, book)
 
 
-def compare1(raw1, raw2, book, printMismatches):
+def compare1(raw1, raw2, book, printMismatches, warnQuality):
     N1 = raw1[None]
     N2 = raw2[None]
     mapF1, _, _ = dataMap(raw1, book)
@@ -713,7 +713,7 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printM
         if anyEmap:
             compare0(raw1, raw2, book, printEmap)
         else:
-            compare1(raw1, raw2, book, printMismatches)
+            compare1(raw1, raw2, book, printMismatches, warnQuality)
 
     okFeds = loop_over_feds(raw1, book, adcTag="feds1",
                             warn=warnQuality, fewerHistos=fewerHistos)
