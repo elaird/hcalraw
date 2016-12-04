@@ -13,6 +13,14 @@ def fiberMap(fedId=None):
         return {}
 
 
+def expectedVmeHtr(fedId, spigot):
+    slot = spigot/2 + (13 if (fedId % 2) else 2)
+    if slot == 19:  # DCC occupies slots 19-20
+        slot = 21
+    return {"Top": {1: "t", 0: "b"}[1 - (spigot % 2)],
+            "Slot": slot}
+
+
 def transformed_crate_slot(crate, slot):
     slot2 = None
     if crate < 20:

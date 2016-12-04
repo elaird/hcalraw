@@ -62,14 +62,6 @@ def rbxes():
     return out
 
 
-def expectedHtr(fedId, spigot):
-    slot = spigot/2 + (13 if (fedId % 2) else 2)
-    if slot == 19:  # DCC occupies slots 19-20
-        slot = 21
-    return {"Top": {1: "t", 0: "b"}[1 - (spigot % 2)],
-            "Slot": slot}
-
-
 def expectedCrate(fedId):
     # http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/Crates/VME_interfaces_newPCs.htm
     return {350:  4,
