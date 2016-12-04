@@ -66,7 +66,7 @@ def header(d={}, iWord64=None, word64=None):
         d["FEDid"] = (w >> 8) & 0xfff
         d["BcN"] = (w >> 20) & 0xfff
         d["EvN"] = (w >> 32) & 0xffffff
-        #d["Evt_ty"] = (w >> 56) & 0xf
+        d["Evt_ty"] = (w >> 56) & 0xf
         return
 
     if iWord64 == 1:
