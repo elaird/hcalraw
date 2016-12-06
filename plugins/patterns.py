@@ -234,7 +234,7 @@ def storePatternData(d={}, utca=None):
                 feWords.append(word)
 
             flavors = filter(lambda x: x is not None, set(flavors))
-            assert (len(flavors) <= 1) or set(flavors) == set([0L, 1L]), flavors
+            assert (len(flavors) <= 1) or set(flavors) == set([0L, 1L]) or set(flavors) == set([5L, 6L]), flavors
 
             pd = None
             if not flavors:
