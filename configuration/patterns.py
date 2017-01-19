@@ -1,13 +1,56 @@
 import re
 
-nTsMax = 20
-
+nTsMax = 20                # consider up to this many acquired time slices (phase-0)
 patternB = False           # consider also patterns mixed across fibers
 rmRibbon = False           # pair central 6 fibers (of 8 or 12)
 compressed = True          # handle lack of per-TS capids
 lineStart = "pattern on "  # print with pattern; used by diff.py
 
+# must match settings used to generate patterns
+ngOffset = 16              # number of bits by which to shift ngFiberID
 pattern = re.compile('-  H .. .. .. .. .. .. ..  -')
+
+
+def prefix_side_number(rbx):
+    rbxname_pattern = re.compile('([A-Z]*)([0-9]*)')
+    match = rbxname_pattern.search(rbx)
+    prefix = match.group(1)
+    if prefix.endswith("M") or prefix.endswith("P"):
+        side = prefix[-1]
+        prefix = prefix[:-1]
+    else:
+        side = ""
+    return prefix, side, int(match.group(2))
+
+
+def subdetector_code(rbx_prefix):
+    # https://github.com/cms-sw/cmssw/blob/CMSSW_9_0_X/DataFormats/HcalDetId/interface/HcalSubdetector.h
+    # enum HcalSubdetector { HcalEmpty=0, HcalBarrel=1, HcalEndcap=2, HcalOuter=3, HcalForward=4, HcalTriggerTower=5, HcalOther=7 };
+    return {"HB": 1,
+            "HE": 2,
+            "HO": 3,
+            "HF": 4,
+            }.get(rbx_prefix, 7)
+
+
+def side_code(rbx_side):
+    return {"": 0,
+            "M": 1,
+            "P": 2,
+            }.get(rbx_side, 7)
+
+
+def decoded_link(code):
+    link_num = (code >> 81) & 0x3
+    top = (code >> 83) & 0x1
+    return top, link_num
+
+
+def decoded_rbx(code):
+    number = (code >> (8 + ngOffset)) & 0xff
+    side = (code >> (16 + ngOffset)) & 0xf
+    subdet = (code >> (20 + ngOffset)) & 0xf
+    return subdet, side, number
 
 
 def string56(codes=[], asciifyPatterns=True, regMatchPatterns=True):
@@ -32,11 +75,24 @@ def string56(codes=[], asciifyPatterns=True, regMatchPatterns=True):
         return s
 
 
-def string012(code=None):
-    # RBX: 8bits
-    # RM: 3bits
-    # FI: 3bits
-    return "%022x" % code
+def string2(code=None):
+    slot = (code >> ngOffset) & 0xff
+    subdet, side, number = decoded_rbx(code)
+    top, link_num = decoded_link(code)
+    # return "%d %d %d %d" % (rbx_number, slot, link_num, top)
+    return "0x%022x" % code
+
+
+def string01(code=None):
+    top, link_num = decoded_link(code)
+    if not top:  # work-around bug in 2.x and 3.0
+        code = code << 8
+        top, link_num = decoded_link(code)
+    qie_card = (code >> ngOffset) & 0xf
+    rm = (code >> (ngOffset + 4)) & 0xf
+    subdet, side, rbx_number = decoded_rbx(code)
+    # return "0x%022x" % code
+    return "RBX#%d RM%d card%d link%d" % (rbx_number, rm, qie_card, link_num)
 
 
 def rbxes():
