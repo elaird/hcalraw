@@ -48,8 +48,19 @@ def decoded_link(code):
 
 def decoded_rbx(code):
     number = (code >> (8 + ngOffset)) & 0xff
+
     side = (code >> (16 + ngOffset)) & 0xf
+    if side <= 2:
+        side = ["", "M", "P"][side]
+    else:
+        side = "?"
+
     subdet = (code >> (20 + ngOffset)) & 0xf
+    if 1 <= subdet <= 4:
+        subdet = ["", "HB", "HE", "HO", "HF"][subdet]
+    else:
+        subdet = "H?"
+
     return subdet, side, number
 
 
@@ -92,7 +103,7 @@ def string01(code=None):
     rm = (code >> (ngOffset + 4)) & 0xf
     subdet, side, rbx_number = decoded_rbx(code)
     # return "0x%022x" % code
-    return "RBX#%d RM%d card%d link%d" % (rbx_number, rm, qie_card, link_num)
+    return "%s%d%s RM%d card%d link%d" % (subdet, rbx_number, side, rm, qie_card, link_num)
 
 
 def rbxes():
