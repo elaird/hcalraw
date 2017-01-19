@@ -84,9 +84,11 @@ def patternString(flavor=None, patterns=[], key=""):
     if not codes:
         return None
 
-    if 0 <= flavor <= 2:
-        return configuration.patterns.string012(codes[0])
-    if 5 <= flavor <= 6:
+    if 0 <= flavor <= 1:
+        return configuration.patterns.string01(codes[0])
+    elif flavor == 2:
+        return configuration.patterns.string2(codes[0])
+    elif 5 <= flavor <= 6:
         return configuration.patterns.string56(codes)
 
 
