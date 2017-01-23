@@ -36,9 +36,14 @@ def mode3_command_string(rbxes=[]):
     commands = []
     for rbx in rbxes:
         if rbx.startswith("HE"):
-            for rm in range(1, 5):
+            for rm in range(1, 6):
                 for qiecard in range(1, 5):
-                    stem = "%s-%d-%d-i" % (rbx, rm, qiecard)
+                    if rm == 5:
+                        if qiecard != 1:
+                            continue
+                        stem = "%s-calib-i" % rbx
+                    else:
+                        stem = "%s-%d-%d-i" % (rbx, rm, qiecard)
                     data = formatted(fiberid_he(rbx, qiecard, rm))
                     for iLink in [1, 2]:
                         commands.append("put %s_FiberID%d %s" % (stem, iLink, data))
@@ -73,5 +78,5 @@ def exercise_bits(stem=""):
 
 if __name__ == "__main__":
     # print "\n", exercise_bits("HE16-3-1-i")
-    print "\n", mode3_command_string(["HE%02d" % i for i in range(19, 20)])
+    print "\n", mode3_command_string(["HE%d" % i for i in range(20)])
     # print "\n", mode3_command_string(["HFP%02d" % i for i in range(1, 2)])
