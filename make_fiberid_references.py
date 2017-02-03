@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os
+import os, sys
 from configuration.patterns import rbxes, lineStart
 
 #Generates .txt file in format same with oneRun.py from a list of RBXs
@@ -104,7 +104,7 @@ def ReformMap(iMapfile = "", ofile = "", oFileOpenMode = "w"):
     output.close()
 
 
-if __name__ == "__main__":
+def phase0():
     version = 'G'
     dir = "/afs/cern.ch/cms/HCAL/document/Mapping/Hua/2015-mar-4/"
 
@@ -131,3 +131,72 @@ if __name__ == "__main__":
         os.system("sort -g %s > %s" % (oFileName, sName))
         os.system("mv %s %s" % (sName, oFileName))
         print "sorted reference file saved: %s" % oFileName
+
+
+def ngReformMap(iMapfile="", ofile="", oFileOpenMode="w", rbxes=["HBP17", "HEP17"]):
+
+    output = open(ofile, oFileOpenMode)  #opens & write the file
+
+    lines = open(iMapfile, "r").readlines()
+    columns = lines[0].split()
+
+    # BE
+    iCrate = columns.index("crate")
+    iSlot = columns.index("uhtr")
+    iUf = columns.index("uhtr_fib")
+    iFc = columns.index("fib_ch")
+
+    # FE
+    iRbx = columns.index("RBX")
+    iRm = columns.index("rm")
+    iRf = columns.index("rm_fib")
+
+    for iLine, line in enumerate(lines):
+        if not iLine or line[0] == "#":
+            continue
+
+        fields = line.split()
+        if fields[1] == "N/C":
+            print "hacking line %d" % (1 + iLine)
+            fields = fields[:3] + ["8"] + fields[3:]
+
+        if len(fields) != len(columns):
+            print "problem on line %d: %d fields vs. %d columns" % (1 + iLine, len(fields), len(columns))
+            print columns
+            print fields
+            for i in range(min(len(fields), len(columns))):
+                print i, columns[i], fields[i]
+            sys.exit()
+
+        # BE
+        crate = int(fields[iCrate])
+        slot = int(fields[iSlot])
+        uhtr_fib = int(fields[iUf])
+
+        # FE
+        rbx = fields[iRbx]
+        rm = int(fields[iRm])
+        rm_fib = int(fields[iRf])
+
+        if rbx in rbxes:
+            if fields[iFc] == "0":
+                output.writelines("%su%2d %02d %02d: %s %1d %1d\n" % (lineStart, crate, slot, uhtr_fib, rbx, rm, rm_fib))
+
+    output.close()
+
+
+def plan1():
+    # fileName = "/afs/cern.ch/cms/HCAL/document/Mapping/HBHE/ngHBHE/ngHE/ngHEP17/HBHEP17_template.txt"
+    fileName = "data/HBHEP17_template.txt"
+    oFileName = "data/ref_plan1.txt"
+    ngReformMap(iMapfile=fileName, ofile=oFileName, oFileOpenMode="w")
+
+    sName = "%s_sorted" % oFileName
+    os.system("sort -g %s > %s" % (oFileName, sName))
+    os.system("mv %s %s" % (sName, oFileName))
+    print "sorted reference file saved: %s" % oFileName
+
+
+if __name__ == "__main__":
+    # phase0()
+    plan1()
