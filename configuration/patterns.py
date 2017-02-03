@@ -103,7 +103,8 @@ def string01(code=None):
     rm = (code >> (ngOffset + 4)) & 0xf
     subdet, side, rbx_number = decoded_rbx(code)
     # return "0x%022x" % code
-    return "%s%d%s RM%d card%d link%d" % (subdet, rbx_number, side, rm, qie_card, link_num)
+    # return "%s%d%s RM%d card%d link%d" % (subdet, rbx_number, side, rm, qie_card, link_num)
+    return "%s%s%d %d %d" % (subdet, side, rbx_number, rm, 2*qie_card + link_num - 1)
 
 
 def rbxes():
