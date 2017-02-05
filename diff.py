@@ -83,7 +83,7 @@ def fiberCount(feCoords=[]):
     return out
 
 
-def printTable(rbxes={}, header="", zero="  "):
+def printTable(rbxes={}, header="", zero="  ", onlyDet=None, excludeDet=None):
     if header:
         header = "| %s |" % header
         print "-"*len(header)
@@ -99,6 +99,10 @@ def printTable(rbxes={}, header="", zero="  "):
     print header
     print "-" * len(header)
     for det in dets:
+        if onlyDet and (onlyDet not in det):
+            continue
+        if excludeDet and (excludeDet in det):
+            continue
         row = []
         for box in boxes:
             key = det + box
@@ -111,12 +115,18 @@ def printTable(rbxes={}, header="", zero="  "):
     print
 
 
-def report(extra=None, missing=None, different=None, same=None, nMissingMax=None):
+def report(extra=None, missing=None, different=None, same=None, nMissingMax=None, onlyDet=None, excludeDet=None):
     assert nMissingMax is not None
 
-    printTable(fiberCount(same.values()), header="Fibers matching reference")
+    printTable(fiberCount(same.values()),
+               header="Fibers matching reference",
+               onlyDet=onlyDet,
+               excludeDet=excludeDet)
     nMissing = fiberCount(missing.values())
-    printTable(nMissing, header="Fibers in reference, but either not acquired or having FE link errors")
+    printTable(nMissing,
+               header="Fibers in reference, but either not acquired or having FE link errors",
+               onlyDet=onlyDet,
+               excludeDet=excludeDet)
 
     header = "| RBXes with (1 <= n missing fibers <= %d) |" % nMissingMax
     print "-" * len(header)
@@ -158,7 +168,7 @@ def report(extra=None, missing=None, different=None, same=None, nMissingMax=None
         print "None"
 
 
-def go(fileName="", nMissingMax=None):
+def go(fileName="", nMissingMax=None, only=None, exclude=None):
     assert fileName
     with open(fileName) as f:
         ref, refMisc = mapping(f)
@@ -167,7 +177,7 @@ def go(fileName="", nMissingMax=None):
     cabled, misc = mapping(sys.stdin, skip=["Xrd", "TClassTable", "nologin"])
     print "".join(misc)
 
-    report(*diffs(ref, cabled), nMissingMax=nMissingMax)
+    report(*diffs(ref, cabled), nMissingMax=nMissingMax, onlyDet=only, excludeDet=exclude)
 
 
 def opts():
@@ -177,6 +187,14 @@ def opts():
                       default="2",
                       metavar="n",
                       help="maximum number of missing fibers per RBX to print in detailed table (default is 2)")
+    parser.add_option("--only",
+                      dest="only",
+                      default=None,
+                      help="suppress row in table if this string is absent from RBX name")
+    parser.add_option("--exclude",
+                      dest="exclude",
+                      default=None,
+                      help="suppress row in table if this string is present in RBX name")
 
     options, args = parser.parse_args()
     if not args:
@@ -187,4 +205,4 @@ def opts():
 
 if __name__ == "__main__":
     options, ref = opts()
-    go(ref, int(options.nMissingMax))
+    go(ref, int(options.nMissingMax), options.only, options.exclude)
