@@ -90,13 +90,13 @@ def string2(code=None):
     slot = (code >> ngOffset) & 0xff
     subdet, side, number = decoded_rbx(code)
     top, link_num = decoded_link(code)
-    # return "%d %d %d %d" % (rbx_number, slot, link_num, top)
-    return "0x%022x" % code
+    # return "0x%022x" % code
+    return "%s%s%d sl%2d ig%d L%d" % (subdet, side, number, slot, top, link_num)
 
 
 def string01(code=None):
     top, link_num = decoded_link(code)
-    if not top:  # work-around bug in 2.x and 3.0
+    if not top:  # work around bug in 2.x and 3.0
         code = code << 8
         top, link_num = decoded_link(code)
     qie_card = (code >> ngOffset) & 0xf
