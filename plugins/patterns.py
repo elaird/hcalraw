@@ -158,6 +158,7 @@ def fe_word_qie10(feWord80, dct, iTs):
         feWord80 |= ((dct["TDC"][iTs] >> 4) &  0x3 ) << 48
         feWord80 |= ((dct["TDC"][iTs] >> 2) &  0x3 ) << 56
         feWord80 |= ((dct["TDC"][iTs] >> 0) &  0x3 ) << 64
+        feWord80 |= ((dct["TDC_TE"][iTs]>>4)&  0x1 ) << 80
     elif dct["FibCh"] == 1:
         feWord80 |= ( dct["TDC_TE"][iTs]    &  0xf ) <<  4
         feWord80 |= ( dct["CapId"][iTs]     &  0x3 ) << 10
@@ -165,6 +166,7 @@ def fe_word_qie10(feWord80, dct, iTs):
         feWord80 |= ((dct["TDC"][iTs] >> 4) &  0x3 ) << 50
         feWord80 |= ((dct["TDC"][iTs] >> 2) &  0x3 ) << 58
         feWord80 |= ((dct["TDC"][iTs] >> 0) &  0x3 ) << 66
+        feWord80 |= ((dct["TDC_TE"][iTs]>>4)&  0x1 ) << 81
     elif dct["FibCh"] == 2:
         feWord80 |= ( dct["CapId"][iTs]     &  0x3 ) << 12
         feWord80 |= ( dct["QIE"][iTs]       & 0xff ) << 32
@@ -172,6 +174,7 @@ def fe_word_qie10(feWord80, dct, iTs):
         feWord80 |= ((dct["TDC"][iTs] >> 2) &  0x3 ) << 60
         feWord80 |= ((dct["TDC"][iTs] >> 0) &  0x3 ) << 68
         feWord80 |= ( dct["TDC_TE"][iTs]    &  0xf ) << 72
+        feWord80 |= ((dct["TDC_TE"][iTs]>>4)&  0x1 ) << 82
     elif dct["FibCh"] == 3:
         feWord80 |= ( dct["CapId"][iTs]     &  0x3 ) << 14
         feWord80 |= ( dct["QIE"][iTs]       & 0xff ) << 40
@@ -179,6 +182,7 @@ def fe_word_qie10(feWord80, dct, iTs):
         feWord80 |= ((dct["TDC"][iTs] >> 2) &  0x3 ) << 62
         feWord80 |= ((dct["TDC"][iTs] >> 0) &  0x3 ) << 70
         feWord80 |= ( dct["TDC_TE"][iTs]    &  0xf ) << 76
+        feWord80 |= ((dct["TDC_TE"][iTs]>>4)&  0x1 ) << 83
 
     return feWord80
 
