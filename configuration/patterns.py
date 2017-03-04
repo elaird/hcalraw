@@ -91,7 +91,8 @@ def string2(code=None):
     subdet, side, number = decoded_rbx(code)
     top, link_num = decoded_link(code)
     # return "0x%022x" % code
-    return "%s%s%d sl%2d ig%d L%d" % (subdet, side, number, slot, top, link_num)
+    # return "%s%s%02d Slot%2d ig%d L%d" % (subdet, side, number, slot, top, link_num)
+    return "%s%s%02d %2d %d" % (subdet, side, number, slot, link_num + 3 * (1 - top))
 
 
 def string01(code=None):
@@ -109,7 +110,8 @@ def string01(code=None):
 
 def rbxes():
     hbe  = range(1, 19)
-    hfo  = range(1, 13)
+    hf   = range(1,  9)
+    ho   = range(1, 13)
     ho12 = range(2, 14, 2)
 
     out = []
@@ -117,11 +119,11 @@ def rbxes():
                         ("HBP",  hbe),
                         ("HEM",  hbe),
                         ("HEP",  hbe),
-                        ("HFM",  hfo),
-                        ("HFP",  hfo),
+                        ("HFM",  hf ),
+                        ("HFP",  hf ),
                         ("HO2M", ho12),
                         ("HO1M", ho12),
-                        ("HO0",  hfo ),
+                        ("HO0",  ho  ),
                         ("HO1P", ho12),
                         ("HO2P", ho12),
                         ]:
