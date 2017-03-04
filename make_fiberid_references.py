@@ -185,6 +185,56 @@ def ngReformMap(iMapfile="", ofile="", oFileOpenMode="w", rbxes=["HBP17", "HEP17
     output.close()
 
 
+def ngHFMap(iMapfile="", ofile="", oFileOpenMode="w"):
+    valid_rbxes = rbxes()
+
+    output = open(ofile, oFileOpenMode)  #opens & write the file
+
+    lines = open(iMapfile, "r").readlines()
+    columns = lines[0].split()
+
+    # BE
+    iCrate = columns.index("Crate")
+    iSlot = columns.index("uHTR")
+    iUf = columns.index("uHTR_FI")
+    iFc = columns.index("FI_CH")
+
+    # FE
+    iRbx = columns.index("ngRBX")
+    iRm = columns.index("QIE10")
+    iTb = columns.index("QIETB")
+    iQf = columns.index("QIEFI")
+
+    for iLine, line in enumerate(lines):
+        if not iLine or line[0] == "#":
+            continue
+
+        fields = line.split()
+        if len(fields) != 1 + len(columns):
+            print "problem on line %d: %d fields vs. %d columns" % (1 + iLine, len(fields), len(columns))
+            print columns
+            print fields
+            for i in range(min(len(fields), len(columns))):
+                print i, columns[i], fields[i]
+            sys.exit()
+
+        # BE
+        crate = int(fields[iCrate])
+        slot = int(fields[iSlot])
+        uhtr_fib = int(fields[iUf])
+
+        # FE
+        rbx = fields[iRbx]
+        rm = int(fields[iRm])
+        rm_fib = int(fields[iQf]) - 4
+
+        if rbx in valid_rbxes:
+            if fields[iFc] == "0":
+                output.writelines("%su%2d %02d %02d: %s %1d %1d\n" % (lineStart, crate, slot, uhtr_fib, rbx, rm, rm_fib))
+
+    output.close()
+
+
 def plan1():
     # fileName = "/afs/cern.ch/cms/HCAL/document/Mapping/HBHE/ngHBHE/ngHE/ngHEP17/HBHEP17_template.txt"
     fileName = "data/HBHEP17_template.txt"
@@ -197,6 +247,18 @@ def plan1():
     print "sorted reference file saved: %s" % oFileName
 
 
+def ngHF():
+    fileName = "ngHF2017LMap_20170125_pre04.tsv"
+    oFileName = "data/ref_ngHF.txt"
+    ngHFMap(iMapfile=fileName, ofile=oFileName, oFileOpenMode="w")
+
+    sName = "%s_sorted" % oFileName
+    os.system("sort -g %s > %s" % (oFileName, sName))
+    os.system("mv %s %s" % (sName, oFileName))
+    print "sorted reference file saved: %s" % oFileName
+
+
 if __name__ == "__main__":
     # phase0()
-    plan1()
+    # plan1()
+    ngHF()
