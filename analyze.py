@@ -160,7 +160,7 @@ def fillEventMap(chain, iEntry,
 # this function returns two dictionaries,
 # one maps TTree entry to (orn, evn)
 # the other maps the reverse
-def eventMaps(chain, s={}, nMapMin=0, nMapMax=None):
+def eventMaps(chain, s={}, identityMap=False):
     forward = {}
     backward = {}
     forwardBcn = {}
@@ -185,6 +185,17 @@ def eventMaps(chain, s={}, nMapMin=0, nMapMax=None):
             return fillEventMap(chain, iEntry,
                                 treeName, fedId0, branch0, s, kargs,
                                 forward, forwardBcn, backward)
+
+        nMapMin = 0     # start from beginning
+        nMapMax = None  # look at all entries
+
+        nEv = s["nEventsMax"] + s["nEventsSkip"]
+        if nEv:
+            if identityMap:
+                nMapMin = s["nEventsSkip"]
+                nMapMax = nEv
+            else:
+                nMapMax = nEv * 2  # a guess for how far to look not to miss out-of-order events
 
         chainLoop(chain, nMapMin, nMapMax, fillEventMap2, progress=s["progress"], sparseLoop=s["sparseLoop"])
     except KeyboardInterrupt:
@@ -436,6 +447,37 @@ def wordsOneBranch(tree=None, branch="", loud=True):
     return chunk
 
 
+def inner_vars(outer, inner, mapOptions):
+    iMapF = iMapB = iMapBcn = {}
+    if inner.get("fileNames") == outer["fileNames"]:
+        chainI = chain
+        innerEvent = {}
+    elif inner:
+        chainI = tchain(inner)
+        if mapOptions["identityMap"]:
+            iMapF = oMapF
+            iMapB = oMapB
+            iMapBcn = oMapBcn
+        else:
+            iMapF, iMapB, iMapBcn = eventMaps(chainI, inner)
+
+        innerEvent = eventToEvent(oMapF, iMapB)
+        if set(innerEvent.values()) == set([None]):
+            sys.exit("No common events found.  Consider passing --identity-map.")
+
+        if mapOptions['printEventMap']:
+            for oEntry, iEntry in sorted(innerEvent.iteritems()):
+                printer.msg(", ".join(["oEntry = %s" % str(oEntry),
+                                       "oEvnOrn = %s" % str(oMapF[oEntry]),
+                                       "iEntry = %s" % str(iEntry),
+                                       ]))
+    else:
+        chainI = None
+        innerEvent = {}
+
+    return chainI, innerEvent, iMapF, iMapB, iMapBcn
+
+
 def category_vs_time(oMap={}, oMapBcn={}, iMap={}, iMapBcn={}, innerEvent={}):
     d = {}
     for oEntry, (evn, orn) in oMap.iteritems():
@@ -455,6 +497,18 @@ def category_vs_time(oMap={}, oMapBcn={}, iMap={}, iMapBcn={}, innerEvent={}):
         d[time] = (1, evn, orn, bcn)
 
     return d
+
+
+def write_category_graphs(d={}, outer={}, inner={}):
+    iFeds = inner.get("fedIds", [])
+    if not iFeds:
+        iFeds = [None]
+    for iGraph, gr in enumerate(graphs(d, oFed=outer["fedIds"][0], iFed=iFeds[0])):
+        if iGraph == 0:
+            gr.SetTitle("_".join(["only %s" % inner.get("label", ""), "only %s" % outer.get("label", ""), "both"]))
+        if iGraph == 1:
+            gr.SetTitle(",".join(outer["fileNames"]))
+        gr.Write()
 
 
 def graphs(d={}, oFed=None, iFed=None):
@@ -503,51 +557,9 @@ def go(outer={}, inner={}, outputFile="",
        mapOptions={}, loopOptions={},
        printEventSummary=None):
 
-    innerEvent = {}
-    deltaOrn = {}
-
     chain = tchain(outer)
-
-    # by default:
-    nMapMin = 0     # start from beginning
-    nMapMax = None  # look at all entries
-
-    nEv = outer["nEventsMax"] + outer["nEventsSkip"]
-    if nEv:
-        if mapOptions["identityMap"]:
-            nMapMin = outer["nEventsSkip"]
-            nMapMax = nEv
-        else:
-            nMapMax = nEv * 2  # a guess for how far to look not to miss out-of-order events
-
-    oMapF, oMapB, oMapBcn = eventMaps(chain, outer, nMapMin=nMapMin, nMapMax=nMapMax)
-    iMapF = iMapB = iMapBcn = {}
-
-    if inner.get("fileNames") == outer["fileNames"]:
-        chainI = chain
-        innerEvent = {}
-    elif inner:
-        chainI = tchain(inner)
-        if mapOptions["identityMap"]:
-            iMapF = oMapF
-            iMapB = oMapB
-            iMapBcn = oMapBcn
-        else:
-            iMapF, iMapB, iMapBcn = eventMaps(chainI, inner)
-
-        innerEvent = eventToEvent(oMapF, iMapB)
-        if set(innerEvent.values()) == set([None]):
-            sys.exit("No common events found.  Consider passing --identity-map.")
-
-        if mapOptions['printEventMap']:
-            for oEntry, iEntry in sorted(innerEvent.iteritems()):
-                printer.msg(", ".join(["oEntry = %s" % str(oEntry),
-                                       "oEvnOrn = %s" % str(oMapF[oEntry]),
-                                       "iEntry = %s" % str(iEntry),
-                                       ]))
-    else:
-        chainI = None
-
+    oMapF, oMapB, oMapBcn = eventMaps(chain, outer, mapOptions["identityMap"])
+    chainI, innerEvent, iMapF, iMapB, iMapBcn = inner_vars(outer, inner, mapOptions)
     book = loop(chain=chain, chainI=chainI,
                 outer=outer, inner=inner,
                 innerEvent=innerEvent,
@@ -565,21 +577,12 @@ def go(outer={}, inner={}, outputFile="",
 
     f = r.TFile(outputFile, "RECREATE")
 
-    d = category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
-                         iMap=iMapF, iMapBcn=iMapBcn,
-                         innerEvent=innerEvent)
-
     if outer["fedIds"]:
-        iFeds = inner.get("fedIds", [])
-        if not iFeds:
-            iFeds = [None]
-        for iGraph, gr in enumerate(graphs(d, oFed=outer["fedIds"][0], iFed=iFeds[0])):
-            if iGraph == 0:
-                gr.SetTitle("_".join(["only %s" % inner.get("label", ""), "only %s" % outer.get("label", ""), "both"]))
-            if iGraph == 1:
-                gr.SetTitle(",".join(outer["fileNames"]))
-            gr.Write()
-
+        write_category_graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
+                                               iMap=iMapF, iMapBcn=iMapBcn,
+                                               innerEvent=innerEvent),
+                              outer,
+                              inner)
 
     for h in book.values():
         h.Write()
