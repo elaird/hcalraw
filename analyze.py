@@ -16,8 +16,9 @@ def setup(plugin_names=[]):
     r.gROOT.SetBatch(True)
 
     if r.gROOT.GetVersionInt() < 60000:  # before ROOT6
-        r.gSystem.Load("%s/cpp/cdf.so" % os.environ["PWD"])
-        r.gSystem.Load("%s/cpp/cms.so" % os.environ["PWD"])
+        for lib in [ "cdf", "cms"]:
+            if r.gSystem.Load("%s/cpp/%s.so" % (os.environ["PWD"], lib)):
+                sys.exit("Try this:\ncd cpp; make -j 5; cd -")
         r.gROOT.SetStyle("Plain")
     else:
         r.gInterpreter.SetClassAutoloading(False)
