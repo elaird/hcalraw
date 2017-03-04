@@ -12,4 +12,4 @@ else
     FILE=$1
 fi
 
-./oneRun.py --file1=${FILE} --feds1=HCAL --plugins=patterns ${@:2} | ./diff.py data/ref_2017_v1.txt
+./oneRun.py --file1=${FILE} --feds1=HCAL --plugins=patterns ${@:2} | ./diff.py data/ref_2017.txt
