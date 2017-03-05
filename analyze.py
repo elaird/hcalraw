@@ -434,7 +434,7 @@ def branches(tree):
     return "\n".join(msg)
 
 
-def inner_vars(outer, inner, mapOptions):
+def inner_vars(outer, inner, mapOptions, oMapF, oMapB, oMapBcn):
     iMapF = iMapB = iMapBcn = {}
     if inner.get("fileNames") == outer["fileNames"]:
         chainI = chain
@@ -543,7 +543,8 @@ def go(outer={}, inner={}, outputFile="",
 
     chain = tchain(outer)
     oMapF, oMapB, oMapBcn = eventMaps(chain, outer, mapOptions["identityMap"])
-    chainI, innerEvent, iMapF, iMapB, iMapBcn = inner_vars(outer, inner, mapOptions)
+    chainI, innerEvent, iMapF, iMapB, iMapBcn = inner_vars(outer, inner, mapOptions,
+                                                           oMapF, oMapB, oMapBcn)
     book = loop(chain=chain, chainI=chainI,
                 outer=outer, inner=inner,
                 innerEvent=innerEvent,
