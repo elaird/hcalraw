@@ -146,10 +146,10 @@ def pruneFeds(chain, s, uargs):
         raw = wfunc(**wargs[fedId])
         if raw:
             if not unpacked(fedData=raw, **uargs).get("nBytesSW"):
-                printer.warning("removing FED %d from spec (read zero bytes)." % fedId)
+                printer.warning("removing FED %4d from spec (read zero bytes)." % fedId)
                 del wargs[fedId]
         else:
-            printer.warning("removing FED %d from spec (no branch %s)." % (fedId, wargs[fedId].get("branch")))
+            printer.warning("removing FED %4d from spec (no branch %s)." % (fedId, wargs[fedId].get("branch")))
             del wargs[fedId]
 
     if wargs:
