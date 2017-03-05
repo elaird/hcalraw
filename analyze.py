@@ -128,72 +128,41 @@ def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False, sparseLo
             iMask = reportProgress(iEntry, iEntry - iEntryStart, iMask)
 
 
-def pruneFeds(chain, s, kargs):
+def pruneFeds(chain, s, uargs):
+    wargs = {"tree": chain}
     fedIds = []
     for fedId in s["fedIds"]:
-        branch = s["branch"](fedId)
-
         if s["treeName"] == "Events":  # CMS CDAQ
-            raw = wordsOneFed(tree=chain,
-                              fedId=fedId,
-                              collection=s["rawCollection"],
-                              product=s["product"])
-            if unpacked(fedData=raw, **kargs).get("nBytesSW"):
+            wfunc = wordsOneFed
+            wargs.update({"fedId": fedId,
+                          "collection": s["rawCollection"],
+                          "product": s["product"]})
+        elif s["treeName"] == "CMSRAW":  # HCAL local
+            wfunc = wordsOneChunk
+            wargs["branch"] = s["branch"](fedId)
+        else:
+            wfunc = wordsOneBranch
+            wargs["branch"] = s["branch"](fedId)
+
+        raw = wfunc(**wargs)
+        if raw:
+            if unpacked(fedData=raw, **uargs).get("nBytesSW"):
                 fedIds.append(fedId)
             else:
                 printer.warning("removing FED %d from spec (read zero bytes)." % fedId)
-
-        elif s["treeName"] == "CMSRAW":  # HCAL local
-            raw = wordsOneChunk(tree=chain, branch=branch)
         else:
-            raw = wordsOneBranch(tree=chain, branch=branch)
-
-        if raw:
-            fedIds.append(fedId)
-        else:
-            printer.warning("removing FED %d from spec (no branch %s)." % (fedId, branch))
+            printer.warning("removing FED %d from spec (no branch %s)." % (fedId, wargs.get("branch")))
 
     if fedIds:
-        s["fedIds"] = fedIds
+        for v in ["fedIds", "wfunc", "wargs"]:
+            s[v] = eval(v)
     elif s["treeName"] == "Events":
         sys.exit("No listed FEDs had any data.")
     else:
         sys.exit(branches(chain))
 
-    func = None
-    args = None
-    return func, args
 
-
-def fillEventMap(chain, iEntry, s, kargs,
-                 forward, forwardBcn, backward):
-
-    treeName = s["treeName"]
-    fedId0 = s["fedIds"][0]
-    if treeName != "Events":
-        branch0 = s["branch"](fedId0)
-    else:
-        branch0 = None
-
-    if treeName == "Events":  # CMS CDAQ
-        rawThisFed = wordsOneFed(tree=chain,
-                                 fedId=fedId0,
-                                 collection=s["rawCollection"],
-                                 product=s["product"]
-                             )
-    elif treeName == "CMSRAW":  # HCAL local
-        rawThisFed = wordsOneChunk(tree=chain, branch=branch0)
-    else:
-        rawThisFed = wordsOneBranch(tree=chain, branch=branch0)
-
-    if rawThisFed is None:
-        sys.exit(" ")
-
-    raw = unpacked(fedData=rawThisFed, **kargs)
-    if not raw["nBytesSW"]:
-        printer.error("the first listed FED (%d) has zero bytes in tree '%s'." % (fedId0, treeName))
-        return True  # break!
-
+def fillEventMap(iEntry, raw, forward, forwardBcn, backward):
     evn, orn, bcn = coords(raw)
     evnOrn = (evn, orn)
 
@@ -216,14 +185,15 @@ def eventMaps(chain, s={}, identityMap=False):
     kargs = {"headerOnly": True,
              "nBytesPer": s["nBytesPer"],
              "skipWords64": s["skipWords64"],
-             }
+            }
 
     try:
         def fillEventMap2(chain, iEntry):
             if iEntry == nMapMin:
                 pruneFeds(chain, s, kargs)
-            return fillEventMap(chain, iEntry, s, kargs,
-                                forward, forwardBcn, backward)
+
+            raw = unpacked(fedData=s["wfunc"](**s["wargs"]), **kargs)
+            return fillEventMap(iEntry, raw, forward, forwardBcn, backward)
 
         nMapMin = 0     # start from beginning
         nMapMax = None  # look at all entries
