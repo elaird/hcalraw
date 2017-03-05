@@ -129,32 +129,33 @@ def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False, sparseLo
 
 
 def pruneFeds(chain, s, uargs):
-    wargs = {"tree": chain}
-    fedIds = []
+    wargs = {}
     for fedId in s["fedIds"]:
+        wargs[fedId] = {"tree": chain, "branch": s["branch"](fedId)}
         if s["treeName"] == "Events":  # CMS CDAQ
             wfunc = wordsOneFed
-            wargs.update({"fedId": fedId,
-                          "collection": s["rawCollection"],
-                          "product": s["product"]})
+            wargs[fedId].update({"fedId": fedId,
+                                 "collection": s["rawCollection"],
+                                 "product": s["product"]})
+            del wargs[fedId]["branch"]
         elif s["treeName"] == "CMSRAW":  # HCAL local
             wfunc = wordsOneChunk
-            wargs["branch"] = s["branch"](fedId)
         else:
             wfunc = wordsOneBranch
-            wargs["branch"] = s["branch"](fedId)
 
-        raw = wfunc(**wargs)
+        raw = wfunc(**wargs[fedId])
         if raw:
-            if unpacked(fedData=raw, **uargs).get("nBytesSW"):
-                fedIds.append(fedId)
-            else:
+            if not unpacked(fedData=raw, **uargs).get("nBytesSW"):
                 printer.warning("removing FED %d from spec (read zero bytes)." % fedId)
+                del wargs[fedId]
         else:
-            printer.warning("removing FED %d from spec (no branch %s)." % (fedId, wargs.get("branch")))
+            printer.warning("removing FED %d from spec (no branch %s)." % (fedId, wargs[fedId].get("branch")))
+            del wargs[fedId]
 
-    if fedIds:
-        for v in ["fedIds", "wfunc", "wargs"]:
+    if wargs:
+        del s["fedIds"]
+        s["fedId0"] = sorted(wargs.keys())[0]
+        for v in ["wfunc", "wargs"]:
             s[v] = eval(v)
     elif s["treeName"] == "Events":
         sys.exit("No listed FEDs had any data.")
@@ -192,7 +193,8 @@ def eventMaps(chain, s={}, identityMap=False):
             if iEntry == nMapMin:
                 pruneFeds(chain, s, kargs)
 
-            raw = unpacked(fedData=s["wfunc"](**s["wargs"]), **kargs)
+            wargs = s["wargs"][s["fedId0"]]
+            raw = unpacked(fedData=s["wfunc"](**wargs), **kargs)
             return fillEventMap(iEntry, raw, forward, forwardBcn, backward)
 
         nMapMin = 0     # start from beginning
@@ -275,36 +277,10 @@ def collectedRaw(tree=None, specs={}):
     for item in ["dump", "unpack", "nBytesPer", "skipWords64"]:
         kargs[item] = specs[item]
 
-    missingFeds = []
-    for fedId in specs["fedIds"]:
-        if "branch" in specs:
-            branch = specs["branch"](fedId)
-
-        if specs["treeName"] == "Events":
-            rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"], specs["product"])
-        elif specs["treeName"] == "CMSRAW":
-            rawThisFed = wordsOneChunk(tree, branch)
-        else:
-            rawThisFed = wordsOneBranch(tree=tree, branch=branch)
-
-        if rawThisFed is None:
-            printer.warning("removing FED %d from spec (no branch %s)." % (fedId, branch))
-            missingFeds.append(fedId)
-            continue
-
-        raw[fedId] = unpacked(fedData=rawThisFed,
+    for fedId, wargs in sorted(specs["wargs"].iteritems()):
+        raw[fedId] = unpacked(fedData=specs["wfunc"](**wargs),
                               warn=specs["warnUnpack"],
                               **kargs)
-
-        if not raw[fedId]["nBytesSW"]:
-            printer.warning("removing FED %d from spec (read zero bytes)." % fedId)
-            missingFeds.append(fedId)
-            continue
-
-    for fedId in missingFeds:
-        specs["fedIds"].remove(fedId)
-        if fedId in raw:
-            del raw[fedId]
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
     for key in ["label", "dump", "crateslots"]:
@@ -331,6 +307,7 @@ def w64(fedData, jWord64, nBytesPer):
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
              warn=True, skipWords64=[], dump=-99):
+    assert fedData
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
@@ -510,10 +487,7 @@ def category_vs_time(oMap={}, oMapBcn={}, iMap={}, iMapBcn={}, innerEvent={}):
 
 
 def write_category_graphs(d={}, outer={}, inner={}):
-    iFeds = inner.get("fedIds", [])
-    if not iFeds:
-        iFeds = [None]
-    for iGraph, gr in enumerate(graphs(d, oFed=outer["fedIds"][0], iFed=iFeds[0])):
+    for iGraph, gr in enumerate(graphs(d, oFed=outer["fedId0"], iFed=inner.get("fedId0", None))):
         if iGraph == 0:
             gr.SetTitle("_".join(["only %s" % inner.get("label", ""), "only %s" % outer.get("label", ""), "both"]))
         if iGraph == 1:
@@ -586,14 +560,11 @@ def go(outer={}, inner={}, outputFile="",
         os.mkdir(dirName)
 
     f = r.TFile(outputFile, "RECREATE")
-
-    if outer["fedIds"]:
-        write_category_graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
-                                               iMap=iMapF, iMapBcn=iMapBcn,
-                                               innerEvent=innerEvent),
-                              outer,
-                              inner)
-
+    write_category_graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
+                                           iMap=iMapF, iMapBcn=iMapBcn,
+                                           innerEvent=innerEvent),
+                          outer,
+                          inner)
     for h in book.values():
         h.Write()
     f.Close()
