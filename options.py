@@ -15,8 +15,8 @@ def opts(alsoArgs=False):
                     help=".root file over which to run")
     reqd.add_option("--feds1",
                     dest="feds1",
-                    default="",
-                    help="FEDs to use in file1, e.g. 714,722 or e.g. HBHE")
+                    default="HCAL",
+                    help="FEDs to use in file1, e.g. 714,722 (default =HCAL)")
     parser.add_option_group(reqd)
 
     common = optparse.OptionGroup(parser, "Misc options")

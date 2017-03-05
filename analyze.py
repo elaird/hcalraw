@@ -128,28 +128,42 @@ def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False, sparseLo
             iMask = reportProgress(iEntry, iEntry - iEntryStart, iMask)
 
 
-def fillEventMap(chain, iEntry,
-                 treeName, fedId0, branch0, s, kargs,
-                 forward, forwardBcn, backward):
-    if treeName == "Events":  # CMS CDAQ
-        rawThisFed = wordsOneFed(tree=chain,
-                                 fedId=fedId0,
-                                 collection=s["rawCollection"],
-                                 product=s["product"]
-                             )
-    elif treeName == "CMSRAW":  # HCAL local
-        rawThisFed = wordsOneChunk(tree=chain, branch=branch0)
+def pruneFeds(chain, s, uargs):
+    wargs = {}
+    for fedId in s["fedIds"]:
+        wargs[fedId] = {"tree": chain, "branch": s["branch"](fedId)}
+        if s["treeName"] == "Events":  # CMS CDAQ
+            wfunc = wordsOneFed
+            wargs[fedId].update({"fedId": fedId,
+                                 "collection": s["rawCollection"],
+                                 "product": s["product"]})
+            del wargs[fedId]["branch"]
+        elif s["treeName"] == "CMSRAW":  # HCAL local
+            wfunc = wordsOneChunk
+        else:
+            wfunc = wordsOneBranch
+
+        raw = wfunc(**wargs[fedId])
+        if raw:
+            if not unpacked(fedData=raw, **uargs).get("nBytesSW"):
+                printer.warning("removing FED %4d from spec (read zero bytes)." % fedId)
+                del wargs[fedId]
+        else:
+            printer.warning("removing FED %4d from spec (no branch %s)." % (fedId, wargs[fedId].get("branch")))
+            del wargs[fedId]
+
+    if wargs:
+        del s["fedIds"]
+        s["fedId0"] = sorted(wargs.keys())[0]
+        for v in ["wfunc", "wargs"]:
+            s[v] = eval(v)
+    elif s["treeName"] == "Events":
+        sys.exit("No listed FEDs had any data.")
     else:
-        rawThisFed = wordsOneBranch(tree=chain, branch=branch0)
+        sys.exit(branches(chain))
 
-    if rawThisFed is None:
-        sys.exit(" ")
 
-    raw = unpacked(fedData=rawThisFed, **kargs)
-    if not raw["nBytesSW"]:
-        printer.error("the first listed FED (%d) has zero bytes in tree '%s'." % (fedId0, treeName))
-        return True  # break!
-
+def fillEventMap(iEntry, raw, forward, forwardBcn, backward):
     evn, orn, bcn = coords(raw)
     evnOrn = (evn, orn)
 
@@ -166,26 +180,22 @@ def eventMaps(chain, s={}, identityMap=False):
     backward = {}
     forwardBcn = {}
 
-    treeName = s["treeName"]
-    fedId0 = s["fedIds"][0]
-    if treeName != "Events":
-        branch0 = s["branch"](fedId0)
-    else:
-        branch0 = None
-
     if s["progress"]:
         print "Mapping %s:" % s["label"]
 
     kargs = {"headerOnly": True,
              "nBytesPer": s["nBytesPer"],
              "skipWords64": s["skipWords64"],
-             }
+            }
 
     try:
         def fillEventMap2(chain, iEntry):
-            return fillEventMap(chain, iEntry,
-                                treeName, fedId0, branch0, s, kargs,
-                                forward, forwardBcn, backward)
+            if iEntry == nMapMin:
+                pruneFeds(chain, s, kargs)
+
+            wargs = s["wargs"][s["fedId0"]]
+            raw = unpacked(fedData=s["wfunc"](**wargs), **kargs)
+            return fillEventMap(iEntry, raw, forward, forwardBcn, backward)
 
         nMapMin = 0     # start from beginning
         nMapMax = None  # look at all entries
@@ -267,36 +277,10 @@ def collectedRaw(tree=None, specs={}):
     for item in ["dump", "unpack", "nBytesPer", "skipWords64"]:
         kargs[item] = specs[item]
 
-    missingFeds = []
-    for fedId in specs["fedIds"]:
-        if "branch" in specs:
-            branch = specs["branch"](fedId)
-
-        if specs["treeName"] == "Events":
-            rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"], specs["product"])
-        elif specs["treeName"] == "CMSRAW":
-            rawThisFed = wordsOneChunk(tree, branch, loud=False)
-        else:
-            rawThisFed = wordsOneBranch(tree=tree, branch=branch)
-
-        if rawThisFed is None:
-            printer.warning("removing FED %d from spec (no branch %s)." % (fedId, branch))
-            missingFeds.append(fedId)
-            continue
-
-        raw[fedId] = unpacked(fedData=rawThisFed,
+    for fedId, wargs in sorted(specs["wargs"].iteritems()):
+        raw[fedId] = unpacked(fedData=specs["wfunc"](**wargs),
                               warn=specs["warnUnpack"],
                               **kargs)
-
-        if not raw[fedId]["nBytesSW"]:
-            printer.warning("removing FED %d from spec (read zero bytes)." % fedId)
-            missingFeds.append(fedId)
-            continue
-
-    for fedId in missingFeds:
-        specs["fedIds"].remove(fedId)
-        if fedId in raw:
-            del raw[fedId]
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
     for key in ["label", "dump", "crateslots"]:
@@ -323,6 +307,7 @@ def w64(fedData, jWord64, nBytesPer):
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
              warn=True, skipWords64=[], dump=-99):
+    assert fedData
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
     header = {"iWordPayload0": 6,
@@ -427,28 +412,29 @@ def wordsOneFed(tree=None, fedId=None, collection="", product=None):
     return r.FEDRawDataWords(FEDRawData.FEDData(fedId))
 
 
-def wordsOneChunk(tree=None, branch="", loud=True):
-    chunk = wordsOneBranch(tree, branch, loud)
+def wordsOneChunk(tree=None, branch=""):
+    chunk = wordsOneBranch(tree, branch)
     if chunk is None:
         return chunk
     else:
         return r.CDFChunk2(chunk)
 
 
-def wordsOneBranch(tree=None, branch="", loud=True):
-    chunk = None
+def wordsOneBranch(tree=None, branch=""):
     try:
         chunk = getattr(tree, branch)
     except AttributeError:
-        msg = ["Branch %s not found.  These branches are available:" % branch]
-        names = [item.GetName() for item in tree.GetListOfBranches()]
-        msg += sorted(names)
-        if loud:
-            print "\n".join(msg)
+        chunk = None
     return chunk
 
 
-def inner_vars(outer, inner, mapOptions):
+def branches(tree):
+    names = [item.GetName() for item in tree.GetListOfBranches()]
+    msg = ["These branches are available:"] + sorted(names)
+    return "\n".join(msg)
+
+
+def inner_vars(outer, inner, mapOptions, oMapF, oMapB, oMapBcn):
     iMapF = iMapB = iMapBcn = {}
     if inner.get("fileNames") == outer["fileNames"]:
         chainI = chain
@@ -501,10 +487,7 @@ def category_vs_time(oMap={}, oMapBcn={}, iMap={}, iMapBcn={}, innerEvent={}):
 
 
 def write_category_graphs(d={}, outer={}, inner={}):
-    iFeds = inner.get("fedIds", [])
-    if not iFeds:
-        iFeds = [None]
-    for iGraph, gr in enumerate(graphs(d, oFed=outer["fedIds"][0], iFed=iFeds[0])):
+    for iGraph, gr in enumerate(graphs(d, oFed=outer["fedId0"], iFed=inner.get("fedId0", None))):
         if iGraph == 0:
             gr.SetTitle("_".join(["only %s" % inner.get("label", ""), "only %s" % outer.get("label", ""), "both"]))
         if iGraph == 1:
@@ -560,7 +543,8 @@ def go(outer={}, inner={}, outputFile="",
 
     chain = tchain(outer)
     oMapF, oMapB, oMapBcn = eventMaps(chain, outer, mapOptions["identityMap"])
-    chainI, innerEvent, iMapF, iMapB, iMapBcn = inner_vars(outer, inner, mapOptions)
+    chainI, innerEvent, iMapF, iMapB, iMapBcn = inner_vars(outer, inner, mapOptions,
+                                                           oMapF, oMapB, oMapBcn)
     book = loop(chain=chain, chainI=chainI,
                 outer=outer, inner=inner,
                 innerEvent=innerEvent,
@@ -577,14 +561,11 @@ def go(outer={}, inner={}, outputFile="",
         os.mkdir(dirName)
 
     f = r.TFile(outputFile, "RECREATE")
-
-    if outer["fedIds"]:
-        write_category_graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
-                                               iMap=iMapF, iMapBcn=iMapBcn,
-                                               innerEvent=innerEvent),
-                              outer,
-                              inner)
-
+    write_category_graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
+                                           iMap=iMapF, iMapBcn=iMapBcn,
+                                           innerEvent=innerEvent),
+                          outer,
+                          inner)
     for h in book.values():
         h.Write()
     f.Close()
