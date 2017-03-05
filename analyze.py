@@ -128,9 +128,53 @@ def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False, sparseLo
             iMask = reportProgress(iEntry, iEntry - iEntryStart, iMask)
 
 
-def fillEventMap(chain, iEntry,
-                 treeName, fedId0, branch0, s, kargs,
+def pruneFeds(chain, s, kargs):
+    fedIds = []
+    for fedId in s["fedIds"]:
+        branch = s["branch"](fedId)
+
+        if s["treeName"] == "Events":  # CMS CDAQ
+            raw = wordsOneFed(tree=chain,
+                              fedId=fedId,
+                              collection=s["rawCollection"],
+                              product=s["product"])
+            if unpacked(fedData=raw, **kargs).get("nBytesSW"):
+                fedIds.append(fedId)
+            else:
+                printer.warning("removing FED %d from spec (read zero bytes)." % fedId)
+
+        elif s["treeName"] == "CMSRAW":  # HCAL local
+            raw = wordsOneChunk(tree=chain, branch=branch)
+        else:
+            raw = wordsOneBranch(tree=chain, branch=branch)
+
+        if raw:
+            fedIds.append(fedId)
+        else:
+            printer.warning("removing FED %d from spec (no branch %s)." % (fedId, branch))
+
+    if fedIds:
+        s["fedIds"] = fedIds
+    elif s["treeName"] == "Events":
+        sys.exit("No listed FEDs had any data.")
+    else:
+        sys.exit(branches(chain))
+
+    func = None
+    args = None
+    return func, args
+
+
+def fillEventMap(chain, iEntry, s, kargs,
                  forward, forwardBcn, backward):
+
+    treeName = s["treeName"]
+    fedId0 = s["fedIds"][0]
+    if treeName != "Events":
+        branch0 = s["branch"](fedId0)
+    else:
+        branch0 = None
+
     if treeName == "Events":  # CMS CDAQ
         rawThisFed = wordsOneFed(tree=chain,
                                  fedId=fedId0,
@@ -166,13 +210,6 @@ def eventMaps(chain, s={}, identityMap=False):
     backward = {}
     forwardBcn = {}
 
-    treeName = s["treeName"]
-    fedId0 = s["fedIds"][0]
-    if treeName != "Events":
-        branch0 = s["branch"](fedId0)
-    else:
-        branch0 = None
-
     if s["progress"]:
         print "Mapping %s:" % s["label"]
 
@@ -183,8 +220,9 @@ def eventMaps(chain, s={}, identityMap=False):
 
     try:
         def fillEventMap2(chain, iEntry):
-            return fillEventMap(chain, iEntry,
-                                treeName, fedId0, branch0, s, kargs,
+            if iEntry == nMapMin:
+                pruneFeds(chain, s, kargs)
+            return fillEventMap(chain, iEntry, s, kargs,
                                 forward, forwardBcn, backward)
 
         nMapMin = 0     # start from beginning
@@ -275,7 +313,7 @@ def collectedRaw(tree=None, specs={}):
         if specs["treeName"] == "Events":
             rawThisFed = wordsOneFed(tree, fedId, specs["rawCollection"], specs["product"])
         elif specs["treeName"] == "CMSRAW":
-            rawThisFed = wordsOneChunk(tree, branch, loud=False)
+            rawThisFed = wordsOneChunk(tree, branch)
         else:
             rawThisFed = wordsOneBranch(tree=tree, branch=branch)
 
@@ -427,25 +465,26 @@ def wordsOneFed(tree=None, fedId=None, collection="", product=None):
     return r.FEDRawDataWords(FEDRawData.FEDData(fedId))
 
 
-def wordsOneChunk(tree=None, branch="", loud=True):
-    chunk = wordsOneBranch(tree, branch, loud)
+def wordsOneChunk(tree=None, branch=""):
+    chunk = wordsOneBranch(tree, branch)
     if chunk is None:
         return chunk
     else:
         return r.CDFChunk2(chunk)
 
 
-def wordsOneBranch(tree=None, branch="", loud=True):
-    chunk = None
+def wordsOneBranch(tree=None, branch=""):
     try:
         chunk = getattr(tree, branch)
     except AttributeError:
-        msg = ["Branch %s not found.  These branches are available:" % branch]
-        names = [item.GetName() for item in tree.GetListOfBranches()]
-        msg += sorted(names)
-        if loud:
-            print "\n".join(msg)
+        chunk = None
     return chunk
+
+
+def branches(tree):
+    names = [item.GetName() for item in tree.GetListOfBranches()]
+    msg = ["These branches are available:"] + sorted(names)
+    return "\n".join(msg)
 
 
 def inner_vars(outer, inner, mapOptions):
