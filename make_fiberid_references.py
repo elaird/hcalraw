@@ -133,7 +133,9 @@ def phase0():
         print "sorted reference file saved: %s" % oFileName
 
 
-def ngReformMap(iMapfile="", ofile="", oFileOpenMode="w", rbxes=["HBP17", "HEP17"]):
+def ngReformMap(iMapfile="", ofile="", oFileOpenMode="w", rbx_whitelist=None, h_rbx="rbx", h_rmFi="rm_fi"):
+
+    valid_rbxes = rbx_whitelist if rbx_whitelist else rbxes()
 
     output = open(ofile, oFileOpenMode)  #opens & write the file
 
@@ -147,9 +149,9 @@ def ngReformMap(iMapfile="", ofile="", oFileOpenMode="w", rbxes=["HBP17", "HEP17
     iFc = columns.index("fib_ch")
 
     # FE
-    iRbx = columns.index("RBX")
+    iRbx = columns.index(h_rbx)
     iRm = columns.index("rm")
-    iRf = columns.index("rm_fib")
+    iRf = columns.index(h_rmFi)
 
     for iLine, line in enumerate(lines):
         if not iLine or line[0] == "#":
@@ -178,7 +180,7 @@ def ngReformMap(iMapfile="", ofile="", oFileOpenMode="w", rbxes=["HBP17", "HEP17
         rm = int(fields[iRm])
         rm_fib = int(fields[iRf])
 
-        if rbx in rbxes:
+        if rbx in valid_rbxes:
             if fields[iFc] == "0":
                 output.writelines("%su%2d %02d %02d: %s %1d %1d\n" % (lineStart, crate, slot, uhtr_fib, rbx, rm, rm_fib))
 
@@ -239,7 +241,7 @@ def plan1():
     # fileName = "/afs/cern.ch/cms/HCAL/document/Mapping/HBHE/ngHBHE/ngHE/ngHEP17/HBHEP17_template.txt"
     fileName = "data/HBHEP17_template.txt"
     oFileName = "data/ref_plan1.txt"
-    ngReformMap(iMapfile=fileName, ofile=oFileName, oFileOpenMode="w")
+    ngReformMap(iMapfile=fileName, ofile=oFileName, oFileOpenMode="w", rbx_whitelist=["HBP17", "HEP17"], h_rbx="RBX", h_rmFi="rm_fib")
 
     sName = "%s_sorted" % oFileName
     os.system("sort -g %s > %s" % (oFileName, sName))
@@ -258,7 +260,19 @@ def ngHF():
     print "sorted reference file saved: %s" % oFileName
 
 
+def calib():
+    fileName = "HCALmapCALIB_H-RBX.tsv"
+    oFileName = "data/ref_calib.txt"
+    ngReformMap(iMapfile=fileName, ofile=oFileName, oFileOpenMode="w")
+
+    sName = "%s_sorted" % oFileName
+    os.system("sort -g %s > %s" % (oFileName, sName))
+    os.system("mv %s %s" % (sName, oFileName))
+    print "sorted reference file saved: %s" % oFileName
+
+
 if __name__ == "__main__":
     # phase0()
     # plan1()
-    ngHF()
+    # ngHF()
+    calib()
