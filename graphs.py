@@ -1019,7 +1019,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
         try:
             pad0.DivideSquare(len(names))
         except AttributeError:
-            print "Skipping page two because ROOT version is ancient."
+            printer.info("Skipping page two because ROOT version is ancient.")
             return
 
     pad0.Draw()
