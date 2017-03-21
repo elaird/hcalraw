@@ -36,11 +36,13 @@ def find1(run):
 
 
 def find2(run):
-    USC = "/store/group/dpg_hcal/comm_hcal/USC/USC_%d.root" % run
+    if 287000 < run:
+        USC = "/store/group/dpg_hcal/comm_hcal/USC/run%d/USC_%d.root" % (run, run)
+    else:
+        USC = "/store/group/dpg_hcal/comm_hcal/USC/USC_%d.root" % run
     stat = "%s stat %s" % (eos(), USC)
     if not utils.commandOutputFull(stat)["returncode"]:
         return "%s/%s" % (eosprefix, USC)
-
 
 def find_gr(run, grdir, hhmmMin=None, quiet=False):
     d = "%s/000/%03d/%03d/00000/" % (grdir, run/1000, run % 1000)
@@ -110,10 +112,7 @@ def main(options, args, quiet=False):
     except ValueError:
         sys.exit("Could not convert %s to int." % args[0])
 
-    subdet = "HBHE" if not options.hf else "HF"
-    options.feds1 = subdet
-    # options.feds2 = "v%s" % subdet
-    options.outputFile = "output/%d_%s.root" % (run, subdet)
+    options.outputFile = "output/%d.root" % run
 
     override(options, quiet, run)
 
