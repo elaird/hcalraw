@@ -86,13 +86,19 @@ def string56(codes=[], asciifyPatterns=True, regMatchPatterns=True):
         return s
 
 
+def ng_looks_broken(i):
+    return bool((i >> 56) & 0xffff) or not i
+
+
 def string2(code=None):
     slot = (code >> ngOffset) & 0xff
     subdet, side, number = decoded_rbx(code)
     top, link_num = decoded_link(code)
-    # return "0x%022x" % code
-    # return "%s%s%02d Slot%2d ig%d L%d" % (subdet, side, number, slot, top, link_num)
-    return "%s%s%02d %2d %d" % (subdet, side, number, slot, link_num + 3 * (1 - top))
+
+    if ng_looks_broken(code):
+        return "0x%022x" % code
+    else:
+        return "%s%s%02d %2d %d" % (subdet, side, number, slot, link_num + 3 * (1 - top))
 
 
 def string01(code=None):
@@ -103,9 +109,10 @@ def string01(code=None):
     qie_card = (code >> ngOffset) & 0xf
     rm = (code >> (ngOffset + 4)) & 0xf
     subdet, side, rbx_number = decoded_rbx(code)
-    # return "0x%022x" % code
-    # return "%s%d%s RM%d card%d link%d" % (subdet, rbx_number, side, rm, qie_card, link_num)
-    return "%s%s%d %d %d" % (subdet, side, rbx_number, rm, 2*qie_card + link_num - 1)
+    if ng_looks_broken(code):
+        return "0x%022x" % code
+    else:
+        return "%s%s%d %d %d" % (subdet, side, rbx_number, rm, 2*qie_card + link_num - 1)
 
 
 def rbxes():
