@@ -261,7 +261,7 @@ def ngHF():
 
 
 def calib():
-    fileName = "HCALmapCALIB_H-RBX.tsv"
+    fileName = "HCALmapCALIB_H_v2.tsv"
     oFileName = "data/ref_calib.txt"
     ngReformMap(iMapfile=fileName, ofile=oFileName, oFileOpenMode="w")
 
