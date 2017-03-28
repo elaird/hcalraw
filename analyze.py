@@ -130,6 +130,8 @@ def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False, sparseLo
 
 def pruneFeds(chain, s, uargs):
     wargs = {}
+
+    remove = {}
     for fedId in s["fedIds"]:
         wargs[fedId] = {"tree": chain, "branch": s["branch"](fedId)}
         if s["treeName"] == "Events":  # CMS CDAQ
@@ -146,11 +148,14 @@ def pruneFeds(chain, s, uargs):
         raw = wfunc(**wargs[fedId])
         if raw:
             if not unpacked(fedData=raw, **uargs).get("nBytesSW"):
-                printer.warning("removing FED %4d from spec (read zero bytes)." % fedId)
-                del wargs[fedId]
+                remove[fedId] = "read zero bytes"
         else:
-            printer.warning("removing FED %4d from spec (no branch %s)." % (fedId, wargs[fedId].get("branch")))
-            del wargs[fedId]
+            remove[fedId] = "no branch %s" % wargs[fedId].get("branch")
+
+    for fedId, msg in sorted(remove.iteritems()):
+        del wargs[fedId]
+        # printer.warning("removing FED %4d from spec (%s)." % (fedId, msg))
+    printer.warning("No data from FEDs %s" % (",".join(["%d" % fedId for fedId in sorted(remove.keys())])))
 
     if wargs:
         del s["fedIds"]
