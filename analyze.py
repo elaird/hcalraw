@@ -155,7 +155,8 @@ def pruneFeds(chain, s, uargs):
     for fedId, msg in sorted(remove.iteritems()):
         del wargs[fedId]
         # printer.warning("removing FED %4d from spec (%s)." % (fedId, msg))
-    printer.warning("No data from FEDs %s" % (",".join(["%d" % fedId for fedId in sorted(remove.keys())])))
+    if remove:
+        printer.warning("No data from FEDs %s" % (",".join(["%d" % fedId for fedId in sorted(remove.keys())])))
 
     if wargs:
         del s["fedIds"]
