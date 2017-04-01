@@ -191,24 +191,20 @@ def oneHtr(iBlock=None, p={}, printColumnHeaders=None, dump=None, crateslots=[],
     return anyHtrDataPrinted
 
 
-def makeRed(s):
-    if printer.__color:  # hack
-        return '\033[91m' + s + '\033[0m'
-    else:
-        return s
-
-
-def qieString(qies=[], red=False):
+def qieString(qies=[], sois=[], red=False):
     l = []
     for i in range(10):
         if i < len(qies):
-            l.append("%2x" % qies[i])
+            s = "%2x" % qies[i]
+            if i < len(sois) and sois[i] and not red:
+                s = printer.gray(s, False)
+            l.append(s)
         else:
             l.append("  ")
 
     out = " ".join(l)
     if red:
-        out = makeRed(out)
+        out = printer.red(out, False)
     return out
 
 
@@ -320,11 +316,11 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                   " %1d" % data["Flavor"],
                   " %2d" % data["ErrF"],
                   "  %1d" % data["CapId0"],
-                  "  %2d   " % len(data["QIE"]) + qieString(data["QIE"], red=red),
-                  "  " + qieString(data.get("TDC", []))
+                  "  %2d   " % len(data["QIE"]) + qieString(data["QIE"], data.get("SOI", []), red=red),
+                  "  " + qieString(data.get("TDC", []), data.get("SOI", []))
                   ]
         if te_tdc:
-            fields += [qieString(data.get("TDC_TE", []))]
+            fields += [qieString(data.get("TDC_TE", []), data.get("SOI", []))]
         out.append(" ".join(fields))
 
         if latency:
