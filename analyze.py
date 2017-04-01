@@ -567,13 +567,14 @@ def go(outer={}, inner={}, outputFile="",
         os.mkdir(dirName)
 
     f = r.TFile(outputFile, "RECREATE")
-    write_category_graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
-                                           iMap=iMapF, iMapBcn=iMapBcn,
-                                           innerEvent=innerEvent),
-                          outer,
-                          inner)
-    for h in book.values():
-        h.Write()
+    if not f.IsZombie():
+        write_category_graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
+                                               iMap=iMapF, iMapBcn=iMapBcn,
+                                               innerEvent=innerEvent),
+                              outer,
+                              inner)
+        for h in book.values():
+            h.Write()
     f.Close()
 
     for h in book.values():
