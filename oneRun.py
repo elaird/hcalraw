@@ -45,7 +45,7 @@ def check_and_adjust(options):
         options.nEvents = 1
 
     if 1 <= options.dump and "printraw" not in options.plugins:
-        printer.info("adding printraw to list of plugins ('--dump' was at least 1)")
+        # printer.info("adding printraw to list of plugins ('--dump' was at least 1)")
         options.plugins.append("printraw")
 
 
