@@ -34,7 +34,8 @@ def yellow(s=''):
 
 
 def blue(s=''):
-    __line('34m', s)
+    # __line('34m', s)
+    __line('94m', s)
 
 
 def purple(s=''):
