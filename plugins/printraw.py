@@ -272,7 +272,12 @@ def uhtrTriggerData(d={}, skipZeroTps=False, crate=None, slot=None, top="", nonM
         for j in range(len(data["SOI"])):
             soi += str(data["SOI"][j])
             ok += str(data["OK"][j])
-            tp += "%5x" % data["TP"][j]
+            tp_s = "%5x" % data["TP"][j]
+            if data["SOI"][j]:
+                tp_s = printer.gray(tp_s, False)
+            if not data["OK"][j]:
+                tp_s = printer.red(tp_s, False)
+            tp += tp_s
         out.append("   ".join([" 0x%02x" % channelId,
                                "%1d" % data["Flavor"],
                                "%5s" % soi,
