@@ -196,7 +196,7 @@ def qieString(qies=[], sois=[], nPreSamples=None, red=False):
     l = []
 
     if nPreSamples and not sois:
-        sois = [0] * nPresamples
+        sois = [0] * nPreSamples
         sois.append(1)
 
     for i in range(10):
