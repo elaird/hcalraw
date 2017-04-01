@@ -165,6 +165,7 @@ def oneHtr(iBlock=None, p={}, printColumnHeaders=None, dump=None, crateslots=[],
                                 crate=p["Crate"],
                                 slot=p["Slot"],
                                 top=p["Top"],
+                                nPreSamples=p["nPreSamples"],
                                 **kargs)
         if len(cd) >= 2:
             printer.yellow(cd[0])
@@ -191,8 +192,13 @@ def oneHtr(iBlock=None, p={}, printColumnHeaders=None, dump=None, crateslots=[],
     return anyHtrDataPrinted
 
 
-def qieString(qies=[], sois=[], red=False):
+def qieString(qies=[], sois=[], nPreSamples=None, red=False):
     l = []
+
+    if nPreSamples and not sois:
+        sois = [0] * nPresamples
+        sois.append(1)
+
     for i in range(10):
         if i < len(qies):
             s = "%2x" % qies[i]
@@ -276,7 +282,7 @@ def uhtrTriggerData(d={}, skipZeroTps=False, crate=None, slot=None, top="", nonM
     return out
 
 
-def htrChannelData(lst=[], crate=0, slot=0, top="",
+def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
                    skipFibChs=[], skipErrF=[],
                    nonMatched=[], latency={}, zs={},
                    utcaFiberBlackList=[0,1,10,11,12,13,22,23][:0],
@@ -316,7 +322,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                   " %1d" % data["Flavor"],
                   " %2d" % data["ErrF"],
                   "  %1d" % data["CapId0"],
-                  "  %2d   " % len(data["QIE"]) + qieString(data["QIE"], data.get("SOI", []), red=red),
+                  "  %2d   " % len(data["QIE"]) + qieString(data["QIE"], data.get("SOI", []), nPreSamples, red=red),
                   "  " + qieString(data.get("TDC", []), data.get("SOI", []))
                   ]
         if te_tdc:
