@@ -8,6 +8,7 @@ def fedMap():
          "HBHE": range(1100, 1118, 2),
          "HF": range(1118, 1124),
          "HC": [1134],
+         "H9": [1192, 1194, 1196],
          }
     d["HBEF"] = d["HBHE"] + d["HF"]
     d["HCAL"] = d["HBHE"] + d["HF"] + d["HO"] + d["HC"]
@@ -32,10 +33,9 @@ def format(treeName=""):
 
     dct = {"CMSRAW": {"branch": lambda fedId: "%s%03d" % ("HCAL_DCC" if __isVme(fedId) else "Chunk", fedId)}}
 
-    if use_fwlite:
-        dct["Events"] = {"rawCollection": "FEDRawDataCollection_rawDataCollector__LHC", "product": True}
-    else:
-        dct["Events"] = {"rawCollection": "FEDRawDataCollection_rawDataCollector__LHC.obj", "product": False}
+    dct["Events"] = {"rawCollections": []}
+    for suffix in ["rawDataCollector__LHC", "hltHcalCalibrationRaw__HLT"]:
+        dct["Events"]["rawCollections"].append("FEDRawDataCollection_%s%s" % (suffix, "" if use_fwlite else ".obj"))
 
     for item in ["LuminosityBlocks", "MetaData", "ParameterSets", "Parentage", "Runs"]:
         dct[item] = None

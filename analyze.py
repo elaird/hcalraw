@@ -61,17 +61,28 @@ def tchain(spec, cacheSizeMB=None):
 
     if spec["treeName"] == "Events":  # CMS CDAQ
         chain.SetBranchStatus("*", 0)
-        branch = spec["rawCollection"]
-        if spec["product"]:
-            for suffix in [".obj", ".present"]:
-                branch1 = branch + suffix
-                if not chain.GetBranch(branch1):
-                    sys.exit("Could not find branch %s" % branch1)
-                chain.SetBranchStatus(branch1, 1)
-        else:
-            if not chain.GetBranch(branch):
-                sys.exit("Could not find branch %s" % branch)
-            chain.SetBranchStatus(branch, 1)
+        found = False
+        for branch in spec["rawCollections"]:
+            if sw.use_fwlite:
+                for suffix in [".obj", ".present"]:
+                    branch1 = branch + suffix
+                    if chain.GetBranch(branch1):
+                        chain.SetBranchStatus(branch1, 1)
+                        found = True
+                    else:
+                        printer.info("Could not find branch %s" % branch1)
+            else:
+                if chain.GetBranch(branch):
+                    chain.SetBranchStatus(branch, 1)
+                    found = True
+                else:
+                    printer.info("Could not find branch %s" % branch)
+            if found:
+                spec["rawCollection"] = branch
+                break
+
+        if not found:
+            sys.exit("Could not find any branches: see configuration/sw.py")
 
     return chain
 
@@ -144,7 +155,7 @@ def pruneFeds(chain, s, uargs):
             wfunc = wordsOneFed
             wargs[fedId].update({"fedId": fedId,
                                  "collection": s["rawCollection"],
-                                 "product": s["product"]})
+                                 "product": sw.use_fwlite})
         elif s["treeName"] == "CMSRAW":  # HCAL local
             wfunc = wordsOneChunk
             wargs["branch"] = s["branch"](fedId)
