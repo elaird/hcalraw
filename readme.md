@@ -62,11 +62,11 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 ./oneRun.py --help
 ```
 
-####License
+#### License
 [GPLv3](http://www.gnu.org/licenses/gpl.html)
 
 
-####Design Goals
+#### Design Goals
 * unpack both VME and uTCA data
 * digest global, local, or monitor buffer data without configuration
 * compare payloads across two .root files containing unsorted events
@@ -75,19 +75,19 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 * not require CMSSW
 
 
-####Dependencies
+#### Dependencies
 * python (2.x, x>=6)
 * [ROOT](https://root.cern.ch/) (>=5.32)
 
 
-####Environment (SLC6/AFS)
+#### Environment (SLC6/AFS)
 (use exactly one of these)
 * `env/lxplus6.sh` sets up CMSSW, EOS, and the environment vars LS1,USC
 * `env/slc6-pypy.sh` sets up pypyROOT (outside of CMSSW)
 * `env/slc6-root6.sh` sets up a ROOT 6 environment (outside of CMSSW)
 
 
-####Files
+#### Files
 * `cpp/CDF*.h` are copied from CMSSW (IORawData/HcalTBInputService/src)
 * `cpp/FED*` are copied from CMSSW (DataFormats/FEDRawData)
 * `cpp/[cdf,cms].h` define helper functions
@@ -108,7 +108,7 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 * `test_transformation.py` tests `configuration.hw.transformed*`
 * `utils.py` contains helper functions
 
-####plugins/
+#### plugins/
 * `compare.py` compares the payloads within two .root files for a given event
 * `patterns.py` interprets the raw data as front-end patterns
 * `printraw.py` dumps to stdout the payload(s) in an event
