@@ -24,6 +24,8 @@ def setup(plugin_names=[]):
         r.gInterpreter.SetClassAutoloading(False)
         r.gInterpreter.ProcessLine('#include "cpp/cdf.h"')
         r.gInterpreter.ProcessLine('#include "cpp/cms.h"')
+        # r.gInterpreter.ProcessLine('#include "cpp/FEDRawData.cc"')
+        # r.gInterpreter.ProcessLine('#include "cpp/FEDRawDataCollection.h"')
 
     if sw.use_fwlite and utils.cmssw():
         r.gSystem.Load("libFWCoreFWLite.so")
@@ -61,10 +63,14 @@ def tchain(spec, cacheSizeMB=None):
         chain.SetBranchStatus("*", 0)
         branch = spec["rawCollection"]
         if spec["product"]:
-            # chain.SetBranchStatus(branch + ".", 1)
-            chain.SetBranchStatus(branch + ".obj", 1)
-            chain.SetBranchStatus(branch + ".present", 1)
+            for suffix in [".obj", ".present"]:
+                branch1 = branch + suffix
+                if not chain.GetBranch(branch1):
+                    sys.exit("Could not find branch %s" % branch1)
+                chain.SetBranchStatus(branch1, 1)
         else:
+            if not chain.GetBranch(branch):
+                sys.exit("Could not find branch %s" % branch)
             chain.SetBranchStatus(branch, 1)
 
     return chain
@@ -133,17 +139,18 @@ def pruneFeds(chain, s, uargs):
 
     remove = {}
     for fedId in s["fedIds"]:
-        wargs[fedId] = {"tree": chain, "branch": s["branch"](fedId)}
+        wargs[fedId] = {"tree": chain}
         if s["treeName"] == "Events":  # CMS CDAQ
             wfunc = wordsOneFed
             wargs[fedId].update({"fedId": fedId,
                                  "collection": s["rawCollection"],
                                  "product": s["product"]})
-            del wargs[fedId]["branch"]
         elif s["treeName"] == "CMSRAW":  # HCAL local
             wfunc = wordsOneChunk
+            wargs["branch"] = s["branch"](fedId)
         else:
             wfunc = wordsOneBranch
+            wargs["branch"] = s["branch"](fedId)
 
         raw = wfunc(**wargs[fedId])
         if raw:
