@@ -8,13 +8,9 @@ cd cpp; make -j 5; cd -
 
 
 # analyze a global or local run
+./look.py 284928
 ./look.py 289555 --nevents=1 --dump=8
-./look.py 239342 --hf --utca-pipeline-delta=4
-./look.py 239895 --hf --hhmm=2212 --nevents=20
-./look.py 246908 --hf --nevents=100
-./look.py 251244 --hf --nevents=300
 
-./look.py 268148
 
 # analyze several global runs
 cat gr_list.txt | ./multi.py --nevents=100
