@@ -465,12 +465,11 @@ def inner_vars(outer, inner, mapOptions, oMapF, oMapB, oMapBcn):
         innerEvent = {}
     elif inner:
         chainI = tchain(inner)
+        iMapF, iMapB, iMapBcn = eventMaps(chainI, inner)
         if mapOptions["identityMap"]:
             iMapF = oMapF
             iMapB = oMapB
             iMapBcn = oMapBcn
-        else:
-            iMapF, iMapB, iMapBcn = eventMaps(chainI, inner)
 
         innerEvent = eventToEvent(oMapF, iMapB)
         if set(innerEvent.values()) == set([None]):
@@ -605,7 +604,9 @@ def go(outer={}, inner={}, outputFile="",
             s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
         printer.msg(s)
 
-    return not len(oMapF)
+    oFeds = sorted(outer["wargs"].keys())
+    iFeds = sorted(inner["wargs"].keys()) if inner else []
+    return not len(oMapF), oFeds, iFeds
 
 
 def printChannelSummary(outputFile):
