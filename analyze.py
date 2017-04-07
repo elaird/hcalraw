@@ -158,10 +158,10 @@ def pruneFeds(chain, s, uargs):
                                  "product": sw.use_fwlite})
         elif s["treeName"] == "CMSRAW":  # HCAL local
             wfunc = wordsOneChunk
-            wargs["branch"] = s["branch"](fedId)
+            wargs[fedId]["branch"] = s["branch"](fedId)
         else:
             wfunc = wordsOneBranch
-            wargs["branch"] = s["branch"](fedId)
+            wargs[fedId]["branch"] = s["branch"](fedId)
 
         raw = wfunc(**wargs[fedId])
         if raw:
