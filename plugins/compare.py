@@ -105,19 +105,13 @@ def htrSummary(blocks=[], book=None, fedId=None,
         caps[i] = 0
         ErrF[i] = 0
 
-    crate2bin = {
-        #  3 904 uTCA crates
-        # 13 USC uTCA crates
-        (63, " "):  1, (62, " "):  2,
-        (61, " "):  3, (38, " "):  4,
-        (37, " "):  5, (36, " "):  5,
-        (35, " "):  7, (34, " "):  8,
-        (32, " "):  9, (31, " "): 10,
-        (30, " "): 11, (29, " "): 12,
-        (25, " "): 13, (24, " "): 14,
-        (22, " "): 15, (21, " "): 16,
-        (20, " "): 17,
-    }
+    crate2bin = {}
+    iCrate = 0
+    for crate in range(20, 39) + range(61, 64):  # USC + 904
+        if crate in [23, 26, 27, 33] + [28, 36]:  # HO + do not exist
+            continue
+        iCrate += 1
+        crate2bin[(crate, " ")] = iCrate
 
     crateFail = 1 + max(crate2bin.values())
     yAxisLabels = labels(crate2bin)
