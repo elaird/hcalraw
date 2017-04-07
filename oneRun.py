@@ -82,15 +82,18 @@ def main(options):
         if options.profile:
             import cProfile
             cProfile.runctx("go(options)", globals(), locals(), sort="time")
-            goCode = 0  # FIXME
+            # FIXME
+            goCode = 0
+            feds1 = []
+            feds2 = []
         else:
-            goCode = go(options)
+            goCode, feds1, feds2 = go(options)
 
-    if options.feds2 and 0 <= options.dump:
+    if feds2 and 0 <= options.dump:
         analyze.printChannelSummary(options.outputFile)
 
     if not options.noPlot:
-        graphs.main(options)
+        graphs.main(options.outputFile, feds1, feds2)
 
     return goCode
 
