@@ -1171,6 +1171,10 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         if "ts" in pages:
             pageThree(stem="ts_vs_time_%d", **kargs)
 
+        if "ts0" in pages:
+            pageThree(stem="cr34_sl11_fib.ge.12_ts0_vs_EvN_%d", **kargs)
+            pageThree(stem="cr34_sl11_fib.ge.12_ts1_vs_EvN_%d", **kargs)
+
         f.Close()
     canvas.Print(pdf + "]")
 
@@ -1195,6 +1199,7 @@ all_pages = ["overview", "vs", "page3",
              # "trends",
              "occupancy",
              # "ts",
+             # "ts0",
              ]
 
 
