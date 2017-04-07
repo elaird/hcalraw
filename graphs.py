@@ -1094,6 +1094,8 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         f = r.TFile(fileName)
         if (not f) or f.IsZombie():
             continue
+        if not feds1:
+            continue
 
         title = f.GetPath().replace("output/", "").replace(".root:/", "")
         if "_" not in title:
@@ -1177,11 +1179,11 @@ def makeSummaryPdf(inputFile="", feds1=[], feds2=[], pdf="summary.pdf"):
     makeSummaryPdfMulti(inputFiles=[inputFile], feds1s=[feds1], feds2s=[feds2], pdf=pdf)
 
 
-def main(options):
-    makeSummaryPdf(inputFile=options.outputFile,
-                   feds1=sw.fedList(options.feds1),
-                   feds2=sw.fedList(options.feds2),
-                   pdf=options.outputFile.replace(".root", ".pdf"),
+def main(outputFile, feds1=[], feds2=[]):
+    makeSummaryPdf(inputFile=outputFile,
+                   feds1=feds1,
+                   feds2=feds2,
+                   pdf=outputFile.replace(".root", ".pdf"),
     )
 
 
