@@ -254,6 +254,19 @@ def histogramChannelData(book, block, channelData, fedId,
     #         book.fill(channelData["QIE"][i], title, 256, -0.5, 255.5,
     #                   title="%s;ADC;Counts / bin" % title)
 
+    if False and block["Crate"] == 34 and block["Slot"] == 11 and 12 <= channelData["Fiber"]:
+        for i in [0, 1]:
+            title = "cr%d_sl%d_fib.ge.12_ts%d" % (block["Crate"], block["Slot"], i)
+            book.fill(channelData["QIE"][i], title,
+                      256, -0.5, 255.5,
+                      title="%s;ADC;Counts / bin" % title)
+
+            nEvN = 20
+            title2 = "%s_vs_EvN_%d" % (title, fedId)
+            book.fill((block["EvN"], channelData["QIE"][i]), title2,
+                      (nEvN, 256), (0.5, -0.5), (nEvN + 0.5, 255.5),
+                      title="%s;EvN;ADC;Counts / bin" % title2)
+
     if channelData["ErrF"]:
         for name, title in [("ErrFNZ", "ErrF != 0"),
                             ("ErrF%d" % channelData["ErrF"], "ErrF == %d" % channelData["ErrF"]),
@@ -292,7 +305,7 @@ def histogramChannelData(book, block, channelData, fedId,
         adc = max(channelData["QIE"])
         adcs.add(adc)
         mp = channelData.get("M&P", 0)
-        book.fill(adc, "channel_peak_adc_mp%d_%d" % (mp, fedId), 14, -0.5, 13.5,
+        book.fill(adc, "channel_peak_adc_mp%d_%d" % (mp, fedId), 256, -0.5, 255.5,
                   title="FED %d;Peak ADC (ErrF == 0);Channels / bin" % fedId)
 
         if fedTime:
