@@ -1,6 +1,38 @@
 use_fwlite = False
-eosprefix = "root://eoscms.cern.ch/"
+
+def files_this_machine(run, nCyclesMax=3):
+    out = []
+    for stem in ["data/USC_",
+                 "data/run",
+                 "/tmp/USC_",
+                 "/localdata/B904_Integration_",
+                 "/localdata/B904_Integration_10000"]:
+        for iCycle in range(nCyclesMax):
+            filename = stem + "%d" % run
+            if iCycle:
+                filename += ".%d" % iCycle
+            filename += ".root"
+            out.append(filename)
+    return out
+
+
+def files_eos_local(run):
+    stem = "root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal"
+
+    if run < 264261:
+        filename = "%s/archival/20160914_USC_LS1_runs212958-264260/USC_%d.root" % (stem, run)
+    elif run < 280486:
+        filename = "%s/USC/USC_%d.root" % (stem, run)
+    else:
+        filename = "%s/USC/run%d/USC_%d.root" % (stem, run)
+
+    return [filename]
+
+
+def files_xrd_global(run):
 #root://cms-xrd-global.cern.ch/
+    return []
+
 
 def fedMap():
     d = {"7xy": range(700, 732),
