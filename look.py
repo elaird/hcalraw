@@ -5,7 +5,8 @@ import sys
 import utils
 import oneRun
 import printer
-from options import opts
+from options import oparser
+import optparse
 from configuration.sw import eosprefix
 
 
@@ -104,13 +105,31 @@ def override(options, quiet, run):
         options.utcaBcnDelta = 0
 
 
-def main(options, args, quiet=False):
+def opts():
+    parser = oparser(arg="RUN_NUMBER")
+
+    look = optparse.OptionGroup(parser, "Options solely for use with look.py")
+    look.add_option("--hhmm",
+                    dest="hhmm",
+                    default=None,
+                    type="int",
+                    help="minimum hhmm")
+    parser.add_option_group(look)
+
+    options, args = parser.parse_args()
+
     if len(args) != 1:
         sys.exit("Please provide a run number as the argument.")
     try:
         run = int(args[0])
     except ValueError:
         sys.exit("Could not convert %s to int." % args[0])
+
+    return options, run
+
+
+def main(quiet=False):
+    options, run = opts()
 
     options.outputFile = "output/%d.root" % run
 
@@ -122,22 +141,6 @@ def main(options, args, quiet=False):
         return
 
     paths = {1: None, 2: None}
-    if run < 246908:  # 2015-06-03  first 13 TeV stable beams
-        paths.update({3: "/store/data/Commissioning2015/HcalNZS/RAW/v1",
-                      4: "/store/express/Commissioning2015/ExpressPhysics/FEVT/Express-v1",
-                      5: "/store/express/Commissioning2015/ExpressCosmics/FEVT/Express-v1",
-                      6: "/store/data/Commissioning2015/Cosmics/RAW/v1",
-                      7: "/store/data/Commissioning2015/MinimumBias/RAW/v1",
-                      })
-    elif run < 250985:
-        paths.update({# 3: "/store/data/Run2015A/HcalNZS/RAW/v1",
-                      4: "/store/express/Run2015A/ExpressPhysics/FEVT/Express-v1/",
-                      })
-
-    else:
-        paths.update({3: "/store/data/Run2016A/HcalNZS/RAW/v1",
-                      4: "/store/data/Run2016A/ZeroBias1/RAW/v1",
-                      })
 
     for iFind, grDir in sorted(paths.iteritems()):
         if grDir is None:
@@ -168,4 +171,4 @@ def main(options, args, quiet=False):
 
 
 if __name__ == "__main__":
-    main(*opts(alsoArgs=True))
+    main()
