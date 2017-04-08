@@ -1,6 +1,6 @@
 use_fwlite = False
 
-def files_this_machine(run, nCyclesMax=3):
+def files_this_machine(run, nCyclesMax=1):
     out = []
     for stem in ["data/USC_",
                  "data/run",
