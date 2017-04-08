@@ -24,13 +24,16 @@ def files_eos_local(run):
     elif run < 280486:
         filename = "%s/USC/USC_%d.root" % (stem, run)
     else:
-        filename = "%s/USC/run%d/USC_%d.root" % (stem, run)
+        filename = "%s/USC/run%d/USC_%d.root" % (stem, run, run)
 
     return [filename]
 
 
 def files_xrd_global(run):
-#root://cms-xrd-global.cern.ch/
+    #root://cms-xrd-global.cern.ch/
+    # "dataset=/HcalNZS/Commissioning2017-v1/RAW"
+    # /store/data/Commissioning2017/HcalNZS/RAW/v1/000/287/167
+    # 290477
     return []
 
 
