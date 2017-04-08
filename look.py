@@ -113,37 +113,36 @@ def opts():
     return options, run
 
 
-def main():
-    options, run = opts()
-
+def search(run):
     global_xrd = this_machine
     for search_func in [this_machine, local_eos, global_xrd]:
         files = search_func(run)
         # options.file1 = find_gr(run, grDir, options.hhmm, quiet)
+        if files:
+            return files
 
-        if not files:
-            continue
 
-        if 2 <= len(files):
-            fileNames = files.split(",")
-            n = len(fileNames)
-            if 2 <= n and options.hhmm is None:
-                options.sparseLoop = max(1, options.nEvents / n)
-            else:
-                options.sparseLoop = -1
-            # report(fileNames, iFind)
+def main():
+    options, run = opts()
+
+    files = search(run)
+    if not files:
+        sys.exit("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
+
+    if 2 <= len(files):
+        fileNames = files.split(",")
+        n = len(fileNames)
+        if 2 <= n and options.hhmm is None:
+            options.sparseLoop = max(1, options.nEvents / n)
         else:
-            options.file1 = files[0]
-            if "B904" in options.file1 and options.feds1 == "HCAL":
-                options.feds1 = "B904"
+            options.sparseLoop = -1
+        # report(fileNames, iFind)
+    else:
+        options.file1 = files[0]
+        if "B904" in options.file1 and options.feds1 == "HCAL":
+            options.feds1 = "B904"
 
-        if oneRun.main(options):
-            continue
-        else:
-            return
-
-    sys.exit("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
-    return 1
+    oneRun.main(options)
 
 
 if __name__ == "__main__":
