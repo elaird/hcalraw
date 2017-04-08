@@ -2,9 +2,9 @@ import optparse
 import sys
 
 
-def opts(alsoArgs=False):
-    if alsoArgs:
-        parser = optparse.OptionParser(usage="usage: %prog [options] args")
+def oparser(arg=""):
+    if arg:
+        parser = optparse.OptionParser(usage="usage: %prog [options] " + arg)
     else:
         parser = optparse.OptionParser()
 
@@ -186,22 +186,14 @@ def opts(alsoArgs=False):
                        help="Print mismatching ADCs or TPs.")
     parser.add_option_group(matchCh)
 
-    look = optparse.OptionGroup(parser, "Options solely for use with look.py")
-    look.add_option("--hhmm",
-                    dest="hhmm",
-                    default=None,
-                    type="int",
-                    help="minimum hhmm")
-    look.add_option("--hf",
-                    dest="hf",
-                    default=False,
-                    action="store_true",
-                    help="consider (u)HF rather than (u)HBHE")
-    parser.add_option_group(look)
+    return parser
 
+
+def opts(arg=""):
+    parser = oparser(arg)
     options, args = parser.parse_args()
 
-    if alsoArgs and not args:
+    if args and not args:
         parser.print_help()
         sys.exit(1)
 
