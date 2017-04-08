@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 
-import os
-import sys
-import utils
-import oneRun
-import printer
+import optparse, os, sys
+import oneRun, utils
 from options import oparser
-import optparse
 from configuration import sw
 
 
@@ -146,7 +142,7 @@ def main():
         else:
             return
 
-    printer.warning("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
+    sys.exit("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
     return 1
 
 
