@@ -135,5 +135,5 @@ def plot(prefix, roots, feds1s, feds2s):
 
 
 if __name__ == "__main__":
-    options, args = opts(alsoArgs=True)
+    options, args = opts(arg=".dat [.dat ...]")
     plot(*histogrammed(*rooted(args, options)))
