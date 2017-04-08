@@ -41,7 +41,8 @@ def this_machine(run):
 def local_eos(run):
     out = []
     for filename in sw.files_eos_local(run):
-        if not utils.commandOutputFull("eos stat %s" % filename)["returncode"]:
+        shortName = filename[filename.find("/store"):]
+        if not utils.commandOutputFull("eos stat %s" % shortName)["returncode"]:
             out.append(filename)
     return out
 
