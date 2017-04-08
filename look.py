@@ -90,21 +90,31 @@ def report(fileNames, iFind):
         print "Found %4d file(s) in %s/" % (len(fileNames), "/".join(bases))
 
 
-def override(options, run, quiet):
+def override(options, run):
+    options.outputFile = "output/%d.root" % run
     if not options.nEvents:
         options.nEvents = 4
 
-    options.progress = not quiet
-    if options.dump == -1 and not quiet:
-        options.dump = 0
+    if not options.quiet:
+        options.progress = True
+        if options.dump == -1:
+            options.dump = 0
 
-    options.outputFile = "output/%d.root" % run
+    if options.noLoop:  # skip file finding
+        options.file1 = "dummy"
+        oneRun.main(options)
+        sys.exit()
 
 
 def opts():
     parser = oparser(arg="RUN_NUMBER")
 
     look = optparse.OptionGroup(parser, "Options solely for use with look.py")
+    look.add_option("--quiet",
+                    dest="quiet",
+                    default=False,
+                    action="store_true",
+                    help="Print less to stdout")
     look.add_option("--hhmm",
                     dest="hhmm",
                     default=None,
@@ -124,14 +134,9 @@ def opts():
     return options, run
 
 
-def main(quiet=False):
+def main():
     options, run = opts()
-    override(options, run, quiet)
-
-    if options.noLoop:  # skip file finding
-        options.file1 = "dummy"
-        oneRun.main(options)
-        return
+    override(options, run)
 
     paths = {1: None, 2: None}
 
