@@ -10,26 +10,6 @@ import optparse
 from configuration import sw
 
 
-def eos():
-    #################################
-    # NOTES from local installation #
-    #################################
-    # rsync -av lxplus.cern.ch:/afs/cern.ch/project/eos/installation/0.3.84-aquamarine .
-    # emerge -av readline:5
-    # /usr/lib # ln -s libcrypto.so libcrypto.so.6
-    # edit 0.3.84-aquamarine/bin/eos.select :
-    # export EOSSYS=${HOME}/0.3.84-aquamarine
-    # export EOS_MGM_URL=root://eoscms.cern.ch
-    ################################################
-
-    for d in ["/afs/cern.ch/project/eos/installation", os.environ["HOME"]]:
-        f = "%s/0.3.84-aquamarine/bin/eos.select" % d
-        if os.path.exists(f):
-            return f
-
-    sys.exit("ERROR: could not find eos.")
-
-
 def this_machine(run):
     out = []
     for filename in sw.files_this_machine(run):
@@ -158,6 +138,8 @@ def main():
             # report(fileNames, iFind)
         else:
             options.file1 = files[0]
+            if "B904" in options.file1 and options.feds1 == "HCAL":
+                options.feds1 = "B904"
 
         if oneRun.main(options):
             continue
