@@ -788,14 +788,12 @@ def dataMap(raw={}, book=None):
 
         delta = matching.pipelineDelta(d["header"]["utca"])
 
-        fiberMap = hw.fiberMap(fedId)
         for block in d["htrBlocks"].values():
             nPre = block["nPreSamples"]
             for channelData in block["channelData"].values():
                 mp = channelData.get("M&P", 0)
                 channel = channelData["FibCh"]
                 fiber = channelData["Fiber"]
-                fiber = fiberMap.get(fiber, fiber)
                 coords = (block["Crate"], block["Slot"], block["Top"], fiber, channel)
 
                 if channelData["ErrF"] not in matching.okErrF():

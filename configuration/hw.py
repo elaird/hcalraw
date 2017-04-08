@@ -6,13 +6,6 @@ def nFibers(utca):
     return 24 if utca else 8
 
 
-def fiberMap(fedId=None):
-    if 989 <= fedId <= 990:  # mCTR2d
-        return d2c()
-    else:
-        return {}
-
-
 def expectedVmeHtr(fedId, spigot):
     slot = spigot/2 + (13 if (fedId % 2) else 2)
     if slot == 19:  # DCC occupies slots 19-20
@@ -104,7 +97,7 @@ def transformed_tp(crate, slot, top, key):
     return (crate2, slot2, top2, key2)
 
 
-def d2c():
+def d2c():  # mCTR2d
     return {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
             7:   9,
             8:  11,
