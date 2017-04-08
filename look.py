@@ -90,19 +90,15 @@ def report(fileNames, iFind):
         print "Found %4d file(s) in %s/" % (len(fileNames), "/".join(bases))
 
 
-def override(options, quiet, run):
+def override(options, run, quiet):
     if not options.nEvents:
-        options.nEvents = 10
+        options.nEvents = 4
 
     options.progress = not quiet
     if options.dump == -1 and not quiet:
         options.dump = 0
 
-    # handle old BcN (http://cmsonline.cern.ch/cms-elog/849949)
-    if run <= 240698:
-        options.utcaBcnDelta = -131
-    else:
-        options.utcaBcnDelta = 0
+    options.outputFile = "output/%d.root" % run
 
 
 def opts():
@@ -130,10 +126,7 @@ def opts():
 
 def main(quiet=False):
     options, run = opts()
-
-    options.outputFile = "output/%d.root" % run
-
-    override(options, quiet, run)
+    override(options, run, quiet)
 
     if options.noLoop:  # skip file finding
         options.file1 = "dummy"
