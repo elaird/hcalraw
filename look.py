@@ -7,7 +7,7 @@ import oneRun
 import printer
 from options import oparser
 import optparse
-from configuration.sw import eosprefix
+from configuration import sw
 
 
 def eos():
@@ -30,20 +30,21 @@ def eos():
     sys.exit("ERROR: could not find eos.")
 
 
-def find1(run):
-    for local in ["/tmp/USC_%d.root" % run, "data/USC_%d.root" % run, "data/run%d.root" % run]:
-        if os.path.exists(local):
-            return local
+def this_machine(run):
+    out = []
+    for filename in sw.files_this_machine(run):
+        if os.path.exists(filename):
+            out.append(filename)
+    return out
 
 
-def find2(run):
-    if 287000 < run:
-        USC = "/store/group/dpg_hcal/comm_hcal/USC/run%d/USC_%d.root" % (run, run)
-    else:
-        USC = "/store/group/dpg_hcal/comm_hcal/USC/USC_%d.root" % run
-    stat = "%s stat %s" % (eos(), USC)
-    if not utils.commandOutputFull(stat)["returncode"]:
-        return "%s/%s" % (eosprefix, USC)
+def local_eos(run):
+    out = []
+    for filename in sw.files_eos_local(run):
+        if not utils.commandOutputFull("eos stat %s" % filename)["returncode"]:
+            out.append(filename)
+    return out
+
 
 def find_gr(run, grdir, hhmmMin=None, quiet=False):
     d = "%s/000/%03d/%03d/00000/" % (grdir, run/1000, run % 1000)
@@ -76,7 +77,7 @@ def find_gr(run, grdir, hhmmMin=None, quiet=False):
 
     files = [c[-1] for c in coords]
     if files:
-        l = ",".join(["%s/%s%s" % (eosprefix, d, f) for f in files])
+        l = ",".join(["%s/%s%s" % (sw.eosprefix, d, f) for f in files])
         return l
 
 
@@ -131,34 +132,32 @@ def opts():
     except ValueError:
         sys.exit("Could not convert %s to int." % args[0])
 
+    override(options, run)
     return options, run
 
 
 def main():
     options, run = opts()
-    override(options, run)
 
-    paths = {1: None, 2: None}
+    global_xrd = this_machine
+    for search_func in [this_machine, local_eos, global_xrd]:
+        files = search_func(run)
+        # options.file1 = find_gr(run, grDir, options.hhmm, quiet)
 
-    for iFind, grDir in sorted(paths.iteritems()):
-        if grDir is None:
-            options.file1 = eval("find%d" % iFind)(run)
-        else:
-            options.file1 = find_gr(run, grDir, options.hhmm, quiet)
-
-        if not options.file1:
+        if not files:
             continue
 
-        fileNames = options.file1.split(",")
-        report(fileNames, iFind)
-
-        n = len(fileNames)
-        if 2 <= n and options.hhmm is None:
-            options.sparseLoop = max(1, options.nEvents / n)
+        if 2 <= len(files):
+            fileNames = files.split(",")
+            n = len(fileNames)
+            if 2 <= n and options.hhmm is None:
+                options.sparseLoop = max(1, options.nEvents / n)
+            else:
+                options.sparseLoop = -1
+            # report(fileNames, iFind)
         else:
-            options.sparseLoop = -1
+            options.file1 = files[0]
 
-        options.file2 = ""  # clear from previous iterations
         if oneRun.main(options):
             continue
         else:
