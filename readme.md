@@ -27,11 +27,7 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 
 
 # compare payloads of different sets of FEDs, within one file
-./look.py 239480 --hf
-./oneRun.py --file1=$LS1/USC_239480.root --feds1=718,719 --feds2=HF \
---dump=0 --output-file=output/239480.root --progress \
- --utca-bcn-delta=-131 --no-warn-quality
-
+./look.py 239480 --feds1=718,719 --feds2=HF --dump=0 --utca-bcn-delta=-131 --no-warn-quality
 
 # dump decoded data to stdout
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702,931 \
@@ -48,10 +44,10 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 
 
 # analyze FE pattern runs
-# (before HO refibering) ./oneRun.py --file1=$LS1/USC_235576.root --feds1=HO  --plugins=patterns | ./diff.py data/ref_2014.txt
-# (before move to uTCA ) ./oneRun.py --file1=$LS1/USC_236631.root --feds1=7xy --plugins=patterns | ./diff.py data/ref_vme_G.txt
-./oneRun.py --file1=$LS1/USC_260773.root --feds1=HBEF --plugins=patterns | ./diff.py data/ref_utca_G.txt
-./oneRun.py --file1=$USC/USC_270688.root --feds1=HBEF --plugins=patterns | ./diff.py data/ref_utca_G.txt
+# (before HO refibering) ./look.py 235576 --feds1=HO  --plugins=patterns | ./diff.py data/ref_2014.txt
+# (before move to uTCA ) ./look.py 236631 --feds1=7xy --plugins=patterns | ./diff.py data/ref_vme_G.txt
+./look.py 260773 --feds1=HBEF --plugins=patterns | ./diff.py data/ref_utca_G.txt
+./look.py 270688 --feds1=HBEF --plugins=patterns | ./diff.py data/ref_utca_G.txt
 ./fiberId.sh 288606
 
 # read about usage
