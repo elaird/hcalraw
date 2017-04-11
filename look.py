@@ -127,7 +127,7 @@ def main():
 
     files = search(run)
     if not files:
-        sys.exit("Did not find a matching file for run %d.  Perhaps try 'source env/lxplus6.sh'" % run)
+        sys.exit("Did not find a matching file for run %d." % run)
 
     if 2 <= len(files):
         fileNames = files.split(",")
