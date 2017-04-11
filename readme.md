@@ -39,8 +39,11 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 --file2=data/mol_run55.root --feds2=931 --dump=0 --any-emap \
 --no-warn-quality --ok-errf=0,1 --utca-bcn-delta=-119
 
-./oneRun.py --file1=$USC/USC_211154.root --feds1=714,722 --nevents=51 --progress \
---file2=$USC/USC_211155.root --feds2=989 --utca-bcn-delta=-119 --any-emap --dump=0
+
+export EOS=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/archival/20160914_USC_Run1_runs133054-220908; \
+./oneRun.py --nevents=51 --progress --utca-bcn-delta=-119 --any-emap --no-warn-quality --dump=0 \
+--file1=${EOS}/USC_211154.root --feds1=714,722 \
+--file2=${EOS}/USC_211155.root --feds2=989
 
 
 # analyze FE pattern runs
@@ -74,7 +77,7 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 
 #### Environment (SLC6/AFS)
 (use exactly one of these)
-* `env/lxplus6.sh` sets up CMSSW, EOS, and the environment vars LS1,USC
+* `env/lxplus6.sh` sets up CMSSW and EOS
 * `env/slc6-pypy.sh` sets up pypyROOT (outside of CMSSW)
 * `env/slc6-root6.sh` sets up a ROOT 6 environment (outside of CMSSW)
 
