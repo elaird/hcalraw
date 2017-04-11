@@ -18,8 +18,9 @@ def files_this_machine(run, nCyclesMax=1):
 
 def files_eos_local(run):
     stem = "root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal"
-
-    if run < 264261:
+    if run < 220909:
+        filename = "%s/archival/20160914_USC_Run1_runs133054-220908/USC_%d.root" % (stem, run)
+    elif run < 264261:
         filename = "%s/archival/20160914_USC_LS1_runs212958-264260/USC_%d.root" % (stem, run)
     elif run < 280486:
         filename = "%s/USC/USC_%d.root" % (stem, run)
