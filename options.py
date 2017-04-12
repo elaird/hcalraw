@@ -105,7 +105,7 @@ def oparser(arg=""):
                         help="suppress warnings about problems with data quality")
     printing.add_option("--crateslots",
                         dest="crateslots",
-                        default=None,
+                        default="",
                         metavar="D",
                         help="list of (100*crate)+slot to dump, e.g. 917,2911")
 
