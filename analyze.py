@@ -16,16 +16,19 @@ def setup(plugin_names=[]):
     r.gROOT.SetBatch(True)
 
     if r.gROOT.GetVersionInt() < 60000:  # before ROOT6
-        for lib in [ "cdf", "cms"]:
-            if r.gSystem.Load("%s/cpp/%s.so" % (os.environ["PWD"], lib)):
-                sys.exit("Try this:\ncd cpp; make -j 5; cd -")
         r.gROOT.SetStyle("Plain")
     else:
-        r.gInterpreter.SetClassAutoloading(False)
-        r.gInterpreter.ProcessLine('#include "cpp/cdf.h"')
-        r.gInterpreter.ProcessLine('#include "cpp/cms.h"')
+        # FIXME
+        # r.gInterpreter.SetClassAutoloading(False)
+        # r.gInterpreter.ProcessLine('#include "cpp/cdf.h"')
+        # r.gInterpreter.ProcessLine('#include "cpp/cms.h"')
         # r.gInterpreter.ProcessLine('#include "cpp/FEDRawData.cc"')
         # r.gInterpreter.ProcessLine('#include "cpp/FEDRawDataCollection.h"')
+        pass
+
+    for lib in [ "cdf", "cms"]:
+        if r.gSystem.Load("%s/cpp/%s.so" % (os.environ["PWD"], lib)):
+            sys.exit("Try this:\ncd cpp; make -j 5; cd -")
 
     if sw.use_fwlite and utils.cmssw():
         r.gSystem.Load("libFWCoreFWLite.so")
