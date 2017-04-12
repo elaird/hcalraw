@@ -1,3 +1,5 @@
+import printer
+
 use_fwlite = False
 
 def files_this_machine(run, nCyclesMax=1):
@@ -52,13 +54,23 @@ def fedMap():
 
 
 def fedList(s=""):
-    d = fedMap()
-    if not s:
-        return []
-    if s in d:
-        return d[s]
+    out = []
 
-    out = [int(x) for x in s.split(",")]
+    d = fedMap()
+    for x in s.split(","):
+        if not x:
+            continue
+
+        y = d.get(x)
+        if y is None:
+            try:
+                y = int(x)
+                out.append(y)
+            except ValueError:
+                printer.warning("Could not convert '%s' to an integer" % x)
+        else:
+            out += y
+
     return out
 
 
