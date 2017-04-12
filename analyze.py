@@ -148,6 +148,38 @@ def chainLoop(chain, iEntryStart, iEntryStop, callback, progress=False, sparseLo
             iMask = reportProgress(iEntry, iEntry - iEntryStart, iMask)
 
 
+def shortList(lst):
+    # ./look.py 284928 --feds1=1118,HO,a,1119,1111,670
+    # ./look.py 284928 --feds1=1118,HO
+    # ./look.py 284928 --feds1=1118,1134,1135
+    # ./look.py 284928
+
+    s = ""
+    hyphen = False
+
+    l = sorted(lst)
+    for i, fed in enumerate(l):
+        if not i:
+            s += "%d" % fed
+            continue
+
+        last = i == len(l) - 1
+        prevFed = l[i - 1]
+        if fed == 1 + prevFed:
+            if last:
+                s += "-%d" % fed
+            else:
+                hyphen = True
+            continue
+
+        if hyphen:
+            s += "-%d,%d" % (prevFed, fed)
+        else:
+            s += ",%d" % fed
+        hyphen = False
+    return s
+
+
 def pruneFeds(chain, s, uargs):
     wargs = {}
 
@@ -177,8 +209,7 @@ def pruneFeds(chain, s, uargs):
         del wargs[fedId]
         # printer.warning("removing FED %4d from spec (%s)." % (fedId, msg))
     if remove:
-        printer.warning("No data from FED%s %s" % ("s" if 2 <= len(remove) else "",
-                                                   ",".join(["%d" % fedId for fedId in sorted(remove.keys())])))
+        printer.warning("No data from FED%s %s" % ("s" if 2 <= len(remove) else "", shortList(remove.keys())))
 
     if wargs:
         del s["fedIds"]
