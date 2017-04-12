@@ -494,11 +494,7 @@ def branches(tree):
 
 
 def inner_vars(outer, inner, mapOptions, oMapF, oMapB, oMapBcn):
-    iMapF = iMapB = iMapBcn = {}
-    if inner.get("fileNames") == outer["fileNames"]:
-        chainI = chain
-        innerEvent = {}
-    elif inner:
+    if inner:
         chainI = tchain(inner)
         iMapF, iMapB, iMapBcn = eventMaps(chainI, inner)
         if mapOptions["identityMap"]:
@@ -518,7 +514,7 @@ def inner_vars(outer, inner, mapOptions, oMapF, oMapB, oMapBcn):
                                        ]))
     else:
         chainI = None
-        innerEvent = {}
+        innerEvent = iMapF = iMapB = iMapBcn = {}
 
     return chainI, innerEvent, iMapF, iMapB, iMapBcn
 
