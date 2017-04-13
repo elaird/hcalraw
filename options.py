@@ -1,5 +1,4 @@
 import optparse
-import sys
 
 
 def oparser(arg=""):
@@ -191,10 +190,4 @@ def oparser(arg=""):
 
 def opts(arg=""):
     parser = oparser(arg)
-    options, args = parser.parse_args()
-
-    if args and not args:
-        parser.print_help()
-        sys.exit(1)
-
-    return options, args
+    return parser.parse_args()
