@@ -1,8 +1,6 @@
 import os
 import subprocess
 import sys
-import printer
-from configuration import hw
 
 
 def cmssw():
@@ -79,7 +77,7 @@ def ROOT():
         try:
             exec("import %s as r" % moduleName)
             if moduleName != "ROOT":
-                printer.msg("Using "+moduleName)
+                print "Using " + moduleName
             r.PyConfig.IgnoreCommandLineOptions = True
             return r
         except ImportError:
