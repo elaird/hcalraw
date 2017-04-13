@@ -1,5 +1,4 @@
 import os
-import struct
 import sys
 import time
 import utils
@@ -132,15 +131,10 @@ def eventMaps(chain, s={}, identityMap=False):
     if s["progress"]:
         print "Mapping %s:" % s["label"]
 
-    kargs = {"headerOnly": True,
-             "nBytesPer": s["nBytesPer"],
-             "skipWords64": s["skipWords64"],
-            }
-
     try:
         def fillEventMap2(chain, iEntry):
             if iEntry == nMapMin:
-                raw.pruneFeds(chain, s, kargs)
+                raw.pruneFeds(chain, s)
 
             return fillEventMap(iEntry, raw.unpackedHeader(s), forward, forwardBcn, backward)
 
