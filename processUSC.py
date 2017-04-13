@@ -1,22 +1,14 @@
 #!/usr/bin/env python
 
 import os
-import subprocess
 import sys
 import utils
-from look import eos
 
 
 def commandOutput(command):
-    p = subprocess.Popen(command,
-                         shell=True,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-    return {"command": command,
-            "stdout": stdout,
-            "stderr": stderr,
-            "returncode": p.returncode}
+    d = utils.commandOutputFull(command)
+    d["command"] = command
+    return d
 
 
 def stdout(cmd="", checkErr=True):
@@ -245,7 +237,7 @@ def go(baseDir="",
 
         if ready:
             fileName = "/store/group/dpg_hcal/comm_hcal/USC/USC_%d.root" % run
-            if utils.commandOutputFull("%s stat %s" % (eos(), fileName))["returncode"]:
+            if utils.commandOutputFull("eos stat %s" % fileName)["returncode"]:
                 not_found.append(run)
                 continue
             else:
