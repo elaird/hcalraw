@@ -2,6 +2,12 @@ nBx = 3564
 f_lhc = 40.079e6  # Hz
 
 
+def minutes(orn, bcn):
+    orn += float(bcn) / nBx
+    orbPerSec = f_lhc / nBx
+    return orn / orbPerSec / 60.0
+
+
 def nFibers(utca):
     return 24 if utca else 8
 
