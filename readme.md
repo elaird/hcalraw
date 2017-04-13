@@ -14,8 +14,6 @@ cd cpp; make -j 5; cd -
 ```bash
 # analyze several global runs
 cat gr_list.txt | ./multi.py --nevents=100
-cat gr_list.txt | ./dqReport.py
-
 
 # analyze AMC13/DCC2 monitor buffer dumps
 # HF (USC FEDs):
@@ -25,25 +23,21 @@ export FEDID=999
 cat foo.dat | cpp/badcoffee ${FEDID}
 ./oneRun.py --file1=badcoffee${FEDID}.root --feds1=${FEDID} --progress
 
-
 # compare payloads of different sets of FEDs, within one file
 ./look.py 239480 --feds1=718,719 --feds2=HF --dump=0 --utca-bcn-delta=-131 --no-warn-quality
 
 # dump decoded data to stdout
 ./look.py 55 --feds1=702,931 --nevents=1 --dump=4
 
-
 # compare payloads of different sets of FEDs, across two files
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 \
 --file2=data/mol_run55.root --feds2=931 --dump=0 --any-emap \
 --no-warn-quality --ok-errf=0,1 --utca-bcn-delta=-119
 
-
 export EOS=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/archival/20160914_USC_Run1_runs133054-220908; \
 ./oneRun.py --nevents=51 --progress --utca-bcn-delta=-119 --any-emap --no-warn-quality --dump=0 \
 --file1=${EOS}/USC_211154.root --feds1=714,722 \
 --file2=${EOS}/USC_211155.root --feds2=989
-
 
 # analyze FE pattern runs
 # (before HO refibering) ./look.py 235576 --feds1=HO  --plugins=patterns | ./diff.py data/ref_2014.txt
