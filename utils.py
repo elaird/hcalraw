@@ -10,10 +10,7 @@ def cmssw():
 
 
 def shortList(lst):
-    # ./look.py 284928 --feds1=1118,HO,a,1119,1111,670
-    # ./look.py 284928 --feds1=1118,HO
-    # ./look.py 284928 --feds1=1118,1134,1135
-    # ./look.py 284928
+    """ see test_transformation.py"""
 
     s = ""
     hyphen = False

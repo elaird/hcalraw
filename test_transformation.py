@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 
-from configuration.hw import transformed_qie, transformed_tp
+from configuration import hw, sw
+import utils
 
 
 def check(l):
@@ -18,8 +19,8 @@ def qie(crate=None, fibCh=None, slots=[], tops="", fibers=[]):
         for top in tops:
             for fiber in fibers:
                 c1 = (crate, slot, top, fiber, fibCh)
-                c2 = transformed_qie(*c1)
-                c3 = transformed_qie(*c2)
+                c2 = hw.transformed_qie(*c1)
+                c3 = hw.transformed_qie(*c2)
                 if c3 != c1:
                     print c1, c2, c3
                 l.append(c2)
@@ -34,8 +35,8 @@ def tp_vme_hf(crate=2, slb=6):
             for ch in chs:
                 key = (slb, ch)
                 c1 = (crate, slot, top, key)
-                c2 = transformed_tp(*c1)
-                # c3 = transformed_tp(*c2)
+                c2 = hw.transformed_tp(*c1)
+                # c3 = hw.transformed_tp(*c2)
                 # if c3 != c1:
                 #     print c1, c2, c3
                 l.append(c2)
@@ -45,12 +46,29 @@ def tp_vme_hf(crate=2, slb=6):
             for ch in chs:
                 key = (slb, ch)
                 c1 = (crate, slot, top, key)
-                c2 = transformed_tp(*c1)
-                # c3 = transformed_tp(*c2)
+                c2 = hw.transformed_tp(*c1)
+                # c3 = hw.transformed_tp(*c2)
                 # if c3 != c1:
                 #     print c1, c2, c3
                 l.append(c2)
     check(l)
+
+
+def shortlists():
+    for inp, out, in [(sw.fedList("HO"), "724-731"),
+                      (sw.fedList("1118,HO"), "724-731,1118"),
+                      (sw.fedList("HCAL"), "724-731,1100,1102,1104,1106,1108,1110,1112,1114,1116,1118-1123,1134"),
+                      (sw.fedList("1118,HO,1111,1118,670"), "670,724-731,1111,1118"),
+                      (sw.fedList("1118,HO,1111,670,671"), "670,671,724-731,1111,1118"),
+                      ([1118, 1134, 1135], "1118,1134,1135"),
+                      ]:
+        result = utils.shortList(inp)
+        if result != out:
+            print "Input:", inp
+            print "Expected: ", out
+            print "Result: ", result
+
+    return
 
 
 if __name__ == "__main__":
@@ -71,3 +89,5 @@ if __name__ == "__main__":
     )
 
     tp_vme_hf()
+
+    shortlists()
