@@ -1,6 +1,9 @@
 from configuration import hw, matching
 import printer
-import utils
+
+
+def msg_coords(fedId, evn, orn, bcn):
+    return "FED %4d / EvN 0x%06x (OrN 0x%08x BcN %04d)" % (fedId, evn, orn, bcn)
 
 
 def flavor(book, d, fedId):
@@ -370,7 +373,7 @@ def singleFedPlots(fedId=None, d={}, book={}, **other):
         printer.error("FED %d lacks EvN.  Keys: %s" % str(h.keys()))
         msg = ""
     else:
-        msg = utils.coords(fedId, fedEvn, fedOrn, fedBcn)
+        msg = msg_coords(fedId, fedEvn, fedOrn, fedBcn)
 
     htrOverviewBits(h, book, fedId, msg=msg, warn=other["warn"])
 
