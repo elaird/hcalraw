@@ -79,7 +79,7 @@ export EOS=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/archival/201609
 (use exactly one of these)
 * `env/lxplus6.sh` sets up CMSSW and EOS
 * `env/slc6-pypy.sh` sets up pypyROOT (outside of CMSSW)
-* `env/slc6-root6.sh` sets up a ROOT 6 environment (outside of CMSSW)
+* `env/cc7-cvmfs.sh` sets up a ROOT 6 environment on cc7
 
 
 #### Files
@@ -89,18 +89,19 @@ export EOS=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/archival/201609
 * `cpp/[mol,deadbeef,badcoffee,rooter].cpp` make .root files from binary event dumps
 * `analyze.py` loops over .root file(s) for one run and produces output/Runxxx.root
 * `autoBook.py` is copied from github.com/elaird/supy/`__autoBook__.py`
-* `configuration/` holds some settings that are used by analyze.py
-* `decode.py` interprets a FED's bytes in an event (called by analyze.unpacked)
+* `configuration/` holds some settings used by `analyze.py`, `plugins/`, etc.
+* `decode.py` interprets a FED's bytes in an event (called by raw.unpacked)
 * `diff.py` compares the decoded output of a FiberID run to data/ref.txt
-* `dumps2root2pdf.py` converts binary event dumps to .root files and analyzes them
+* `dumps2root2pdf-HF.py` converts binary event dumps to .root files and analyzes them
 * `graphs.py` reads in output/Runxxx.root, makes plots, and outputs a .pdf
 * `look.py` will find a file in EOS (or locally) for a given run and loop over it
 * `make_fiberid_references.py` produces FiberID reference files from HCAL logical maps
 * `oneRun.py` is used to analyze one run (see examples above)
-* `options.py` parses command line options for `oneRun.py` or `dumps2root2pdf.py`
-* `printer.py` contains a utility class for printing messages
+* `options.py` parses command line options for `oneRun.py`, `look.py`, or `dumps2root2pdf-HF.py`
+* `printer.py` contains utility functions for printing messages
 * `processUSC.py` loops over available USC local runs and processes them
-* `test_transformation.py` tests `configuration.hw.transformed*`
+* `raw.py` reads and unpacks raw data
+* `test_transformation.py` tests `configuration.hw.transformed*` and `utils.shortList`
 * `utils.py` contains helper functions
 
 #### plugins/
