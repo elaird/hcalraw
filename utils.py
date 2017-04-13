@@ -15,7 +15,7 @@ def shortList(lst):
     s = ""
     hyphen = False
 
-    l = sorted(lst)
+    l = sorted(set(lst))
     for i, fed in enumerate(l):
         if not i:
             s += "%d" % fed
