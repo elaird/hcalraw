@@ -62,14 +62,13 @@ def pruneFeds(chain, s):
             wargs[fedId]["branch"] = s["branch"](fedId)
 
         raw = wfunc(**wargs[fedId])
-        if raw:
-            if not unpacked(fedData=raw,
-                            nBytesPer=s["nBytesPer"],
-                            skipWords64=s["skipWords64"],
-                            headerOnly=True).get("nBytesSW"):
-                remove[fedId] = "read zero bytes"
-        else:
+        if not raw:
             remove[fedId] = "no branch %s" % wargs[fedId].get("branch")
+        elif not unpacked(fedData=raw,
+                          nBytesPer=s["nBytesPer"],
+                          skipWords64=s["skipWords64"],
+                          headerOnly=True).get("nBytesSW"):
+            remove[fedId] = "read zero bytes"
 
     for fedId, msg in sorted(remove.iteritems()):
         del wargs[fedId]
