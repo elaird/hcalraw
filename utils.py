@@ -13,6 +13,38 @@ def coords(fedId, evn, orn, bcn):
     return "FED %4d / EvN 0x%06x (OrN 0x%08x BcN %04d)" % (fedId, evn, orn, bcn)
 
 
+def shortList(lst):
+    # ./look.py 284928 --feds1=1118,HO,a,1119,1111,670
+    # ./look.py 284928 --feds1=1118,HO
+    # ./look.py 284928 --feds1=1118,1134,1135
+    # ./look.py 284928
+
+    s = ""
+    hyphen = False
+
+    l = sorted(lst)
+    for i, fed in enumerate(l):
+        if not i:
+            s += "%d" % fed
+            continue
+
+        last = i == len(l) - 1
+        prevFed = l[i - 1]
+        if fed == 1 + prevFed:
+            if last:
+                s += "-%d" % fed
+            else:
+                hyphen = True
+            continue
+
+        if hyphen:
+            s += "-%d,%d" % (prevFed, fed)
+        else:
+            s += ",%d" % fed
+        hyphen = False
+    return s
+
+
 def commandOutput(cmd=""):
     return commandOutputFull(cmd="")["stdout"].split()
 
