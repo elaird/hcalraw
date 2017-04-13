@@ -6,8 +6,6 @@ cd hcalraw
 source env/lxplus6.sh
 cd cpp; make -j 5; cd -
 
-
-# analyze a global or local run
 ./look.py 284928
 ./look.py 289555 --nevents=1 --dump=8
 ```
@@ -32,8 +30,7 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 ./look.py 239480 --feds1=718,719 --feds2=HF --dump=0 --utca-bcn-delta=-131 --no-warn-quality
 
 # dump decoded data to stdout
-./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702,931 \
---nevents=1 --dump=4
+./look.py 55 --feds1=702,931 --nevents=1 --dump=4
 
 
 # compare payloads of different sets of FEDs, across two files

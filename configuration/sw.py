@@ -7,6 +7,7 @@ def files_this_machine(run, nCyclesMax=1):
     for stem in ["data/USC_",
                  "data/run",
                  "/tmp/USC_",
+                 "data/B904_Integration_0000",
                  "/localdata/B904_Integration_",
                  "/localdata/B904_Integration_10000"]:
         for iCycle in range(nCyclesMax):
