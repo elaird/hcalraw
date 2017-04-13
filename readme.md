@@ -74,11 +74,11 @@ export EOS=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/archival/201609
 * [ROOT](https://root.cern.ch/) (>=5.32)
 
 
-#### Environment (SLC6/AFS)
+#### Environment
 (use exactly one of these)
+* `env/cc7-cvmfs.sh` sets up a ROOT 6 environment on cc7
 * `env/lxplus6.sh` sets up CMSSW and EOS
 * `env/slc6-pypy.sh` sets up pypyROOT (outside of CMSSW)
-* `env/cc7-cvmfs.sh` sets up a ROOT 6 environment on cc7
 
 
 #### Files
