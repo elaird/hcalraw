@@ -4,7 +4,7 @@ import os
 import sys
 import graphs
 import oneRun
-from options import opts
+from options import oparser
 
 
 def bail(dat, fields, reason):
@@ -135,5 +135,9 @@ def plot(prefix, roots, feds1s, feds2s):
 
 
 if __name__ == "__main__":
-    options, args = opts(arg=".dat [.dat ...]")
+    options, args = oparser(arg=".dat [.dat ...]").parse_args()
+
+    if not args:
+        sys.exit("Please provide at least one .dat file as an argument")
+
     plot(*histogrammed(*rooted(args, options)))
