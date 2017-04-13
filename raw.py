@@ -4,6 +4,7 @@ r = utils.ROOT()
 from configuration import sw
 import decode
 import printer
+import struct
 
 
 def tchain(spec, cacheSizeMB=None):
@@ -42,7 +43,7 @@ def tchain(spec, cacheSizeMB=None):
     return chain
 
 
-def pruneFeds(chain, s, uargs):
+def pruneFeds(chain, s):
     wargs = {}
 
     remove = {}
@@ -62,14 +63,17 @@ def pruneFeds(chain, s, uargs):
 
         raw = wfunc(**wargs[fedId])
         if raw:
-            if not unpacked(fedData=raw, **uargs).get("nBytesSW"):
+            if not unpacked(fedData=raw,
+                            nBytesPer=s["nBytesPer"],
+                            skipWords64=s["skipWords64"],
+                            headerOnly=True).get("nBytesSW"):
                 remove[fedId] = "read zero bytes"
         else:
             remove[fedId] = "no branch %s" % wargs[fedId].get("branch")
 
     for fedId, msg in sorted(remove.iteritems()):
         del wargs[fedId]
-        printer.warning("removing FED %4d from spec (%s)." % (fedId, msg))
+        # printer.warning("removing FED %4d from spec (%s)." % (fedId, msg))
     if remove:
         printer.warning("No data from FED%s %s" % ("s" if 2 <= len(remove) else "", utils.shortList(remove.keys())))
 
