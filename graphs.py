@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 
-from options import opts
-from configuration import sw
 import array
 import math
 import collections
@@ -1201,7 +1199,3 @@ all_pages = ["overview", "vs", "page3",
              # "ts",
              # "ts0",
              ]
-
-
-if __name__ == "__main__":
-    main(opts()[0])
