@@ -306,7 +306,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
     if te_tdc:
         columns += [" T0 T1 T2 T3 T4 T5 T6 T7 T8 T9"]
     if latency:
-        columns += [" ", " EF", "Cnt", "IDLE"]
+        columns += ["", "EF", "Cnt", "IDLE"]
     if zs:
         columns += [" ", "ZS?"]
     out.append(" ".join(columns))
@@ -337,12 +337,12 @@ def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
         if latency:
             dct = latency.get("Fiber%d" % data["Fiber"])
             if dct and data["FibCh"] == 1:
-                lat = [" "*4,
+                lat = [" ",
                        "%s%s" % (dct["Empty"], dct["Full"]),
-                       "%3d" % dct["Cnt"],
+                       "%2d " % dct["Cnt"],
                        "%4d" % dct["IdleBCN"],
                 ]
-                out[-1] += "  ".join(lat)
+                out[-1] += " ".join(lat)
         if zs:
             iChannel = 3*(data["Fiber"] - 1) + data["FibCh"]
             marks = zs["DigiMarks"]
