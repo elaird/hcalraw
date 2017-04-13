@@ -10,8 +10,10 @@ cd cpp; make -j 5; cd -
 # analyze a global or local run
 ./look.py 284928
 ./look.py 289555 --nevents=1 --dump=8
+```
 
-
+#### More Examples
+```bash
 # analyze several global runs
 cat gr_list.txt | ./multi.py --nevents=100
 cat gr_list.txt | ./dqReport.py
