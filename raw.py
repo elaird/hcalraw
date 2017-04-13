@@ -3,8 +3,44 @@ r = utils.ROOT()
 
 from configuration import sw
 import decode
+import os
 import printer
 import struct
+import sys
+
+
+def setup_root():
+    r.gROOT.SetBatch(True)
+
+    if r.gROOT.GetVersionInt() < 60000:  # before ROOT6
+        r.gROOT.SetStyle("Plain")
+    else:
+        # FIXME
+        # r.gInterpreter.SetClassAutoloading(False)
+        # r.gInterpreter.ProcessLine('#include "cpp/cdf.h"')
+        # r.gInterpreter.ProcessLine('#include "cpp/cms.h"')
+        # r.gInterpreter.ProcessLine('#include "cpp/FEDRawData.cc"')
+        # r.gInterpreter.ProcessLine('#include "cpp/FEDRawDataCollection.h"')
+        pass
+
+    for lib in [ "cdf", "cms"]:
+        if r.gSystem.Load("%s/cpp/%s.so" % (os.environ["PWD"], lib)):
+            sys.exit("Try this:\ncd cpp; make -j 5; cd -")
+
+    if sw.use_fwlite and utils.cmssw():
+        r.gSystem.Load("libFWCoreFWLite.so")
+        r.AutoLibraryLoader.enable()
+
+        libs = ["DataFormatsFEDRawData"]
+        if os.environ["CMSSW_RELEASE_BASE"]:
+            base = os.environ["CMSSW_RELEASE_BASE"]
+        else:
+            base = os.environ["CMSSW_BASE"]
+        libPath = "/".join([base, "lib", os.environ["SCRAM_ARCH"]])
+        r.gSystem.SetLinkedLibs(" -L"+libPath+" -l".join([""]+libs))
+    else:
+        # TClass::TClass:0: RuntimeWarning: no dictionary for class x::y::z is available
+        r.gErrorIgnoreLevel = r.kError
 
 
 def tchain(spec, cacheSizeMB=None):
