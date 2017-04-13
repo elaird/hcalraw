@@ -1,5 +1,5 @@
+from configuration import hw
 import printer
-import utils
 
 
 def printraw(raw1={}, raw2={}, **_):
@@ -400,7 +400,7 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
                  "0x%07x" % h["EvN"],
                  "0x%08x" % h["OrN"],
                  "%4d" % h["BcN"],
-                 "%7.3f" % utils.minutes(h["OrN"], h["BcN"]),
+                 "%7.3f" % hw.minutes(h["OrN"], h["BcN"]),
                  ("  %1x" % t["TTS"]) if "TTS" in t else "  - ",
                  "    %5d(%5d)" % (t["nWord64"]*8 if "nWord64" in t else "  -1", d["nBytesSW"]),
                  "  %1d " % h["Evt_ty"],

@@ -523,7 +523,7 @@ def category_vs_time(oMap={}, oMapBcn={}, iMap={}, iMapBcn={}, innerEvent={}):
     d = {}
     for oEntry, (evn, orn) in oMap.iteritems():
         bcn = oMapBcn[oEntry]
-        time = utils.minutes(orn, bcn)
+        time = hw.minutes(orn, bcn)
         if innerEvent.get(oEntry) is not None:
             d[time] = (3, evn, orn, bcn)
         else:
@@ -534,7 +534,7 @@ def category_vs_time(oMap={}, oMapBcn={}, iMap={}, iMapBcn={}, innerEvent={}):
         if iEntry in iEntries:
             continue
         bcn = iMapBcn[iEntry]
-        time = utils.minutes(orn, bcn)
+        time = hw.minutes(orn, bcn)
         d[time] = (1, evn, orn, bcn)
 
     return d

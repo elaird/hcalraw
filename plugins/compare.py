@@ -374,7 +374,7 @@ def singleFedPlots(fedId=None, d={}, book={}, **other):
 
     htrOverviewBits(h, book, fedId, msg=msg, warn=other["warn"])
 
-    fedTime = utils.minutes(fedOrn, fedBcn)
+    fedTime = hw.minutes(fedOrn, fedBcn)
 
     nBadHtrs, ErrF, caps, adcs, fracEvN, fracADC, fracTP = htrSummary(blocks=d["htrBlocks"].values(),
                                                                       book=book,
