@@ -12,20 +12,25 @@ import sys
 def setup_root():
     r.gROOT.SetBatch(True)
 
+    load_libs = False
     if r.gROOT.GetVersionInt() < 60000:  # before ROOT6
         r.gROOT.SetStyle("Plain")
+        load_libs = True
+
+    if not utils.cmssw():
+        load_libs = True
+
+    if load_libs:
+        for lib in ["cdf", "cms"]:
+            if r.gSystem.Load("%s/cpp/%s.so" % (os.environ["PWD"], lib)):
+                sys.exit("Try this:\ncd cpp; make -j 5; cd -")
     else:
         # FIXME
-        # r.gInterpreter.SetClassAutoloading(False)
-        # r.gInterpreter.ProcessLine('#include "cpp/cdf.h"')
-        # r.gInterpreter.ProcessLine('#include "cpp/cms.h"')
+        r.gInterpreter.SetClassAutoloading(False)
+        r.gInterpreter.ProcessLine('#include "cpp/cdf.h"')
+        r.gInterpreter.ProcessLine('#include "cpp/cms.h"')
         # r.gInterpreter.ProcessLine('#include "cpp/FEDRawData.cc"')
         # r.gInterpreter.ProcessLine('#include "cpp/FEDRawDataCollection.h"')
-        pass
-
-    for lib in [ "cdf", "cms"]:
-        if r.gSystem.Load("%s/cpp/%s.so" % (os.environ["PWD"], lib)):
-            sys.exit("Try this:\ncd cpp; make -j 5; cd -")
 
     if sw.use_fwlite and utils.cmssw():
         r.gSystem.Load("libFWCoreFWLite.so")
