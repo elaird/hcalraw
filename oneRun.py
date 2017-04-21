@@ -63,7 +63,10 @@ def go(options):
         if value:
             kargs["files%d" % iFile] = value.split(",")
 
-    return analyze.oneRun(**kargs)
+    if options.noLoop:
+        return 0, kargs["feds1"], kargs["feds2"]
+    else:
+        return analyze.oneRun(**kargs)
 
 
 def main(options):
@@ -75,19 +78,17 @@ def main(options):
     if options.noColor:
         printer.__color = False
 
-    goCode = 0
-    feds1 = []
-    feds2 = []
-
     analyze.setup(options.plugins)
 
-    if not options.noLoop:
-        if options.profile:
-            import cProfile
-            cProfile.runctx("go(options)", globals(), locals(), sort="time")
-            # FIXME: goCode, feds1, feds2
-        else:
-            goCode, feds1, feds2 = go(options)
+    if options.profile:
+        import cProfile
+        cProfile.runctx("go(options)", globals(), locals(), sort="time")
+        # FIXME
+        goCode = 0
+        feds1 = []
+        feds2 = []
+    else:
+        goCode, feds1, feds2 = go(options)
 
     if feds2 and 0 <= options.dump:
         analyze.printChannelSummary(options.outputFile)
