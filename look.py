@@ -78,11 +78,6 @@ def override(options, run):
         if options.dump == -1:
             options.dump = 0
 
-    if options.noLoop:  # skip file finding
-        options.file1 = "dummy"
-        oneRun.main(options)
-        sys.exit()
-
 
 def opts():
     parser = oparser(arg="RUN_NUMBER")
@@ -125,7 +120,8 @@ def search(run):
 def main():
     options, run = opts()
 
-    files = search(run)
+    files = ["dummy"] if options.noLoop else search(run)
+
     if not files:
         sys.exit("Did not find a matching file for run %d." % run)
 
