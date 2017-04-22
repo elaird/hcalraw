@@ -22,7 +22,7 @@ def setup_root():
 
     if load_libs:
         for lib in ["cdf", "cms"]:
-            if r.gSystem.Load("%s/cpp/%s.so" % (os.environ["PWD"], lib)):
+            if r.gSystem.Load("%s/cpp/%s.so" % (os.environ["PWD"], lib)) < 0:
                 sys.exit("Try this:\ncd cpp; make -j 5; cd -")
     else:
         # FIXME
