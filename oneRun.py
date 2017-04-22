@@ -24,7 +24,7 @@ def subset(options, l, process=False, invert=False):
     return out
 
 
-def check_and_adjust(options):
+def check(options):
     if not all([options.file1, options.feds1]):
         sys.exit("--file1 and --feds1 are required (see './oneRun.py --help').")
     if not options.outputFile.endswith(".root"):
@@ -34,51 +34,44 @@ def check_and_adjust(options):
             sys.exit("--sparse-loop does not work with --file2")
         if options.nEventsSkip:
             sys.exit("--sparse-loop does not work with --nevents-skip")
-    if options.feds2 and (not options.file2) and (not options.noLoop):
-        # print "INFO: using --file1 also for --file2; also using identity map"
-        options.file2 = options.file1
-        options.identityMap = True
-
-    options.plugins = options.plugins.split(",")
-    if "patterns" in options.plugins:
-        printer.info("setting nEvents=1 ('patterns' was in list of plugins)")
-        options.nEvents = 1
-
-    if 1 <= options.dump and "printraw" not in options.plugins:
-        # printer.info("adding printraw to list of plugins ('--dump' was at least 1)")
-        options.plugins.append("printraw")
 
 
 def go(options):
+    matching.__okErrF = sw.fedList(options.okErrF)
+    matching.__utcaBcnDelta = options.utcaBcnDelta
+    matching.__utcaPipelineDelta = options.utcaPipelineDelta
+    printer.__color = not options.noColor
+
     kargs = subset(options, ["feds1", "feds2"], process=True)
     kargs.update(subset(options, ["nEvents", "nEventsSkip", "outputFile", "noUnpack", "sparseLoop", "plugins"]))
     kargs["compareOptions"] = subset(options, ["anyEmap", "printEmap", "printMismatches", "fewerHistos"])
     kargs["mapOptions"] = subset(options, ["printEventMap", "identityMap"])
     kargs["printOptions"] = subset(options, ["dump", "progress"])
     kargs["printOptions"].update(subset(options, ["noWarnUnpack", "noWarnQuality"], invert=True))
-    kargs["printOptions"]["crateslots"] = sw.fedList(options.crateslots)
+    kargs["printOptions"].update(subset(options, ["crateslots"], process=True))
 
     for iFile in [1, 2]:
         value = getattr(options, "file%d" % iFile)
         if value:
             kargs["files%d" % iFile] = value.split(",")
 
+    if kargs["feds2"] and not kargs.get("files2"):
+        kargs["files2"] = kargs["files1"]
+        kargs["mapOptions"]["identityMap"] = True
+
+    kargs["plugins"] = options.plugins.split(",")
+    if 1 <= options.dump and "printraw" not in kargs["plugins"]:
+        kargs["plugins"].append("printraw")
+
     if options.noLoop:
         return 0, kargs["feds1"], kargs["feds2"]
     else:
+        analyze.setup(kargs["plugins"])
         return analyze.oneRun(**kargs)
 
 
 def main(options):
-    check_and_adjust(options)
-
-    matching.__okErrF = sw.fedList(options.okErrF)
-    matching.__utcaBcnDelta = options.utcaBcnDelta
-    matching.__utcaPipelineDelta = options.utcaPipelineDelta
-    if options.noColor:
-        printer.__color = False
-
-    analyze.setup(options.plugins)
+    check(options)
 
     if options.profile:
         import cProfile
