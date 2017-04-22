@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import optparse, os, sys
-import oneRun, utils
+import optparse, os
+import oneRun, printer, utils
 from options import oparser
 from configuration import sw
 
@@ -58,14 +58,14 @@ def find_gr(run, grdir, hhmmMin=None, quiet=False):
         return l
 
 
-def report(fileNames, iFind):
+def report(run, fileNames):
     pieces = [f.split("/") for f in fileNames]
     bases = set(["/".join(piece[:-1]) for piece in pieces])
     assert len(bases) == 1, bases
-    if len(fileNames) == 1 and iFind <= 2:
-        print "Found matching file: %s" % fileNames[0]
+    if len(fileNames) == 1:
+        print "Run %d: found matching file %s" % (run, fileNames[0])
     else:
-        print "Found %4d file(s) in %s/" % (len(fileNames), "/".join(bases))
+        print "Run %d: found %4d file(s) in %s/" % (run, len(fileNames), "/".join(bases))
 
 
 def override(options, run):
@@ -80,7 +80,7 @@ def override(options, run):
 
 
 def opts():
-    parser = oparser(arg="RUN_NUMBER")
+    parser = oparser(arg="RUN_NUMBER [RUN_NUMBER2 ...]")
 
     look = optparse.OptionGroup(parser, "Options solely for use with look.py")
     look.add_option("--quiet",
@@ -97,15 +97,17 @@ def opts():
 
     options, args = parser.parse_args()
 
-    if len(args) != 1:
-        sys.exit("Please provide a run number as the argument.")
-    try:
-        run = int(args[0])
-    except ValueError:
-        sys.exit("Could not convert %s to int." % args[0])
+    runs = []
+    for arg in args:
+        try:
+            runs.append(int(arg))
+        except ValueError:
+            printer.warning("Could not convert '%s' to an integer." % arg)
 
-    override(options, run)
-    return options, run
+    if not runs:
+        printer.error("Please provide a run number as the argument.")
+
+    return options, runs
 
 
 def search(run):
@@ -117,28 +119,37 @@ def search(run):
             return files
 
 
-def main():
-    options, run = opts()
+def go(options, run):
+    override(options, run)
 
     files = ["dummy"] if options.noLoop else search(run)
 
     if not files:
-        sys.exit("Did not find a matching file for run %d." % run)
+        printer.warning("Did not find a matching file for run %d." % run)
+        return
 
-    if 2 <= len(files):
-        fileNames = files.split(",")
-        n = len(fileNames)
-        if 2 <= n and options.hhmm is None:
-            options.sparseLoop = max(1, options.nEvents / n)
+    nFiles = len(files)
+    if 2 <= nFiles:
+        if 2 <= nFiles and options.hhmm is None:
+            options.sparseLoop = max(1, options.nEvents / nFiles)
         else:
             options.sparseLoop = -1
-        # report(fileNames, iFind)
     else:
         options.file1 = files[0]
         if "B904" in options.file1 and options.feds1 == "HCAL":
             options.feds1 = "B904"
 
+    if not options.quiet:
+        report(run, files)
+
     oneRun.main(options)
+
+
+def main():
+    options, runs = opts()
+
+    for run in runs:
+        go(options, run)
 
 
 if __name__ == "__main__":
