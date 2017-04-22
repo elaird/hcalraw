@@ -186,8 +186,3 @@ def oparser(arg=""):
     parser.add_option_group(matchCh)
 
     return parser
-
-
-def opts(arg=""):
-    parser = oparser(arg)
-    return parser.parse_args()

@@ -5,7 +5,7 @@ import printer
 import graphs
 import sys
 from configuration import sw, matching
-from options import opts
+from options import oparser
 
 
 def subset(options, l, process=False, invert=False):
@@ -22,18 +22,6 @@ def subset(options, l, process=False, invert=False):
         else:
             out[item] = value
     return out
-
-
-def check(options):
-    if not all([options.file1, options.feds1]):
-        sys.exit("--file1 and --feds1 are required (see './oneRun.py --help').")
-    if not options.outputFile.endswith(".root"):
-        sys.exit("--output-file must end with .root (%s)" % options.outputFile)
-    if 0 <= options.sparseLoop:
-        if options.file2:
-            sys.exit("--sparse-loop does not work with --file2")
-        if options.nEventsSkip:
-            sys.exit("--sparse-loop does not work with --nevents-skip")
 
 
 def go(options):
@@ -70,9 +58,23 @@ def go(options):
         return analyze.oneRun(**kargs)
 
 
-def main(options):
-    check(options)
+def opts():
+    options, _ = oparser().parse_args()
 
+    if not all([options.file1, options.feds1]):
+        sys.exit("--file1 and --feds1 are required (see './oneRun.py --help').")
+    if not options.outputFile.endswith(".root"):
+        sys.exit("--output-file must end with .root (%s)" % options.outputFile)
+    if 0 <= options.sparseLoop:
+        if options.file2:
+            sys.exit("--sparse-loop does not work with --file2")
+        if options.nEventsSkip:
+            sys.exit("--sparse-loop does not work with --nevents-skip")
+
+    return options
+
+
+def main(options):
     if options.profile:
         import cProfile
         cProfile.runctx("go(options)", globals(), locals(), sort="time")
@@ -93,4 +95,4 @@ def main(options):
 
 
 if __name__ == "__main__":
-    main(opts()[0])
+    main(opts())
