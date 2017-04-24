@@ -20,7 +20,7 @@ def oparser(arg=""):
 
     common = optparse.OptionGroup(parser, "Misc options")
     common.add_option("--nevents",
-                      dest="nEvents",
+                      dest="nEventsMax",
                       default=0,
                       metavar="N",
                       type="int",
