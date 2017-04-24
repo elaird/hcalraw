@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import optparse, os
-import oneRun, printer, utils
+import graphs, oneRun, printer, utils
 from options import oparser
 from configuration import sw
 
@@ -126,7 +126,7 @@ def go(options, run):
 
     if not files:
         printer.warning("Did not find a matching file for run %d." % run)
-        return
+        return 1, None, None
 
     nFiles = len(files)
     if 2 <= nFiles:
@@ -142,14 +142,29 @@ def go(options, run):
     if not options.quiet:
         report(run, files)
 
-    oneRun.main(options)
+    return oneRun.main(options)
 
 
 def main():
     options, runs = opts()
 
+    roots = []
+    feds1s = []
+    feds2s = []
     for run in runs:
-        go(options, run)
+        retCode, feds1, feds2 = go(options, run)
+        if not retCode:
+            roots.append(options.outputFile)
+            feds1s.append(feds1)
+            feds2s.append(feds2)
+
+    if 2 <= len(roots):
+        for i, stem in enumerate(graphs.all_pages):
+            graphs.makeSummaryPdfMulti(inputFiles=roots,
+                                       feds1s=feds1s,
+                                       feds2s=feds2s,
+                                       pdf="output/%d_%s.pdf" % (1 + i, stem),
+                                       pages=[stem])
 
 
 if __name__ == "__main__":
