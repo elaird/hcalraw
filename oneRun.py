@@ -24,7 +24,17 @@ def subset(options, l, process=False, invert=False):
     return out
 
 
-def go(options):
+def processed(options):
+    if not all([options.file1, options.feds1]):
+        sys.exit("--file1 and --feds1 are required (see './oneRun.py --help').")
+    if not options.outputFile.endswith(".root"):
+        sys.exit("--output-file must end with .root (%s)" % options.outputFile)
+    if 0 <= options.sparseLoop:
+        if options.file2:
+            sys.exit("--sparse-loop does not work with --file2")
+        if options.nEventsSkip:
+            sys.exit("--sparse-loop does not work with --nevents-skip")
+
     matching.__okErrF = sw.fedList(options.okErrF)
     matching.__utcaBcnDelta = options.utcaBcnDelta
     matching.__utcaPipelineDelta = options.utcaPipelineDelta
@@ -51,39 +61,25 @@ def go(options):
     if 1 <= options.dump and "printraw" not in kargs["plugins"]:
         kargs["plugins"].append("printraw")
 
-    if options.noLoop:
-        return 0, kargs["feds1"], kargs["feds2"]
-    else:
-        analyze.setup(kargs["plugins"])
-        return analyze.oneRun(**kargs)
-
-
-def opts():
-    options, _ = oparser().parse_args()
-
-    if not all([options.file1, options.feds1]):
-        sys.exit("--file1 and --feds1 are required (see './oneRun.py --help').")
-    if not options.outputFile.endswith(".root"):
-        sys.exit("--output-file must end with .root (%s)" % options.outputFile)
-    if 0 <= options.sparseLoop:
-        if options.file2:
-            sys.exit("--sparse-loop does not work with --file2")
-        if options.nEventsSkip:
-            sys.exit("--sparse-loop does not work with --nevents-skip")
-
-    return options
+    return kargs
 
 
 def main(options):
-    if options.profile:
+    kargs = processed(options)
+    analyze.setup(kargs["plugins"])
+
+    retCode = 0
+    feds1 = kargs["feds1"]
+    feds2 = kargs["feds2"]
+
+    if options.noLoop:
+        pass
+    elif options.profile:
         import cProfile
-        cProfile.runctx("go(options)", globals(), locals(), sort="time")
-        # FIXME
-        goCode = 0
-        feds1 = []
-        feds2 = []
+        cProfile.runctx("analyze.oneRun(**kargs)", globals(), locals(), sort="time")
+        # FIXME: retCode, feds1, feds2
     else:
-        goCode, feds1, feds2 = go(options)
+        retCode, feds1, feds2 = analyze.oneRun(**kargs)
 
     if feds2 and 0 <= options.dump:
         analyze.printChannelSummary(options.outputFile)
@@ -91,8 +87,8 @@ def main(options):
     if not options.noPlot:
         graphs.main(options.outputFile, feds1, feds2)
 
-    return goCode
+    return retCode, feds1, feds2
 
 
 if __name__ == "__main__":
-    main(opts())
+    main(oparser().parse_args()[0])
