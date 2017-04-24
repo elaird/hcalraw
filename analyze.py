@@ -11,9 +11,8 @@ import plugins
 import raw
 
 
-def setup(plugin_names=[]):
-    raw.setup_root()
-    for p in plugin_names:
+def import_plugins(names=[]):
+    for p in names:
         exec("from plugins import %s" % p)
 
 
@@ -295,7 +294,8 @@ def printEventSummary(outer, inner):
 def go(outer={}, inner={}, outputFile="",
        mapOptions={}, options={}):
 
-    setup(outer["plugins"])
+    raw.setup_root()
+    import_plugins(outer["plugins"])
     outer.update(fileSpec(outer["fileNames"]))
     if inner:
         inner.update(fileSpec(inner["fileNames"]))
