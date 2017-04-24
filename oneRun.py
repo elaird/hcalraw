@@ -4,7 +4,8 @@ import analyze
 import printer
 import graphs
 import sys
-from configuration import sw, matching
+from configuration import matching
+from configuration.sw import fedList
 from options import oparser
 
 
@@ -15,7 +16,7 @@ def subset(options, l, process=False, invert=False):
     for item in l:
         value = getattr(options, item)
         if process:
-            out[item] = sw.fedList(value)
+            out[item] = fedList(value)
         elif invert:
             # "noFoo": True --> "foo": False
             out[item[2].lower() + item[3:]] = not value
@@ -29,57 +30,63 @@ def processed(options):
         sys.exit("--file1 and --feds1 are required (see './oneRun.py --help').")
     if not options.outputFile.endswith(".root"):
         sys.exit("--output-file must end with .root (%s)" % options.outputFile)
+    if options.file2 and not options.feds2:
+        sys.exit("--file2 requires --feds2")
     if 0 <= options.sparseLoop:
         if options.file2:
             sys.exit("--sparse-loop does not work with --file2")
         if options.nEventsSkip:
             sys.exit("--sparse-loop does not work with --nevents-skip")
 
-    matching.__okErrF = sw.fedList(options.okErrF)
+    matching.__okErrF = fedList(options.okErrF)
     matching.__utcaBcnDelta = options.utcaBcnDelta
     matching.__utcaPipelineDelta = options.utcaPipelineDelta
     printer.__color = not options.noColor
 
-    kargs = subset(options, ["feds1", "feds2"], process=True)
-    kargs.update(subset(options, ["nEvents", "nEventsSkip", "outputFile", "noUnpack", "sparseLoop", "plugins"]))
-    kargs["compareOptions"] = subset(options, ["anyEmap", "printEmap", "printMismatches", "fewerHistos"])
-    kargs["mapOptions"] = subset(options, ["printEventMap", "identityMap"])
-    kargs["printOptions"] = subset(options, ["dump", "progress"])
-    kargs["printOptions"].update(subset(options, ["noWarnUnpack", "noWarnQuality"], invert=True))
-    kargs["printOptions"].update(subset(options, ["crateslots"], process=True))
+    common = subset(options, ["dump", "nEventsMax", "nEventsSkip", "progress", "sparseLoop"])
+    common.update(subset(options, ["noUnpack", "noWarnQuality", "noWarnUnpack"], invert=True))
+    common["crateslots"] = fedList(options.crateslots)
 
-    for iFile in [1, 2]:
-        value = getattr(options, "file%d" % iFile)
-        if value:
-            kargs["files%d" % iFile] = value.split(",")
+    plugins = options.plugins.split(",")
+    if 1 <= options.dump and "printraw" not in plugins:
+        plugins.append("printraw")
+    common["plugins"] = plugins
 
-    if kargs["feds2"] and not kargs.get("files2"):
-        kargs["files2"] = kargs["files1"]
-        kargs["mapOptions"]["identityMap"] = True
+    outer = {"fedIds": fedList(options.feds1),
+             "label": "files1",
+             "fileNames": options.file1}
+    outer.update(common)
 
-    kargs["plugins"] = options.plugins.split(",")
-    if 1 <= options.dump and "printraw" not in kargs["plugins"]:
-        kargs["plugins"].append("printraw")
+    inner = {}
+    if options.feds2:
+        inner = {"fedIds": fedList(options.feds2),
+                 "label": "files2",
+                 "fileNames": options.file2 if options.file2 else options.file1}
+        inner.update(common)
 
-    return kargs
+    return {"outer": outer,
+            "inner": inner,
+            "outputFile": options.outputFile,
+            "mapOptions": subset(options, ["printEventMap", "identityMap"]),
+            "options": subset(options, ["anyEmap", "printEmap", "printMismatches", "fewerHistos"])}
 
 
 def main(options):
     kargs = processed(options)
-    analyze.setup(kargs["plugins"])
-
-    retCode = 0
-    feds1 = kargs["feds1"]
-    feds2 = kargs["feds2"]
 
     if options.noLoop:
-        pass
+        retCode = 0
+        feds1 = kargs["outer"]["fedIds"]
+        feds2 = kargs["inner"].get("fedIds", [])
     elif options.profile:
         import cProfile
-        cProfile.runctx("analyze.oneRun(**kargs)", globals(), locals(), sort="time")
-        # FIXME: retCode, feds1, feds2
+        cProfile.runctx("analyze.go(**kargs)", globals(), locals(), sort="time")
+        # FIXME:
+        retCode = 0
+        feds1 = []
+        feds2 = []
     else:
-        retCode, feds1, feds2 = analyze.oneRun(**kargs)
+        retCode, feds1, feds2 = analyze.go(**kargs)
 
     if feds2 and 0 <= options.dump:
         analyze.printChannelSummary(options.outputFile)
