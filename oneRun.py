@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+import cProfile
+import sys
+
 import analyze
 import printer
 import graphs
-import sys
 from configuration import matching
 from configuration.sw import fedList
 from options import oparser
@@ -79,12 +81,9 @@ def main(options):
         feds1 = kargs["outer"]["fedIds"]
         feds2 = kargs["inner"].get("fedIds", [])
     elif options.profile:
-        import cProfile
-        cProfile.runctx("analyze.go(**kargs)", globals(), locals(), sort="time")
-        # FIXME:
-        retCode = 0
-        feds1 = []
-        feds2 = []
+        pr = cProfile.Profile()
+        retCode, feds1, feds2 = pr.runcall(analyze.go, **kargs)
+        pr.print_stats("time")
     else:
         retCode, feds1, feds2 = analyze.go(**kargs)
 
