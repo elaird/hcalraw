@@ -163,7 +163,8 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={})
     if outer["progress"]:
         print "Looping:"
 
-    kargs = {"book": autoBook.autoBook("book")}
+    kargs = {"book": autoBook.autoBook("book"),
+             "warnQuality": outer["warnQuality"]}
     kargs.update(options)
 
     try:
@@ -279,9 +280,27 @@ def eventToEvent(mapF={}, mapB={}):
     return out
 
 
+def printEventSummary(outer, inner):
+    if "compare" not in outer["plugins"]:
+        return False
+    if outer["dump"] < 0:
+        return False
+    if not inner:
+        return False
+    if outer["fileNames"] == inner["fileNames"]:
+        return False
+    return True
+
+
 def go(outer={}, inner={}, outputFile="",
-       mapOptions={}, loopOptions={},
-       printEventSummary=None):
+       mapOptions={}, options={}):
+
+    setup(outer["plugins"])
+    outer.update(fileSpec(outer["fileNames"]))
+    if inner:
+        inner.update(fileSpec(inner["fileNames"]))
+        if inner["fileNames"] == outer["fileNames"]:
+            mapOptions["identityMap"] = True
 
     chain = raw.tchain(outer)
     oMapF, oMapB, oMapBcn = eventMaps(chain, outer, mapOptions["identityMap"])
@@ -290,7 +309,7 @@ def go(outer={}, inner={}, outputFile="",
     book = loop(chain=chain, chainI=chainI,
                 outer=outer, inner=inner,
                 innerEvent=innerEvent,
-                options=loopOptions)
+                options=options)
 
     utils.delete(chain)
     if chainI:
@@ -316,7 +335,7 @@ def go(outer={}, inner={}, outputFile="",
     for h in book.values():
         utils.delete(h)
 
-    if printEventSummary:
+    if printEventSummary(outer, inner):
         s = "%s: %4s = %6d" % (outputFile, outer["label"], len(oMapF))
         if inner:
             nBoth = len(filter(lambda x: x is not None, innerEvent.values()))
@@ -392,7 +411,9 @@ def bail(specs, fileName):
     sys.exit(msg)
 
 
-def fileSpec(fileNames=[]):
+def fileSpec(fileString=""):
+    fileNames = fileString.split(",")
+
     f = r.TFile.Open(fileNames[0])
     if (not f) or f.IsZombie():
         sys.exit("File %s could not be opened." % fileNames[0])
@@ -416,59 +437,3 @@ def fileSpec(fileNames=[]):
         bail(specs, fileName[0])
     else:
         return specs[0]
-
-
-def oneRun(files1=[],
-           feds1=[],
-           files2=[],
-           feds2=[],
-           mapOptions={},
-           compareOptions={},
-           printOptions={},
-           noUnpack=False,
-           nEvents=None,
-           nEventsSkip=None,
-           sparseLoop=None,
-           outputFile="",
-           plugins=[],
-           ):
-
-    assert files1
-    assert feds1
-
-    common = {"nEventsMax": nEvents,
-              "nEventsSkip": nEventsSkip,
-              "sparseLoop": sparseLoop,
-              "unpack": not noUnpack,
-              "plugins": plugins,
-              }
-    common.update(printOptions)
-
-    spec1 = fileSpec(files1)
-    spec1.update(common)
-    spec1.update({"fedIds": feds1,
-                  "label": "files1",
-                  })
-    inner = {}
-
-    if files2:
-        if not feds2:
-            sys.exit("files2 '%s' but feds2 %s" % (files2, feds2))
-        spec2 = fileSpec(files2)
-        spec2.update(common)
-        spec2.update({"fedIds": feds2,
-                      "label": "files2",
-                      })
-        inner = spec2
-
-
-    loopOptions = {"warnQuality": printOptions["warnQuality"]}
-    loopOptions.update(compareOptions)
-
-    return go(outer=spec1,
-              inner=inner,
-              outputFile=outputFile,
-              mapOptions=mapOptions,
-              loopOptions=loopOptions,
-              printEventSummary=("compare" in plugins) and feds2 and (files1 != files2) and 0 <= common["dump"],
-              )
