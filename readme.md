@@ -12,9 +12,6 @@ cd cpp; make -j 5; cd -
 
 #### More Examples
 ```bash
-# analyze several global runs
-cat gr_list.txt | ./multi.py --nevents=100
-
 # analyze AMC13/DCC2 monitor buffer dumps
 # HF (USC FEDs):
 ./dumps2root2pdf-HF.py data/239713_*.dat
@@ -87,7 +84,7 @@ export EOS=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/archival/201609
 * `diff.py` compares the decoded output of a FiberID run to data/ref.txt
 * `dumps2root2pdf-HF.py` converts binary event dumps to .root files and analyzes them
 * `graphs.py` reads in output/Runxxx.root, makes plots, and outputs a .pdf
-* `look.py` will find a file in EOS (or locally) for a given run and loop over it
+* `look.py` will find a files in EOS (or locally) for given runs and loop over them
 * `make_fiberid_references.py` produces FiberID reference files from HCAL logical maps
 * `oneRun.py` is used to analyze one run (see examples above)
 * `options.py` parses command line options for `oneRun.py`, `look.py`, or `dumps2root2pdf-HF.py`
