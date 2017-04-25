@@ -70,8 +70,8 @@ def report(run, fileNames):
 
 def override(options, run):
     options.outputFile = "output/%d.root" % run
-    if not options.nEvents:
-        options.nEvents = 4
+    if not options.nEventsMax:
+        options.nEventsMax = 4
 
     if not options.quiet:
         options.progress = True
