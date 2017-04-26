@@ -129,8 +129,9 @@ def go(options, run):
 
     nFiles = len(files)
     if 2 <= nFiles:
+        options.file1 = ",".join(files)
         if options.hhmm is None:
-            options.sparseLoop = max(1, options.nEvents / nFiles)
+            options.sparseLoop = max(1, options.nEventsMax / nFiles)
         else:
             options.sparseLoop = -1
     else:
