@@ -161,8 +161,8 @@ def oparser(arg=""):
                        default=0,
                        metavar="n",
                        type="int",
-                       help="Number of BX to add to uTCA counters (default is 0)")
-    matchCh.add_option("--utca-pipeline-delta",
+                       help="Add n BX to uTCA BcN counters (default is 0)")
+    matchCh.add_option("--utca-pipe-sub",
                        dest="utcaPipelineDelta",
                        default=0,
                        metavar="n",
