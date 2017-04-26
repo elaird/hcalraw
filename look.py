@@ -23,39 +23,39 @@ def local_eos(run):
     return out
 
 
-def find_gr(run, grdir, hhmmMin=None, quiet=False):
-    d = "%s/000/%03d/%03d/00000/" % (grdir, run/1000, run % 1000)
-    stat = "%s stat %s" % (eos(), d)
-    ls = stat.replace(" stat ", " ls -l ")
-
-    if utils.commandOutputFull(stat)["returncode"]:
-        return
-
-    listings = filter(lambda x: x, utils.commandOutputFull(ls)["stdout"].split("\n"))
-
+def global_eos(run, hhmmMin=None, quiet=False):
     month_num = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr":  4, "May":  5, "Jun":  6,
                  "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
 
-    coords = []
-    for listing in listings:
-        fields = listing.split()
-        month, day, hhmm, fileName = fields[-4:]
-        hh, mm = hhmm.split(":")
-        coords.append((month_num[month], int(day), int(hh), int(mm), fileName))
+    for d in sw.dirs_global(run):
+        shortName = d[d.find(".ch/") + 4:]
+        stat = utils.commandOutputFull("eos stat %s" % shortName)
+        if stat["returncode"]:
+            continue
 
-    coords.sort()
-    if hhmmMin:
-        mmMin = hhmmMin % 100
-        hhMin = hhmmMin / 100
-        coords = filter(lambda x: hhMin < x[2] or (hhMin == x[2] and mmMin <= x[3]), coords)
-        if not quiet:
-            for c in coords:
-                print c
+        ll = utils.commandOutputFull("eos ls -l %s" % d)
+        listings = filter(lambda x: x, ll["stdout"].split("\n"))
 
-    files = [c[-1] for c in coords]
-    if files:
-        l = ",".join(["%s/%s%s" % (sw.eosprefix, d, f) for f in files])
-        return l
+        coords = []
+        for listing in listings:
+            fields = listing.split()
+            month, day, hhmm, fileName = fields[-4:]
+            hh, mm = hhmm.split(":")
+            coords.append((month_num[month], int(day), int(hh), int(mm), fileName))
+
+        coords.sort()
+        if hhmmMin:
+            mmMin = hhmmMin % 100
+            hhMin = hhmmMin / 100
+            coords = filter(lambda x: hhMin < x[2] or (hhMin == x[2] and mmMin <= x[3]), coords)
+            if not quiet:
+                for c in coords:
+                    print c
+
+        files = []
+        for c in coords:
+            files.append(d + c[-1])
+        return files
 
 
 def report(run, fileNames):
@@ -111,8 +111,7 @@ def opts():
 
 
 def search(run):
-    global_xrd = this_machine
-    for search_func in [this_machine, local_eos, global_xrd]:
+    for search_func in [this_machine, local_eos, global_eos]:
         files = search_func(run)
         # options.file1 = find_gr(run, grDir, options.hhmm, quiet)
         if files:
@@ -130,7 +129,7 @@ def go(options, run):
 
     nFiles = len(files)
     if 2 <= nFiles:
-        if 2 <= nFiles and options.hhmm is None:
+        if options.hhmm is None:
             options.sparseLoop = max(1, options.nEvents / nFiles)
         else:
             options.sparseLoop = -1
