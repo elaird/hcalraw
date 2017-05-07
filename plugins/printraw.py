@@ -67,7 +67,7 @@ def htrOverview(d={}):
     printer.cyan(hyphens)
 
 
-def oneHtr(iBlock=None, p={}, printColumnHeaders=None, dump=None, crateslots=[], utca=None,
+def oneHtr(iBlock=None, p={}, dump=None, utca=None,
            nonMatchedQie=[], nonMatchedTp=[]):
 
     try:
@@ -87,26 +87,23 @@ def oneHtr(iBlock=None, p={}, printColumnHeaders=None, dump=None, crateslots=[],
         printer.warning("unpacking did not succeed enough to print more about %s" % coords)
         return
 
-    out = []
-    if printColumnHeaders:
-        columns = ["iWord16",
-                   "    EvN",
-                   "  OrN5",
-                   " BcN",
-                   "Cr",
-                   "Sl",
-                   " Fl",
-                   "FrmtV",
-                   "nPre",
-                   #"nWordTP",
-                   col,
-                   "nSamp",
-                   "EvN8",
-                   "  CRC" + ("32" if utca else ""),
-        ]
-        if zs:
-            columns += [" ", "ZSMask:  Thr1, Thr24, ThrTP"]
-        out.append("  ".join(columns))
+    columns = ["iWord16",
+               "    EvN",
+               "  OrN5",
+               " BcN",
+               "Cr",
+               "Sl",
+               " Fl",
+               "FrmtV",
+               "nPre",
+               #"nWordTP",
+               col,
+               "nSamp",
+               "EvN8",
+               "  CRC" + ("32" if utca else ""),
+              ]
+    if zs:
+        columns += [" ", "ZSMask:  Thr1, Thr24, ThrTP"]
 
     strings = [" %05d" % p["0Word16"],
                " 0x%07x" % p["EvN"],
@@ -143,57 +140,58 @@ def oneHtr(iBlock=None, p={}, printColumnHeaders=None, dump=None, crateslots=[],
                     "  %3d" % zs["ThresholdTP"],
         ]
 
-    out.append("  ".join(strings))
-    printer.green("\n".join(out))
+    out = []
+    if (not iBlock) or 4 <= dump:
+        out.append("  ".join(columns))
 
-    anyHtrDataPrinted = False
-    if 4 <= dump:
-        kargs = {"skipFibers": [0, 1] + range(3, 14) + range(15, 24) if (dump == 4) else [],
-                 "skipFibChs": [0, 2, 3, 4, 5, 6, 7] if (4 <= dump <= 7) else [],
-                 "skipErrF": [],
-                 "nonMatched": nonMatchedQie,
-                 "latency": p.get("Latency"),
-                 "zs": p.get("ZS"),
+    if dump != 4 and dump != 10:
+        out.append("  ".join(strings))
+        printer.green("\n".join(out))
+
+    if dump <= 3:
+        return
+
+    kargs = {"skipFibers": [0, 1] + range(3, 14) + range(15, 24) if (dump == 4) else [],
+             "skipFibChs": [0, 2, 3, 4, 5, 6, 7] if (4 <= dump <= 7) else [],
+             "skipErrF": [],
+             "nonMatched": nonMatchedQie,
+             "latency": p.get("Latency"),
+             "zs": p.get("ZS"),
+            }
+    if dump in [4, 5, 6, 8]:
+        kargs["skipErrF"] = [3]
+    if dump == 10:
+        kargs["skipErrF"] = [0]
+
+    if p["IsTTP"]:
+        cd = ttpData(p["ttpInput"], p["ttpOutput"], p["ttpAlgoDep"])
+    else:
+        cd = htrChannelData(p["channelData"].values(),
+                            crate=p["Crate"],
+                            slot=p["Slot"],
+                            top=p["Top"],
+                            nPreSamples=p["nPreSamples"],
+                            **kargs)
+
+    if len(cd) >= 2:
+        printer.yellow(cd[0])
+        printer.msg("\n".join(cd[1:]))
+
+    if 6 <= dump:
+        kargs = {"crate": p["Crate"],
+                 "slot": p["Slot"],
+                 "top": p["Top"],
+                 "nonMatched": nonMatchedTp,
+                 "dump": dump,
                  }
-        if dump in [4, 5, 6, 8]:
-            kargs["skipErrF"] = [3]
-        if dump == 10:
-            kargs["skipErrF"] = [0]
-
-        if p["IsTTP"]:
-            cd = ttpData(p["ttpInput"], p["ttpOutput"], p["ttpAlgoDep"])
+        if utca:
+            td = uhtrTriggerData(p["triggerData"], **kargs)
         else:
-            if crateslots and (100*p["Crate"] + p["Slot"]) not in crateslots:
-                return
-            cd = htrChannelData(p["channelData"].values(),
-                                crate=p["Crate"],
-                                slot=p["Slot"],
-                                top=p["Top"],
-                                nPreSamples=p["nPreSamples"],
-                                **kargs)
-        if len(cd) >= 2:
-            printer.yellow(cd[0])
-            printer.msg("\n".join(cd[1:]))
-            anyHtrDataPrinted = True
+            td = htrTriggerData(p["triggerData"], zs=zs, **kargs)
 
-        if 6 <= dump:
-            kargs = {"crate": p["Crate"],
-                     "slot": p["Slot"],
-                     "top": p["Top"],
-                     "nonMatched": nonMatchedTp,
-                     "dump": dump,
-                     }
-            if utca:
-                td = uhtrTriggerData(p["triggerData"], **kargs)
-            else:
-                td = htrTriggerData(p["triggerData"], zs=zs, **kargs)
-
-            if len(td) >= 2:
-                printer.yellow(td[0])
-                printer.msg("\n".join(td[1:]))
-                anyHtrDataPrinted = True
-
-    return anyHtrDataPrinted
+        if len(td) >= 2:
+            printer.yellow(td[0])
+            printer.msg("\n".join(td[1:]))
 
 
 def qieString(qies=[], sois=[], nPreSamples=None, red=False):
@@ -428,17 +426,16 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
     if dump <= 2:
         return
 
-    printColumnHeaders = True
     for iBlock, block in sorted(d["htrBlocks"].iteritems()):
-        printColumnHeaders = oneHtr(iBlock=iBlock,
-                                    p=block,
-                                    printColumnHeaders=printColumnHeaders,
-                                    dump=dump,
-                                    crateslots=crateslots,
-                                    utca=h["utca"],
-                                    nonMatchedQie=nonMatchedQie,
-                                    nonMatchedTp=nonMatchedTp,
-                                   )
+        if crateslots and (100*block["Crate"] + block["Slot"]) not in crateslots:
+            continue
+        oneHtr(iBlock=iBlock,
+               p=block,
+               dump=dump,
+               utca=h["utca"],
+               nonMatchedQie=nonMatchedQie,
+               nonMatchedTp=nonMatchedTp,
+        )
 
 
 def oneFedMol(d):
