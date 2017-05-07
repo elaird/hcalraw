@@ -524,7 +524,7 @@ def fedString(feds):
     for step in range(1, 3):
         if 3 <= len(feds) and feds == range(feds[0], 1 + feds[-1], step):
             return "%d: %d - %d" % (len(feds), feds[0], feds[-1])
-    return ",".join(["%d" % iFed for iFed in feds])
+    return utils.shortList(feds)
 
 
 def plotMerged(f, pad, offset=None, names=[],
@@ -1040,7 +1040,6 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
         keep.append(stamp(title))
 
     canvas.Print(pdf)
-    r.gStyle.SetPalette(1)
     r.gStyle.SetNumberContours(nContours)
 
 
@@ -1170,8 +1169,15 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             pageThree(stem="ts_vs_time_%d", **kargs)
 
         if "ts0" in pages:
-            pageThree(stem="cr34_sl11_fib.ge.12_ts0_vs_EvN_%d", **kargs)
-            pageThree(stem="cr34_sl11_fib.ge.12_ts1_vs_EvN_%d", **kargs)
+            pageThree(stem="ADC_vs_TS_ErrF0_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrF1_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrF3_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrF0_Crate34_Slot11_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrF0_Crate34_Slot12_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrF1_Crate34_Slot11_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrF1_Crate34_Slot12_%d", **kargs)
+            # pageThree(stem="cr34_sl11_fib.ge.12_ts0_vs_EvN_%d", **kargs)
+            # pageThree(stem="cr34_sl11_fib.ge.12_ts1_vs_EvN_%d", **kargs)
 
         f.Close()
     canvas.Print(pdf + "]")
@@ -1189,7 +1195,9 @@ def main(outputFile, feds1=[], feds2=[]):
     )
 
 
-all_pages = ["overview", "vs", "page3",
+all_pages = ["overview",
+             "vs",
+             "page3",
              # "maps_rates",
              "maps_evn_orn_bcn", "maps_errf", "maps_adc_tp",
              "frac0_orbit",
