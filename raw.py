@@ -112,7 +112,7 @@ def pruneFeds(chain, s):
         del wargs[fedId]
         # printer.warning("removing FED %4d from spec (%s)." % (fedId, msg))
     if remove:
-        printer.warning("No data from FED%s %s" % ("s" if 2 <= len(remove) else "", utils.shortList(remove.keys())))
+        printer.info("No data from FED%s %s" % ("s" if 2 <= len(remove) else "", utils.shortList(remove.keys())))
 
     if wargs:
         del s["fedIds"]

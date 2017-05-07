@@ -19,7 +19,7 @@ def warning(s=''):
     return red('WARNING: ' + s, True)
 
 def info(s=''):
-    return msg('INFO: ' + s)
+    return cyan('INFO: ' + s)
 
 def msg(s=''):
     return __line('0m', s, True)
