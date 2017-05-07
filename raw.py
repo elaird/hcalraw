@@ -15,6 +15,7 @@ def setup_root():
     load_libs = False
     if r.gROOT.GetVersionInt() < 60000:  # before ROOT6
         r.gROOT.SetStyle("Plain")
+        r.gStyle.SetPalette(1)
         load_libs = True
 
     if not utils.cmssw():
