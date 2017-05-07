@@ -41,8 +41,9 @@ def dirs_global(run):
     prefix = "root://eoscms.cern.ch/"
     midfix = "000/%03d/%03d" % (run/1000, run % 1000)
     nzs = "%s/eos/cms/tier0/store/data/Commissioning2017/HcalNZS/RAW/v1/%s/00000/" % (prefix, midfix)
+    mb = "%s/eos/cms/tier0/store/data/Commissioning2017/MinimumBias/RAW/v1/%s/00000/" % (prefix, midfix)
     minidaq = "%s/eos/cms/store/t0streamer/Minidaq/A/%s/" % (prefix, midfix)
-    return [nzs, minidaq][:1]
+    return [nzs, mb, minidaq][:-1]
 
 
 def fedMap():
