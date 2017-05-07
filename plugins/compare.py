@@ -118,7 +118,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
     crateFail = 1 + max(crate2bin.values())
     yAxisLabels = labels(crate2bin)
-    misMatchMapBins = ((13, crateFail), (-0.5, 0.5), (12.5, 0.5 + crateFail))
+    misMatchMapBins = ((12, crateFail), (0.5, 0.5), (12.5, 0.5 + crateFail))
 
     for block in blocks:
         if type(block) is not dict:
@@ -251,11 +251,19 @@ def histogramChannelData(book, block, channelData, fedId,
               title="any;slot;crate;Channels / bin",
               yAxisLabels=yAxisLabels)
 
-    # if block["Slot"] == 9 and block["Crate"] == 41 and channelData["Fiber"] == 2 and channelData["FibCh"] == 3:
-    #     for i in [0, 1]:
-    #         title = "cr41_sl9_fib2_fibch3_ts%d" % i
-    #         book.fill(channelData["QIE"][i], title, 256, -0.5, 255.5,
-    #                   title="%s;ADC;Counts / bin" % title)
+    nTsMax = 10
+    nAdcMax = 256
+    for (i, adc) in enumerate(channelData["QIE"]):
+        if nTsMax <= i:
+            break
+        book.fill((i, adc), "ADC_vs_TS_ErrF%d_%d" % (channelData["ErrF"], fedId),
+                  (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
+                  title="FED %d (ErrF == %d);time slice;ADC;Counts / bin" % (fedId, channelData["ErrF"]))
+
+        if False and block["Crate"] == 34 and 11 <= block["Slot"]:
+            book.fill((i, adc), "ADC_vs_TS_ErrF%d_Crate%d_Slot%d_%d" % (channelData["ErrF"], block["Crate"], block["Slot"], fedId),
+                      (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
+                      title="Cr %d Sl %d (ErrF == %d);time slice;ADC;Counts / bin" % (block["Crate"], block["Slot"], channelData["ErrF"]))
 
     if False and block["Crate"] == 34 and block["Slot"] == 11 and 12 <= channelData["Fiber"]:
         for i in [0, 1]:
@@ -474,7 +482,7 @@ def loop_over_feds(raw, book, adcTag="", **other):
         if fedId is None:
             continue
 
-        book.fill(dct["nBytesSW"] / 1024.0, "nBytesSW_%d" % fedId, 64, 0, 64,
+        book.fill(dct["nBytesSW"] / 1024.0, "nBytesSW_%d" % fedId, 64, 0, 32,
                   title="FED %d; kBytes;Events / bin" % fedId)
 
         fedIdHw = dct["header"]["FEDid"]
@@ -709,8 +717,9 @@ def histogram_deltas(raw1, raw2, book, okFeds):
                 book.fill(delta, "delta%s_%s_%s" % (x, fed1, fed2), 11, -5.5, 5.5, title=title)
 
 
-def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printMismatches=False, warnQuality=True, fewerHistos=False):
-    if raw2:
+def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printMismatches=False,
+            warnQuality=True, fewerHistos=False, acrossRaws=True):
+    if acrossRaws and raw2:
         if anyEmap:
             compare0(raw1, raw2, book, printEmap)
         else:
@@ -725,7 +734,8 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printM
 
     okFeds = okFeds.union(loop_over_feds(raw2, book, adcTag="feds2", warn=warnQuality))
 
-    histogram_deltas(raw1, raw2, book, okFeds)
+    if acrossRaws:
+        histogram_deltas(raw1, raw2, book, okFeds)
 
 
 def coordString(crate, slot, tb, fiber, channel):
