@@ -148,14 +148,18 @@ def oneHtr(iBlock=None, p={}, printColumnHeaders=None, dump=None, crateslots=[],
 
     anyHtrDataPrinted = False
     if 4 <= dump:
-        kargs = {"skipFibChs": [0, 2, 3, 4, 5, 6, 7] if (4 <= dump <= 6) else [],
+        kargs = {"skipFibers": [0, 1] + range(3, 14) + range(15, 24) if (dump == 4) else [],
+                 "skipFibChs": [0, 2, 3, 4, 5, 6, 7] if (4 <= dump <= 7) else [],
+                 "skipErrF": [],
                  "nonMatched": nonMatchedQie,
                  "latency": p.get("Latency"),
                  "zs": p.get("ZS"),
-                 "skipErrF": [3],
                  }
-        if dump == 6 or 8 <= dump:
-            kargs["skipErrF"] = []
+        if dump in [4, 5, 6, 8]:
+            kargs["skipErrF"] = [3]
+        if dump == 10:
+            kargs["skipErrF"] = [0]
+
         if p["IsTTP"]:
             cd = ttpData(p["ttpInput"], p["ttpOutput"], p["ttpAlgoDep"])
         else:
@@ -172,12 +176,12 @@ def oneHtr(iBlock=None, p={}, printColumnHeaders=None, dump=None, crateslots=[],
             printer.msg("\n".join(cd[1:]))
             anyHtrDataPrinted = True
 
-        if 5 <= dump:
-            kargs = {"skipZeroTps": dump <= 7,
-                     "crate": p["Crate"],
+        if 6 <= dump:
+            kargs = {"crate": p["Crate"],
                      "slot": p["Slot"],
                      "top": p["Top"],
                      "nonMatched": nonMatchedTp,
+                     "dump": dump,
                      }
             if utca:
                 td = uhtrTriggerData(p["triggerData"], **kargs)
@@ -214,7 +218,7 @@ def qieString(qies=[], sois=[], nPreSamples=None, red=False):
     return out
 
 
-def htrTriggerData(d={}, skipZeroTps=False, crate=None, slot=None, top="", nonMatched=[], zs={}):
+def htrTriggerData(d={}, dump=None, crate=None, slot=None, top="", nonMatched=[], zs={}):
     columns = ["SLB-ch", "Peak", "SofI", "TP(hex)  0   1   2   3"]
     if zs:
         columns.append("  ZS?")
@@ -224,7 +228,7 @@ def htrTriggerData(d={}, skipZeroTps=False, crate=None, slot=None, top="", nonMa
         z = ""
         soi = ""
         tp = ""
-        if skipZeroTps and not any([dct["TP"]]):
+        if (dump <= 8) and not any([dct["TP"]]):
             continue
 
         for i in range(len(dct["TP"])):
@@ -253,7 +257,7 @@ def htrTriggerData(d={}, skipZeroTps=False, crate=None, slot=None, top="", nonMa
     return out
 
 
-def uhtrTriggerData(d={}, skipZeroTps=False, crate=None, slot=None, top="", nonMatched=[]):
+def uhtrTriggerData(d={}, dump=None, crate=None, slot=None, top="", nonMatched=[]):
     out = []
     out.append("  ".join([" TPid",
                           "Fl",
@@ -264,7 +268,7 @@ def uhtrTriggerData(d={}, skipZeroTps=False, crate=None, slot=None, top="", nonM
                           ])
                )
     for channelId, data in sorted(d.iteritems()):
-        if skipZeroTps and not any(data["TP"]):
+        if (dump <= 8) and not any(data["TP"]):
             continue
         soi = ""
         ok = ""
@@ -278,20 +282,20 @@ def uhtrTriggerData(d={}, skipZeroTps=False, crate=None, slot=None, top="", nonM
             if not data["OK"][j]:
                 tp_s = printer.red(tp_s, False)
             tp += tp_s
-        out.append("   ".join([" 0x%02x" % channelId,
-                               "%1d" % data["Flavor"],
-                               "%5s" % soi,
-                               "%5s" % ok,
-                               " "*2,
-                               tp]))
+
+        if dump != 10 or not all(data["OK"]):
+            out.append("   ".join([" 0x%02x" % channelId,
+                                   "%1d" % data["Flavor"],
+                                   "%5s" % soi,
+                                   "%5s" % ok,
+                                   " "*2,
+                                   tp]))
     return out
 
 
 def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
-                   skipFibChs=[], skipErrF=[],
-                   nonMatched=[], latency={}, zs={},
-                   utcaFiberBlackList=[0,1,10,11,12,13,22,23][:0],
-                   te_tdc=False):
+                   skipFibers=[], skipFibChs=[], skipErrF=[],
+                   nonMatched=[], latency={}, zs={}, te_tdc=False):
     out = []
     columns = ["Crate",
                "Slot",
@@ -312,7 +316,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
     out.append(" ".join(columns))
 
     for data in sorted(lst, key=lambda x: (x["Fiber"], x["FibCh"])):
-        if (top not in "tb") and data["Fiber"] in utcaFiberBlackList:
+        if data["Fiber"] in skipFibers:
             continue
         if data["FibCh"] in skipFibChs:
             continue
@@ -320,12 +324,16 @@ def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
             continue
         red = (crate, slot, top, data["Fiber"], data["FibCh"]) in nonMatched
 
+        errf = "%2d" % data["ErrF"]
+        if data["ErrF"]:
+            errf = printer.red(errf, False)
+
         fields = [" %3d" % crate,
                   "  %2d%1s" % (slot, top),
                   "%2d" % data["Fiber"],
                   " %1d" % data["FibCh"],
                   " %1d" % data["Flavor"],
-                  " %2d" % data["ErrF"],
+                  " %s" % errf,
                   "  %1d" % data["CapId0"],
                   "  %2d   " % len(data["QIE"]) + qieString(data["QIE"], data.get("SOI", []), nPreSamples, red=red),
                   "  " + qieString(data.get("TDC", []), data.get("SOI", []))
