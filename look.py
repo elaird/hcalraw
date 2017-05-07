@@ -58,14 +58,14 @@ def global_eos(run, hhmmMin=None, quiet=False):
         return files
 
 
-def report(run, fileNames):
+def report(fileNames):
     pieces = [f.split("/") for f in fileNames]
     bases = set(["/".join(piece[:-1]) for piece in pieces])
     assert len(bases) == 1, bases
     if len(fileNames) == 1:
-        print "Run %d: found matching file %s" % (run, fileNames[0])
+        printer.info("found matching file %s" % fileNames[0])
     else:
-        print "Run %d: found %4d file(s) in %s/" % (run, len(fileNames), "/".join(bases))
+        printer.info("found %4d file(s) in %s/" % (len(fileNames), "/".join(bases)))
 
 
 def override(options, run):
@@ -140,7 +140,7 @@ def go(options, run):
             options.feds1 = "B904"
 
     if not options.quiet:
-        report(run, files)
+        report(files)
 
     return oneRun.main(options)
 
