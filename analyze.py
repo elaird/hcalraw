@@ -129,7 +129,7 @@ def reportProgress(globalEntry, iEvent, iMask):
         msg = "%8d %s" % (iEvent, time.ctime())
         if globalEntry != iEvent:
             msg += "  (entry %8d)" % globalEntry
-        print msg
+        printer.gray(msg)
         return iMask + 1
     else:
         return iMask
