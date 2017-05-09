@@ -1170,12 +1170,13 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
 
         if "ts0" in pages:
             pageThree(stem="ADC_vs_TS_ErrF0_%d", **kargs)
-            # pageThree(stem="ADC_vs_TS_ErrF1_%d", **kargs)
-            # pageThree(stem="ADC_vs_TS_ErrF3_%d", **kargs)
-            # pageThree(stem="ADC_vs_TS_ErrF0_Crate34_Slot11_%d", **kargs)
-            # pageThree(stem="ADC_vs_TS_ErrF0_Crate34_Slot12_%d", **kargs)
-            # pageThree(stem="ADC_vs_TS_ErrF1_Crate34_Slot11_%d", **kargs)
-            # pageThree(stem="ADC_vs_TS_ErrF1_Crate34_Slot12_%d", **kargs)
+            pageThree(stem="ADC_vs_TS_ErrFNZ_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrF0_Slot10_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrF0_Slot11_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrF0_Slot12_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrFNZ_Slot10_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrFNZ_Slot11_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrFNZ_Slot12_%d", **kargs)
             # pageThree(stem="cr34_sl11_fib.ge.12_ts0_vs_EvN_%d", **kargs)
             # pageThree(stem="cr34_sl11_fib.ge.12_ts1_vs_EvN_%d", **kargs)
 
