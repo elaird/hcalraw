@@ -13,17 +13,17 @@ def __line(f, s, p):
 
 
 def error(s=''):
-    return red('ERROR: ' + s, True)
+    return red('ERROR: ' + s)
 
 def warning(s=''):
-    return red('WARNING: ' + s, True)
+    return red('WARNING: ' + s)
 
 def info(s=''):
     return cyan('INFO: ' + s)
 
-def msg(s=''):
-    return __line('0m', s, True)
 
+def msg(s='', p=True):
+    return __line('0m', s, p)
 
 def bold(s='', p=True):
     return __line('1m', s, p)
