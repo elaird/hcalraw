@@ -256,14 +256,18 @@ def histogramChannelData(book, block, channelData, fedId,
     for (i, adc) in enumerate(channelData["QIE"]):
         if nTsMax <= i:
             break
-        book.fill((i, adc), "ADC_vs_TS_ErrF%d_%d" % (channelData["ErrF"], fedId),
+
+        errf = "ErrFNZ" if channelData["ErrF"] else "ErrF0"
+        eq = "!=" if channelData["ErrF"] else "=="
+
+        book.fill((i, adc), "ADC_vs_TS_%s_%d" % (errf, fedId),
                   (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
-                  title="FED %d (ErrF == %d);time slice;ADC;Counts / bin" % (fedId, channelData["ErrF"]))
+                  title="FED %d (ErrF %s 0);time slice;ADC;Counts / bin" % (fedId, eq))
 
         book.fill((i, adc),
-                  "ADC_vs_TS_%s_Slot%d_%d" % ("ErrFNZ" if channelData["ErrF"] else "ErrF0", block["Slot"], fedId),
+                  "ADC_vs_TS_%s_Slot%d_%d" % (errf, block["Slot"], fedId),
                   (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
-                  title="Cr %d Sl %d (ErrF %s 0);time slice;ADC;Counts / bin" % (block["Crate"], block["Slot"], "!=" if channelData["ErrF"] else "=="))
+                  title="Cr %d Sl %d (ErrF %s 0);time slice;ADC;Counts / bin" % (block["Crate"], block["Slot"], eq))
 
     if False and block["Crate"] == 34 and block["Slot"] == 11 and 12 <= channelData["Fiber"]:
         for i in [0, 1]:
