@@ -114,7 +114,7 @@ def oparser(arg=""):
             "1: DCC/AMC13 headers",
             "2: (u)HTR summary info",
             "3: (u)HTR headers",
-            "4: data (fib=2,14  fibCh=1   ErrF != 3)",
+            "4: data (fib=2,14  fibCh=1), formatted compactly",
             "5: data (fib=all   fibCh=1   ErrF != 3)",
             "6: data (fib=all   fibCh=1   ErrF != 3); TPs (> 0)",
             "7: data (fib=all   fibCh=1            ); TPs (> 0)",

@@ -3,8 +3,9 @@ import printer
 
 
 def printraw(raw1={}, raw2={}, **_):
-    if None in raw1 and 1 <= raw1[None]["dump"]:
-        slim1 = (raw1[None]["dump"] == 1) and (len(raw1) == 2) and not raw2
+    dump = raw1.get(None, {}).get("dump", -99)
+    if 1 <= dump:
+        slim1 = (dump in [1, 4]) and (len(raw1) == 2) and (not raw2)
         oneEvent(raw1, slim1=slim1)
         oneEvent(raw2)
 
@@ -158,7 +159,7 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
              "latency": p.get("Latency"),
              "zs": p.get("ZS"),
             }
-    if dump in [4, 5, 6, 8]:
+    if dump in [5, 6, 8]:
         kargs["skipErrF"] = [3]
     if dump == 10:
         kargs["skipErrF"] = [0]
@@ -420,7 +421,7 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
                       ]
 
         printer.blue("  ".join(sList))
-        if 2 <= dump:
+        if 2 <= dump and dump != 4:
             htrOverview(h)
 
     if dump <= 2:
