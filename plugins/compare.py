@@ -260,10 +260,10 @@ def histogramChannelData(book, block, channelData, fedId,
                   (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
                   title="FED %d (ErrF == %d);time slice;ADC;Counts / bin" % (fedId, channelData["ErrF"]))
 
-        if False and block["Crate"] == 34 and 11 <= block["Slot"]:
-            book.fill((i, adc), "ADC_vs_TS_ErrF%d_Crate%d_Slot%d_%d" % (channelData["ErrF"], block["Crate"], block["Slot"], fedId),
-                      (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
-                      title="Cr %d Sl %d (ErrF == %d);time slice;ADC;Counts / bin" % (block["Crate"], block["Slot"], channelData["ErrF"]))
+        book.fill((i, adc),
+                  "ADC_vs_TS_%s_Slot%d_%d" % ("ErrFNZ" if channelData["ErrF"] else "ErrF0", block["Slot"], fedId),
+                  (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
+                  title="Cr %d Sl %d (ErrF %s 0);time slice;ADC;Counts / bin" % (block["Crate"], block["Slot"], "!=" if channelData["ErrF"] else "=="))
 
     if False and block["Crate"] == 34 and block["Slot"] == 11 and 12 <= channelData["Fiber"]:
         for i in [0, 1]:
