@@ -193,7 +193,7 @@ def x_last_filled(h):
             return h.GetBinLowEdge(iBin) + h.GetBinWidth(iBin)
 
 
-def histoLoop(f, lst, func, zoom=False):
+def histoLoop(f, lst, hFunc=None, sFunc=None, zoom=False):
     out = []
     ymaxes = []
     xmins = []
@@ -201,10 +201,13 @@ def histoLoop(f, lst, func, zoom=False):
     legEntries = []
     h0 = None
 
+    if not sFunc:
+        sFunc = lambda x: x
+
     didOne = False
     twoLines = False
     for x, color, style in lst:
-        h = f.Get(func(x))
+        h = f.Get(sFunc(x))
         if not h:
             continue
 
@@ -218,6 +221,8 @@ def histoLoop(f, lst, func, zoom=False):
             h0 = h
 
         shiftFlows(h)
+        if hFunc:
+            hFunc(h)
         h.Draw(gopts)
         stylize(h, color, style)
         magnify(h, factor=1.8)
@@ -233,10 +238,10 @@ def histoLoop(f, lst, func, zoom=False):
 
 
         s = "Matched"
-        if func(x).startswith(s):
+        if sFunc(x).startswith(s):
             h.GetXaxis().SetLabelSize(0.04)
             twoLines = True
-            ch = func(x).replace(s, "").replace("Fibers", "").replace("TriggerTowers", "")
+            ch = sFunc(x).replace(s, "").replace("Fibers", "").replace("TriggerTowers", "")
             if not ch:
                 ch = "TP  "
             t = "%s  %d#pm%d" % (ch, h.GetMean(), h.GetRMS())
@@ -516,7 +521,7 @@ def plotList(f, pad, offset=None, names=[],
         for iFed, fed in enumerate(sorted(fedList)):
             feds.append((fed, color[iFed], style[iFed]))
 
-        keep += func(f, feds, lambda x: "%s_%d" % (name, x))
+        keep += func(f, feds, sFunc=lambda x: "%s_%d" % (name, x))
     return keep
 
 
@@ -927,7 +932,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
 
     pad20.cd(4)
     adjustPad(logY=True)
-    keep += histoLoop(f, [("BcN_%d" % sorted(feds1)[0], r.kBlack, 1)], lambda x: x)
+    keep += histoLoop(f, [("BcN_%d" % sorted(feds1)[0], r.kBlack, 1)], hFunc=lambda x: x.RebinX(99))
 
     plotFunc = plotMerged if feds2 or 4 <= len(feds1) else plotList
     keep += plotFunc(f, pad20, offset=5,
@@ -943,7 +948,6 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
                       [("nTS_for_matching_ADC", r.kBlue, 1),
                        ("nTS_for_matching_TP", r.kCyan, 2),
                        ],
-                      lambda x: x,
                       )
 
 
@@ -970,7 +974,7 @@ def plotEvnOrnBcnPerFed(f, feds1, feds2):
                            ("OrN", r.kCyan, 2),
                            ("BcN", r.kBlack, 3),
                            ],
-                          lambda x: "delta%s_%s_%s" % (x, fed1, fed2),
+                          sFunc=lambda x: "delta%s_%s_%s" % (x, fed1, fed2),
                           )
     return keep
 
@@ -986,7 +990,6 @@ def plotMatch(f, pad0, feds1, feds2):
                        ("MatchedFibersCh2", r.kBlack, 3),
                        ("MatchedTriggerTowers", r.kGreen, 4),
                        ],
-                      lambda x: x,
                       zoom=True,
                       )
 
@@ -998,7 +1001,6 @@ def plotMatch(f, pad0, feds1, feds2):
                        ("MisMatchedFibersCh2", r.kBlack, 3),
                        ("MisMatchedTriggerTowers", r.kGreen, 4),
                        ],
-                      lambda x: x,
                       )
     return keep
 
@@ -1127,9 +1129,17 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         if "ts" in pages:
             pageThree(stem="ADC_vs_TS_ErrF0_%d", **kargs)
             # pageThree(stem="ADC_vs_TS_ErrFNZ_%d", **kargs)
+
+            # iterate over fibers rather than FEDs
+            feds1 = kargs["feds1"]
+            kargs["feds1"] = range(32)
+            pageThree(stem="ADC_vs_TS_HEP17_ErrF0_fib%d", **kargs)
+            kargs["feds1"] = feds1
+            # back to FEDs
+
             # pageThree(stem="ADC_vs_TS_ErrF0_Slot10_%d", **kargs)
             # pageThree(stem="ADC_vs_TS_ErrF0_Slot11_%d", **kargs)
-            pageThree(stem="ADC_vs_TS_ErrF0_Slot12_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrF0_Slot12_%d", **kargs)
             # pageThree(stem="ADC_vs_TS_ErrFNZ_Slot10_%d", **kargs)
             # pageThree(stem="ADC_vs_TS_ErrFNZ_Slot11_%d", **kargs)
             # pageThree(stem="ADC_vs_TS_ErrFNZ_Slot12_%d", **kargs)
@@ -1148,8 +1158,8 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             pageTwo(denoms=denoms, **kargs34)
 
         if "maps_errf" in pages:
-            denoms = {"ErrF1_vs_slot_crate": "ErrFAny_vs_slot_crate",
-                      "ErrF3_vs_slot_crate": "ErrFAny_vs_slot_crate",
+            denoms = {# "ErrF1_vs_slot_crate": "ErrFAny_vs_slot_crate",
+                      # "ErrF3_vs_slot_crate": "ErrFAny_vs_slot_crate",
                       "ErrFNZ_vs_slot_crate": "ErrFAny_vs_slot_crate",
                       }
             kargs34["names"] = sorted(denoms.keys())
