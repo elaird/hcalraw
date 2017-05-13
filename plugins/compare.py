@@ -96,7 +96,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
     crate2bin = collections.defaultdict(int)
     yAxisLabels = ["?"]
 
-    for iCrate, crate in enumerate(sw.crateList(usc=True)):
+    for iCrate, crate in enumerate(sw.crateList()):
         crate2bin[crate] = 1 + iCrate
         yAxisLabels.append("%2d" % crate)
 
@@ -239,37 +239,6 @@ def histogramChannelData(book, block, channelData, fedId,
               title="any;slot;crate;Channels / bin",
               xAxisLabels=xAxisLabels, yAxisLabels=yAxisLabels)
 
-    nTsMax = 10
-    nAdcMax = 256
-    for (i, adc) in enumerate(channelData["QIE"]):
-        if nTsMax <= i:
-            break
-
-        errf = "ErrFNZ" if channelData["ErrF"] else "ErrF0"
-        eq = "!=" if channelData["ErrF"] else "=="
-
-        book.fill((i, adc), "ADC_vs_TS_%s_%d" % (errf, fedId),
-                  (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
-                  title="FED %d (ErrF %s 0);time slice;ADC;Counts / bin" % (fedId, eq))
-
-        book.fill((i, adc),
-                  "ADC_vs_TS_%s_Slot%d_%d" % (errf, block["Slot"], fedId),
-                  (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
-                  title="Cr %d Sl %d (ErrF %s 0);time slice;ADC;Counts / bin" % (block["Crate"], block["Slot"], eq))
-
-    if False and block["Crate"] == 34 and block["Slot"] == 11 and 12 <= channelData["Fiber"]:
-        for i in [0, 1]:
-            title = "cr%d_sl%d_fib.ge.12_ts%d" % (block["Crate"], block["Slot"], i)
-            book.fill(channelData["QIE"][i], title,
-                      256, -0.5, 255.5,
-                      title="%s;ADC;Counts / bin" % title)
-
-            nEvN = 20
-            title2 = "%s_vs_EvN_%d" % (title, fedId)
-            book.fill((block["EvN"], channelData["QIE"][i]), title2,
-                      (nEvN, 256), (0.5, -0.5), (nEvN + 0.5, 255.5),
-                      title="%s;EvN;ADC;Counts / bin" % title2)
-
     if channelData["ErrF"]:
         for name, title in [("ErrFNZ", "ErrF != 0"),
                             ("ErrF%d" % channelData["ErrF"], "ErrF == %d" % channelData["ErrF"]),
@@ -303,15 +272,66 @@ def histogramChannelData(book, block, channelData, fedId,
     caps[channelData["CapId0"]] += 1
 
     if channelData["QIE"]:
-        adc = max(channelData["QIE"])
-        adcs.add(adc)
-        mp = channelData.get("M&P", 0)
-        book.fill(adc, "channel_peak_adc_mp%d_%d" % (mp, fedId), 256, -0.5, 255.5,
-                  title="FED %d;Peak ADC (ErrF == 0);Channels / bin" % fedId)
-
+        histogramAdcs(book, fedId, block, channelData, adcs)
         if fedTime:
             histogramTsVsTime(book, fedTime, fedId, channelData["QIE"])
+
     return nAdcMatch, nAdcMisMatch
+
+
+def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax=10):
+    nAdcMax = 256
+
+    adc = max(channelData["QIE"])
+    adcs.add(adc)
+    mp = channelData.get("M&P", 0)
+    book.fill(adc, "channel_peak_adc_mp%d_%d" % (mp, fedId), nAdcMax, -0.5, nAdcMax - 0.5,
+              title="FED %d;Peak ADC (ErrF == 0);Channels / bin" % fedId)
+
+
+    for (i, adc) in enumerate(channelData["QIE"]):
+        if nTsMax <= i:
+            break
+
+        errf = "ErrFNZ" if channelData["ErrF"] else "ErrF0"
+        eq = "!=" if channelData["ErrF"] else "=="
+
+        book.fill((i, adc), "ADC_vs_TS_%s_%d" % (errf, fedId),
+                  (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
+                  title="FED %d (ErrF %s 0);time slice;ADC;Counts / bin" % (fedId, eq))
+
+        # the 32 fibers of HEP17 carrying SiPM data
+        if block["Crate"] != 34:
+            continue
+
+        fib = 0
+        if block["Slot"] == 12:
+            fib += 12 + channelData["Fiber"] - 1
+            if 13 <= channelData["Fiber"]:
+                fib -= 2
+        elif block["Slot"] == 11 and 12 <= channelData["Fiber"]:
+            fib += channelData["Fiber"] - 12
+            # nEvN = 20
+            # for i in [0, 1]:
+            #     title = "cr%d_sl%d_fib.ge.12_ts%d" % (block["Crate"], block["Slot"], i)
+            #     book.fill(channelData["QIE"][i], title,
+            #               256, -0.5, 255.5,
+            #               title="%s;ADC;Counts / bin" % title)
+            #     title2 = "%s_vs_EvN_%d" % (title, fedId)
+            #     book.fill((block["EvN"], channelData["QIE"][i]), title2,
+            #               (nEvN, 256), (0.5, -0.5), (nEvN + 0.5, 255.5),
+            #               title="%s;EvN;ADC;Counts / bin" % title2)
+        else:
+            continue
+
+        if channelData["Flavor"] and not channelData["ErrF"]:
+            printer.warning("Crate %d Slot %d Fib %d Channel %d has flavor %d" % \
+                            (block["Crate"], block["Slot"], channelData["Fiber"], channelData["FibCh"], channelData["Flavor"]))
+
+        book.fill((i, adc),
+                  "ADC_vs_TS_HEP17_%s_fib%d" % (errf, fib),
+                  (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
+                  title="HEP17 Fib %d;time slice;ADC;Counts / bin" % fib)
 
 
 def histogramTsVsTime(book, fedTime, fedId, qies, adcMin=9, nBins=10):
