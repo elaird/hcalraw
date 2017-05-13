@@ -1,11 +1,11 @@
-# AMC13 (May 2014 onward) http://ohm.bu.edu/~hazen/CMS/AMC13/UpdatedDAQPath_2014-05-01.pdf
-# uHTR  (May 2014 onward) https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12306
-# uMNio: https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12925&filename=umnio_spec.pdf
-# AMC13/uHTR (through April 2014) http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_3.pdf
-# DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
-# HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
-# TTP http://cmsdoc.cern.ch/cms/HCAL/document/Aux/HcalTechTriggerProcessor/dataformat.html
-# MOL/FEROL https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
+# uHTR         https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12306
+# uMNio        https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12925
+# HTR          https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=3327&filename=HTR_MainFPGA.pdf
+# TTP          https://cmsdoc.cern.ch/cms/HCAL/document/Aux/HcalTechTriggerProcessor/dataformat.html
+# DCC2         https://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
+# MOL/FEROL    https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
+# AMC13        https://ohm.bu.edu/~hazen/CMS/AMC13/UpdatedDAQPath_2014-05-01.pdf
+# thru 2014-04 https://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_3.pdf
 
 
 from configuration import hw, matching
