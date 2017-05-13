@@ -291,7 +291,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
                    skipFibers=[], skipFibChs=[], skipErrF=[],
                    nonMatched=[], latency={}, zs={}, te_tdc=False, nTsMax=10):
     out = []
-    columns = [" Cr",
+    columns = ["  Cr",
                "Sl",
                "Fi",
                "Ch",
@@ -304,7 +304,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
     if te_tdc:
         columns += ["0xT0 " + " ".join(["T%1d" % i for i in range(1, nTsMax)])]
     if latency:
-        columns += ["", "EF", "Cnt", "IDLE"]
+        columns += [" EF", "Cnt", "IDLE"]
     if zs:
         columns += [" ", "ZS?"]
     out.append(" ".join(columns))
@@ -322,7 +322,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
         if data["ErrF"]:
             errf = printer.red(errf, False)
 
-        fields = [" %2d" % crate,
+        fields = ["  %2d" % crate,
                   "%2d%1s%2d" % (slot, top, data["Fiber"]),
                   " %1d" % data["FibCh"],
                   " %1d" % data["Flavor"],
@@ -338,8 +338,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
         if latency:
             dct = latency.get("Fiber%d" % data["Fiber"])
             if dct and data["FibCh"] == 1:
-                lat = [" ",
-                       "%s%s" % (dct["Empty"], dct["Full"]),
+                lat = ["%s%s" % (dct["Empty"], dct["Full"]),
                        "%2d " % dct["Cnt"],
                        "%4d" % dct["IdleBCN"],
                 ]
