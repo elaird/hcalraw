@@ -1124,6 +1124,18 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         kargs34 = {"names": names, "doYx": False, "retitle": False, "boxes": False}
         kargs34.update(kargs)
 
+        if "ts" in pages:
+            pageThree(stem="ADC_vs_TS_ErrF0_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrFNZ_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrF0_Slot10_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrF0_Slot11_%d", **kargs)
+            pageThree(stem="ADC_vs_TS_ErrF0_Slot12_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrFNZ_Slot10_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrFNZ_Slot11_%d", **kargs)
+            # pageThree(stem="ADC_vs_TS_ErrFNZ_Slot12_%d", **kargs)
+            # pageThree(stem="cr34_sl11_fib.ge.12_ts0_vs_EvN_%d", **kargs)
+            # pageThree(stem="cr34_sl11_fib.ge.12_ts1_vs_EvN_%d", **kargs)
+
         if "maps_rates" in pages:
             pageTwo(**kargs34)
 
@@ -1161,24 +1173,11 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
 
         if "trends" in pages:
             pageTrends(names=["fracEvN_vs_time", "frac0_vs_time", "ADC_misMatch_vs_time"], **kargs)
+            pageThree(stem="ts_vs_time_%d", **kargs)
 
         if "occupancy" in pages:
             pageThree(stem="fiber_vs_slot_%d", suppress=full_utca_crate, keys=["feds2"], **kargs)
 
-        if "ts" in pages:
-            pageThree(stem="ts_vs_time_%d", **kargs)
-
-        if "ts0" in pages:
-            pageThree(stem="ADC_vs_TS_ErrF0_%d", **kargs)
-            pageThree(stem="ADC_vs_TS_ErrFNZ_%d", **kargs)
-            # pageThree(stem="ADC_vs_TS_ErrF0_Slot10_%d", **kargs)
-            # pageThree(stem="ADC_vs_TS_ErrF0_Slot11_%d", **kargs)
-            # pageThree(stem="ADC_vs_TS_ErrF0_Slot12_%d", **kargs)
-            # pageThree(stem="ADC_vs_TS_ErrFNZ_Slot10_%d", **kargs)
-            # pageThree(stem="ADC_vs_TS_ErrFNZ_Slot11_%d", **kargs)
-            # pageThree(stem="ADC_vs_TS_ErrFNZ_Slot12_%d", **kargs)
-            # pageThree(stem="cr34_sl11_fib.ge.12_ts0_vs_EvN_%d", **kargs)
-            # pageThree(stem="cr34_sl11_fib.ge.12_ts1_vs_EvN_%d", **kargs)
 
         f.Close()
     canvas.Print(pdf + "]")
@@ -1197,14 +1196,14 @@ def main(outputFile, feds1=[], feds2=[]):
 
 
 all_pages = ["overview",
+             "ts",
+             "maps_evn_orn_bcn",
+             "maps_errf",
              "vs",
              "page3",
              # "maps_rates",
-             "maps_evn_orn_bcn", "maps_errf", "maps_adc_tp",
-             "frac0_orbit",
-             "evn", "orn",
+             # "maps_adc_tp",
+             # "frac0_orbit",
              # "trends",
-             "occupancy",
-             # "ts",
-             # "ts0",
+             "evn", "orn", "occupancy",
              ]
