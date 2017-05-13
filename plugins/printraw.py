@@ -185,14 +185,14 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
             printer.msg("\n".join(td[1:]))
 
 
-def qieString(qies=[], sois=[], nPreSamples=None, red=False):
+def qieString(qies=[], sois=[], nPreSamples=None, red=False, nMax=10):
     l = []
 
     if nPreSamples and not sois:
         sois = [0] * nPreSamples
         sois.append(1)
 
-    for i in range(10):
+    for i in range(nMax):
         if i < len(qies):
             s = "%2x" % qies[i]
             if i < len(sois) and sois[i] and not red:
@@ -204,6 +204,11 @@ def qieString(qies=[], sois=[], nPreSamples=None, red=False):
     out = " ".join(l)
     if red:
         out = printer.red(out, False)
+
+    if nMax < len(qies):
+        out += printer.red("..", False)
+    else:
+        out += "  "
     return out
 
 
@@ -284,20 +289,20 @@ def uhtrTriggerData(d={}, dump=None, crate=None, slot=None, top="", nonMatched=[
 
 def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
                    skipFibers=[], skipFibChs=[], skipErrF=[],
-                   nonMatched=[], latency={}, zs={}, te_tdc=False):
+                   nonMatched=[], latency={}, zs={}, te_tdc=False, nTsMax=10):
     out = []
-    columns = ["Crate",
-               "Slot",
+    columns = [" Cr",
+               "Sl",
                "Fi",
                "Ch",
                "Fl",
-               "ErrF",
-               "Cap0",
-               "NS 0xA0 A1 A2 A3 A4 A5 A6 A7 A8 A9",
-               "0xL0 L1 L2 L3 L4 L5 L6 L7 L8 L9",
+               "Er",
+               "C0",
+               "0xA0 " + " ".join(["A%1d" % i for i in range(1, nTsMax)]),
+               "0xL0 " + " ".join(["L%1d" % i for i in range(1, nTsMax)]),
                ]
     if te_tdc:
-        columns += [" T0 T1 T2 T3 T4 T5 T6 T7 T8 T9"]
+        columns += ["0xT0 " + " ".join(["T%1d" % i for i in range(1, nTsMax)])]
     if latency:
         columns += ["", "EF", "Cnt", "IDLE"]
     if zs:
@@ -313,22 +318,21 @@ def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
             continue
         red = (crate, slot, top, data["Fiber"], data["FibCh"]) in nonMatched
 
-        errf = "%2d" % data["ErrF"]
+        errf = " %1d" % data["ErrF"]
         if data["ErrF"]:
             errf = printer.red(errf, False)
 
-        fields = [" %3d" % crate,
-                  "  %2d%1s" % (slot, top),
-                  "%2d" % data["Fiber"],
+        fields = [" %2d" % crate,
+                  "%2d%1s%2d" % (slot, top, data["Fiber"]),
                   " %1d" % data["FibCh"],
                   " %1d" % data["Flavor"],
-                  " %s" % errf,
-                  "  %1d" % data["CapId0"],
-                  "  %2d   " % len(data["QIE"]) + qieString(data["QIE"], data.get("SOI", []), nPreSamples, red=red),
-                  "  " + qieString(data.get("TDC", []), data.get("SOI", []))
+                  errf,
+                  " %1d" % data["CapId0"],
+                  "  " + qieString(data["QIE"], data.get("SOI", []), nPreSamples, red=red, nMax=nTsMax),
+                  qieString(data.get("TDC", []), data.get("SOI", []), nMax=nTsMax)
                   ]
         if te_tdc:
-            fields += [qieString(data.get("TDC_TE", []), data.get("SOI", []))]
+            fields += [qieString(data.get("TDC_TE", []), data.get("SOI", []), nMax=nTsMax)]
         out.append(" ".join(fields))
 
         if latency:
