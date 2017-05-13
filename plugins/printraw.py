@@ -17,7 +17,7 @@ def oneEvent(d={}, slim1=False):
     aux = d[None]
 
     if not slim1:
-        printer.purple("-" * 85)
+        printer.purple("-" * 86)
         printer.purple("%4s iEntry 0x%08x (%d)" % (aux["label"], aux["iEntry"], aux["iEntry"]))
 
     printHeaders = not (slim1 and aux["iEntry"])
@@ -97,11 +97,7 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
                " Fl",
                "FrmtV",
                "nPre",
-               #"nWordTP",
                col,
-               "nSamp",
-               "EvN8",
-               "  CRC" + ("32" if utca else ""),
               ]
     if zs:
         columns += [" ", "ZSMask:  Thr1, Thr24, ThrTP"]
@@ -115,7 +111,6 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
                "%2d" % p.get("FWFlavor", -1),  # absent in uHTR
                " 0x%01x" % p["FormatVer"],
                "  %2d" % p["nPreSamples"],
-               #"  %3d  " % p["nWord16Tp"],
                ]
     if utca:
         s = "  %4d/%4d" % (p.get(col, -1), p.get(col+"T", -1))
@@ -123,13 +118,8 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
     else:
         strings.append("     %3d " % p.get(col, -1))
 
-    strings += ["   %2d" % p.get("nSamples", -1),  # absent in uHTR
-                "  0x%02x" % p["EvN8"],
-                ]
-    if utca:
-        strings.append("0x%08x" % p["CRC"])
-    elif "Qie" in col:
-        strings.append("0x%04x" % p["CRC"])
+    if utca or ("Qie" in col):
+        strings.append("      ")
     else:
         strings.append("  TTP ")
 
@@ -388,13 +378,11 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
                   "       OrN",
                   "    BcN",
                   "minutes",
-                  " TTS",
+                  "TTS",
                   "nBytesHW(   SW)",
                   "type",
                   #"CRC16",
                   "nSkip16",
-                  "BcN12",
-                  "EvN8",
                   "Blk8",
                   ]
 
@@ -408,17 +396,14 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
                  "0x%08x" % h["OrN"],
                  "%4d" % h["BcN"],
                  "%7.3f" % hw.minutes(h["OrN"], h["BcN"]),
-                 ("  %1x" % t["TTS"]) if "TTS" in t else "  - ",
+                 (" %1x" % t["TTS"]) if "TTS" in t else "  - ",
                  "    %5d(%5d)" % (t["nWord64"]*8 if "nWord64" in t else "  -1", d["nBytesSW"]),
                  "  %1d " % h["Evt_ty"],
                  #(" 0x%04x" % t["CRC16"]) if "CRC16" in t else "   - ",
                  "%7d" % d["nWord16Skipped"],
                  ]
         if h["uFoV"]:
-            sList += [" %4d" % t["BcN12"],
-                      "0x%02x" % t["EvN8"],
-                      "  %2d" % t["Blk_no8"],
-                      ]
+            sList.append("  %2d" % t["Blk_no8"])
 
         printer.blue("  ".join(sList))
         if 2 <= dump and dump != 4:
