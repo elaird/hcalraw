@@ -1,5 +1,6 @@
 # AMC13 (May 2014 onward) http://ohm.bu.edu/~hazen/CMS/AMC13/UpdatedDAQPath_2014-05-01.pdf
 # uHTR  (May 2014 onward) https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12306
+# uMNio: https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12925&filename=umnio_spec.pdf
 # AMC13/uHTR (through April 2014) http://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_3.pdf
 # DCC2 http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
 # HTR https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
@@ -233,15 +234,11 @@ def htrHeaderV1(l={}, w=None, i=None, utca=None):
         l["EventType"] = (w >> 8) & 0xf
         l["FwFlavor"] = w & 0xff
         l["FormatVer"] = l["PayloadFormat"]  # compat
+        l["IsIO"] = l["PayloadFormat"] == 2
+        l["IsTTP"] = False
 
     if i == 7:
         l["Header7"] = w
-
-    l["IsTTP"] = False
-    l["channelData"] = {}
-    l["triggerData"] = {}
-    l["technicalData"] = {}
-    l["otherData"] = {}
 
 
 def htrHeaderV0(l={}, w=None, i=None, utca=None):
@@ -279,10 +276,6 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
         l["UnsupportedFormat"] = (not utca) and (l["FormatVer"] != 6)
 
     if i == 5:
-        l["channelData"] = {}
-        l["triggerData"] = {}
-        l["technicalData"] = {}
-        l["otherData"] = {}
         if utca:
             #l["nWord16Payload"] = w & 0x1fff  # !document
             l["nPreSamples"] = (w >> 3) & 0x1f  # !document
@@ -295,6 +288,7 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
         l["CM"] = (w >> 14) & 0x1
 
     if i == 7:
+        l["IsIO"] = False
         l["IsTTP"] = (w >> 15) & 0x1
         l["PipelineLength"] = w & 0xff
         if l["IsTTP"]:
@@ -410,8 +404,11 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             l["headerWords"] = []
         l["headerWords"].append(word16)
         if i == 7:
-            l["V1"] = (l["headerWords"][6] >> 12) & 0x1
-            l["V1"] &= utca
+            l["channelData"] = {}
+            l["triggerData"] = {}
+            l["technicalData"] = {}
+            l["otherData"] = {}
+            l["V1"] = utca and ((l["headerWords"][6] >> 12) & 0x3)
             func = htrHeaderV1 if l["V1"] else htrHeaderV0
             for iHeaderWord in range(8):
                 func(l, w=l["headerWords"][iHeaderWord], i=iHeaderWord, utca=utca)
@@ -448,28 +445,32 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
 
     if l["IsTTP"]:
         ttpData(l, (i - 8) % 6, word16)
-    else:
-        if not utca:
-            if i < 8 + l["nWord16Tp"]:
-                htrTps(l, word16, bot=l["Top"]=="b")
-                return
+        return
+    elif l["IsIO"]:
+        # ioData(l)
+        return
 
-            if (3 <= k <= 4):
-                htrPreTrailer(l, word16, k)
-                return
+    if not utca:
+        if i < 8 + l["nWord16Tp"]:
+            htrTps(l, word16, bot=l["Top"]=="b")
+            return
 
-            if (5 <= k <= 12) and not l["CM"]:
-                htrExtra(l, w=word16, i=13-k)
-                return
+        if (3 <= k <= 4):
+            htrPreTrailer(l, word16, k)
+            return
 
-        htrData(d=d,
-                l=l,
-                iWord16=iWord16,
-                word16=word16,
-                utca=utca,
-                fedId=fedId,
-                warn=warn,
-                )
+        if (5 <= k <= 12) and not l["CM"]:
+            htrExtra(l, w=word16, i=13-k)
+            return
+
+    htrData(d=d,
+            l=l,
+            iWord16=iWord16,
+            word16=word16,
+            utca=utca,
+            fedId=fedId,
+            warn=warn,
+            )
 
 
 def ttpData(l={}, iDataMod6=None, word16=None):
