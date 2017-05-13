@@ -1,4 +1,5 @@
-from configuration import hw, matching
+import collections
+from configuration import hw, sw, matching
 import printer
 
 
@@ -27,22 +28,6 @@ def matchFrac(nMatch, nMisMatch):
         return None
 
 
-def labels(crate2bin):
-    l = ["-1"] * (1 + len(crate2bin))
-    for (cr, top), bin in crate2bin.iteritems():
-        assert 1 <= bin
-        l[bin - 1] = "%2d%1s" % (cr, top)
-    return l
-
-
-def slot2bin(slot, min=0, max=22):
-    if slot <= min:
-        return min
-    if max <= slot:
-        return max
-    return slot
-
-
 def histogramBlock(book, block, fedId, fedEvn, fedOrn5, fedBcn):
     evnMask = 0x7f
     book.fill((fedEvn & evnMask, block["EvN"] & evnMask), "EvN_HTR_vs_FED_%d" % fedId,
@@ -67,12 +52,12 @@ def histogramBlock(book, block, fedId, fedEvn, fedOrn5, fedBcn):
               title="FED %d;HTR BcN - FED BcN;HTRs / bin" % fedId)
 
 
-def histogramBlock2(book, block, fedEvn, fedOrn5, fedBcn, slotCrate, misMatchMapBins, yAxisLabels):
+def histogramBlock2(book, block, fedEvn, fedOrn5, fedBcn, slotCrate, misMatchMapBins, xAxisLabels, yAxisLabels):
     book.fill(slotCrate,
               "block_vs_slot_crate",
               *misMatchMapBins,
               title="any;slot;crate;HTR / bin",
-              yAxisLabels=yAxisLabels)
+              xAxisLabels=xAxisLabels, yAxisLabels=yAxisLabels)
 
     for key, fedVar in [("EvN", fedEvn),
                         ("OrN5", fedOrn5),
@@ -83,7 +68,7 @@ def histogramBlock2(book, block, fedEvn, fedOrn5, fedBcn, slotCrate, misMatchMap
                       "%s_mismatch_vs_slot_crate" % key,
                       *misMatchMapBins,
                       title="%s mismatch;slot;crate;HTR - FED   mismatches / bin" % key,
-                      yAxisLabels=yAxisLabels)
+                      xAxisLabels=xAxisLabels, yAxisLabels=yAxisLabels)
 
 
 def htrSummary(blocks=[], book=None, fedId=None,
@@ -108,17 +93,19 @@ def htrSummary(blocks=[], book=None, fedId=None,
         caps[i] = 0
         ErrF[i] = 0
 
-    crate2bin = {}
-    iCrate = 0
-    for crate in range(20, 39) + range(61, 64):  # USC + 904
-        if crate in [23, 26, 27, 33] + [28, 36]:  # HO + do not exist
-            continue
-        iCrate += 1
-        crate2bin[(crate, " ")] = iCrate
+    crate2bin = collections.defaultdict(int)
+    yAxisLabels = ["?"]
 
-    crateFail = 1 + max(crate2bin.values())
-    yAxisLabels = labels(crate2bin)
-    misMatchMapBins = ((12, crateFail), (0.5, 0.5), (12.5, 0.5 + crateFail))
+    for iCrate, crate in enumerate(sw.crateList(usc=True)):
+        crate2bin[crate] = 1 + iCrate
+        yAxisLabels.append("%2d" % crate)
+
+    nSlots = 21
+    xAxisLabels = ["%d" % s for s in range(1, 1 + nSlots)]
+    x0 =  0.5
+    y0 = -0.5
+    nCrates = len(yAxisLabels)
+    misMatchMapBins = ((nSlots, nCrates), (x0, y0), (x0 + nSlots, y0 + nCrates))
 
     for block in blocks:
         if type(block) is not dict:
@@ -138,8 +125,8 @@ def htrSummary(blocks=[], book=None, fedId=None,
                 printer.warning("%s / crate %2d slot %2d%1s has EvN 0x%06x" % (msg, block["Crate"], block["Slot"], block["Top"], block["EvN"]))
 
         histogramBlock(book, block, fedId, fedEvn, fedOrn5, fedBcn)
-        slotCrate = (slot2bin(block["Slot"]), crate2bin.get((block["Crate"], block["Top"]), crateFail))
-        histogramBlock2(book, block, fedEvn, fedOrn5, fedBcn, slotCrate, misMatchMapBins, yAxisLabels)
+        slotCrate = (block["Slot"], crate2bin[block["Crate"]])
+        histogramBlock2(book, block, fedEvn, fedOrn5, fedBcn, slotCrate, misMatchMapBins, xAxisLabels, yAxisLabels)
 
         nTpTowerBins = 50
         book.fill(len(block["triggerData"]), "nTpTowers_%d" % fedId, nTpTowerBins, -0.5, nTpTowerBins - 0.5,
@@ -165,7 +152,8 @@ def htrSummary(blocks=[], book=None, fedId=None,
                 flavor(book, triggerData, fedId)
 
             tpMatch = histogramTriggerData(book, block, triggerData, triggerKey, fedId,
-                                           crate2bin, crateFail, slotCrate, misMatchMapBins, yAxisLabels,
+                                           crate2bin, slotCrate,
+                                           misMatchMapBins, xAxisLabels, yAxisLabels,
                                            tpMatches=other.get("tMatched", []), # tpMismatches,
                                           )
             if tpMatch:
@@ -175,10 +163,10 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
         for channelData in block["channelData"].values():
             flavor(book, channelData, fedId)
-            a, b = histogramChannelData(book, block, channelData, fedId,
-                                        caps, ErrF, adcs, crate2bin, crateFail,
-                                        slotCrate, misMatchMapBins,
-                                        yAxisLabels, fedTime, **other)
+            a, b = histogramChannelData(book, block, channelData, fedId, caps, ErrF, adcs,
+                                        crate2bin, slotCrate,
+                                        misMatchMapBins, xAxisLabels, yAxisLabels,
+                                        fedTime, **other)
             nAdcMatch += a
             nAdcMisMatch += b
 
@@ -190,7 +178,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
 
 
 def histogramTriggerData(book, block, triggerData, triggerKey, fedId,
-                         crate2bin, crateFail, slotCrate, misMatchMapBins, yAxisLabels,
+                         crate2bin, slotCrate, misMatchMapBins, xAxisLabels, yAxisLabels,
                          tpMatches=None, # tpMismatches,
                          ):
 
@@ -211,18 +199,18 @@ def histogramTriggerData(book, block, triggerData, triggerKey, fedId,
     if tpCoords2 is None:
         book.fill(slotCrate, "TP_unmatchable_vs_slot_crate", *misMatchMapBins,
                   title="TP unmatchable;slot;crate;Towers / bin",
-                  yAxisLabels=yAxisLabels)
+                  xAxisLabels=xAxisLabels, yAxisLabels=yAxisLabels)
         return
 
     crate2, slot2, top2 = tpCoords2[:3]
     slotsCrates = [slotCrate,
-                   (slot2bin(slot2), crate2bin.get((crate2, top2), crateFail)),
+                   (slot2, crate2bin[crate2]),
                    ]
 
     for t in slotsCrates:
         book.fill(t, "TP_matchable_vs_slot_crate", *misMatchMapBins,
                   title="TP matchable;slot;crate;Towers / bin",
-                  yAxisLabels=yAxisLabels)
+                  xAxisLabels=xAxisLabels, yAxisLabels=yAxisLabels)
 
     if tpCoords in tpMatches:
         return True
@@ -230,14 +218,14 @@ def histogramTriggerData(book, block, triggerData, triggerKey, fedId,
         for t in slotsCrates:
             book.fill(t, "TP_mismatch_vs_slot_crate", *misMatchMapBins,
                       title="TP mismatch;slot;crate;Towers / bin",
-                      yAxisLabels=yAxisLabels)
+                      xAxisLabels=xAxisLabels, yAxisLabels=yAxisLabels)
         return False
 
 
 def histogramChannelData(book, block, channelData, fedId,
-                         caps, ErrF, adcs, crate2bin, crateFail,
+                         caps, ErrF, adcs, crate2bin,
                          slotCrate, misMatchMapBins,
-                         yAxisLabels, fedTime, **other):
+                         xAxisLabels, yAxisLabels, fedTime, **other):
 
     nAdcMatch = 0
     nAdcMisMatch = 0
@@ -249,7 +237,7 @@ def histogramChannelData(book, block, channelData, fedId,
     book.fill(slotCrate,
               "ErrFAny_vs_slot_crate", *misMatchMapBins,
               title="any;slot;crate;Channels / bin",
-              yAxisLabels=yAxisLabels)
+              xAxisLabels=xAxisLabels, yAxisLabels=yAxisLabels)
 
     nTsMax = 10
     nAdcMax = 256
@@ -289,13 +277,13 @@ def histogramChannelData(book, block, channelData, fedId,
             book.fill(slotCrate,
                       "%s_vs_slot_crate" % name, *misMatchMapBins,
                       title="%s;slot;crate;Channels / bin" % title,
-                      yAxisLabels=yAxisLabels)
+                      xAxisLabels=xAxisLabels, yAxisLabels=yAxisLabels)
         return nAdcMatch, nAdcMisMatch
 
     book.fill(slotCrate,
               "ErrF0_vs_slot_crate", *misMatchMapBins,
               title="ErrF == 0;slot;crate;Channels / bin",
-              yAxisLabels=yAxisLabels)
+              xAxisLabels=xAxisLabels, yAxisLabels=yAxisLabels)
 
     book.fill((block["Slot"], channelData["Fiber"]),
               "fiber_vs_slot_%d" % fedId, (12, 24), (0.5, -0.5), (12.5, 23.5),
@@ -305,12 +293,10 @@ def histogramChannelData(book, block, channelData, fedId,
     if coords in other.get("misMatched", []):
         nAdcMisMatch = 1
         crate2, slot2, top2 = hw.transformed_qie(*coords)[:3]
-        for t in [slotCrate,
-                  (slot2bin(slot2), crate2bin.get((crate2, top2), crateFail)),
-                 ]:
+        for t in [slotCrate, (slot2, crate2bin[crate2])]:
             book.fill(t, "ADC_mismatch_vs_slot_crate", *misMatchMapBins,
                       title="ADC mismatch;slot;crate;Channels / bin",
-                      yAxisLabels=yAxisLabels)
+                      xAxisLabels=xAxisLabels, yAxisLabels=yAxisLabels)
     elif coords in other.get("matched", []):
         nAdcMatch = 1
 

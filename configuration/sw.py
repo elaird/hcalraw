@@ -46,6 +46,18 @@ def dirs_global(run):
     return [nzs, mb, minidaq][:-1]
 
 
+def crateList(usc=True):
+    h = []
+    for crate in [3, 6, 7, 13] + range(20, 39): # USC
+        if crate in [23, 26, 27, 33] + [28, 36]:  # uHO + do not exist
+            continue
+        h.append(crate)
+    if usc:
+        return h
+    else:  # B904
+        return [50, 51, 52, 53, 61, 62, 63]
+
+
 def fedMap():
     d = {"7xy": range(700, 732),
          "HO": range(724, 732),
