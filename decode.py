@@ -60,7 +60,7 @@ def uHtrDict(w, l=[]):
             }
 
 
-def header(d={}, iWord64=None, word64=None):
+def header(d={}, iWord64=None, word64=None, lastN=None):
     w = word64
     if iWord64 == 0:
         #d["FoV"] = (w >> 4) & 0xf
@@ -74,12 +74,12 @@ def header(d={}, iWord64=None, word64=None):
         d["uFoV"] = (w >> 60) & 0xf
 
     if d["uFoV"]:
-        block_header_ufov1(d=d, iWord64=iWord64, word64=word64)
+        block_header_ufov1(d=d, iWord64=iWord64, word64=word64, lastN=lastN)
     else:
         header_ufov0(d=d, iWord64=iWord64, word64=word64)
 
 
-def block_header_ufov1(d={}, iWord64=None, word64=None):
+def block_header_ufov1(d={}, iWord64=None, word64=None, lastN=None):
     w = word64
     if iWord64 == 1:
         d["word16Counts"] = []
@@ -90,24 +90,31 @@ def block_header_ufov1(d={}, iWord64=None, word64=None):
 
         d["nAMC"] = (w >> 52) & 0xf
         d["iWordPayload0"] = 2 + d["nAMC"]
+        d["iWordPayloadn"] = d["iWordPayload0"]
         return
 
-    if iWord64 < d["iWordPayload0"]:
-        iAMC = (w >> 16) & 0xf
-        key = "uHTR%d" % iAMC
-        d[key] = {}
+    if d["iWordPayload0"] <= iWord64:
+        return
 
-        lmsepvc = (w >> 56) & 0x7f
-        for i, l in enumerate(["L", "M", "S", "E", "P", "V", "C"]):
-            d[key][l] = (lmsepvc >> (6-i)) & 0x1
+    if lastN and iWord64 < d["iWordPayload0"] - lastN:
+        d["iWordPayloadn"] += (w >> 32) & 0xffffff
+        return
 
-        if d[key]["M"]:
-            sys.exit("multi-block unpacking not implemented")
-        d[key]["BoardID"] = w & 0xffff
-        d[key]["Blk_no"] = (w >> 20) & 0xff
-        d[key]["nWord16"] = (w >> 32) & 0xffffff
-        d[key]["nWord16"] *= 4
-        d["word16Counts"].append(d[key]["nWord16"])
+    iAMC = (w >> 16) & 0xf
+    key = "uHTR%d" % iAMC
+    d[key] = {}
+
+    lmsepvc = (w >> 56) & 0x7f
+    for i, l in enumerate(["L", "M", "S", "E", "P", "V", "C"]):
+        d[key][l] = (lmsepvc >> (6-i)) & 0x1
+
+    if d[key]["M"]:
+        sys.exit("multi-block unpacking not implemented")
+    d[key]["BoardID"] = w & 0xffff
+    d[key]["Blk_no"] = (w >> 20) & 0xff
+    d[key]["nWord16"] = (w >> 32) & 0xffffff
+    d[key]["nWord16"] *= 4
+    d["word16Counts"].append(d[key]["nWord16"])
 
 
 def block_trailer_ufov1(d={}, iWord64=None, word64=None):

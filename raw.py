@@ -129,7 +129,7 @@ def pruneFeds(chain, s):
 def collected(tree=None, specs={}):
     raw = {}
     kargs = {}
-    for item in ["dump", "unpack", "nBytesPer", "skipWords64"]:
+    for item in ["dump", "unpack", "lastNAmcs", "nBytesPer", "skipWords64"]:
         kargs[item] = specs[item]
 
     for fedId, wargs in sorted(specs["wargs"].iteritems()):
@@ -169,7 +169,7 @@ def unpackedHeader(spec):
 
 # for format documentation, see decode.py
 def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
-             warn=True, skipWords64=[], dump=-99):
+             warn=True, skipWords64=[], dump=-99, lastNAmcs=0):
     assert fedData
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
@@ -206,12 +206,14 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
             print "%5d" % iWord64, "%016x" % word64
 
         if iWord64 < header["iWordPayload0"]:
-            decode.header(header, iWord64, word64)
+            decode.header(header, iWord64, word64, lastNAmcs)
             if header.get("uFoV"):
                 nWord64Trailer = 2  # accommodate block trailer
             iWordTrailer0 = nWord64 - nToSkip - nWord64Trailer
         elif headerOnly:
             break
+        elif lastNAmcs and iWord64 < header["iWordPayloadn"]:
+            continue
         elif iWord64 < iWordTrailer0:
             for i in range(4):
                 word16 = (word64 >> (16*i)) & 0xffff
