@@ -324,7 +324,7 @@ def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax=10):
         else:
             continue
 
-        if channelData["Flavor"] and not channelData["ErrF"]:
+        if (2 <= channelData["Flavor"]) and (not channelData["ErrF"]):
             printer.warning("Crate %d Slot %d Fib %d Channel %d has flavor %d" % \
                             (block["Crate"], block["Slot"], channelData["Fiber"], channelData["FibCh"], channelData["Flavor"]))
 
