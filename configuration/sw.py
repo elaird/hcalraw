@@ -61,9 +61,9 @@ def crateList(usc=True):
 def fedMap():
     d = {"7xy": range(700, 732),
          "HO": range(724, 732),
-         "HBHE": range(1100, 1118, 2),
+         "HBHE": range(1100, 1118),
          "HF": range(1118, 1124),
-         "HC": [1134],
+         "HC": [1134, 1135],
          "B904": range(1180, 1188) + [1192, 1194, 1196],
          }
     d["HBEF"] = d["HBHE"] + d["HF"]
