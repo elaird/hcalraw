@@ -52,11 +52,17 @@ def oparser(arg=""):
                       default=False,
                       action="store_true",
                       help="Loop over raw data, but do not unpack it.")
-    common.add_option("--fewer-histos",
+    common.add_option("--fewer-histograms",
                       dest="fewerHistos",
                       default=False,
                       action="store_true",
                       help="Save time by making fewer histograms.")
+    common.add_option("--last-n-amcs",
+                      dest="lastNAmcs",
+                      default=0,
+                      metavar="N",
+                      type="int",
+                      help="Consider only the final N AMCs per FED.")
     common.add_option("--no-plot",
                       dest="noPlot",
                       default=False,
