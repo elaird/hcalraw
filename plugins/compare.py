@@ -73,7 +73,8 @@ def histogramBlock2(book, block, fedEvn, fedOrn5, fedBcn, slotCrate, misMatchMap
 
 def htrSummary(blocks=[], book=None, fedId=None,
                fedEvn=None, fedOrn5=None, fedBcn=None,
-               msg="", warn=True, fewerHistos=False, fedTime=None,
+               msg="", warn=True, fewerHistos=False,
+               fedTime=None, nTsMax=None,
                **other):
     nBadHtrs = 0
     caps = {}
@@ -166,7 +167,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
             a, b = histogramChannelData(book, block, channelData, fedId, caps, ErrF, adcs,
                                         crate2bin, slotCrate,
                                         misMatchMapBins, xAxisLabels, yAxisLabels,
-                                        fedTime, **other)
+                                        fedTime, nTsMax, **other)
             nAdcMatch += a
             nAdcMisMatch += b
 
@@ -225,7 +226,8 @@ def histogramTriggerData(book, block, triggerData, triggerKey, fedId,
 def histogramChannelData(book, block, channelData, fedId,
                          caps, ErrF, adcs, crate2bin,
                          slotCrate, misMatchMapBins,
-                         xAxisLabels, yAxisLabels, fedTime, **other):
+                         xAxisLabels, yAxisLabels, fedTime, nTsMax,
+                         **other):
 
     nAdcMatch = 0
     nAdcMisMatch = 0
@@ -272,14 +274,14 @@ def histogramChannelData(book, block, channelData, fedId,
     caps[channelData["CapId0"]] += 1
 
     if channelData["QIE"]:
-        histogramAdcs(book, fedId, block, channelData, adcs)
+        histogramAdcs(book, fedId, block, channelData, adcs, nTsMax)
         if fedTime:
             histogramTsVsTime(book, fedTime, fedId, channelData["QIE"])
 
     return nAdcMatch, nAdcMisMatch
 
 
-def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax=10):
+def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax):
     nAdcMax = 256
 
     adc = max(channelData["QIE"])
@@ -368,7 +370,7 @@ def htrOverviewBits(d={}, book={}, fedId=None, msg="", warn=True):
                     printer.warning("%s / input %2d has bit %s set." % (msg, iHtr, l))
 
 
-def singleFedPlots(fedId=None, d={}, book={}, **other):
+def singleFedPlots(fedId=None, d={}, book={}, nTsMax=None, **other):
     book.fill(d["nWord16Skipped"], "nWord16Skipped_%d" % fedId, 14, -0.5, 13.5,
               title="FED %d;nWord16 skipped during unpacking;Events / bin" % fedId)
 
@@ -405,6 +407,7 @@ def singleFedPlots(fedId=None, d={}, book={}, **other):
                                                                       fedBcn=fedBcn,
                                                                       msg=msg,
                                                                       fedTime=fedTime,
+                                                                      nTsMax=nTsMax,
                                                                       **other)
 
     errFSum = 0.0 + sum(ErrF.values())
@@ -488,6 +491,7 @@ def loop_over_feds(raw, book, adcTag="", **other):
     okFeds = set()
     adcs = set()
 
+    nTsMax = raw[None]["firstNTs"]
     for fedId, dct in sorted(raw.iteritems()):
         if fedId is None:
             continue
@@ -500,7 +504,7 @@ def loop_over_feds(raw, book, adcTag="", **other):
             printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
             continue
 
-        nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book, **other)
+        nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book, nTsMax=nTsMax, **other)
         adcs = adcs.union(adcs1)
         if nBadHtrs:
             return
