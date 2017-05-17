@@ -468,24 +468,23 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
 
         h.Draw(gopts + "same")  # draw again to be on top of dashed lines
 
-        yx = r.TF1("yx", "x", -0.5, xMax)
-        yx.SetNpx(int(0.5 + xMax))
-        yx.SetLineColor(r.kBlack)
-        yx.SetLineWidth(1)
-        yx.SetLineStyle(3)
-        if doYx:
-            yx.Draw("same")
-
         leg = r.TLegend(0.25, 0.73, 0.4, 0.85)
         leg.SetBorderSize(0)
         leg.SetFillStyle(0)
 
         if doYx:
+            yx = r.TF1("yx", "x", -0.5, xMax)
+            yx.SetNpx(int(0.5 + xMax))
+            yx.SetLineColor(r.kBlack)
+            yx.SetLineWidth(1)
+            yx.SetLineStyle(3)
+            yx.Draw("same")
             leg.AddEntry(yx, "y = x", "l")
             # leg.AddEntry(x0, "zero", "l")
+            keep.append(yx)
 
         leg.Draw()
-        keep += [h, yx, leg]
+        keep += [h, leg]
         # if name == "adc_vs_adc":
         #     h.SetTitle("")
         #     h.GetXaxis().SetTitle("ADC  (VME FEDs 718,719)")
