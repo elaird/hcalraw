@@ -36,6 +36,7 @@ def oneEvent(d={}, slim1=False):
                    nonMatchedQie=aux.get("misMatched", []),
                    nonMatchedTp=aux.get("tMisMatched", []),
                    printHeaders=printHeaders,
+                   nTsMax=aux["firstNTs"],
                    )
         printHeaders = True
     if not slim1:
@@ -69,7 +70,7 @@ def htrOverview(d={}):
 
 
 def oneHtr(iBlock=None, p={}, dump=None, utca=None,
-           nonMatchedQie=[], nonMatchedTp=[]):
+           nonMatchedQie=[], nonMatchedTp=[], nTsMax=None):
 
     try:
         zs = p.get("ZS")
@@ -148,6 +149,7 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
              "nonMatched": nonMatchedQie,
              "latency": p.get("Latency"),
              "zs": p.get("ZS"),
+             "nTsMax": nTsMax,
             }
     if dump in [5, 6, 8]:
         kargs["skipErrF"] = [3]
@@ -289,7 +291,7 @@ def uhtrTriggerData(d={}, dump=None, crate=None, slot=None, top="", nonMatched=[
 
 def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
                    skipFibers=[], skipFibChs=[], skipErrF=[],
-                   nonMatched=[], latency={}, zs={}, te_tdc=False, nTsMax=10):
+                   nonMatched=[], latency={}, zs={}, te_tdc=False, nTsMax=None):
     out = []
     columns = ["  Cr",
                "Sl",
@@ -372,7 +374,7 @@ def ttpData(ttpInput=[], ttpOutput=[], ttpAlgoDep=[]):
 
 def oneFedHcal(d={}, dump=None, crateslots=[],
                nonMatchedQie=[], nonMatchedTp=[],
-               printHeaders=None):
+               printHeaders=None, nTsMax=None):
     h = d["header"]
     t = d["trailer"]
     if 1 <= dump:
@@ -424,6 +426,7 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
                utca=h["utca"],
                nonMatchedQie=nonMatchedQie,
                nonMatchedTp=nonMatchedTp,
+               nTsMax=nTsMax,
         )
 
 
