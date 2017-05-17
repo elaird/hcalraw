@@ -1,6 +1,5 @@
 import re
 
-nTsMax = 20                # consider up to this many acquired time slices (phase-0)
 patternB = False           # consider also patterns mixed across fibers
 rmRibbon = False           # pair central 6 fibers (of 8 or 12)
 compressed = True          # handle lack of per-TS capids

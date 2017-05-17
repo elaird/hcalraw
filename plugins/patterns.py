@@ -18,10 +18,10 @@ def patterns(raw1={}, **_):
                 continue
 
             # skip printer to facilitate diff
-            print "\n".join(lines(raw["header"], iBlock, block))
+            print "\n".join(lines(raw["header"], iBlock, block, raw1[None]["firstNTs"]))
 
 
-def lines(h, iBlock, block):
+def lines(h, iBlock, block, nTsMax):
     if h["utca"]:
         moduleId = "u%2d %2d" % (block["Crate"], block["Slot"])
     else:
@@ -29,13 +29,13 @@ def lines(h, iBlock, block):
 
     if configuration.patterns.patternB:
         headers = [configuration.patterns.lineStart, "ModuleId", "Fibers", "Pattern"]
-        chars = " ".join(["%2d" % i for i in range(20)])
+        chars = " ".join(["%2d" % i for i in range(nTsMax)])
         out = ["  ".join(headers + [chars])]
     else:
         out = [""]
 
     # print "Crate=%2d, Slot=%2d" % (block["Crate"], block["Slot"])
-    d = storePatternData(block["channelData"], h["utca"])
+    d = storePatternData(block["channelData"], h["utca"], nTsMax)
 
     for fiber1, fd in sorted(d.iteritems()):
         out += lines_fiber_pair(fiber1, fd["flavor"], fd["patternData"], h["utca"], moduleId)
@@ -216,7 +216,7 @@ def fe_word_qie8(feWord32, dct, iTs):
     return feWord32
 
 
-def storePatternData(d={}, utca=None):
+def storePatternData(d={}, utca=None, nTsMax=None):
     offset = 0
     if not utca:
         offset += 1
@@ -230,7 +230,7 @@ def storePatternData(d={}, utca=None):
                        "patternData": [],
                        }
 
-        for iTs in range(configuration.patterns.nTsMax):
+        for iTs in range(nTsMax):
             feWords = []
             flavors = []
             # Tullio says HTR f/w makes no distinction between optical cables 1 and 2
