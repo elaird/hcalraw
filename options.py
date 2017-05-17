@@ -42,32 +42,6 @@ def oparser(arg=""):
                       metavar="S",
                       type="int",
                       help="Loop over only (up to) S events per file.")
-    common.add_option("--no-loop",
-                      dest="noLoop",
-                      default=False,
-                      action="store_true",
-                      help="Plot from existing .root file (do not look at data).")
-    common.add_option("--no-unpack",
-                      dest="noUnpack",
-                      default=False,
-                      action="store_true",
-                      help="Loop over raw data, but do not unpack it.")
-    common.add_option("--fewer-histograms",
-                      dest="fewerHistos",
-                      default=False,
-                      action="store_true",
-                      help="Save time by making fewer histograms.")
-    common.add_option("--last-n-amcs",
-                      dest="lastNAmcs",
-                      default=0,
-                      metavar="N",
-                      type="int",
-                      help="Consider only the final N AMCs per FED.")
-    common.add_option("--no-plot",
-                      dest="noPlot",
-                      default=False,
-                      action="store_true",
-                      help="Do not make .pdf from .root file")
     common.add_option("--profile",
                       dest="profile",
                       default=False,
@@ -86,6 +60,41 @@ def oparser(arg=""):
                       default="compare",
                       help=" ".join([l.ljust(60) for l in plugins]))
     parser.add_option_group(common)
+
+    less = optparse.OptionGroup(parser, "Options to do less work")
+    less.add_option("--no-loop",
+                    dest="noLoop",
+                    default=False,
+                    action="store_true",
+                    help="Plot from existing .root file (do not look at data).")
+    less.add_option("--no-unpack",
+                    dest="noUnpack",
+                    default=False,
+                    action="store_true",
+                    help="Loop over raw data, but do not unpack it.")
+    less.add_option("--last-n-amcs",
+                    dest="lastNAmcs",
+                    default=0,
+                    metavar="N",
+                    type="int",
+                    help="Consider only the final N AMCs per FED (0 means all).")
+    less.add_option("--first-n-ts",
+                    dest="firstNTs",
+                    default=10,
+                    metavar="N",
+                    type="int",
+                    help="Consider only the first N time slices (default is 10).")
+    less.add_option("--fewer-histograms",
+                    dest="fewerHistos",
+                    default=False,
+                    action="store_true",
+                    help="Save time by making fewer histograms.")
+    less.add_option("--no-plot",
+                    dest="noPlot",
+                    default=False,
+                    action="store_true",
+                    help="Do not make .pdf from .root file")
+    parser.add_option_group(less)
 
     printing = optparse.OptionGroup(parser, "Options for printing to stdout")
     printing.add_option("--no-color",
