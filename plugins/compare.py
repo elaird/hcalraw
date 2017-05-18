@@ -739,17 +739,16 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printM
         else:
             compare1(raw1, raw2, book, printMismatches, warnQuality)
 
-    okFeds = loop_over_feds(raw1, book, adcTag="feds1",
-                            warn=warnQuality, fewerHistos=fewerHistos)
+    okFeds1 = loop_over_feds(raw1, book, adcTag="feds1", warn=warnQuality, fewerHistos=fewerHistos)
 
     noGood = [[], [None]]
     if raw1.keys() in noGood or raw2.keys() in noGood:
         return
 
-    okFeds = okFeds.union(loop_over_feds(raw2, book, adcTag="feds2", warn=warnQuality))
+    okFeds2 = loop_over_feds(raw2, book, adcTag="feds2", warn=warnQuality, fewerHistos=fewerHistos)
 
     if acrossRaws:
-        histogram_deltas(raw1, raw2, book, okFeds)
+        histogram_deltas(raw1, raw2, book, okFeds1.union(okFeds2))
 
 
 def coordString(crate, slot, tb, fiber, channel):
