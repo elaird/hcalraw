@@ -262,7 +262,7 @@ def histoLoop(f, lst, hFunc=None, sFunc=None, zoom=False):
     return out
 
 
-def graphLoop(f, lst, func):
+def graphLoop(f, lst, sFunc):
     out = []
     legEntries = []
     h0 = None
@@ -273,7 +273,7 @@ def graphLoop(f, lst, func):
     mins = []
     maxs = []
     for x, _, _ in lst:
-        g = f.Get(func(x))
+        g = f.Get(sFunc(x))
         if not g:
             continue
         xMin, xMax = xMin_xMax(g)
@@ -281,7 +281,7 @@ def graphLoop(f, lst, func):
         maxs.append(xMax)
 
     for x, color, style in lst:
-        g = f.Get(func(x))
+        g = f.Get(sFunc(x))
         if not g:
             continue
 
@@ -611,6 +611,9 @@ def big_clean(size=None, frac0=None, sizeMin=None, frac0Min=None, height=None):
 
 def anyVisible(graph=None, maximum=None):
     n = graph.GetN()
+    if 5.0e3 < n:
+        return False
+
     y = graph.GetY()
     for i in range(n):
         if y[i] <= maximum:
@@ -1004,8 +1007,8 @@ def plotMatch(f, pad0, feds1, feds2):
     return keep
 
 
-def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="", denoms={},
-            doYx=True, retitle=True, gridX=False, gridY=False, boxes=False, alsoZs=False, alsoMatch=False):
+def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="", gopts="colz", denoms={},
+            doYx=True, retitle=True, gridX=False, gridY=False, logY=False, boxes=False, alsoZs=False, alsoMatch=False):
 
     # don't print blank page
     if not any([f.Get(name) for name in names]):
@@ -1024,7 +1027,7 @@ def pageTwo(f=None, feds1=[], feds2=[], canvas=None, pdf="", names=[], title="",
     pad0.Draw()
 
     kargs = {}
-    for item in ["feds1", "feds2", "names", "denoms", "doYx", "retitle", "gridX", "gridY", "boxes"]:
+    for item in ["feds1", "feds2", "names", "denoms", "doYx", "retitle", "gopts", "gridX", "gridY", "logY", "boxes"]:
         kargs[item] = eval(item)
 
     nContours = r.gStyle.GetNumberContours()
@@ -1051,7 +1054,7 @@ def pageThree(stem, suppress=lambda x: False, yx=False, keys=["feds1", "feds2"],
     h = summed(kargs["f"], names)
 
     if h and not suppress(h):
-        pageTwo(names=names, doYx=yx, retitle=False, gridX=True, **kargs)
+        pageTwo(names=names, doYx=yx, retitle=False, **kargs)
 
 
 def pageTrends(f=None, feds1=[], feds2=[], canvas=None, pdf="", title="", names=[]):
@@ -1126,15 +1129,18 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         kargs34.update(kargs)
 
         if "ts" in pages:
-            pageThree(stem="ADC_vs_TS_ErrF0_%d", **kargs)
+            pageThree(stem="ADC_vs_TS_ErrF0_%d", gridX=True, **kargs)
             # pageThree(stem="ADC_vs_TS_ErrFNZ_%d", **kargs)
 
-            # iterate over fibers rather than FEDs
-            feds1 = kargs["feds1"]
-            kargs["feds1"] = range(32)
-            pageThree(stem="ADC_vs_TS_HEP17_ErrF0_fib%d", **kargs)
-            kargs["feds1"] = feds1
-            # back to FEDs
+            feds1 = kargs["feds1"]  # stash default
+
+            kargs["feds1"] = range(32) # iterate over fibers
+            pageThree(stem="ADC_vs_TS_HEP17_ErrF0_fib%d", gridX=True, **kargs)
+
+            kargs["feds1"] = range(10) # iterate over TS
+            pageThree(stem="HEP17_ADC_TS%d", gopts="hist", logY=True, **kargs)
+
+            kargs["feds1"] = feds1  # restore default
 
             # pageThree(stem="ADC_vs_TS_ErrF0_Slot10_%d", **kargs)
             # pageThree(stem="ADC_vs_TS_ErrF0_Slot11_%d", **kargs)
@@ -1212,7 +1218,7 @@ all_pages = ["overview",
              "page3",
              # "maps_rates",
              # "maps_adc_tp",
-             # "frac0_orbit",
-             # "trends",
+             "frac0_orbit",
+             "trends",
              "evn", "orn", "occupancy",
              ]
