@@ -313,16 +313,6 @@ def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax):
                 fib -= 2
         elif block["Slot"] == 11 and 12 <= channelData["Fiber"]:
             fib += channelData["Fiber"] - 12
-            # nEvN = 20
-            # for i in [0, 1]:
-            #     title = "cr%d_sl%d_fib.ge.12_ts%d" % (block["Crate"], block["Slot"], i)
-            #     book.fill(channelData["QIE"][i], title,
-            #               256, -0.5, 255.5,
-            #               title="%s;ADC;Counts / bin" % title)
-            #     title2 = "%s_vs_EvN_%d" % (title, fedId)
-            #     book.fill((block["EvN"], channelData["QIE"][i]), title2,
-            #               (nEvN, 256), (0.5, -0.5), (nEvN + 0.5, 255.5),
-            #               title="%s;EvN;ADC;Counts / bin" % title2)
         else:
             continue
 
@@ -334,6 +324,16 @@ def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax):
                   "ADC_vs_TS_HEP17_%s_fib%d" % (errf, fib),
                   (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
                   title="HEP17 Fib %d;time slice;ADC;Counts / bin" % fib)
+
+        book.fill(channelData["QIE"][i],
+                  "HEP17_ADC_TS%d" % i,
+                  nAdcMax, -0.5, nAdcMax - 0.5,
+                  title="HEP17 TS%d;ADC;Counts / bin" % i)
+        # nEvN = 20
+        # title2 = "%s_vs_EvN_%d" % (title, fedId)
+        # book.fill((block["EvN"], channelData["QIE"][i]), title2,
+        #           (nEvN, 256), (0.5, -0.5), (nEvN + 0.5, 255.5),
+        #           title="%s;EvN;ADC;Counts / bin" % title2)
 
 
 def histogramTsVsTime(book, fedTime, fedId, qies, adcMin=9, nBins=10):
