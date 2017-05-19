@@ -4,8 +4,8 @@ import printer
 
 
 def histogram(raw1={}, raw2={}, book=None, warnQuality=True, fewerHistos=False, **_):
-    okFeds1 = loop_over_feds(raw1, book, adcTag="feds1", warn=warnQuality, fewerHistos=fewerHistos)
-    okFeds2 = loop_over_feds(raw2, book, adcTag="feds2", warn=warnQuality, fewerHistos=fewerHistos)
+    for i, raw in enumerate([raw1, raw2]):
+        loop_over_feds(raw, book, adcTag="feds%d" % (1 + i), warn=warnQuality, fewerHistos=fewerHistos)
 
 
 def loop_over_feds(raw, book, adcTag="", **other):
