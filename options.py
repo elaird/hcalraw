@@ -49,15 +49,15 @@ def oparser(arg=""):
                       help="Profile this program.")
 
     plugins = ["Comma-separated list of plugins to run on each event.",
-               "E.g., --plugins=compare,foo will execute",
-               "first the function compare from plugins/compare.py",
-               "and then the function foo from plugins/foo.py"
+               "E.g., --plugins=histogram,compare will execute",
+               "first the function compare from plugins/histogram.py",
+               "and then the function foo from plugins/compare.py"
               ]
     common.add_option("--plugins",
                       dest="plugins",
                       type="str",
-                      metavar="compare,...",
-                      default="compare",
+                      metavar="histogram,...",
+                      default="histogram",
                       help=" ".join([l.ljust(60) for l in plugins]))
     parser.add_option_group(common)
 

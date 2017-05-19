@@ -480,7 +480,9 @@ def processed(options):
     plugins = options.plugins.split(",")
     if 1 <= options.dump and "printraw" not in plugins:
         plugins.append("printraw")
-    common["plugins"] = plugins
+    if options.file2 and "compare" not in plugins:
+        plugins.append("compare")
+    common["plugins"] = filter(lambda x: x, plugins)
 
     outer = {"fedIds": sw.fedList(options.feds1),
              "label": "files1",
