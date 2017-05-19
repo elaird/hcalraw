@@ -5,6 +5,8 @@ import printer
 
 def histogram(raw1={}, raw2={}, book=None, warnQuality=True, fewerHistos=False, **_):
     for i, raw in enumerate([raw1, raw2]):
+        if not raw:
+            continue
         loop_over_feds(raw, book, adcTag="feds%d" % (1 + i), warn=warnQuality, fewerHistos=fewerHistos)
 
 
@@ -536,10 +538,15 @@ def histogramTdcs(book, fedId, block, channelData, nTsMax, errf, eq):
                   title="FED %d (ErrF %s 0);time slice;TDC;Counts / bin" % (fedId, eq))
 
         if tdc < 50 and tsSoi is not None:
-            book.fill(25.0 * (i - tsSoi) + tdc / 2.0,
-                      "TDCHitTime_%d" % fedId,
-                      110, -55.0, 55.0,
+            t = 25.0 * (i - tsSoi) + tdc / 2.0
+            book.fill(t, "TDCHitTime_%d" % fedId, 110, -55.0, 55.0,
                       title="FED %d;TDC hit time w.r.t. SoI (ns);Counts / bin" % fedId)
+
+            # nEvN = 1000
+            # book.fill((block["EvN"], t),
+            #           "TDCHitTime_vs_EvN_%d" % fedId,
+            #           (nEvN, 110), (0.5, -55.0), (nEvN + 0.5, 55.0),
+            #           title="FED %d;EvN;TDC hit time w.r.t. SoI (ns);Counts / bin" % fedId)
 
 
 def histogramTsVsTime(book, fedTime, fedId, qies, adcMin=16, nBins=10):
