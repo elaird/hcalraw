@@ -453,14 +453,21 @@ def histogramChannelData(book, block, channelData, fedId,
     caps[channelData["CapId0"]] += 1
 
     if channelData["QIE"]:
-        histogramAdcs(book, fedId, block, channelData, adcs, nTsMax)
+        errf = "ErrFNZ" if channelData["ErrF"] else "ErrF0"
+        eq = "!=" if channelData["ErrF"] else "=="
+
+        histogramAdcs(book, fedId, block, channelData, adcs, nTsMax, errf, eq)
         if fedTime:
             histogramTsVsTime(book, fedTime, fedId, channelData["QIE"])
+
+    if channelData.get("TDC"):
+        histogramTdcs(book, fedId, block, channelData, nTsMax, errf, eq)
+
 
     return nAdcMatch, nAdcMisMatch
 
 
-def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax):
+def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax, errf, eq):
     nAdcMax = 256
 
     adc = max(channelData["QIE"])
@@ -473,9 +480,6 @@ def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax):
     for (i, adc) in enumerate(channelData["QIE"]):
         if nTsMax <= i:
             break
-
-        errf = "ErrFNZ" if channelData["ErrF"] else "ErrF0"
-        eq = "!=" if channelData["ErrF"] else "=="
 
         book.fill((i, adc), "ADC_vs_TS_%s_%d" % (errf, fedId),
                   (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
@@ -504,18 +508,41 @@ def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax):
                   (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
                   title="HEP17 Fib %d;time slice;ADC;Counts / bin" % fib)
 
-        book.fill(channelData["QIE"][i],
+        book.fill(adc,
                   "HEP17_ADC_TS%d" % i,
                   nAdcMax, -0.5, nAdcMax - 0.5,
                   title="HEP17 TS%d;ADC;Counts / bin" % i)
         # nEvN = 20
         # title2 = "%s_vs_EvN_%d" % (title, fedId)
-        # book.fill((block["EvN"], channelData["QIE"][i]), title2,
+        # book.fill((block["EvN"], adc), title2,
         #           (nEvN, 256), (0.5, -0.5), (nEvN + 0.5, 255.5),
         #           title="%s;EvN;ADC;Counts / bin" % title2)
 
 
-def histogramTsVsTime(book, fedTime, fedId, qies, adcMin=9, nBins=10):
+def histogramTdcs(book, fedId, block, channelData, nTsMax, errf, eq):
+    tdcMax = 64
+    try:
+        tsSoi = channelData["SOI"].index(1)
+    except ValueError:
+        printer.warning("%2d:%2d:%2d:%d SoI not found" % (block["Crate"], block["Slot"], channelData["Fiber"], channelData["FibCh"]))
+        tsSoi = None
+
+    for (i, tdc) in enumerate(channelData["TDC"]):
+        if nTsMax <= i:
+            break
+
+        book.fill((i, tdc), "TDC_vs_TS_%s_%d" % (errf, fedId),
+                  (nTsMax, tdcMax), (-0.5, -0.5), (nTsMax - 0.5, tdcMax - 0.5),
+                  title="FED %d (ErrF %s 0);time slice;TDC;Counts / bin" % (fedId, eq))
+
+        if tdc < 50 and tsSoi is not None:
+            book.fill(25.0 * (i - tsSoi) + tdc / 2.0,
+                      "TDCHitTime_%d" % fedId,
+                      110, -55.0, 55.0,
+                      title="FED %d;TDC hit time (ns);Counts / bin" % fedId)
+
+
+def histogramTsVsTime(book, fedTime, fedId, qies, adcMin=16, nBins=10):
     for i, adc in enumerate(qies):
         if adcMin <= adc:
             book.fill(i, "ts_qie_%d" % fedId, nBins, -0.5, nBins - 0.5,
