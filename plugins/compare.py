@@ -2,6 +2,20 @@ from configuration import hw, matching
 import printer
 
 
+def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False,
+            printMismatches=False, warnQuality=True, **_):
+
+    if len(raw1) <= 1 or len(raw2) <= 1:
+        return
+
+    if anyEmap:
+        compare0(raw1, raw2, book, printEmap)
+    else:
+        compare1(raw1, raw2, book, printMismatches, warnQuality)
+
+    histogram_deltas(raw1, raw2, book)
+
+
 def nPerChannel(lst=[], iChannel=None):
     return len(filter(lambda x: x[-1] == iChannel, lst))
 
@@ -211,21 +225,6 @@ def histogram_deltas(raw1, raw2, book):
                               ])
             delta = d1["header"][x] - d2["header"][x]
             book.fill(delta, "delta%s_%s_%s" % (x, fed1, fed2), 11, -5.5, 5.5, title=title)
-
-
-def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False,
-            printMismatches=False, warnQuality=True, **_):
-
-    for raw in [raw1, raw2]:
-        if len(raw) <= 1:
-            return
-
-    if anyEmap:
-        compare0(raw1, raw2, book, printEmap)
-    else:
-        compare1(raw1, raw2, book, printMismatches, warnQuality)
-
-    histogram_deltas(raw1, raw2, book)
 
 
 def coordString(crate, slot, tb, fiber, channel):
