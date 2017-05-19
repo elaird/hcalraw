@@ -539,7 +539,7 @@ def histogramTdcs(book, fedId, block, channelData, nTsMax, errf, eq):
             book.fill(25.0 * (i - tsSoi) + tdc / 2.0,
                       "TDCHitTime_%d" % fedId,
                       110, -55.0, 55.0,
-                      title="FED %d;TDC hit time (ns);Counts / bin" % fedId)
+                      title="FED %d;TDC hit time w.r.t. SoI (ns);Counts / bin" % fedId)
 
 
 def histogramTsVsTime(book, fedTime, fedId, qies, adcMin=16, nBins=10):
