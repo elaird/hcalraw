@@ -8,6 +8,7 @@ cd cpp; make -j 5; cd -
 
 ./look.py 284928
 ./look.py 289555 --nevents=1 --dump=8
+./look.py 294542 --feds1=1115 --nevents=1000
 ```
 
 #### More Examples
@@ -21,7 +22,7 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 ./oneRun.py --file1=badcoffee${FEDID}.root --feds1=${FEDID} --progress
 
 # compare payloads of different sets of FEDs, within one file
-./look.py 239480 --feds1=718,719 --feds2=HF --dump=0 --utca-bcn-delta=-131 --no-warn-quality
+./look.py 239480 --feds1=718,719 --feds2=HF --dump=0 --utca-bcn-delta=-131 --no-warn-quality --plugins=histogram,compare
 
 # dump decoded data to stdout
 ./look.py 55 --feds1=702,931 --nevents=1 --dump=4
@@ -96,5 +97,6 @@ export EOS=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/archival/201609
 
 #### plugins/
 * `compare.py` compares the payloads within two .root files for a given event
+* `histogram.py` books and fills many per-FED and per-event histograms
 * `patterns.py` interprets the raw data as front-end patterns
 * `printraw.py` dumps to stdout the payload(s) in an event
