@@ -939,19 +939,18 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
     plotFunc = plotMerged if feds2 or 4 <= len(feds1) else plotList
     keep += plotFunc(f, pad20, offset=5,
                      names=["nBytesSW", "htrOverviewBits", "nChannels", "nTpTowers",
-                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "",
+                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "TDCHitTime",
                             "ChannelFlavor", "ErrF0", "nQieSamples", "nTpSamples",
                             # "TTS", "PopCapFrac",
                             ], feds1=feds1, feds2=feds2)
 
-    pad20.cd(12)
-    adjustPad(logY=True)
-    keep += histoLoop(f,
-                      [("nTS_for_matching_ADC", r.kBlue, 1),
-                       ("nTS_for_matching_TP", r.kCyan, 2),
-                       ],
-                      )
-
+    # pad20.cd(12)
+    # adjustPad(logY=True)
+    # keep += histoLoop(f,
+    #                   [("nTS_for_matching_ADC", r.kBlue, 1),
+    #                    ("nTS_for_matching_TP", r.kCyan, 2),
+    #                    ],
+    #                   )
 
     canvas.Print(pdf)
 
@@ -1130,6 +1129,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
 
         if "ts" in pages:
             pageThree(stem="ADC_vs_TS_ErrF0_%d", gridX=True, **kargs)
+            pageThree(stem="TDC_vs_TS_ErrF0_%d", gridX=True, **kargs)
             # pageThree(stem="ADC_vs_TS_ErrFNZ_%d", **kargs)
 
             feds1 = kargs["feds1"]  # stash default
