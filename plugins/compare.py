@@ -710,7 +710,7 @@ def compare1(raw1, raw2, book, printMismatches, warnQuality):
     histogram_nMatched(N1, book)
 
 
-def histogram_deltas(raw1, raw2, book, okFeds):
+def histogram_deltas(raw1, raw2, book):
     fed1 = filter(lambda x: x is not None, sorted(raw1.keys()))[0]
     d1 = raw1[fed1]
     for fed2, d2 in raw2.iteritems():
@@ -721,34 +721,28 @@ def histogram_deltas(raw1, raw2, book, okFeds):
         utca2 = d2["header"]["utca"]
         bcnDelta = matching.bcnDelta(utca1) - matching.bcnDelta(utca2)
 
-        if (fed1 in okFeds) and (fed2 in okFeds):
-            for x in ["BcN", "OrN", "EvN"]:
-                title = ";".join([x+("%d" % bcnDelta if (x == "BcN" and bcnDelta) else ""),
-                                  "FED %s - FED %s" % (fed1, fed2),
-                                  "Events / bin",
-                                  ])
-                delta = d1["header"][x] - d2["header"][x]
-                book.fill(delta, "delta%s_%s_%s" % (x, fed1, fed2), 11, -5.5, 5.5, title=title)
+        for x in ["BcN", "OrN", "EvN"]:
+            title = ";".join([x+("%d" % bcnDelta if (x == "BcN" and bcnDelta) else ""),
+                              "FED %s - FED %s" % (fed1, fed2),
+                              "Events / bin",
+                              ])
+            delta = d1["header"][x] - d2["header"][x]
+            book.fill(delta, "delta%s_%s_%s" % (x, fed1, fed2), 11, -5.5, 5.5, title=title)
 
 
-def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False, printMismatches=False,
-            warnQuality=True, fewerHistos=False, acrossRaws=True):
-    if acrossRaws and raw2:
-        if anyEmap:
-            compare0(raw1, raw2, book, printEmap)
-        else:
-            compare1(raw1, raw2, book, printMismatches, warnQuality)
+def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False,
+            printMismatches=False, warnQuality=True, **_):
 
-    okFeds1 = loop_over_feds(raw1, book, adcTag="feds1", warn=warnQuality, fewerHistos=fewerHistos)
+    for raw in [raw1, raw2]:
+        if len(raw) <= 1:
+            return
 
-    noGood = [[], [None]]
-    if raw1.keys() in noGood or raw2.keys() in noGood:
-        return
+    if anyEmap:
+        compare0(raw1, raw2, book, printEmap)
+    else:
+        compare1(raw1, raw2, book, printMismatches, warnQuality)
 
-    okFeds2 = loop_over_feds(raw2, book, adcTag="feds2", warn=warnQuality, fewerHistos=fewerHistos)
-
-    if acrossRaws:
-        histogram_deltas(raw1, raw2, book, okFeds1.union(okFeds2))
+    histogram_deltas(raw1, raw2, book)
 
 
 def coordString(crate, slot, tb, fiber, channel):
