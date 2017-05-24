@@ -68,12 +68,12 @@ def report(fileNames):
         printer.info("found %4d file(s) in %s/" % (len(fileNames), "/".join(bases)))
 
 
-def override(options, run):
+def override(options, run, nRuns=None):
     options.outputFile = "output/%d.root" % run
     if not options.nEventsMax:
         options.nEventsMax = 4
 
-    if not options.quiet:
+    if (not options.quiet) and (nRuns == 1):
         options.progress = True
         if options.dump == -1:
             options.dump = 0
@@ -118,8 +118,8 @@ def search(run):
             return files
 
 
-def go(options, run):
-    override(options, run)
+def go(options, run, nRuns=None):
+    override(options, run, nRuns=None)
 
     files = ["dummy"] if options.noLoop else search(run)
 
@@ -152,7 +152,7 @@ def main():
     feds1s = []
     feds2s = []
     for run in runs:
-        retCode, feds1, feds2 = go(options, run)
+        retCode, feds1, feds2 = go(options, run, len(runs))
         if not retCode:
             roots.append(options.outputFile)
             feds1s.append(feds1)
