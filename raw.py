@@ -28,8 +28,10 @@ def setup_root():
     else:
         # FIXME
         r.gInterpreter.SetClassAutoloading(False)
-        r.gInterpreter.ProcessLine('#include "cpp/cdf.h"')
-        r.gInterpreter.ProcessLine('#include "cpp/cms.h"')
+        if not hasattr(r, "CDFChunk2"):
+            r.gInterpreter.ProcessLine('#include "cpp/cdf.h"')
+        if not hasattr(r, "FEDRawDataWords"):
+            r.gInterpreter.ProcessLine('#include "cpp/cms.h"')
         # r.gInterpreter.ProcessLine('#include "cpp/FEDRawData.cc"')
         # r.gInterpreter.ProcessLine('#include "cpp/FEDRawDataCollection.h"')
 
