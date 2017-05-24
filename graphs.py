@@ -62,6 +62,9 @@ def xMin_xMax(graph=None):
 
 def yCounts(graph=None):
     counts = collections.defaultdict(int)
+    if not graph:
+        return counts
+
     y = graph.GetY()
     for i in range(graph.GetN()):
         counts[int(y[i])] += 1
@@ -576,6 +579,9 @@ def plotMerged(f, pad, offset=None, names=[],
 
 
 def resyncs(graph=None, maximum=None):
+    if not graph:
+        return graph
+
     n = graph.GetN()
     x = graph.GetX()
     y = graph.GetY()
@@ -631,12 +637,12 @@ def stamp(title, size=0.045, x=0.01, y=0.99):
 
 
 def draw_graph(graph=None, title="", ratemax=None, graph2=None, graph3=None, graph4=None):
-    if not graph or not graph.GetN():
-        return
-
     padg = r.TPad("padg", "padg", 0.00, 0.75, 0.75, 1.00)
     padg.Draw()
     keep = [padg]
+
+    if not graph or not graph.GetN():
+        return keep
 
     if ratemax:
         split = 0.3
@@ -901,32 +907,24 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
     sfx = suffix(feds1, feds2)
 
     cats = f.Get("category_vs_time" + sfx)
-    if not cats:
-        return
-    if not cats.GetN():
-        return
-
     counts = yCounts(cats)
-    if 2 <= len(counts.keys()):
+    if cats and cats.GetN() and 2 <= len(counts.keys()):
         relabel(cats, counts)
         keep += draw_graph(cats, title=title)
     else:
         ratemax = 5.0e7
-
+        graph4 = None
         evn_graph = f.Get("evn_vs_time" + sfx)
-        retitle(evn_graph)
+        if evn_graph:
+            retitle(evn_graph)
+            if "/239/895" in evn_graph.GetTitle():
+                graph4 = big_clean(size=f.Get("kB_vs_time_%d" % feds1[0]),
+                                   frac0=f.Get("frac0_vs_time_%d" % feds1[0]),
+                                   sizeMin=0.8,
+                                   frac0Min=0.2,
+                                   height=ratemax / 5.0)
 
-        if "/239/895" in evn_graph.GetTitle():
-            graph4 = big_clean(size=f.Get("kB_vs_time_%d" % feds1[0]),
-                               frac0=f.Get("frac0_vs_time_%d" % feds1[0]),
-                               sizeMin=0.8,
-                               frac0Min=0.2,
-                               height=ratemax / 5.0)
-        else:
-            graph4 = None
-
-        keep += draw_graph(graph=evn_graph,
-                           title=title, ratemax=ratemax,
+        keep += draw_graph(graph=evn_graph, title=title, ratemax=ratemax,
                            graph2=f.Get("bcn_delta_vs_time" + sfx),
                            graph3=resyncs(f.Get("incr_evn_vs_time" + sfx), ratemax),
                            graph4=graph4,
