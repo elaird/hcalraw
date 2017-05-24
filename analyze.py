@@ -229,7 +229,7 @@ def category_vs_time(oMap={}, oMapBcn={}, iMap={}, iMapBcn={}, innerEvent={}):
 
 
 def write_category_graphs(d={}, outer={}, inner={}):
-    for iGraph, gr in enumerate(graphs(d, oFed=outer["fedId0"], iFed=inner.get("fedId0", None))):
+    for iGraph, gr in enumerate(graphs(d, oFed=outer.get("fedId0", None), iFed=inner.get("fedId0", None))):
         if iGraph == 0:
             gr.SetTitle("_".join(["only %s" % inner.get("label", ""), "only %s" % outer.get("label", ""), "both"]))
         if iGraph == 1:
@@ -322,7 +322,7 @@ def go(outer={}, inner={}, outputFile="",
         os.mkdir(dirName)
 
     f = r.TFile(outputFile, "RECREATE")
-    if innerEvent and not f.IsZombie():
+    if not f.IsZombie():
         write_category_graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
                                                iMap=iMapF, iMapBcn=iMapBcn,
                                                innerEvent=innerEvent),
