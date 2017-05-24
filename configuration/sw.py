@@ -35,15 +35,17 @@ def files_eos_local(run):
 
 def dirs_global(run):
     #root://cms-xrd-global.cern.ch/
-    # "dataset=/HcalNZS/Commissioning2017-v1/RAW"
-    # /store/data/Commissioning2017/HcalNZS/RAW/v1/000/287/167
-    # 290477
     prefix = "root://eoscms.cern.ch/"
     midfix = "000/%03d/%03d" % (run/1000, run % 1000)
-    nzs = "%s/eos/cms/tier0/store/data/Commissioning2017/HcalNZS/RAW/v1/%s/00000/" % (prefix, midfix)
-    mb = "%s/eos/cms/tier0/store/data/Commissioning2017/MinimumBias/RAW/v1/%s/00000/" % (prefix, midfix)
     minidaq = "%s/eos/cms/store/t0streamer/Minidaq/A/%s/" % (prefix, midfix)
-    return [nzs, mb, minidaq][:-1]
+
+    out = []
+    for era in ["Run2017A", "Commissioning2017"]:
+        nzs = "%s/eos/cms/tier0/store/data/%s/HcalNZS/RAW/v1/%s/00000/" % (prefix, era, midfix)
+        mb = "%s/eos/cms/tier0/store/data/%s/MinimumBias/RAW/v1/%s/00000/" % (prefix, era, midfix)
+        out.append(nzs)
+        out.append(mb)
+    return out
 
 
 def crateList(usc=True):
