@@ -322,7 +322,7 @@ def go(outer={}, inner={}, outputFile="",
         os.mkdir(dirName)
 
     f = r.TFile(outputFile, "RECREATE")
-    if not f.IsZombie():
+    if innerEvent and not f.IsZombie():
         write_category_graphs(category_vs_time(oMap=oMapF, oMapBcn=oMapBcn,
                                                iMap=iMapF, iMapBcn=iMapBcn,
                                                innerEvent=innerEvent),
@@ -342,8 +342,8 @@ def go(outer={}, inner={}, outputFile="",
             s += ", %4s = %6d, both = %6d" % (inner["label"], len(iMapB), nBoth)
         printer.msg(s)
 
-    oFeds = sorted(outer["wargs"].keys())
-    iFeds = sorted(inner["wargs"].keys()) if inner else []
+    oFeds = sorted(outer.get("wargs", {}).keys())
+    iFeds = sorted(inner.get("wargs", {}).keys()) if inner else []
     return not len(oMapF), oFeds, iFeds
 
 
