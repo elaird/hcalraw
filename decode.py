@@ -555,6 +555,15 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
         channelHeader["FibCh"] = channelId & 0x7
         for key in ["SOI", "OK", "QIE", "CapId", "TDC", "TDC_TE"]:
             channelHeader[key] = []
+    elif flavor == 3:
+        dataKey = "channelData"
+        channelHeader["ErrF"] = (word16 >> 11) & 0x1  # compat
+        channelHeader["M&P"] = (word16 >> 8) & 0x1
+        channelId = word16 & 0xff
+        channelHeader["Fiber"] = channelId >> 3
+        channelHeader["FibCh"] = channelId & 0x7
+        for key in ["SOI", "OK", "QIE", "CapId", "TDC"]:
+            channelHeader[key] = []
     elif flavor == 4:
         channelHeader["ErrF"] = (word16 >> 10) & 0x3
         dataKey = "triggerData"
@@ -604,6 +613,13 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
             dct["SOI"].append((word16 >> 13) & 0x1)
             dct["OK"].append((word16 >> 12) & 0x1)
             dct["QIE"].append(word16 & 0xff)
+    elif flavor == 3:
+        dct["SOI"].append((word16 >> 14) & 0x1)
+        dct["OK"].append((word16 >> 13) & 0x1)
+        dct["CapId"].append((word16 >> 10) & 0x3)
+        dct["CapId0"] = dct["CapId"][0]  # compat
+        dct["TDC"].append((word16 >> 8) & 0x3)
+        dct["QIE"].append(word16 & 0xff)
     elif flavor == 4:
         dct["SOI"].append((word16 >> 14) & 0x1)
         dct["OK"].append((word16 >> 13) & 0x1)
