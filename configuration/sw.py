@@ -6,12 +6,16 @@ def files_this_machine(run, nCyclesMax=1):
     out = []
     for stem in ["data/USC_",
                  "data/run",
+                 "data/FNAL_",
                  "/tmp/USC_",
                  "data/B904_Integration_0000",
                  "/localdata/B904_Integration_",
                  "/localdata/B904_Integration_10000"]:
         for iCycle in range(nCyclesMax):
-            filename = stem + "%d" % run
+            if "FNAL" in stem:
+                filename = stem + "%06d" % run  # FNAL runs might be less than 100000
+            else:
+                filename = stem + "%d" % run
             if iCycle:
                 filename += ".%d" % iCycle
             filename += ".root"
