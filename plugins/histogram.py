@@ -350,13 +350,9 @@ def flavor(book, d, fedId):
     x = d["Flavor"]
     if x == 0:
         x = 1
-    if x == 3:
-        x = 7
-    if 4 <= x:
-        x -= 1
     book.fill(x, "ChannelFlavor_%d" % fedId, 7, 0.5, 7.5,
               title="FED %d;channel flavor;Channels / bin" % fedId,
-              xAxisLabels=["HE", "HF", "uTP", "Q5", "Q6", "7", "?"])
+              xAxisLabels=["HE", "HF", "HB", "uTP", "Q5", "Q6", "7"])
 
 
 def histogramTriggerData(book, block, triggerData, triggerKey, fedId,
