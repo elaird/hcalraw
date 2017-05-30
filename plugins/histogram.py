@@ -450,19 +450,40 @@ def histogramChannelData(book, block, channelData, fedId,
 
     caps[channelData["CapId"][0]] += 1
 
+    try:
+        tsSoi = channelData["SOI"].index(1)
+    except ValueError:
+        printer.warning("%2d:%2d:%2d:%d SoI not found" % (block["Crate"], block["Slot"], channelData["Fiber"], channelData["FibCh"]))
+        tsSoi = None
+
     if channelData["QIE"]:
         errf = "ErrFNZ" if channelData["ErrF"] else "ErrF0"
         eq = "!=" if channelData["ErrF"] else "=="
 
         histogramAdcs(book, fedId, block, channelData, adcs, nTsMax, errf, eq)
+        histogramCaps(book, fedId, block, channelData["CapId"], tsSoi)
         if fedTime:
             histogramTsVsTime(book, fedTime, fedId, channelData["QIE"])
 
     if channelData.get("TDC"):
-        histogramTdcs(book, fedId, block, channelData, nTsMax, errf, eq)
-
+        histogramTdcs(book, fedId, block, channelData["TDC"], nTsMax, errf, eq, tsSoi)
 
     return nAdcMatch, nAdcMisMatch
+
+
+def histogramCaps(book, fedId, block, caps, tsSoi, nCaps=4):
+    if tsSoi is None:
+        return
+
+    if tsSoi < len(caps):
+        capSoi = caps[tsSoi]
+    else:
+        capSoi = caps[0] + tsSoi
+
+    book.fill((capSoi - block["BcN"]) % nCaps,
+              "CapIdSoiMinusBcn_%d" % fedId,
+              nCaps, -0.5, nCaps - 0.5,
+              title="FED %d;(CapIdSoI - BcN) %s 4;Counts / bin" % (fedId, "%"))
 
 
 def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax, errf, eq):
@@ -517,15 +538,10 @@ def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax, errf, eq):
         #           title="%s;EvN;ADC;Counts / bin" % title2)
 
 
-def histogramTdcs(book, fedId, block, channelData, nTsMax, errf, eq):
+def histogramTdcs(book, fedId, block, tdcs, nTsMax, errf, eq, tsSoi):
     tdcMax = 64
-    try:
-        tsSoi = channelData["SOI"].index(1)
-    except ValueError:
-        printer.warning("%2d:%2d:%2d:%d SoI not found" % (block["Crate"], block["Slot"], channelData["Fiber"], channelData["FibCh"]))
-        tsSoi = None
 
-    for (i, tdc) in enumerate(channelData["TDC"]):
+    for (i, tdc) in enumerate(tdcs):
         if nTsMax <= i:
             break
 
