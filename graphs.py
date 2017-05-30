@@ -937,7 +937,7 @@ def pageOne(f=None, feds1=[], feds2=[], canvas=None, pdf="", title=""):
     plotFunc = plotMerged if feds2 or 4 <= len(feds1) else plotList
     keep += plotFunc(f, pad20, offset=5,
                      names=["nBytesSW", "htrOverviewBits", "nChannels", "nTpTowers",
-                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "TDCHitTime",
+                            "EvN_HTRs", "OrN5_HTRs", "BcN_HTRs", "TDCHitTime", # "CapIdSoiMinusBcn",
                             "ChannelFlavor", "ErrF0", "nQieSamples", "nTpSamples",
                             # "TTS", "PopCapFrac",
                             ], feds1=feds1, feds2=feds2)
