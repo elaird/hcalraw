@@ -136,8 +136,7 @@ def go(options, run, nRuns):
             options.sparseLoop = -1
     else:
         options.file1 = files[0]
-        if "B904" in options.file1 and options.feds1 == "HCAL":
-            options.feds1 = "B904"
+        sw.set_default_feds1(options)
 
     if not options.quiet:
         report(files)

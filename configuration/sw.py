@@ -64,6 +64,14 @@ def crateList(usc=True):
         return [50, 51, 52, 53, 61, 62, 63]
 
 
+def set_default_feds1(options):
+    if options.feds1 == "HCAL":
+        if "B904" in options.file1:
+            options.feds1 = "B904"
+        elif "FNAL" in options.file1:
+            options.feds1 = "WH14"
+
+
 def fedMap():
     d = {"7xy": range(700, 732),
          "HO": range(724, 732),
@@ -71,6 +79,7 @@ def fedMap():
          "HF": range(1118, 1124),
          "HC": [1134, 1135],
          "B904": range(1180, 1188) + [1192, 1194, 1196],
+         "WH14": [1776],
          }
     d["HBEF"] = d["HBHE"] + d["HF"]
     d["HCAL"] = d["HBHE"] + d["HF"] + d["HO"] + d["HC"]
