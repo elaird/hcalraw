@@ -163,7 +163,6 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
                             crate=p["Crate"],
                             slot=p["Slot"],
                             top=p["Top"],
-                            nPreSamples=p["nPreSamples"],
                             **kargs)
 
     if len(cd) >= 2:
@@ -187,12 +186,8 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
             printer.msg("\n".join(td[1:]))
 
 
-def qieString(qies=[], sois=[], nPreSamples=None, red=False, nMax=10):
+def qieString(qies=[], sois=[], red=False, nMax=10):
     l = []
-
-    if nPreSamples and not sois:
-        sois = [0] * nPreSamples
-        sois.append(1)
 
     for i in range(nMax):
         if i < len(qies):
@@ -208,6 +203,28 @@ def qieString(qies=[], sois=[], nPreSamples=None, red=False, nMax=10):
         out = printer.red(out, False)
 
     if nMax < len(qies):
+        out += printer.red("..", False)
+    else:
+        out += "  "
+    return out
+
+
+def capIdString(caps, sois, nTsMax):
+    l = []
+
+    for i in range(nTsMax):
+        if i < len(caps) and i < len(sois):
+            value = caps[i]
+            s = "%1x" % value
+            if sois[i]:
+                s = printer.gray(s, False)
+            l.append(s)
+        else:
+            l.append(" ")
+
+    out = "".join(l)
+
+    if nTsMax < len(caps):
         out += printer.red("..", False)
     else:
         out += "  "
@@ -289,7 +306,7 @@ def uhtrTriggerData(d={}, dump=None, crate=None, slot=None, top="", nonMatched=[
     return out
 
 
-def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
+def htrChannelData(lst=[], crate=0, slot=0, top="",
                    skipFibers=[], skipFibChs=[], skipErrF=[],
                    nonMatched=[], latency={}, zs={}, te_tdc=False, nTsMax=None):
     out = []
@@ -300,6 +317,8 @@ def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
                "Fl",
                "Er",
                "C0",
+               # "C/0" + "".join(["%1x" % i for i in range(1, nTsMax)]),
+               # "K/0" + "".join(["%1x" % i for i in range(1, nTsMax)]),
                "0xA0 " + " ".join(["A%1d" % i for i in range(1, nTsMax)]),
                "0xL0 " + " ".join(["L%1d" % i for i in range(1, nTsMax)]),
                ]
@@ -329,12 +348,14 @@ def htrChannelData(lst=[], crate=0, slot=0, top="", nPreSamples=None,
                   " %1d" % data["FibCh"],
                   " %1d" % data["Flavor"],
                   errf,
-                  " %1d" % data["CapId0"],
-                  "  " + qieString(data["QIE"], data.get("SOI", []), nPreSamples, red=red, nMax=nTsMax),
-                  qieString(data.get("TDC", []), data.get("SOI", []), nMax=nTsMax)
+                  " %1d  " % data["CapId"][0],
+                  # "  " + capIdString(data["CapId"], data["SOI"], nTsMax),
+                  # capIdString(data["OK"], data["SOI"], nTsMax),
+                  qieString(data["QIE"], data["SOI"], red=red, nMax=nTsMax),
+                  qieString(data.get("TDC", []), data["SOI"], nMax=nTsMax)
                   ]
         if te_tdc:
-            fields += [qieString(data.get("TDC_TE", []), data.get("SOI", []), nMax=nTsMax)]
+            fields += [qieString(data.get("TDC_TE", []), data["SOI"], nMax=nTsMax)]
         out.append(" ".join(fields))
 
         if latency:
