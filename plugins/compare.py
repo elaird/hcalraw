@@ -302,7 +302,7 @@ def dataMap(raw={}, book=None):
                     skipped.append(coords)
                     continue
 
-                cap0 = channelData["CapId0"]
+                cap0 = channelData["CapId"][0]
                 data = tuple([nPre, delta, mp, cap0] + channelData["QIE"])
                 # print coords, data
                 forward[coords] = data

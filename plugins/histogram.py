@@ -448,7 +448,7 @@ def histogramChannelData(book, block, channelData, fedId,
     elif coords in other.get("matched", []):
         nAdcMatch = 1
 
-    caps[channelData["CapId0"]] += 1
+    caps[channelData["CapId"][0]] += 1
 
     if channelData["QIE"]:
         errf = "ErrFNZ" if channelData["ErrF"] else "ErrF0"
