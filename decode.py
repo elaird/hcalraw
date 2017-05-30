@@ -508,7 +508,8 @@ def htrData(d={}, l={}, iWord16=None, word16=None,
         dataKey, channelId, channelHeader = channelInit(iWord16=iWord16,
                                                         word16=word16,
                                                         flavor=flavor,
-                                                        utca=utca)
+                                                        utca=utca,
+                                                        nPreSamples=l["nPreSamples"])
         if warn and dataKey == "otherData":
             coords = "FED %4d crate %2d slot %2d" % (fedId, l["Crate"], l["Slot"])
             evn = "(EvN 0x%06x, iWord16 %4d, word16 0x%04x)" % (l["EvN"], iWord16, word16)
@@ -531,7 +532,7 @@ def clearChannel(d):
             del d[key]
 
 
-def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
+def channelInit(iWord16=None, word16=None, flavor=None, utca=None, nPreSamples=None):
     channelId = word16 & 0xff  # modified below for flavors 5, 6
     channelHeader = {"Flavor": flavor,
                      "iWord16": iWord16,
@@ -540,7 +541,7 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
     if 0 <= flavor <= 1:
         dataKey = "channelData"
         channelHeader["ErrF"] = (word16 >> 10) & 0x3
-        channelHeader["CapId0"] = (word16 >> 8) & 0x3
+        channelHeader["CapId"] = [(word16 >> 8) & 0x3]
         channelId = word16 & 0xff
         channelHeader["Fiber"] = channelId >> 3
         channelHeader["FibCh"] = channelId & 0x7
@@ -570,19 +571,29 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None):
         for key in ["SOI", "OK", "TP"]:
             channelHeader[key] = []
     elif 5 <= flavor <= 6:
-        channelId = word16 & 0x7f
         dataKey = "channelData"
         channelHeader["ErrF"] = (word16 >> 10) & 0x3
-        channelHeader["CapId0"] = (word16 >> 8) & 0x3
+        channelId = word16 & 0x7f
         channelHeader["Fiber"] = channelId / 4
+        channelHeader["FibCh"] = channelId % 4
+
+        if flavor == 5:
+            channelHeader["CapId"] = [(word16 >> 8) & 0x3]
+        else:
+            channelHeader["CapId"] = []
+
         if utca:
             channelHeader["M&P"] = (word16 >> 7) & 0x1
         else:
             channelHeader["Fiber"] += 1
 
-        channelHeader["FibCh"] = channelId % 4
         channelHeader["QIE"] = []
-        channelHeader["CapId"] = []
+
+        # compat
+        channelHeader["SOI"] = [0] * nPreSamples
+        channelHeader["SOI"].append(1)
+        if len(channelHeader["SOI"]) % 2:
+            channelHeader["SOI"].append(0)
     elif flavor == 7:
         dataKey = "technicalData"
         channelHeader["channelId"] = channelId
@@ -608,16 +619,15 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
             dct["CapId"].append((word16 >> 12) & 0x3)
             dct["TDC_TE"].append((word16 >> 6) & 0x1f)
             dct["TDC"].append(word16 & 0x3f)
-            dct["CapId0"] = dct["CapId"][0]  # compat
         else:
             dct["SOI"].append((word16 >> 13) & 0x1)
             dct["OK"].append((word16 >> 12) & 0x1)
             dct["QIE"].append(word16 & 0xff)
     elif flavor == 3:
         dct["SOI"].append((word16 >> 14) & 0x1)
-        dct["OK"].append((word16 >> 13) & 0x1)
+        LE = (word16 >> 13) & 0x1
+        dct["OK"].append(not LE)  # compat
         dct["CapId"].append((word16 >> 10) & 0x3)
-        dct["CapId0"] = dct["CapId"][0]  # compat
         dct["TDC"].append((word16 >> 8) & 0x3)
         dct["QIE"].append(word16 & 0xff)
     elif flavor == 4:
@@ -627,8 +637,13 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
     elif flavor == 5:
         dct["QIE"].append(word16 & 0x7f)
         dct["QIE"].append((word16 >> 8) & 0x7f)
+        if len(dct["SOI"]) < len(dct["QIE"]):  # compat
+            dct["SOI"].append(0)
+            dct["SOI"].append(0)
     elif flavor == 6:
         dct["QIE"].append(word16 & 0x7f)
         dct["CapId"].append((word16 >> 8) & 0x3)
+        if len(dct["SOI"]) < len(dct["QIE"]):  # compat
+            dct["SOI"].append(0)
     elif 7 <= flavor:
         dct["words"].append(word16)
