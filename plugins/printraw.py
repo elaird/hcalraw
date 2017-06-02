@@ -308,20 +308,19 @@ def uhtrTriggerData(d={}, dump=None, crate=None, slot=None, top="", nonMatched=[
 
 def htrChannelData(lst=[], crate=0, slot=0, top="",
                    skipFibers=[], skipFibChs=[], skipErrF=[],
-                   nonMatched=[], latency={}, zs={}, te_tdc=False, nTsMax=None):
+                   nonMatched=[], latency={}, zs={},
+                   te_tdc=False, nTsMax=None, perTs=None):
     out = []
-    columns = ["  Cr",
-               "Sl",
-               "Fi",
-               "Ch",
-               "Fl",
-               "Er",
-               "C0",
-               # "C/0" + "".join(["%1x" % i for i in range(1, nTsMax)]),
-               # "K/0" + "".join(["%1x" % i for i in range(1, nTsMax)]),
-               "0xA0 " + " ".join(["A%1d" % i for i in range(1, nTsMax)]),
-               "0xL0 " + " ".join(["L%1d" % i for i in range(1, nTsMax)]),
-               ]
+    columns = ["  Cr", "Sl", "Fi", "Ch", "Fl", "Er"]
+    if perTs:
+        columns += ["C/0" + "".join(["%1x" % i for i in range(1, nTsMax)]),
+                    "K/0" + "".join(["%1x" % i for i in range(1, nTsMax)])]
+    else:
+        columns.append("C0")
+
+    columns += ["0xA0 " + " ".join(["A%1d" % i for i in range(1, nTsMax)]),
+                "0xL0 " + " ".join(["L%1d" % i for i in range(1, nTsMax)])]
+
     if te_tdc:
         columns += ["0xT0 " + " ".join(["T%1d" % i for i in range(1, nTsMax)])]
     if latency:
@@ -348,12 +347,16 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                   " %1d" % data["FibCh"],
                   " %1d" % data["Flavor"],
                   errf,
-                  " %1d  " % data["CapId"][0],
-                  # "  " + capIdString(data["CapId"], data["SOI"], nTsMax),
-                  # capIdString(data["OK"], data["SOI"], nTsMax),
-                  qieString(data["QIE"], data["SOI"], red=red, nMax=nTsMax),
-                  qieString(data.get("TDC", []), data["SOI"], nMax=nTsMax)
                   ]
+        if perTs:
+            fields += ["  " + capIdString(data["CapId"], data["SOI"], nTsMax),
+                       capIdString(data.get("OK", []), data["SOI"], nTsMax)]
+        else:
+            fields.append(" %1d  " % data["CapId"][0])
+
+        fields += [qieString(data["QIE"], data["SOI"], red=red, nMax=nTsMax),
+                   qieString(data.get("TDC", []), data["SOI"], nMax=nTsMax)]
+
         if te_tdc:
             fields += [qieString(data.get("TDC_TE", []), data["SOI"], nMax=nTsMax)]
         out.append(" ".join(fields))
