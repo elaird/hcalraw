@@ -314,7 +314,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                    nonMatched=[], latency={}, zs={},
                    te_tdc=False, nTsMax=None, perTs=None):
     out = []
-    columns = ["  Cr", "Sl", "Fi", "Ch", "Fl", "Er"]
+    columns = ["  Cr", "Sl", "Fi", "Ch", "Fl", "LE", "CE"]
     if perTs:
         columns += ["C/0" + "".join(["%1x" % i for i in range(1, nTsMax)]),
                     "K/0" + "".join(["%1x" % i for i in range(1, nTsMax)])]
@@ -341,16 +341,21 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
             continue
         red = (crate, slot, top, data["Fiber"], data["FibCh"]) in nonMatched
 
-        errf = " %1d" % data["ErrF"]
-        if data["ErrF"]:
-            errf = printer.red(errf, False)
-
         fields = ["  %2d" % crate,
                   "%2d%1s%2d" % (slot, top, data["Fiber"]),
                   " %1d" % data["FibCh"],
                   " %1d" % data["Flavor"],
-                  errf,
                   ]
+
+        for bit in ["LE", "CE"]:
+            if data.get(bit) is None:
+                fields.append("  ")
+                continue
+            v = " %1d" % data[bit]
+            if data[bit]:
+                v = printer.red(v, False)
+            fields.append(v)
+
         if perTs:
             fields += ["  " + capIdString(data["CapId"], data["SOI"], nTsMax),
                        capIdString(data.get("OK", []), data["SOI"], nTsMax)]
