@@ -140,7 +140,7 @@ def collected(tree=None, specs={}):
                               **kargs)
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
-    for key in ["label", "dump", "crateslots", "firstNTs"]:
+    for key in ["label", "dump", "crateslots", "firstNTs", "perTs"]:
         raw[None][key] = specs[key]
 
     return raw

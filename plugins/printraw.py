@@ -37,6 +37,7 @@ def oneEvent(d={}, slim1=False):
                    nonMatchedTp=aux.get("tMisMatched", []),
                    printHeaders=printHeaders,
                    nTsMax=aux["firstNTs"],
+                   perTs=aux["perTs"],
                    )
         printHeaders = True
     if not slim1:
@@ -70,7 +71,8 @@ def htrOverview(d={}):
 
 
 def oneHtr(iBlock=None, p={}, dump=None, utca=None,
-           nonMatchedQie=[], nonMatchedTp=[], nTsMax=None):
+           nonMatchedQie=[], nonMatchedTp=[],
+           nTsMax=None, perTs=None):
 
     try:
         zs = p.get("ZS")
@@ -150,6 +152,7 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
              "latency": p.get("Latency"),
              "zs": p.get("ZS"),
              "nTsMax": nTsMax,
+             "perTs": perTs,
             }
     if dump in [5, 6, 8]:
         kargs["skipErrF"] = [3]
@@ -398,7 +401,7 @@ def ttpData(ttpInput=[], ttpOutput=[], ttpAlgoDep=[]):
 
 def oneFedHcal(d={}, dump=None, crateslots=[],
                nonMatchedQie=[], nonMatchedTp=[],
-               printHeaders=None, nTsMax=None):
+               printHeaders=None, nTsMax=None, perTs=None):
     h = d["header"]
     t = d["trailer"]
     if 1 <= dump:
@@ -451,6 +454,7 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
                nonMatchedQie=nonMatchedQie,
                nonMatchedTp=nonMatchedTp,
                nTsMax=nTsMax,
+               perTs=perTs,
         )
 
 

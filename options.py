@@ -122,6 +122,11 @@ def oparser(arg=""):
                         default="",
                         metavar="D",
                         help="list of (100*crate)+slot to dump, e.g. 917,2911")
+    printing.add_option("--per-ts",
+                        dest="perTs",
+                        default=False,
+                        action="store_true",
+                        help="print per-TS error bits and cap ids")
 
     dump = ["dump level (default is -1)",
             "-1: only program info, warnings and errors",

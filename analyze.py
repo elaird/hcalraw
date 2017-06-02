@@ -473,7 +473,7 @@ def processed(options):
     matching.__utcaPipelineDelta = options.utcaPipelineDelta
     printer.__color = not options.noColor
 
-    common = subset(options, ["dump", "firstNTs", "lastNAmcs", "nEventsMax", "nEventsSkip", "progress", "sparseLoop"])
+    common = subset(options, ["dump", "firstNTs", "lastNAmcs", "nEventsMax", "nEventsSkip", "perTs", "progress", "sparseLoop"])
     common.update(subset(options, ["noUnpack", "noWarnQuality", "noWarnUnpack"], invert=True))
     common["crateslots"] = sw.fedList(options.crateslots)
 
