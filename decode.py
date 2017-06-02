@@ -540,7 +540,9 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None, nPreSamples=N
 
     if 0 <= flavor <= 1:
         dataKey = "channelData"
-        channelHeader["ErrF"] = (word16 >> 10) & 0x3
+        channelHeader["LE"] = (word16 >> 11) & 0x1
+        channelHeader["CE"] = (word16 >> 10) & 0x1
+        channelHeader["ErrF"] = (word16 >> 10) & 0x3  # compat
         channelHeader["CapId"] = [(word16 >> 8) & 0x3]
         channelId = word16 & 0xff
         channelHeader["Fiber"] = channelId >> 3
@@ -549,7 +551,8 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None, nPreSamples=N
             channelHeader[key] = []
     elif flavor == 2:
         dataKey = "channelData"
-        channelHeader["ErrF"] = (word16 >> 11) & 0x1  # compat
+        channelHeader["LE"] = (word16 >> 11) & 0x1
+        channelHeader["ErrF"] = channelHeader["LE"]  # compat
         channelHeader["M&P"] = (word16 >> 8) & 0x1
         channelId = word16 & 0xff
         channelHeader["Fiber"] = channelId >> 3
@@ -558,7 +561,8 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None, nPreSamples=N
             channelHeader[key] = []
     elif flavor == 3:
         dataKey = "channelData"
-        channelHeader["ErrF"] = (word16 >> 11) & 0x1  # compat
+        channelHeader["LE"] = (word16 >> 11) & 0x1
+        channelHeader["ErrF"] = channelHeader["LE"]  # compat
         channelHeader["M&P"] = (word16 >> 8) & 0x1
         channelId = word16 & 0xff
         channelHeader["Fiber"] = channelId >> 3
@@ -572,7 +576,9 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None, nPreSamples=N
             channelHeader[key] = []
     elif 5 <= flavor <= 6:
         dataKey = "channelData"
-        channelHeader["ErrF"] = (word16 >> 10) & 0x3
+        channelHeader["LE"] = (word16 >> 11) & 0x1
+        channelHeader["CE"] = (word16 >> 10) & 0x1
+        channelHeader["ErrF"] = (word16 >> 10) & 0x3  # compat
         channelId = word16 & 0x7f
         channelHeader["Fiber"] = channelId / 4
         channelHeader["FibCh"] = channelId % 4
