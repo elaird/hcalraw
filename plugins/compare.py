@@ -184,7 +184,12 @@ def compare1(raw1, raw2, book, printMismatches, warnQuality):
     mapF1, _, _ = dataMap(raw1, book)
     mapF2, _, _ = dataMap(raw2, book)
 
-    titlePrefix = "ErrF == %s;ADC;ADC" % ",".join(["%d" % x for x in matching.okErrF()])
+    if matching.ignoreCE():
+        titlePrefix = "!LE"
+    else:
+        titlePrefix = "!(LE || CE)"
+    titlePrefix += ";ADC;ADC
+
     N1["matched"], N1["misMatched"] \
         = adc_vs_adc(mapF1, mapF2, book=book, titlePrefix=titlePrefix,
                      printMismatches=printMismatches,
