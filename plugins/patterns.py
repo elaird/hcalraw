@@ -100,7 +100,7 @@ def feWord(d, fiber, iTs):
         if v["Fiber"] != fiber:
             continue
 
-        if v["ErrF"] == 3:  # 8b/10b errors
+        if v.get("LE"):  # 8b/10b errors
             continue
 
         if len(v["QIE"]) <= iTs:
