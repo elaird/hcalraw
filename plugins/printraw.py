@@ -5,7 +5,7 @@ import printer
 def printraw(raw1={}, raw2={}, **_):
     dump = raw1.get(None, {}).get("dump", -99)
     if 1 <= dump:
-        slim1 = (dump in [1, 4]) and (len(raw1) == 2) and (not raw2)
+        slim1 = (dump in [1, 4, 11]) and (len(raw1) == 2) and (not raw2)
         oneEvent(raw1, slim1=slim1)
         oneEvent(raw2)
 
@@ -155,9 +155,11 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
              "perTs": perTs,
             }
     if dump in [5, 6, 8]:
-        kargs["skipErrF"] = [3]
+        kargs["skipErrF"] = [1,2,3]
     if dump == 10:
         kargs["skipErrF"] = [0]
+    if dump == 11:
+        kargs["skipErrF"] = [1,2,3]
 
     if p["IsTTP"]:
         cd = ttpData(p["ttpInput"], p["ttpOutput"], p["ttpAlgoDep"])
