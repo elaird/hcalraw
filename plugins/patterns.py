@@ -188,8 +188,9 @@ def fe_word_qie10(feWord80, dct, iTs):
 
 
 def fe_word_qie8(feWord32, dct, iTs):
-    if dct.get("CapId"):
-        cap = dct["CapId"][iTs]
+    capids = dct.get("CapId", [])
+    if iTs < len(capids):
+        cap = capids[iTs]
     elif not configuration.patterns.compressed:
         sys.exit("\n".join(["Cap-ids per time-slice not found.",
                             "Either set 'configuration.patterns.compressed = True'",
