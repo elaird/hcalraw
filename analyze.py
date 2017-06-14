@@ -468,7 +468,7 @@ def processed(options):
         if options.nEventsSkip:
             sys.exit("--sparse-loop does not work with --nevents-skip")
 
-    matching.__okErrF = sw.fedList(options.okErrF)
+    matching.__ignoreCE = options.ignoreCE
     matching.__utcaBcnDelta = options.utcaBcnDelta
     matching.__utcaPipelineDelta = options.utcaPipelineDelta
     printer.__color = not options.noColor

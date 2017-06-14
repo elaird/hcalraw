@@ -298,7 +298,7 @@ def dataMap(raw={}, book=None):
                 fiber = channelData["Fiber"]
                 coords = (block["Crate"], block["Slot"], block["Top"], fiber, channel)
 
-                if channelData["ErrF"] not in matching.okErrF():
+                if channelData.get("LE") or (channelData.get("CE") and not matching.ignoreCE()):
                     skipped.append(coords)
                     continue
 

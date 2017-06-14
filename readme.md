@@ -30,7 +30,7 @@ cat foo.dat | cpp/badcoffee ${FEDID}
 # compare payloads of different sets of FEDs, across two files
 ./oneRun.py --file1=data/B904_Integration_000055.root --feds1=702 \
 --file2=data/mol_run55.root --feds2=931 --dump=0 --any-emap \
---no-warn-quality --ok-errf=0,1 --utca-bcn-delta=-119
+--no-warn-quality --ignore-ce --utca-bcn-delta=-119
 
 export EOS=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/archival/20160914_USC_Run1_runs133054-220908; \
 ./oneRun.py --nevents=51 --progress --utca-bcn-delta=-119 --any-emap --no-warn-quality --dump=0 \

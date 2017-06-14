@@ -175,10 +175,11 @@ def oparser(arg=""):
     parser.add_option_group(match)
 
     matchCh = optparse.OptionGroup(parser, "Options for matching channels across events")
-    matchCh.add_option("--ok-errf",
-                       dest="okErrF",
-                       default="0",
-                       help="Values of ErrF to allow")
+    matchCh.add_option("--ignore-ce",
+                       dest="ignoreCE",
+                       default=False,
+                       action="store_true",
+                       help="Ignore whether CE is asserted")
     matchCh.add_option("--utca-bcn-delta",
                        dest="utcaBcnDelta",
                        default=0,

@@ -1,11 +1,11 @@
 # these are overwritten by oneRun.py
-__okErrF = [0]
+__ignoreCE = False
 __utcaBcnDelta = 0
 __utcaPipelineDelta = 0
 
 
-def okErrF():
-    return __okErrF
+def ignoreCE():
+    return __ignoreCE
 
 
 def bcnDelta(utca):
