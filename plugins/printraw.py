@@ -147,7 +147,6 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
 
     kargs = {"skipFibers": [0, 1] + range(3, 14) + range(15, 24) if (dump == 4) else [],
              "skipFibChs": [0, 2, 3, 4, 5, 6, 7] if (4 <= dump <= 7) else [],
-             "skipErrF": [],
              "nonMatched": nonMatchedQie,
              "latency": p.get("Latency"),
              "zs": p.get("ZS"),
@@ -155,11 +154,9 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
              "perTs": perTs,
             }
     if dump in [5, 6, 8]:
-        kargs["skipErrF"] = [1,2,3]
+        kargs["errorsReq"] = False
     if dump == 10:
-        kargs["skipErrF"] = [0]
-    if dump == 11:
-        kargs["skipErrF"] = [1,2,3]
+        kargs["errorsReq"] = True
 
     if p["IsTTP"]:
         cd = ttpData(p["ttpInput"], p["ttpOutput"], p["ttpAlgoDep"])
@@ -312,7 +309,7 @@ def uhtrTriggerData(d={}, dump=None, crate=None, slot=None, top="", nonMatched=[
 
 
 def htrChannelData(lst=[], crate=0, slot=0, top="",
-                   skipFibers=[], skipFibChs=[], skipErrF=[],
+                   skipFibers=[], skipFibChs=[], errorsReq=None,
                    nonMatched=[], latency={}, zs={},
                    te_tdc=False, nTsMax=None, perTs=None):
     out = []
@@ -339,8 +336,11 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
             continue
         if data["FibCh"] in skipFibChs:
             continue
-        if data["ErrF"] in skipErrF:
-            continue
+        if errorsReq is not None:
+            anything_wrong = data.get("LE", False) or data.get("CE", False) or not all(data.get("OK", []))
+            if errorsReq ^ anything_wrong:
+                continue
+
         red = (crate, slot, top, data["Fiber"], data["FibCh"]) in nonMatched
 
         fields = ["  %2d" % crate,
