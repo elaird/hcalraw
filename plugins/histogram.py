@@ -363,6 +363,10 @@ def histogramTriggerData(book, block, triggerData, triggerKey, fedId,
     book.fill(len(triggerData["TP"]), "nTpSamples_%d" % fedId, 14, -0.5, 13.5,
               title="FED %d;number of TP samples;Towers / bin" % fedId)
 
+    book.fill(slotCrate, "TP_vs_slot_crate", *misMatchMapBins,
+              title="TP present;slot;crate;Towers / bin",
+              xAxisLabels=xAxisLabels, yAxisLabels=yAxisLabels)
+
     maxTp = -1
     for tp in triggerData["TP"]:
         tp8 = tp & 0xff  # ignore fine-grain bit
