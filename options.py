@@ -67,11 +67,6 @@ def oparser(arg=""):
                     default=False,
                     action="store_true",
                     help="Plot from existing .root file (do not look at data).")
-    less.add_option("--no-unpack",
-                    dest="noUnpack",
-                    default=False,
-                    action="store_true",
-                    help="Loop over raw data, but do not unpack it.")
     less.add_option("--last-n-amcs",
                     dest="lastNAmcs",
                     default=0,

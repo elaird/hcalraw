@@ -12,7 +12,7 @@ def unpack(raw1={}, raw2={}, chain=None, chainI=None, outer={}, inner={}, **_):
 def collected(tree=None, specs={}):
     raw = {}
     kargs = {}
-    for item in ["dump", "unpack", "lastNAmcs", "nBytesPer", "skipWords64"]:
+    for item in ["dump", "lastNAmcs", "nBytesPer", "skipWords64"]:
         kargs[item] = specs[item]
 
     for fedId, wargs in sorted(specs["wargs"].iteritems()):
@@ -51,7 +51,7 @@ def unpackedHeader(spec):
 
 
 # for format documentation, see decode.py
-def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
+def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
              warn=True, skipWords64=[], dump=-99, lastNAmcs=0):
     assert fedData
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
@@ -72,9 +72,6 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False, unpack=True,
     skipped64 = []
 
     for jWord64 in range(nWord64):
-        if not unpack:
-            continue
-
         word64 = w64(fedData, jWord64, nBytesPer)
 
         if jWord64 in skipWords64:
