@@ -188,7 +188,7 @@ def compare1(raw1, raw2, book, printMismatches, warnQuality):
         titlePrefix = "!LE"
     else:
         titlePrefix = "!(LE || CE)"
-    titlePrefix += ";ADC;ADC
+    titlePrefix += ";ADC;ADC"
 
     N1["matched"], N1["misMatched"] \
         = adc_vs_adc(mapF1, mapF2, book=book, titlePrefix=titlePrefix,
