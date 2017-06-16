@@ -136,27 +136,20 @@ def reportProgress(globalEntry, iEvent, iMask):
         return iMask
 
 
-def outerInnerCompare(chain, oEntry, outer, inner, innerEvent, chainI, kargs):
-    kargs["raw1"] = unpack.collected(tree=chain, specs=outer)
-
+def outerInnerCompare(oEntry, innerEvent, kargs):
     if innerEvent:
         iEntry = innerEvent[oEntry]
         if iEntry is None:
             oEntry += 1
             return
 
-        if chainI.GetEntry(iEntry) <= 0:
+        if kargs["chainI"].GetEntry(iEntry) <= 0:
             return True  # break!
 
-    if inner:
-        kargs["raw2"] = unpack.collected(tree=chainI, specs=inner)
-
-    if not outer["unpack"]:
-        return
-
-    for p in outer["plugins"]:
+    for p in kargs["outer"]["plugins"]:
         f = getattr(eval("plugins.%s" % p), p)
-        f(**kargs)
+        if f(**kargs):
+            break
 
 
 def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={}):
@@ -164,12 +157,18 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={})
         print "Looping:"
 
     kargs = {"book": autoBook.autoBook("book"),
-             "warnQuality": outer["warnQuality"]}
+             "warnQuality": outer["warnQuality"],
+             "raw1": {},
+             "raw2": {},
+             "chain": chain,
+             "chainI": chainI,
+             "outer": outer,
+             "inner": inner}
     kargs.update(options)
 
     try:
         def outerInnerCompare2(chain, iEntry):
-            return outerInnerCompare(chain, iEntry, outer, inner, innerEvent, chainI, kargs)
+            return outerInnerCompare(iEntry, innerEvent, kargs)
 
         nMin = outer["nEventsSkip"]
         nMax = (outer["nEventsSkip"] + outer["nEventsMax"]) if outer["nEventsMax"] else None

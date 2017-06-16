@@ -3,6 +3,12 @@ import printer
 import struct
 
 
+def unpack(raw1={}, raw2={}, chain=None, chainI=None, outer={}, inner={}, **_):
+    raw1.update(collected(tree=chain, specs=outer))
+    if inner:
+        raw2.update(collected(tree=chainI, specs=inner))
+
+
 def collected(tree=None, specs={}):
     raw = {}
     kargs = {}
