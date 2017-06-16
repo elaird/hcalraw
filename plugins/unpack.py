@@ -17,7 +17,7 @@ def collected(tree=None, specs={}):
 
     for fedId, wargs in sorted(specs["wargs"].iteritems()):
         raw[fedId] = unpacked(fedData=specs["wfunc"](**wargs),
-                              warn=specs["warnUnpack"],
+                              warn=specs["warnQuality"],
                               **kargs)
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
@@ -104,7 +104,6 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
                                             word16Counts=header["word16Counts"],
                                             utca=header["utca"],
                                             fedId=header["FEDid"],
-                                            warn=warn,
                                             dump=dump)
                 if returnCode is None:
                     continue

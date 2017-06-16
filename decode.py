@@ -386,7 +386,7 @@ def end(d):
 
 
 def payload(d={}, iWord16=None, word16=None, word16Counts=[],
-            utca=None, fedId=None, warn=True, dump=-99):
+            utca=None, fedId=None, dump=-99):
 
     if 12 <= dump:
         print "      (%5d 0x%04x)" % (iWord16, word16)
@@ -476,7 +476,6 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             word16=word16,
             utca=utca,
             fedId=fedId,
-            warn=warn,
             )
 
 
@@ -501,7 +500,7 @@ def ttpData(l={}, iDataMod6=None, word16=None):
 
 
 def htrData(d={}, l={}, iWord16=None, word16=None,
-            utca=None, fedId=None, warn=True):
+            utca=None, fedId=None):
 
     if (word16 >> 15):
         flavor = (word16 >> 12) & 0x7
@@ -510,7 +509,7 @@ def htrData(d={}, l={}, iWord16=None, word16=None,
                                                         flavor=flavor,
                                                         utca=utca,
                                                         nPreSamples=l["nPreSamples"])
-        if warn and dataKey == "otherData":
+        if dataKey == "otherData":
             coords = "FED %4d crate %2d slot %2d" % (fedId, l["Crate"], l["Slot"])
             evn = "(EvN 0x%06x, iWord16 %4d, word16 0x%04x)" % (l["EvN"], iWord16, word16)
             printer.warning("unknown flavor %d: %s %s." % (flavor, coords, evn))

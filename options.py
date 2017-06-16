@@ -102,11 +102,6 @@ def oparser(arg=""):
                         default=False,
                         action="store_true",
                         help="print TTree entry number (when power of 2)")
-    printing.add_option("--no-warn-unpack",
-                        dest="noWarnUnpack",
-                        default=False,
-                        action="store_true",
-                        help="suppress warnings during unpacking")
     printing.add_option("--no-warn-quality",
                         dest="noWarnQuality",
                         default=False,

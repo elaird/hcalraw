@@ -474,7 +474,7 @@ def processed(options):
     printer.__color = not options.noColor
 
     common = subset(options, ["dump", "firstNTs", "lastNAmcs", "nEventsMax", "nEventsSkip", "perTs", "progress", "sparseLoop"])
-    common.update(subset(options, ["noWarnQuality", "noWarnUnpack"], invert=True))
+    common.update(subset(options, ["noWarnQuality"], invert=True))
     common["crateslots"] = sw.fedList(options.crateslots)
 
     plugins = options.plugins.split(",")
