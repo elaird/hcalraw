@@ -152,7 +152,7 @@ def outerInnerCompare(oEntry, innerEvent, kargs):
             break
 
 
-def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={}):
+def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, oMapF={}, options={}):
     if outer["progress"]:
         print "Looping:"
 
@@ -168,6 +168,7 @@ def loop(chain=None, chainI=None, outer={}, inner={}, innerEvent={}, options={})
 
     try:
         def outerInnerCompare2(chain, iEntry):
+            kargs["evn"], kargs["orn"] = oMapF[iEntry]
             return outerInnerCompare(iEntry, innerEvent, kargs)
 
         nMin = outer["nEventsSkip"]
@@ -308,7 +309,7 @@ def go(outer={}, inner={}, outputFile="",
                                                            oMapF, oMapB, oMapBcn)
     book = loop(chain=chain, chainI=chainI,
                 outer=outer, inner=inner,
-                innerEvent=innerEvent,
+                innerEvent=innerEvent, oMapF=oMapF,
                 options=options)
 
     utils.delete(chain)
