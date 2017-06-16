@@ -8,6 +8,7 @@ import autoBook
 from configuration import hw, sw, matching
 import printer
 import plugins
+from plugins import unpack
 import raw
 
 
@@ -104,7 +105,7 @@ def eventMaps(chain, s={}, identityMap=False):
             if iEntry == nMapMin:
                 raw.pruneFeds(chain, s)
 
-            return fillEventMap(iEntry, raw.unpackedHeader(s), forward, forwardBcn, backward)
+            return fillEventMap(iEntry, unpack.unpackedHeader(s), forward, forwardBcn, backward)
 
         nMapMin = 0     # start from beginning
         nMapMax = None  # look at all entries
@@ -136,7 +137,7 @@ def reportProgress(globalEntry, iEvent, iMask):
 
 
 def outerInnerCompare(chain, oEntry, outer, inner, innerEvent, chainI, kargs):
-    kargs["raw1"] = raw.collected(tree=chain, specs=outer)
+    kargs["raw1"] = unpack.collected(tree=chain, specs=outer)
 
     if innerEvent:
         iEntry = innerEvent[oEntry]
@@ -148,7 +149,7 @@ def outerInnerCompare(chain, oEntry, outer, inner, innerEvent, chainI, kargs):
             return True  # break!
 
     if inner:
-        kargs["raw2"] = raw.collected(tree=chainI, specs=inner)
+        kargs["raw2"] = unpack.collected(tree=chainI, specs=inner)
 
     if not outer["unpack"]:
         return
