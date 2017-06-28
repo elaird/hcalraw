@@ -284,7 +284,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
             a, b = histogramChannelData(book, block, channelData, fedId, caps, ErrF, adcs,
                                         crate2bin, slotCrate,
                                         misMatchMapBins, xAxisLabels, yAxisLabels,
-                                        fedTime, nTsMax, **other)
+                                        fedTime, nTsMax, warn, **other)
             nAdcMatch += a
             nAdcMisMatch += b
 
@@ -408,7 +408,7 @@ def histogramChannelData(book, block, channelData, fedId,
                          caps, ErrF, adcs, crate2bin,
                          slotCrate, misMatchMapBins,
                          xAxisLabels, yAxisLabels, fedTime, nTsMax,
-                         **other):
+                         warn, **other):
 
     nAdcMatch = 0
     nAdcMisMatch = 0
@@ -457,7 +457,8 @@ def histogramChannelData(book, block, channelData, fedId,
     try:
         tsSoi = channelData["SOI"].index(1)
     except ValueError:
-        printer.warning("%2d:%2d:%2d:%d SoI not found" % (block["Crate"], block["Slot"], channelData["Fiber"], channelData["FibCh"]))
+        if warn:
+            printer.warning("%2d:%2d:%2d:%d SoI not found" % (block["Crate"], block["Slot"], channelData["Fiber"], channelData["FibCh"]))
         tsSoi = None
 
     if channelData["QIE"]:
