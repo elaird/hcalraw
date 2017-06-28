@@ -159,6 +159,8 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
 
     if p["IsTTP"]:
         cd = ttpData(p["ttpInput"], p["ttpOutput"], p["ttpAlgoDep"])
+    if p["IsIO"]:
+        cd = ioData(p)
     else:
         cd = htrChannelData(p["channelData"].values(),
                             crate=p["Crate"],
@@ -388,6 +390,15 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
             out[-1] += "%3s" % m
 
     return out
+
+
+def ioData(p):
+    l = []
+    columns = ["   Run ", "EventType", "UserWords"]
+    l.append("   ".join(columns))
+    w = " ".join(["%04x:%08x" % (k, v) for (k, v) in sorted(p["UserWords"].iteritems())])
+    l.append("   ".join(["%8d" % p["Run"], "  %2d    " % p["EventType"], w]))
+    return l
 
 
 def ttpData(ttpInput=[], ttpOutput=[], ttpAlgoDep=[]):
