@@ -240,7 +240,6 @@ def htrHeaderV1(l={}, w=None, i=None, utca=None):
         l["PayloadFormat"] = (w >> 12) & 0xf
         l["EventType"] = (w >> 8) & 0xf
         l["FwFlavor"] = w & 0xff
-        l["FormatVer"] = l["PayloadFormat"]  # compat
         l["IsIO"] = l["PayloadFormat"] == 2
         l["IsTTP"] = False
 
@@ -280,6 +279,7 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
         l["BcN"] = w & 0xfff
         l["OrN5"], l["BcN"] = ornBcn(l["OrN5"], l["BcN"], utca)
         l["FormatVer"] = (w >> 12) & 0xf
+        l["PayloadFormat"] = l["FormatVer"]  # compat
         l["UnsupportedFormat"] = (not utca) and (l["FormatVer"] != 6)
 
     if i == 5:
@@ -454,7 +454,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
         ttpData(l, (i - 8) % 6, word16)
         return
     elif l["IsIO"]:
-        # ioData(l)
+        ioData(l, i, word16)
         return
 
     if not utca:
@@ -477,6 +477,34 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             utca=utca,
             fedId=fedId,
             )
+
+
+def ioData(l, i, word16):
+    if i == 8:
+        l["OrN"] |= (word16 << 16)
+    if i == 9:
+        l["Run"] = word16
+    if i == 10:
+        l["Run"] |= (word16 << 16)
+    if i == 11:
+        l["Header11"] = word16
+    if i == 12:
+        l["nKeys"] = word16 & 0xff
+        l["keys"] = []
+        l["UserWords"] = {}
+    if i < 13:
+        return
+
+    j = (i - 13) % 3
+    if not j:
+        l["keys"].append(word16)
+        l["UserWords"][word16] = 0
+    else:
+        key = l["keys"][-1]
+        l["UserWords"][key] |= word16 << (16 * (j - 1))
+
+    if (i - 13) == 3 * l["nKeys"] - 1:
+        del l["keys"]
 
 
 def ttpData(l={}, iDataMod6=None, word16=None):
