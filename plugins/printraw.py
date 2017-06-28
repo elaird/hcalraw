@@ -103,7 +103,7 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
                col,
               ]
     if zs:
-        columns += [" ", "ZSMask:  Thr1, Thr24, ThrTP"]
+        columns += ["ZSMask:  Thr1, Thr24, ThrTP"]
 
     strings = [" %05d" % p["0Word16"],
                " 0x%07x" % p["EvN"],
@@ -112,7 +112,7 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
                "%2d" % p["Crate"],
                "%2d%1s" % (p["Slot"], p["Top"]),
                "%2d" % p.get("FWFlavor", -1),  # absent in uHTR
-               " 0x%01x" % p["FormatVer"],
+               " 0x%01x" % p["PayloadFormat"],
                "  %2d" % p["nPreSamples"],
                ]
     if utca:
@@ -121,14 +121,13 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
     else:
         strings.append("     %3d " % p.get(col, -1))
 
-    if utca or ("Qie" in col):
-        strings.append("      ")
-    else:
+    if p["IsTTP"]:
         strings.append("  TTP ")
+    elif p["IsIO"]:
+        strings.append(" uMNio ")
 
     if zs:
-        strings += ["",
-                    "0x%04x" % zs["Mask"],
+        strings += ["  0x%04x" % zs["Mask"],
                     "  %3d" % zs["Threshold1"],
                     "  %3d" % zs["Threshold24"],
                     "  %3d" % zs["ThresholdTP"],
@@ -386,7 +385,7 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
                 m = "y" if marks[iChannel] else "n"
             else:
                 m = " "
-            out[-1] += "%7s" % m
+            out[-1] += "%3s" % m
 
     return out
 
