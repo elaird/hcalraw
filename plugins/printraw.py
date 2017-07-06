@@ -396,7 +396,14 @@ def ioData(p):
     l = []
     columns = ["   Run ", "EventType", "UserWords"]
     l.append("   ".join(columns))
-    w = " ".join(["%04x:%08x" % (k, v) for (k, v) in sorted(p["UserWords"].iteritems())])
+
+    lst = []
+    for (k, v) in sorted(p["UserWords"].iteritems()):
+        if v is None:
+            lst.append("%04x:[None]" % k)
+        else:
+            lst.append("%04x:%08x" % (k, v))
+    w = " ".join(lst)
     l.append("   ".join(["%8d" % p["Run"], "  %2d    " % p["EventType"], w]))
     return l
 
