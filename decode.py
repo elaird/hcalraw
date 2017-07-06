@@ -498,12 +498,14 @@ def ioData(l, i, word16):
     j = (i - 13) % 3
     if not j:
         l["keys"].append(word16)
-        l["UserWords"][word16] = 0
+        l["UserWords"][word16] = None
     else:
         key = l["keys"][-1]
+        if l["UserWords"][key] is None:
+            l["UserWords"][key] = 0
         l["UserWords"][key] |= word16 << (16 * (j - 1))
 
-    if (i - 13) == 3 * l["nKeys"] - 1:
+    if 12 + 3 * l["nKeys"] <= i and (i % 4) == 3:
         del l["keys"]
 
 
