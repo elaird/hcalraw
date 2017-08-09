@@ -18,7 +18,12 @@ def patterns(raw1={}, **_):
                 continue
 
             # skip printer to facilitate diff
-            print "\n".join(lines(raw["header"], iBlock, block, raw1[None]["firstNTs"]))
+            nTsMax = raw1[None]["firstNTs"]
+            header = raw["header"]
+            block["patternData"] = storePatternData(block["channelData"], header["utca"], nTsMax)
+            if 0 <= raw1[None]["dump"]:
+                # print "Crate=%2d, Slot=%2d" % (block["Crate"], block["Slot"])
+                print "\n".join(lines(header, iBlock, block, nTsMax))
 
 
 def lines(h, iBlock, block, nTsMax):
@@ -34,10 +39,7 @@ def lines(h, iBlock, block, nTsMax):
     else:
         out = [""]
 
-    # print "Crate=%2d, Slot=%2d" % (block["Crate"], block["Slot"])
-    d = storePatternData(block["channelData"], h["utca"], nTsMax)
-
-    for fiber1, fd in sorted(d.iteritems()):
+    for fiber1, fd in sorted(block["patternData"].iteritems()):
         out += lines_fiber_pair(fiber1, fd["flavor"], fd["patternData"], h["utca"], moduleId)
 
     return out
