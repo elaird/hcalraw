@@ -38,10 +38,10 @@ export EOS=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/archival/201609
 --file2=${EOS}/USC_211155.root --feds2=989
 
 # analyze FE pattern runs
-# (before HO refibering) ./look.py 235576 --feds1=HO  --plugins=patterns | ./diff.py data/ref_2014.txt
-# (before move to uTCA ) ./look.py 236631 --feds1=7xy --plugins=patterns | ./diff.py data/ref_vme_G.txt
-./look.py 260773 --feds1=HBEF --plugins=patterns | ./diff.py data/ref_utca_G.txt
-./look.py 270688 --feds1=HBEF --plugins=patterns | ./diff.py data/ref_utca_G.txt
+# (before HO refibering) ./look.py 235576 --feds1=HO  --plugins=unpack,patterns --dump=0 | ./diff.py data/ref_2014.txt
+# (before move to uTCA ) ./look.py 236631 --feds1=7xy --plugins=unpack,patterns --dump=0 | ./diff.py data/ref_vme_G.txt
+./look.py 260773 --feds1=HBEF --plugins=unpack,patterns --dump=0 | ./diff.py data/ref_utca_G.txt
+./look.py 270688 --feds1=HBEF --plugins=unpack,patterns --dump=0 | ./diff.py data/ref_utca_G.txt
 ./fiberId.sh 288606
 
 # read about usage
