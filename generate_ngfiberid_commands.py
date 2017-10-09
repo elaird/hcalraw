@@ -14,7 +14,7 @@ def with_rbx(i, rbx):
     return i
 
 
-def fiberid_he(rbx, qiecard, rm):
+def fiberid_hehb(rbx, qiecard, rm):
     i = qiecard & 0xf
     i |= (rm & 0xf) << 4
     return with_rbx(i, rbx)
@@ -44,11 +44,27 @@ def mode3_command_string(rbxes=[]):
                         stem = "%s-calib-i" % rbx
                     else:
                         stem = "%s-%d-%d-i" % (rbx, rm, qiecard)
-                    data = formatted(fiberid_he(rbx, qiecard, rm))
+                    data = formatted(fiberid_hehb(rbx, qiecard, rm))
                     for iLink in [1, 2]:
                         commands.append("put %s_FiberID%d %s" % (stem, iLink, data))
                     commands.append("put %s_LinkTestMode 3" % stem)
 
+        elif rbx.startswith("HB"):
+            for rm in range(1, 6):
+                for qiecard in range(1, 5):
+                    for fpga in ["iTop", "iBot"]:
+                        if rm == 5:
+                            if qiecard != 1:
+                                continue
+                            stem = "%s-calib-%s" % (rbx, fpga)
+                        else:
+                            stem = "%s-%d-%d-%s" % (rbx, rm, qiecard, fpga)
+                        data = formatted(fiberid_hehb(rbx, qiecard, rm))
+                        iLink = 1 # HB only uses iLink = 1
+                        commands.append("put %s_FiberID%d %s" % (stem, iLink, data))
+                        commands.append("put %s_LinkTestMode 3" % stem)
+        
+            
         elif rbx.startswith("HF"):
             for slot in range(1, 14):
                 for fpga in ["iTop", "iBot"]:
@@ -78,5 +94,8 @@ def exercise_bits(stem=""):
 
 if __name__ == "__main__":
     # print "\n", exercise_bits("HE16-3-1-i")
-    print "\n", mode3_command_string(["HE%d" % i for i in range(20)])
+    # print "\n", mode3_command_string(["HE%d" % i for i in range(20)])
     # print "\n", mode3_command_string(["HFP%02d" % i for i in range(1, 2)])
+    print "\n", mode3_command_string(["HB%d" % i for i in range(20)])
+    print "\n", mode3_command_string(["HBP%02d" % i for i in range(1, 19)])
+    print "\n", mode3_command_string(["HBM%02d" % i for i in range(1, 19)])
