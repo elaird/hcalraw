@@ -60,8 +60,8 @@ def mode3_command_string(rbxes=[]):
                         else:
                             stem = "%s-%d-%d-%s" % (rbx, rm, qiecard, fpga)
                         data = formatted(fiberid_hehb(rbx, qiecard, rm))
-                        for iLink in [1, 2]:
-                            commands.append("put %s_FiberID%d %s" % (stem, iLink, data))
+                        iLink = 1 # HB only uses iLink = 1
+                        commands.append("put %s_FiberID%d %s" % (stem, iLink, data))
                         commands.append("put %s_LinkTestMode 3" % stem)
         
             
@@ -96,6 +96,6 @@ if __name__ == "__main__":
     # print "\n", exercise_bits("HE16-3-1-i")
     # print "\n", mode3_command_string(["HE%d" % i for i in range(20)])
     # print "\n", mode3_command_string(["HFP%02d" % i for i in range(1, 2)])
-    print "\n", mode3_command_string(["HB%02d" % i for i in range(20)])
-    print "\n", mode3_command_string(["HBP%02d" % i for i in range(20)])
-    print "\n", mode3_command_string(["HBM%02d" % i for i in range(20)])
+    print "\n", mode3_command_string(["HB%d" % i for i in range(20)])
+    print "\n", mode3_command_string(["HBP%02d" % i for i in range(1, 19)])
+    print "\n", mode3_command_string(["HBM%02d" % i for i in range(1, 19)])
