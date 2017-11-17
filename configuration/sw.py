@@ -9,6 +9,7 @@ def files_this_machine(run, nCyclesMax=1):
                  "data/FNAL_",
                  "/tmp/USC_",
                  "data/B904_Integration_0000",
+                 "data/B904_Integration_10000",
                  "/localdata/B904_Integration_",
                  "/localdata/B904_Integration_10000"]:
         for iCycle in range(nCyclesMax):
