@@ -271,8 +271,28 @@ def calib():
     print "sorted reference file saved: %s" % oFileName
 
 
+def B904():
+    crate = 61
+    slot = 1
+    uhtr_fib = -1
+
+    for iRbx in range(1, 19):
+        rbx = "HE%d" % iRbx
+        for rm in range(1, 5):
+            for rm_fib in range(1, 9):
+                uhtr_fib += 1
+                if 23 < uhtr_fib:
+                    uhtr_fib -= 24
+                    slot += 1
+                if 12 < slot:
+                    slot -= 12
+                    crate += 1
+                print("%su%2d %02d %02d: %s %1d %1d" % (lineStart, crate, slot, uhtr_fib, rbx, rm, rm_fib))
+
+
 if __name__ == "__main__":
     # phase0()
     # plan1()
     # ngHF()
-    calib()
+    # calib()
+    B904()
