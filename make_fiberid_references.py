@@ -290,9 +290,27 @@ def B904():
                 print("%su%2d %02d %02d: %s %1d %1d" % (lineStart, crate, slot, uhtr_fib, rbx, rm, rm_fib))
 
 
+def ngHE():
+    for filename in ["HB2018LMap_20171128_ppcol-fix_K.txt", "ngHE2018LMap_20171130_K.txt"]:
+        f = open(filename)
+        for line in f:
+            if line.startswith("#"):
+                continue
+            fields =line.split()
+            if len(fields) != 26:
+                print fields
+                continue
+
+            # HE column headers
+            Side, Eta, Phi, dPhi, Depth, Det, RBX, Wedge, BV, QIE11, QIECH, RM, RM_FI, FI_CH, ppCol, ppRow, ppCpl, ppLC, dodec, Crate, uHTR, uHTR_FI, FEDid, QIE11id, TP_FI, TP_CH = fields
+            print("%su%2d %02d %02d: %s %1d %1d" % (lineStart, int(Crate), int(uHTR), int(uHTR_FI), RBX, int(RM), int(RM_FI)))
+        f.close()
+
+
 if __name__ == "__main__":
     # phase0()
     # plan1()
     # ngHF()
     # calib()
-    B904()
+    # B904()
+    ngHE()
