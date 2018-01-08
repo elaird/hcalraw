@@ -111,7 +111,7 @@ def string01(code=None):
     if ng_looks_broken(code):
         return "0x%022x" % code
     else:
-        return "%s%s%d %2d %d" % (subdet, side, rbx_number, rm, 2*qie_card + link_num - 1)
+        return "%s%s%02d %2d %d" % (subdet, side, rbx_number, rm, 2*qie_card + link_num - 1)
 
 
 def rbxes():
