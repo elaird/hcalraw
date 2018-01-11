@@ -8,7 +8,7 @@ def files_this_machine(run, nCyclesMax=1):
                  "data/run",
                  "data/FNAL_",
                  "/tmp/USC_",
-                 "/hcaldepot1/data/USC_",
+                 # "/hcaldepot1/data/USC_",
                  "data/B904_Integration_0000",
                  "data/B904_Integration_10000",
                  "/localdata/B904_Integration_",
