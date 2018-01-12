@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-import optparse, os
+import collections, optparse, os
 import graphs, oneRun, printer, utils
 from options import oparser
 from configuration import sw
@@ -118,6 +118,19 @@ def search(run):
             return files
 
 
+def pruned(files):
+    pieces = collections.defaultdict(list)
+    for f in files:
+        filename = f.split("/")[-1]
+        pieces[filename].append(f)
+
+    out = []
+    for filename, bases in sorted(pieces.iteritems()):
+        out.append(sorted(bases)[0])
+
+    return out
+
+
 def go(options, run, nRuns):
     override(options, run, nRuns)
 
@@ -126,6 +139,8 @@ def go(options, run, nRuns):
     if not files:
         printer.warning("Did not find a matching file for run %d." % run)
         return 1, None, None
+
+    files = pruned(files)
 
     nFiles = len(files)
     if 2 <= nFiles:
