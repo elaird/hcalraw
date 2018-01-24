@@ -908,6 +908,7 @@ pattern on u20 05 06: HBM05 3 2
 pattern on u20 05 07: HBM05 3 3
 pattern on u20 05 08: HBM05 4 2
 pattern on u20 05 09: HBM05 4 3
+pattern on u20 05 10: HBM05 5 1
 pattern on u20 05 12: HEM05 1 2
 pattern on u20 05 13: HEM05 1 4
 pattern on u20 05 14: HEM05 1 6
@@ -1142,6 +1143,7 @@ pattern on u21 05 06: HBM07 3 2
 pattern on u21 05 07: HBM07 3 3
 pattern on u21 05 08: HBM07 4 2
 pattern on u21 05 09: HBM07 4 3
+pattern on u21 05 10: HBM07 5 1
 pattern on u21 05 12: HEM07 1 2
 pattern on u21 05 13: HEM07 1 4
 pattern on u21 05 14: HEM07 1 6
@@ -1664,6 +1666,7 @@ pattern on u24 05 06: HBM03 3 2
 pattern on u24 05 07: HBM03 3 3
 pattern on u24 05 08: HBM03 4 2
 pattern on u24 05 09: HBM03 4 3
+pattern on u24 05 10: HBM03 5 1
 pattern on u24 05 12: HEM03 1 2
 pattern on u24 05 13: HEM03 1 4
 pattern on u24 05 14: HEM03 1 6
@@ -1898,6 +1901,7 @@ pattern on u25 05 06: HBM09 3 2
 pattern on u25 05 07: HBM09 3 3
 pattern on u25 05 08: HBM09 4 2
 pattern on u25 05 09: HBM09 4 3
+pattern on u25 05 10: HBM09 5 1
 pattern on u25 05 12: HEM09 1 2
 pattern on u25 05 13: HEM09 1 4
 pattern on u25 05 14: HEM09 1 6
@@ -2420,6 +2424,7 @@ pattern on u30 05 06: HBM01 3 2
 pattern on u30 05 07: HBM01 3 3
 pattern on u30 05 08: HBM01 4 2
 pattern on u30 05 09: HBM01 4 3
+pattern on u30 05 10: HBM01 5 1
 pattern on u30 05 12: HEM01 1 2
 pattern on u30 05 13: HEM01 1 4
 pattern on u30 05 14: HEM01 1 6
@@ -2654,6 +2659,7 @@ pattern on u31 05 06: HBM11 3 2
 pattern on u31 05 07: HBM11 3 3
 pattern on u31 05 08: HBM11 4 2
 pattern on u31 05 09: HBM11 4 3
+pattern on u31 05 10: HBM11 5 1
 pattern on u31 05 12: HEM11 1 2
 pattern on u31 05 13: HEM11 1 4
 pattern on u31 05 14: HEM11 1 6
@@ -3176,6 +3182,7 @@ pattern on u34 05 06: HBM17 3 2
 pattern on u34 05 07: HBM17 3 3
 pattern on u34 05 08: HBM17 4 2
 pattern on u34 05 09: HBM17 4 3
+pattern on u34 05 10: HBM17 5 1
 pattern on u34 05 12: HEM17 1 2
 pattern on u34 05 13: HEM17 1 4
 pattern on u34 05 14: HEM17 1 6
@@ -3410,6 +3417,7 @@ pattern on u35 05 06: HBM13 3 2
 pattern on u35 05 07: HBM13 3 3
 pattern on u35 05 08: HBM13 4 2
 pattern on u35 05 09: HBM13 4 3
+pattern on u35 05 10: HBM13 5 1
 pattern on u35 05 12: HEM13 1 2
 pattern on u35 05 13: HEM13 1 4
 pattern on u35 05 14: HEM13 1 6
@@ -3644,6 +3652,7 @@ pattern on u37 05 06: HBM15 3 2
 pattern on u37 05 07: HBM15 3 3
 pattern on u37 05 08: HBM15 4 2
 pattern on u37 05 09: HBM15 4 3
+pattern on u37 05 10: HBM15 5 1
 pattern on u37 05 12: HEM15 1 2
 pattern on u37 05 13: HEM15 1 4
 pattern on u37 05 14: HEM15 1 6
