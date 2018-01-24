@@ -966,6 +966,7 @@ pattern on u20 08 06: HBP04 3 2
 pattern on u20 08 07: HBP04 3 3
 pattern on u20 08 08: HBP04 4 2
 pattern on u20 08 09: HBP04 4 3
+pattern on u20 08 10: HBP04 5 1
 pattern on u20 08 12: HEP04 1 2
 pattern on u20 08 13: HEP04 1 4
 pattern on u20 08 14: HEP04 1 6
@@ -1199,6 +1200,7 @@ pattern on u21 08 06: HBP06 3 2
 pattern on u21 08 07: HBP06 3 3
 pattern on u21 08 08: HBP06 4 2
 pattern on u21 08 09: HBP06 4 3
+pattern on u21 08 10: HBP06 5 1
 pattern on u21 08 12: HEP06 1 2
 pattern on u21 08 13: HEP06 1 4
 pattern on u21 08 14: HEP06 1 6
@@ -1720,6 +1722,7 @@ pattern on u24 08 06: HBP02 3 2
 pattern on u24 08 07: HBP02 3 3
 pattern on u24 08 08: HBP02 4 2
 pattern on u24 08 09: HBP02 4 3
+pattern on u24 08 10: HBP02 5 1
 pattern on u24 08 12: HEP02 1 2
 pattern on u24 08 13: HEP02 1 4
 pattern on u24 08 14: HEP02 1 6
@@ -1953,6 +1956,7 @@ pattern on u25 08 06: HBP08 3 2
 pattern on u25 08 07: HBP08 3 3
 pattern on u25 08 08: HBP08 4 2
 pattern on u25 08 09: HBP08 4 3
+pattern on u25 08 10: HBP08 5 1
 pattern on u25 08 12: HEP08 1 2
 pattern on u25 08 13: HEP08 1 4
 pattern on u25 08 14: HEP08 1 6
@@ -2474,6 +2478,7 @@ pattern on u30 08 06: HBP18 3 2
 pattern on u30 08 07: HBP18 3 3
 pattern on u30 08 08: HBP18 4 2
 pattern on u30 08 09: HBP18 4 3
+pattern on u30 08 10: HBP18 5 1
 pattern on u30 08 12: HEP18 1 2
 pattern on u30 08 13: HEP18 1 4
 pattern on u30 08 14: HEP18 1 6
@@ -2707,6 +2712,7 @@ pattern on u31 08 06: HBP10 3 2
 pattern on u31 08 07: HBP10 3 3
 pattern on u31 08 08: HBP10 4 2
 pattern on u31 08 09: HBP10 4 3
+pattern on u31 08 10: HBP10 5 1
 pattern on u31 08 12: HEP10 1 2
 pattern on u31 08 13: HEP10 1 4
 pattern on u31 08 14: HEP10 1 6
@@ -3228,6 +3234,7 @@ pattern on u34 08 06: HBP16 3 2
 pattern on u34 08 07: HBP16 3 3
 pattern on u34 08 08: HBP16 4 2
 pattern on u34 08 09: HBP16 4 3
+pattern on u34 08 10: HBP16 5 1
 pattern on u34 08 12: HEP16 1 2
 pattern on u34 08 13: HEP16 1 4
 pattern on u34 08 14: HEP16 1 6
@@ -3461,6 +3468,7 @@ pattern on u35 08 06: HBP12 3 2
 pattern on u35 08 07: HBP12 3 3
 pattern on u35 08 08: HBP12 4 2
 pattern on u35 08 09: HBP12 4 3
+pattern on u35 08 10: HBP12 5 1
 pattern on u35 08 12: HEP12 1 2
 pattern on u35 08 13: HEP12 1 4
 pattern on u35 08 14: HEP12 1 6
@@ -3694,6 +3702,7 @@ pattern on u37 08 06: HBP14 3 2
 pattern on u37 08 07: HBP14 3 3
 pattern on u37 08 08: HBP14 4 2
 pattern on u37 08 09: HBP14 4 3
+pattern on u37 08 10: HBP14 5 1
 pattern on u37 08 12: HEP14 1 2
 pattern on u37 08 13: HEP14 1 4
 pattern on u37 08 14: HEP14 1 6
