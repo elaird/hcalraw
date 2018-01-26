@@ -873,7 +873,7 @@ pattern on u20 03 07: HEM04 2 2
 pattern on u20 03 08: HEM04 2 3
 pattern on u20 03 09: HEM04 2 6
 pattern on u20 03 10: HEM04 2 8
-pattern on u20 03 11: HEM04 5 1
+pattern on u20 03 11: HEM04 5 2
 pattern on u20 03 13: HEM04 3 1
 pattern on u20 03 14: HEM04 3 3
 pattern on u20 03 15: HEM04 3 5
@@ -884,7 +884,7 @@ pattern on u20 03 19: HEM04 4 2
 pattern on u20 03 20: HEM04 4 3
 pattern on u20 03 21: HEM04 4 6
 pattern on u20 03 22: HEM04 4 8
-pattern on u20 03 23: HEM04 5 2
+pattern on u20 03 23: HEM04 5 1
 pattern on u20 04 04: HBM05 1 4
 pattern on u20 04 05: HBM05 2 4
 pattern on u20 04 06: HBM05 3 4
@@ -932,7 +932,7 @@ pattern on u20 06 07: HEM05 2 2
 pattern on u20 06 08: HEM05 2 3
 pattern on u20 06 09: HEM05 2 6
 pattern on u20 06 10: HEM05 2 8
-pattern on u20 06 11: HEM05 5 1
+pattern on u20 06 11: HEM05 5 2
 pattern on u20 06 13: HEM05 3 1
 pattern on u20 06 14: HEM05 3 3
 pattern on u20 06 15: HEM05 3 5
@@ -943,7 +943,7 @@ pattern on u20 06 19: HEM05 4 2
 pattern on u20 06 20: HEM05 4 3
 pattern on u20 06 21: HEM05 4 6
 pattern on u20 06 22: HEM05 4 8
-pattern on u20 06 23: HEM05 5 2
+pattern on u20 06 23: HEM05 5 1
 pattern on u20 07 04: HBP04 1 4
 pattern on u20 07 05: HBP04 2 4
 pattern on u20 07 06: HBP04 3 4
@@ -991,7 +991,7 @@ pattern on u20 09 07: HEP04 2 2
 pattern on u20 09 08: HEP04 2 3
 pattern on u20 09 09: HEP04 2 6
 pattern on u20 09 10: HEP04 2 8
-pattern on u20 09 11: HEP04 5 1
+pattern on u20 09 11: HEP04 5 2
 pattern on u20 09 13: HEP04 3 1
 pattern on u20 09 14: HEP04 3 3
 pattern on u20 09 15: HEP04 3 5
@@ -1002,7 +1002,7 @@ pattern on u20 09 19: HEP04 4 2
 pattern on u20 09 20: HEP04 4 3
 pattern on u20 09 21: HEP04 4 6
 pattern on u20 09 22: HEP04 4 8
-pattern on u20 09 23: HEP04 5 2
+pattern on u20 09 23: HEP04 5 1
 pattern on u20 10 04: HBP05 1 4
 pattern on u20 10 05: HBP05 2 4
 pattern on u20 10 06: HBP05 3 4
@@ -1050,7 +1050,7 @@ pattern on u20 12 07: HEP05 2 2
 pattern on u20 12 08: HEP05 2 3
 pattern on u20 12 09: HEP05 2 6
 pattern on u20 12 10: HEP05 2 8
-pattern on u20 12 11: HEP05 5 1
+pattern on u20 12 11: HEP05 5 2
 pattern on u20 12 13: HEP05 3 1
 pattern on u20 12 14: HEP05 3 3
 pattern on u20 12 15: HEP05 3 5
@@ -1061,7 +1061,7 @@ pattern on u20 12 19: HEP05 4 2
 pattern on u20 12 20: HEP05 4 3
 pattern on u20 12 21: HEP05 4 6
 pattern on u20 12 22: HEP05 4 8
-pattern on u20 12 23: HEP05 5 2
+pattern on u20 12 23: HEP05 5 1
 pattern on u21 01 04: HBM06 1 4
 pattern on u21 01 05: HBM06 2 4
 pattern on u21 01 06: HBM06 3 4
@@ -1109,7 +1109,7 @@ pattern on u21 03 07: HEM06 2 2
 pattern on u21 03 08: HEM06 2 3
 pattern on u21 03 09: HEM06 2 6
 pattern on u21 03 10: HEM06 2 8
-pattern on u21 03 11: HEM06 5 1
+pattern on u21 03 11: HEM06 5 2
 pattern on u21 03 13: HEM06 3 1
 pattern on u21 03 14: HEM06 3 3
 pattern on u21 03 15: HEM06 3 5
@@ -1120,7 +1120,7 @@ pattern on u21 03 19: HEM06 4 2
 pattern on u21 03 20: HEM06 4 3
 pattern on u21 03 21: HEM06 4 6
 pattern on u21 03 22: HEM06 4 8
-pattern on u21 03 23: HEM06 5 2
+pattern on u21 03 23: HEM06 5 1
 pattern on u21 04 04: HBM07 1 4
 pattern on u21 04 05: HBM07 2 4
 pattern on u21 04 06: HBM07 3 4
@@ -1168,7 +1168,7 @@ pattern on u21 06 07: HEM07 2 2
 pattern on u21 06 08: HEM07 2 3
 pattern on u21 06 09: HEM07 2 6
 pattern on u21 06 10: HEM07 2 8
-pattern on u21 06 11: HEM07 5 1
+pattern on u21 06 11: HEM07 5 2
 pattern on u21 06 13: HEM07 3 1
 pattern on u21 06 14: HEM07 3 3
 pattern on u21 06 15: HEM07 3 5
@@ -1179,7 +1179,7 @@ pattern on u21 06 19: HEM07 4 2
 pattern on u21 06 20: HEM07 4 3
 pattern on u21 06 21: HEM07 4 6
 pattern on u21 06 22: HEM07 4 8
-pattern on u21 06 23: HEM07 5 2
+pattern on u21 06 23: HEM07 5 1
 pattern on u21 07 04: HBP06 1 4
 pattern on u21 07 05: HBP06 2 4
 pattern on u21 07 06: HBP06 3 4
@@ -1227,7 +1227,7 @@ pattern on u21 09 07: HEP06 2 2
 pattern on u21 09 08: HEP06 2 3
 pattern on u21 09 09: HEP06 2 6
 pattern on u21 09 10: HEP06 2 8
-pattern on u21 09 11: HEP06 5 1
+pattern on u21 09 11: HEP06 5 2
 pattern on u21 09 13: HEP06 3 1
 pattern on u21 09 14: HEP06 3 3
 pattern on u21 09 15: HEP06 3 5
@@ -1238,7 +1238,7 @@ pattern on u21 09 19: HEP06 4 2
 pattern on u21 09 20: HEP06 4 3
 pattern on u21 09 21: HEP06 4 6
 pattern on u21 09 22: HEP06 4 8
-pattern on u21 09 23: HEP06 5 2
+pattern on u21 09 23: HEP06 5 1
 pattern on u21 10 04: HBP07 1 4
 pattern on u21 10 05: HBP07 2 4
 pattern on u21 10 06: HBP07 3 4
@@ -1286,7 +1286,7 @@ pattern on u21 12 07: HEP07 2 2
 pattern on u21 12 08: HEP07 2 3
 pattern on u21 12 09: HEP07 2 6
 pattern on u21 12 10: HEP07 2 8
-pattern on u21 12 11: HEP07 5 1
+pattern on u21 12 11: HEP07 5 2
 pattern on u21 12 13: HEP07 3 1
 pattern on u21 12 14: HEP07 3 3
 pattern on u21 12 15: HEP07 3 5
@@ -1297,7 +1297,7 @@ pattern on u21 12 19: HEP07 4 2
 pattern on u21 12 20: HEP07 4 3
 pattern on u21 12 21: HEP07 4 6
 pattern on u21 12 22: HEP07 4 8
-pattern on u21 12 23: HEP07 5 2
+pattern on u21 12 23: HEP07 5 1
 pattern on u22 01 00: HFM01 6 0
 pattern on u22 01 01: HFM01 6 1
 pattern on u22 01 02: HFM01 6 2
@@ -1633,7 +1633,7 @@ pattern on u24 03 07: HEM02 2 2
 pattern on u24 03 08: HEM02 2 3
 pattern on u24 03 09: HEM02 2 6
 pattern on u24 03 10: HEM02 2 8
-pattern on u24 03 11: HEM02 5 1
+pattern on u24 03 11: HEM02 5 2
 pattern on u24 03 13: HEM02 3 1
 pattern on u24 03 14: HEM02 3 3
 pattern on u24 03 15: HEM02 3 5
@@ -1644,7 +1644,7 @@ pattern on u24 03 19: HEM02 4 2
 pattern on u24 03 20: HEM02 4 3
 pattern on u24 03 21: HEM02 4 6
 pattern on u24 03 22: HEM02 4 8
-pattern on u24 03 23: HEM02 5 2
+pattern on u24 03 23: HEM02 5 1
 pattern on u24 04 04: HBM03 1 4
 pattern on u24 04 05: HBM03 2 4
 pattern on u24 04 06: HBM03 3 4
@@ -1692,7 +1692,7 @@ pattern on u24 06 07: HEM03 2 2
 pattern on u24 06 08: HEM03 2 3
 pattern on u24 06 09: HEM03 2 6
 pattern on u24 06 10: HEM03 2 8
-pattern on u21 06 11: HEM03 5 1
+pattern on u21 06 11: HEM03 5 2
 pattern on u24 06 13: HEM03 3 1
 pattern on u24 06 14: HEM03 3 3
 pattern on u24 06 15: HEM03 3 5
@@ -1703,7 +1703,7 @@ pattern on u24 06 19: HEM03 4 2
 pattern on u24 06 20: HEM03 4 3
 pattern on u24 06 21: HEM03 4 6
 pattern on u24 06 22: HEM03 4 8
-pattern on u21 06 23: HEM03 5 2
+pattern on u21 06 23: HEM03 5 1
 pattern on u24 07 04: HBP02 1 4
 pattern on u24 07 05: HBP02 2 4
 pattern on u24 07 06: HBP02 3 4
@@ -1751,7 +1751,7 @@ pattern on u24 09 07: HEP02 2 2
 pattern on u24 09 08: HEP02 2 3
 pattern on u24 09 09: HEP02 2 6
 pattern on u24 09 10: HEP02 2 8
-pattern on u24 09 11: HEP02 5 1
+pattern on u24 09 11: HEP02 5 2
 pattern on u24 09 13: HEP02 3 1
 pattern on u24 09 14: HEP02 3 3
 pattern on u24 09 15: HEP02 3 5
@@ -1762,7 +1762,7 @@ pattern on u24 09 19: HEP02 4 2
 pattern on u24 09 20: HEP02 4 3
 pattern on u24 09 21: HEP02 4 6
 pattern on u24 09 22: HEP02 4 8
-pattern on u24 09 23: HEP02 5 2
+pattern on u24 09 23: HEP02 5 1
 pattern on u24 10 04: HBP03 1 4
 pattern on u24 10 05: HBP03 2 4
 pattern on u24 10 06: HBP03 3 4
@@ -1810,7 +1810,7 @@ pattern on u24 12 07: HEP03 2 2
 pattern on u24 12 08: HEP03 2 3
 pattern on u24 12 09: HEP03 2 6
 pattern on u24 12 10: HEP03 2 8
-pattern on u24 12 11: HEP03 5 1
+pattern on u24 12 11: HEP03 5 2
 pattern on u24 12 13: HEP03 3 1
 pattern on u24 12 14: HEP03 3 3
 pattern on u24 12 15: HEP03 3 5
@@ -1821,7 +1821,7 @@ pattern on u24 12 19: HEP03 4 2
 pattern on u24 12 20: HEP03 4 3
 pattern on u24 12 21: HEP03 4 6
 pattern on u24 12 22: HEP03 4 8
-pattern on u24 12 23: HEP03 5 2
+pattern on u24 12 23: HEP03 5 1
 pattern on u25 01 04: HBM08 1 4
 pattern on u25 01 05: HBM08 2 4
 pattern on u25 01 06: HBM08 3 4
@@ -1869,7 +1869,7 @@ pattern on u25 03 07: HEM08 2 2
 pattern on u25 03 08: HEM08 2 3
 pattern on u25 03 09: HEM08 2 6
 pattern on u25 03 10: HEM08 2 8
-pattern on u25 03 11: HEM08 5 1
+pattern on u25 03 11: HEM08 5 2
 pattern on u25 03 13: HEM08 3 1
 pattern on u25 03 14: HEM08 3 3
 pattern on u25 03 15: HEM08 3 5
@@ -1880,7 +1880,7 @@ pattern on u25 03 19: HEM08 4 2
 pattern on u25 03 20: HEM08 4 3
 pattern on u25 03 21: HEM08 4 6
 pattern on u25 03 22: HEM08 4 8
-pattern on u25 03 23: HEM08 5 2
+pattern on u25 03 23: HEM08 5 1
 pattern on u25 04 04: HBM09 1 4
 pattern on u25 04 05: HBM09 2 4
 pattern on u25 04 06: HBM09 3 4
@@ -1928,7 +1928,7 @@ pattern on u25 06 07: HEM09 2 2
 pattern on u25 06 08: HEM09 2 3
 pattern on u25 06 09: HEM09 2 6
 pattern on u25 06 10: HEM09 2 8
-pattern on u25 06 11: HEM09 5 1
+pattern on u25 06 11: HEM09 5 2
 pattern on u25 06 13: HEM09 3 1
 pattern on u25 06 14: HEM09 3 3
 pattern on u25 06 15: HEM09 3 5
@@ -1939,7 +1939,7 @@ pattern on u25 06 19: HEM09 4 2
 pattern on u25 06 20: HEM09 4 3
 pattern on u25 06 21: HEM09 4 6
 pattern on u25 06 22: HEM09 4 8
-pattern on u25 06 23: HEM09 5 2
+pattern on u25 06 23: HEM09 5 1
 pattern on u25 07 04: HBP08 1 4
 pattern on u25 07 05: HBP08 2 4
 pattern on u25 07 06: HBP08 3 4
@@ -1987,7 +1987,7 @@ pattern on u25 09 07: HEP08 2 2
 pattern on u25 09 08: HEP08 2 3
 pattern on u25 09 09: HEP08 2 6
 pattern on u25 09 10: HEP08 2 8
-pattern on u25 09 11: HEP08 5 1
+pattern on u25 09 11: HEP08 5 2
 pattern on u25 09 13: HEP08 3 1
 pattern on u25 09 14: HEP08 3 3
 pattern on u25 09 15: HEP08 3 5
@@ -1998,7 +1998,7 @@ pattern on u25 09 19: HEP08 4 2
 pattern on u25 09 20: HEP08 4 3
 pattern on u25 09 21: HEP08 4 6
 pattern on u25 09 22: HEP08 4 8
-pattern on u25 09 23: HEP08 5 2
+pattern on u25 09 23: HEP08 5 1
 pattern on u25 10 04: HBP09 1 4
 pattern on u25 10 05: HBP09 2 4
 pattern on u25 10 06: HBP09 3 4
@@ -2046,7 +2046,7 @@ pattern on u25 12 07: HEP09 2 2
 pattern on u25 12 08: HEP09 2 3
 pattern on u25 12 09: HEP09 2 6
 pattern on u25 12 10: HEP09 2 8
-pattern on u25 12 11: HEP09 5 1
+pattern on u25 12 11: HEP09 5 2
 pattern on u25 12 13: HEP09 3 1
 pattern on u25 12 14: HEP09 3 3
 pattern on u25 12 15: HEP09 3 5
@@ -2057,7 +2057,7 @@ pattern on u25 12 19: HEP09 4 2
 pattern on u25 12 20: HEP09 4 3
 pattern on u25 12 21: HEP09 4 6
 pattern on u25 12 22: HEP09 4 8
-pattern on u25 12 23: HEP09 5 2
+pattern on u25 12 23: HEP09 5 1
 pattern on u29 01 00: HFM04 12 0
 pattern on u29 01 01: HFM04 12 1
 pattern on u29 01 02: HFM04 12 2
@@ -2393,7 +2393,7 @@ pattern on u30 03 07: HEM18 2 2
 pattern on u30 03 08: HEM18 2 3
 pattern on u30 03 09: HEM18 2 6
 pattern on u30 03 10: HEM18 2 8
-pattern on u30 03 11: HEM18 5 1
+pattern on u30 03 11: HEM18 5 2
 pattern on u30 03 13: HEM18 3 1
 pattern on u30 03 14: HEM18 3 3
 pattern on u30 03 15: HEM18 3 5
@@ -2404,7 +2404,7 @@ pattern on u30 03 19: HEM18 4 2
 pattern on u30 03 20: HEM18 4 3
 pattern on u30 03 21: HEM18 4 6
 pattern on u30 03 22: HEM18 4 8
-pattern on u30 03 23: HEM18 5 2
+pattern on u30 03 23: HEM18 5 1
 pattern on u30 04 04: HBM01 1 4
 pattern on u30 04 05: HBM01 2 4
 pattern on u30 04 06: HBM01 3 4
@@ -2452,7 +2452,7 @@ pattern on u30 06 07: HEM01 2 2
 pattern on u30 06 08: HEM01 2 3
 pattern on u30 06 09: HEM01 2 6
 pattern on u30 06 10: HEM01 2 8
-pattern on u30 06 11: HEM01 5 1
+pattern on u30 06 11: HEM01 5 2
 pattern on u30 06 13: HEM01 3 1
 pattern on u30 06 14: HEM01 3 3
 pattern on u30 06 15: HEM01 3 5
@@ -2463,7 +2463,7 @@ pattern on u30 06 19: HEM01 4 2
 pattern on u30 06 20: HEM01 4 3
 pattern on u30 06 21: HEM01 4 6
 pattern on u30 06 22: HEM01 4 8
-pattern on u30 06 23: HEM01 5 2
+pattern on u30 06 23: HEM01 5 1
 pattern on u30 07 04: HBP18 1 4
 pattern on u30 07 05: HBP18 2 4
 pattern on u30 07 06: HBP18 3 4
@@ -2511,7 +2511,7 @@ pattern on u30 09 07: HEP18 2 2
 pattern on u30 09 08: HEP18 2 3
 pattern on u30 09 09: HEP18 2 6
 pattern on u30 09 10: HEP18 2 8
-pattern on u30 09 11: HEP18 5 1
+pattern on u30 09 11: HEP18 5 2
 pattern on u30 09 13: HEP18 3 1
 pattern on u30 09 14: HEP18 3 3
 pattern on u30 09 15: HEP18 3 5
@@ -2522,7 +2522,7 @@ pattern on u30 09 19: HEP18 4 2
 pattern on u30 09 20: HEP18 4 3
 pattern on u30 09 21: HEP18 4 6
 pattern on u30 09 22: HEP18 4 8
-pattern on u30 09 23: HEP18 5 2
+pattern on u30 09 23: HEP18 5 1
 pattern on u30 10 04: HBP01 1 4
 pattern on u30 10 05: HBP01 2 4
 pattern on u30 10 06: HBP01 3 4
@@ -2570,7 +2570,7 @@ pattern on u30 12 07: HEP01 2 2
 pattern on u30 12 08: HEP01 2 3
 pattern on u30 12 09: HEP01 2 6
 pattern on u30 12 10: HEP01 2 8
-pattern on u30 12 11: HEP01 5 1
+pattern on u30 12 11: HEP01 5 2
 pattern on u30 12 13: HEP01 3 1
 pattern on u30 12 14: HEP01 3 3
 pattern on u30 12 15: HEP01 3 5
@@ -2581,7 +2581,7 @@ pattern on u30 12 19: HEP01 4 2
 pattern on u30 12 20: HEP01 4 3
 pattern on u30 12 21: HEP01 4 6
 pattern on u30 12 22: HEP01 4 8
-pattern on u30 12 23: HEP01 5 2
+pattern on u30 12 23: HEP01 5 1
 pattern on u31 01 04: HBM10 1 4
 pattern on u31 01 05: HBM10 2 4
 pattern on u31 01 06: HBM10 3 4
@@ -2629,7 +2629,7 @@ pattern on u31 03 07: HEM10 2 2
 pattern on u31 03 08: HEM10 2 3
 pattern on u31 03 09: HEM10 2 6
 pattern on u31 03 10: HEM10 2 8
-pattern on u31 03 11: HEM10 5 1
+pattern on u31 03 11: HEM10 5 2
 pattern on u31 03 13: HEM10 3 1
 pattern on u31 03 14: HEM10 3 3
 pattern on u31 03 15: HEM10 3 5
@@ -2640,7 +2640,7 @@ pattern on u31 03 19: HEM10 4 2
 pattern on u31 03 20: HEM10 4 3
 pattern on u31 03 21: HEM10 4 6
 pattern on u31 03 22: HEM10 4 8
-pattern on u31 03 23: HEM10 5 2
+pattern on u31 03 23: HEM10 5 1
 pattern on u31 04 04: HBM11 1 4
 pattern on u31 04 05: HBM11 2 4
 pattern on u31 04 06: HBM11 3 4
@@ -2688,7 +2688,7 @@ pattern on u31 06 07: HEM11 2 2
 pattern on u31 06 08: HEM11 2 3
 pattern on u31 06 09: HEM11 2 6
 pattern on u31 06 10: HEM11 2 8
-pattern on u31 06 11: HEM11 5 1
+pattern on u31 06 11: HEM11 5 2
 pattern on u31 06 13: HEM11 3 1
 pattern on u31 06 14: HEM11 3 3
 pattern on u31 06 15: HEM11 3 5
@@ -2699,7 +2699,7 @@ pattern on u31 06 19: HEM11 4 2
 pattern on u31 06 20: HEM11 4 3
 pattern on u31 06 21: HEM11 4 6
 pattern on u31 06 22: HEM11 4 8
-pattern on u31 06 23: HEM11 5 2
+pattern on u31 06 23: HEM11 5 1
 pattern on u31 07 04: HBP10 1 4
 pattern on u31 07 05: HBP10 2 4
 pattern on u31 07 06: HBP10 3 4
@@ -2747,7 +2747,7 @@ pattern on u31 09 07: HEP10 2 2
 pattern on u31 09 08: HEP10 2 3
 pattern on u31 09 09: HEP10 2 6
 pattern on u31 09 10: HEP10 2 8
-pattern on u31 09 11: HEP10 5 1
+pattern on u31 09 11: HEP10 5 2
 pattern on u31 09 13: HEP10 3 1
 pattern on u31 09 14: HEP10 3 3
 pattern on u31 09 15: HEP10 3 5
@@ -2758,7 +2758,7 @@ pattern on u31 09 19: HEP10 4 2
 pattern on u31 09 20: HEP10 4 3
 pattern on u31 09 21: HEP10 4 6
 pattern on u31 09 22: HEP10 4 8
-pattern on u31 09 23: HEP10 5 2
+pattern on u31 09 23: HEP10 5 1
 pattern on u31 10 04: HBP11 1 4
 pattern on u31 10 05: HBP11 2 4
 pattern on u31 10 06: HBP11 3 4
@@ -2806,7 +2806,7 @@ pattern on u31 12 07: HEP11 2 2
 pattern on u31 12 08: HEP11 2 3
 pattern on u31 12 09: HEP11 2 6
 pattern on u31 12 10: HEP11 2 8
-pattern on u31 12 11: HEP11 5 1
+pattern on u31 12 11: HEP11 5 2
 pattern on u31 12 13: HEP11 3 1
 pattern on u31 12 14: HEP11 3 3
 pattern on u31 12 15: HEP11 3 5
@@ -2817,7 +2817,7 @@ pattern on u31 12 19: HEP11 4 2
 pattern on u31 12 20: HEP11 4 3
 pattern on u31 12 21: HEP11 4 6
 pattern on u31 12 22: HEP11 4 8
-pattern on u31 12 23: HEP11 5 2
+pattern on u31 12 23: HEP11 5 1
 pattern on u32 01 00: HFM06 3 0
 pattern on u32 01 01: HFM06 3 1
 pattern on u32 01 02: HFM06 3 2
@@ -3153,7 +3153,7 @@ pattern on u34 03 07: HEM16 2 2
 pattern on u34 03 08: HEM16 2 3
 pattern on u34 03 09: HEM16 2 6
 pattern on u34 03 10: HEM16 2 8
-pattern on u34 03 11: HEM16 5 1
+pattern on u34 03 11: HEM16 5 2
 pattern on u34 03 13: HEM16 3 1
 pattern on u34 03 14: HEM16 3 3
 pattern on u34 03 15: HEM16 3 5
@@ -3164,7 +3164,7 @@ pattern on u34 03 19: HEM16 4 2
 pattern on u34 03 20: HEM16 4 3
 pattern on u34 03 21: HEM16 4 6
 pattern on u34 03 22: HEM16 4 8
-pattern on u34 03 23: HEM16 5 2
+pattern on u34 03 23: HEM16 5 1
 pattern on u34 04 04: HBM17 1 4
 pattern on u34 04 05: HBM17 2 4
 pattern on u34 04 06: HBM17 3 4
@@ -3212,7 +3212,7 @@ pattern on u34 06 07: HEM17 2 2
 pattern on u34 06 08: HEM17 2 3
 pattern on u34 06 09: HEM17 2 6
 pattern on u34 06 10: HEM17 2 8
-pattern on u34 06 11: HEM17 5 1
+pattern on u34 06 11: HEM17 5 2
 pattern on u34 06 13: HEM17 3 1
 pattern on u34 06 14: HEM17 3 3
 pattern on u34 06 15: HEM17 3 5
@@ -3223,7 +3223,7 @@ pattern on u34 06 19: HEM17 4 2
 pattern on u34 06 20: HEM17 4 3
 pattern on u34 06 21: HEM17 4 6
 pattern on u34 06 22: HEM17 4 8
-pattern on u34 06 23: HEM17 5 2
+pattern on u34 06 23: HEM17 5 1
 pattern on u34 07 04: HBP16 1 4
 pattern on u34 07 05: HBP16 2 4
 pattern on u34 07 06: HBP16 3 4
@@ -3271,7 +3271,7 @@ pattern on u34 09 07: HEP16 2 2
 pattern on u34 09 08: HEP16 2 3
 pattern on u34 09 09: HEP16 2 6
 pattern on u34 09 10: HEP16 2 8
-pattern on u34 09 11: HEP16 5 1
+pattern on u34 09 11: HEP16 5 2
 pattern on u34 09 13: HEP16 3 1
 pattern on u34 09 14: HEP16 3 3
 pattern on u34 09 15: HEP16 3 5
@@ -3282,7 +3282,7 @@ pattern on u34 09 19: HEP16 4 2
 pattern on u34 09 20: HEP16 4 3
 pattern on u34 09 21: HEP16 4 6
 pattern on u34 09 22: HEP16 4 8
-pattern on u34 09 23: HEP16 5 2
+pattern on u34 09 23: HEP16 5 1
 pattern on u34 10 04: HBP17 1 4
 pattern on u34 10 05: HBP17 2 4
 pattern on u34 10 06: HBP17 3 4
@@ -3330,7 +3330,7 @@ pattern on u34 12 07: HEP17 2 2
 pattern on u34 12 08: HEP17 2 3
 pattern on u34 12 09: HEP17 2 6
 pattern on u34 12 10: HEP17 2 8
-pattern on u34 12 11: HEP17 5 1
+pattern on u34 12 11: HEP17 5 2
 pattern on u34 12 13: HEP17 3 1
 pattern on u34 12 14: HEP17 3 3
 pattern on u34 12 15: HEP17 3 5
@@ -3341,7 +3341,7 @@ pattern on u34 12 19: HEP17 4 2
 pattern on u34 12 20: HEP17 4 3
 pattern on u34 12 21: HEP17 4 6
 pattern on u34 12 22: HEP17 4 8
-pattern on u34 12 23: HEP17 5 2
+pattern on u34 12 23: HEP17 5 1
 pattern on u35 01 04: HBM12 1 4
 pattern on u35 01 05: HBM12 2 4
 pattern on u35 01 06: HBM12 3 4
@@ -3389,7 +3389,7 @@ pattern on u35 03 07: HEM12 2 2
 pattern on u35 03 08: HEM12 2 3
 pattern on u35 03 09: HEM12 2 6
 pattern on u35 03 10: HEM12 2 8
-pattern on u35 03 11: HEM12 5 1
+pattern on u35 03 11: HEM12 5 2
 pattern on u35 03 13: HEM12 3 1
 pattern on u35 03 14: HEM12 3 3
 pattern on u35 03 15: HEM12 3 5
@@ -3400,7 +3400,7 @@ pattern on u35 03 19: HEM12 4 2
 pattern on u35 03 20: HEM12 4 3
 pattern on u35 03 21: HEM12 4 6
 pattern on u35 03 22: HEM12 4 8
-pattern on u35 03 23: HEM12 5 2
+pattern on u35 03 23: HEM12 5 1
 pattern on u35 04 04: HBM13 1 4
 pattern on u35 04 05: HBM13 2 4
 pattern on u35 04 06: HBM13 3 4
@@ -3448,7 +3448,7 @@ pattern on u35 06 07: HEM13 2 2
 pattern on u35 06 08: HEM13 2 3
 pattern on u35 06 09: HEM13 2 6
 pattern on u35 06 10: HEM13 2 8
-pattern on u35 06 11: HEM13 5 1
+pattern on u35 06 11: HEM13 5 2
 pattern on u35 06 13: HEM13 3 1
 pattern on u35 06 14: HEM13 3 3
 pattern on u35 06 15: HEM13 3 5
@@ -3459,7 +3459,7 @@ pattern on u35 06 19: HEM13 4 2
 pattern on u35 06 20: HEM13 4 3
 pattern on u35 06 21: HEM13 4 6
 pattern on u35 06 22: HEM13 4 8
-pattern on u35 06 23: HEM13 5 2
+pattern on u35 06 23: HEM13 5 1
 pattern on u35 07 04: HBP12 1 4
 pattern on u35 07 05: HBP12 2 4
 pattern on u35 07 06: HBP12 3 4
@@ -3507,7 +3507,7 @@ pattern on u35 09 07: HEP12 2 2
 pattern on u35 09 08: HEP12 2 3
 pattern on u35 09 09: HEP12 2 6
 pattern on u35 09 10: HEP12 2 8
-pattern on u35 09 11: HEP12 5 1
+pattern on u35 09 11: HEP12 5 2
 pattern on u35 09 13: HEP12 3 1
 pattern on u35 09 14: HEP12 3 3
 pattern on u35 09 15: HEP12 3 5
@@ -3518,7 +3518,7 @@ pattern on u35 09 19: HEP12 4 2
 pattern on u35 09 20: HEP12 4 3
 pattern on u35 09 21: HEP12 4 6
 pattern on u35 09 22: HEP12 4 8
-pattern on u35 09 23: HEP12 5 2
+pattern on u35 09 23: HEP12 5 1
 pattern on u35 10 04: HBP13 1 4
 pattern on u35 10 05: HBP13 2 4
 pattern on u35 10 06: HBP13 3 4
@@ -3566,7 +3566,7 @@ pattern on u35 12 07: HEP13 2 2
 pattern on u35 12 08: HEP13 2 3
 pattern on u35 12 09: HEP13 2 6
 pattern on u35 12 10: HEP13 2 8
-pattern on u35 12 11: HEP13 5 1
+pattern on u35 12 11: HEP13 5 2
 pattern on u35 12 13: HEP13 3 1
 pattern on u35 12 14: HEP13 3 3
 pattern on u35 12 15: HEP13 3 5
@@ -3577,7 +3577,7 @@ pattern on u35 12 19: HEP13 4 2
 pattern on u35 12 20: HEP13 4 3
 pattern on u35 12 21: HEP13 4 6
 pattern on u35 12 22: HEP13 4 8
-pattern on u35 12 23: HEP13 5 2
+pattern on u35 12 23: HEP13 5 1
 pattern on u37 01 04: HBM14 1 4
 pattern on u37 01 05: HBM14 2 4
 pattern on u37 01 06: HBM14 3 4
@@ -3625,7 +3625,7 @@ pattern on u37 03 07: HEM14 2 2
 pattern on u37 03 08: HEM14 2 3
 pattern on u37 03 09: HEM14 2 6
 pattern on u37 03 10: HEM14 2 8
-pattern on u37 03 11: HEM14 5 1
+pattern on u37 03 11: HEM14 5 2
 pattern on u37 03 13: HEM14 3 1
 pattern on u37 03 14: HEM14 3 3
 pattern on u37 03 15: HEM14 3 5
@@ -3636,7 +3636,7 @@ pattern on u37 03 19: HEM14 4 2
 pattern on u37 03 20: HEM14 4 3
 pattern on u37 03 21: HEM14 4 6
 pattern on u37 03 22: HEM14 4 8
-pattern on u37 03 23: HEM14 5 2
+pattern on u37 03 23: HEM14 5 1
 pattern on u37 04 04: HBM15 1 4
 pattern on u37 04 05: HBM15 2 4
 pattern on u37 04 06: HBM15 3 4
@@ -3684,7 +3684,7 @@ pattern on u37 06 07: HEM15 2 2
 pattern on u37 06 08: HEM15 2 3
 pattern on u37 06 09: HEM15 2 6
 pattern on u37 06 10: HEM15 2 8
-pattern on u37 06 11: HEM15 5 1
+pattern on u37 06 11: HEM15 5 2
 pattern on u37 06 13: HEM15 3 1
 pattern on u37 06 14: HEM15 3 3
 pattern on u37 06 15: HEM15 3 5
@@ -3695,7 +3695,7 @@ pattern on u37 06 19: HEM15 4 2
 pattern on u37 06 20: HEM15 4 3
 pattern on u37 06 21: HEM15 4 6
 pattern on u37 06 22: HEM15 4 8
-pattern on u37 06 23: HEM15 5 2
+pattern on u37 06 23: HEM15 5 1
 pattern on u37 07 04: HBP14 1 4
 pattern on u37 07 05: HBP14 2 4
 pattern on u37 07 06: HBP14 3 4
@@ -3743,7 +3743,7 @@ pattern on u37 09 07: HEP14 2 2
 pattern on u37 09 08: HEP14 2 3
 pattern on u37 09 09: HEP14 2 6
 pattern on u37 09 10: HEP14 2 8
-pattern on u37 09 11: HEP14 5 1
+pattern on u37 09 11: HEP14 5 2
 pattern on u37 09 13: HEP14 3 1
 pattern on u37 09 14: HEP14 3 3
 pattern on u37 09 15: HEP14 3 5
@@ -3754,7 +3754,7 @@ pattern on u37 09 19: HEP14 4 2
 pattern on u37 09 20: HEP14 4 3
 pattern on u37 09 21: HEP14 4 6
 pattern on u37 09 22: HEP14 4 8
-pattern on u37 09 23: HEP14 5 2
+pattern on u37 09 23: HEP14 5 1
 pattern on u37 10 04: HBP15 1 4
 pattern on u37 10 05: HBP15 2 4
 pattern on u37 10 06: HBP15 3 4
@@ -3802,7 +3802,7 @@ pattern on u37 12 07: HEP15 2 2
 pattern on u37 12 08: HEP15 2 3
 pattern on u37 12 09: HEP15 2 6
 pattern on u37 12 10: HEP15 2 8
-pattern on u37 12 11: HEP15 5 1
+pattern on u37 12 11: HEP15 5 2
 pattern on u37 12 13: HEP15 3 1
 pattern on u37 12 14: HEP15 3 3
 pattern on u37 12 15: HEP15 3 5
@@ -3813,7 +3813,7 @@ pattern on u37 12 19: HEP15 4 2
 pattern on u37 12 20: HEP15 4 3
 pattern on u37 12 21: HEP15 4 6
 pattern on u37 12 22: HEP15 4 8
-pattern on u37 12 23: HEP15 5 2
+pattern on u37 12 23: HEP15 5 1
 pattern on u38 06 00: HFP01 1 0
 pattern on u38 06 01: HFP03 1 0
 pattern on u38 06 02: HFP05 1 0
