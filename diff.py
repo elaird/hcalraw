@@ -115,34 +115,35 @@ def printTable(rbxes={}, header="", zero="  ", onlyDet=None, excludeDet=None):
     print
 
 
-def report(extra=None, missing=None, different=None, same=None, nMissingMax=None, onlyDet=None, excludeDet=None):
-    assert nMissingMax is not None
+def report(extra=None, missing=None, different=None, same=None, options=None):
+    nMissingMin = options.nMissingMin
+    nMissingMax = options.nMissingMax
 
     printTable(fiberCount(same.values()),
                header="Fibers matching reference",
-               onlyDet=onlyDet,
-               excludeDet=excludeDet)
+               onlyDet=options.only,
+               excludeDet=options.exclude)
     nMissing = fiberCount(missing.values())
     printTable(nMissing,
                header="Fibers in reference, but either not acquired or having FE link errors",
-               onlyDet=onlyDet,
-               excludeDet=excludeDet)
+               onlyDet=options.only,
+               excludeDet=options.exclude)
 
-    header = "| RBXes with (1 <= n missing fibers <= %d) |" % nMissingMax
+    header = "| RBXes with (%d <= n missing fibers <= %d) |" % (nMissingMin, nMissingMax)
     print "-" * len(header)
     print header
     print "-" * len(header)
     print "DCC(CR) SP(HTR) FI: ref. RBX RM FI"
 
     count = 0
-    for iMissing in range(1, 1 + nMissingMax):
+    for iMissing in range(nMissingMin, 1 + nMissingMax):
         count += nMissing.values().count(iMissing)
     if not count:
         print "None"
 
     for be, ref in sorted(missing.iteritems()):
         rbx = ref[0]
-        if 1 <= nMissing[rbx] <= nMissingMax:
+        if nMissingMin <= nMissing[rbx] <= nMissingMax:
             print pretty(be=be, fe=ref)
 
     print
@@ -168,7 +169,7 @@ def report(extra=None, missing=None, different=None, same=None, nMissingMax=None
         print "None"
 
 
-def go(fileName="", nMissingMax=None, only=None, exclude=None):
+def go(fileName="", options=None):
     assert fileName
     with open(fileName) as f:
         ref, refMisc = mapping(f)
@@ -177,15 +178,22 @@ def go(fileName="", nMissingMax=None, only=None, exclude=None):
     cabled, misc = mapping(sys.stdin, skip=["Xrd", "TClassTable", "nologin"])
     print "".join(misc)
 
-    report(*diffs(ref, cabled), nMissingMax=nMissingMax, onlyDet=only, excludeDet=exclude)
+    report(*diffs(ref, cabled), options=options)
 
 
 def opts():
     parser = optparse.OptionParser(usage="usage: %prog [options] reference_file.txt")
-    parser.add_option("--nMissingMax",
+    parser.add_option("--n-missing-min",
+                      dest="nMissingMin",
+                      default="1",
+                      metavar="n",
+                      type="int",
+                      help="maximum number of missing fibers per RBX to print in detailed table (default is 1)")
+    parser.add_option("--n-missing-max",
                       dest="nMissingMax",
                       default="2",
                       metavar="n",
+                      type="int",
                       help="maximum number of missing fibers per RBX to print in detailed table (default is 2)")
     parser.add_option("--only",
                       dest="only",
@@ -205,4 +213,4 @@ def opts():
 
 if __name__ == "__main__":
     options, ref = opts()
-    go(ref, int(options.nMissingMax), options.only, options.exclude)
+    go(ref, options)
