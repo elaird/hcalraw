@@ -1692,7 +1692,7 @@ pattern on u24 06 07: HEM03 2 2
 pattern on u24 06 08: HEM03 2 3
 pattern on u24 06 09: HEM03 2 6
 pattern on u24 06 10: HEM03 2 8
-pattern on u21 06 11: HEM03 5 2
+pattern on u24 06 11: HEM03 5 2
 pattern on u24 06 13: HEM03 3 1
 pattern on u24 06 14: HEM03 3 3
 pattern on u24 06 15: HEM03 3 5
@@ -1703,7 +1703,7 @@ pattern on u24 06 19: HEM03 4 2
 pattern on u24 06 20: HEM03 4 3
 pattern on u24 06 21: HEM03 4 6
 pattern on u24 06 22: HEM03 4 8
-pattern on u21 06 23: HEM03 5 1
+pattern on u24 06 23: HEM03 5 1
 pattern on u24 07 04: HBP02 1 4
 pattern on u24 07 05: HBP02 2 4
 pattern on u24 07 06: HBP02 3 4
