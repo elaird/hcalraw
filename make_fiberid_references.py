@@ -1,274 +1,6 @@
 #!/usr/bin/env python2
 
-import os, sys
-from configuration.patterns import rbxes, lineStart
-
-#Generates .txt file in format same with oneRun.py from a list of RBXs
-
-def WordStrip(iStr="", index=""): #iStr: input string, index: the index-th word in the string that you're looking for
-    nWord = 0
-    i=0
-    while i < len(iStr):
-       while iStr[i] == " ": 
-        i+=1 #get to next word
-        if i==len(iStr): break
-       iStart = i
-       while iStr[i] != " " and i < len(iStr): 
-        i+=1
-        if i==len(iStr): break
-       nWord+=1
-       if i==len(iStr): i = len(iStr)-1 #remove '/n' a the end of line
-       if nWord == index: return iStr[iStart:i]
-    
-    return "#%s word not found in string: %s" %(index, iStr)
-
-
-def WordSpace(iStr="", nSpace=""): 
-    while len(iStr) < nSpace:   iStr = " " + iStr
-    if len(iStr) == nSpace: return iStr
-    else:   print "Error in fixing #char per word"
-    
-
-def DoubleSpace(iStr=""):
-    oStr = []
-    for i in range(0, len(iStr)):   oStr.append(iStr[i])
-    return "  ".join(oStr)
-
-def getKeyPosition(mapFileName = ""):
-    keyPosition = {}
-    keyPosition["RBXname"] = 8
-    keyPosition["rm"] = 10
-    keyPosition["rm_fib"] = 14
-    keyPosition["fi_ch"] = 15
-    
-    if "HBEF" in mapFileName:
-        keyPosition["htr_fib"] = 19
-        keyPosition["spigo"] = 21
-        keyPosition["fedid"] = 31
-        keyPosition["crate"] = 16
-        keyPosition["slot"] = 17
-
-    if "HO" in mapFileName:
-        keyPosition["htr_fib"] = 21
-        keyPosition["spigo"] = 23
-        keyPosition["fedid"] = 25
-    if "CALIB" in mapFileName:
-        keyPosition["RBXname"] = 7
-        keyPosition["rm"] = 9
-        keyPosition["rm_fib"] = 10
-        keyPosition["fi_ch"] = 11
-        keyPosition["htr_fib"] = 15
-        keyPosition["spigo"] = 17
-        keyPosition["fedid"] = 19
-        
-    return keyPosition
-        
-        
-
-def ReformMap(iMapfile = "", ofile = "", oFileOpenMode = "w"):
-
-    lines = open(iMapfile, "r").readlines() #opens & read the file
-    output = open(ofile, oFileOpenMode)  #opens & write the file
-
-    RBXnameRange = rbxes()
-
-    rmRange = ['1','2','3','4']
-    if "CALIB" in iMapfile: rmRange = ['4','5']
-    keyPosition = getKeyPosition(iMapfile)
-
-    for i in range(0, len(lines)):   #loop through Map file
-        if "## file created" in lines[i]: continue  #over pass un_needed lines
-        if "#   side    eta    phi   dphi" in lines[i]: continue
-        current_line = lines[i]
-    
-        RBXname = WordStrip(current_line, keyPosition["RBXname"])
-        rm = str(WordStrip(current_line, keyPosition["rm"]))
-        rm_fib = str(WordStrip(current_line, keyPosition["rm_fib"]))
-        fi_ch = str(WordStrip(current_line, keyPosition["fi_ch"]))
-        htr_fib = str(WordStrip(current_line, keyPosition["htr_fib"]))
-        if 'uHTR' in iMapfile:
-            fedid = 'u' + str(WordStrip(current_line, keyPosition["crate"]))
-            spigo = str(WordStrip(current_line, keyPosition["slot"]))
-
-        else:
-            fedid = str(WordStrip(current_line, keyPosition["fedid"]))
-            spigo = str(WordStrip(current_line, keyPosition["spigo"]))
-
-        spigo = WordSpace(spigo,2)
-        htr_fib = WordSpace(htr_fib,2)
-    
-        if RBXname in RBXnameRange:
-            if rm in rmRange and fi_ch == "0": #save only once per 3 channels
-                output.writelines("%s%3s %02d %02d: %s %1d %1d\n" % (lineStart, fedid, int(spigo), int(htr_fib), RBXname, int(rm), int(rm_fib)))
-
-    output.close()
-
-
-def phase0():
-    version = 'G'
-    dir = "/afs/cern.ch/cms/HCAL/document/Mapping/Hua/2015-mar-4/"
-
-    for gen, stems in [("vme", ["HCALmapHO", "HCALmapHBEF", "HCALmapCALIB"]),
-                       ("utca", ["HCALmapHBEF_uHTR"]),
-                       ]:
-        oFileName = "data/ref_%s_%s.txt" % (gen, version)
-        for i, stem in enumerate(stems):
-            if stem.endswith("uHTR"):
-                fileName = stem.replace("uHTR", "%s_uHTR.txt" % version)
-            else:
-                fileName = "%s_%s.txt" % (stem, version)
-
-            fileName = "%s/%s" % (dir, fileName)
-            print "Reading", fileName
-
-            if i:
-                ReformMap(iMapfile=fileName, ofile=oFileName, oFileOpenMode="a")
-            else:
-                ReformMap(iMapfile=fileName, ofile=oFileName)
-
-        # sort
-        sName = "%s_sorted" % oFileName
-        os.system("sort -g %s > %s" % (oFileName, sName))
-        os.system("mv %s %s" % (sName, oFileName))
-        print "sorted reference file saved: %s" % oFileName
-
-
-def ngReformMap(iMapfile="", ofile="", oFileOpenMode="w", rbx_whitelist=None, h_rbx="rbx", h_rmFi="rm_fi"):
-
-    valid_rbxes = rbx_whitelist if rbx_whitelist else rbxes()
-
-    output = open(ofile, oFileOpenMode)  #opens & write the file
-
-    lines = open(iMapfile, "r").readlines()
-    columns = lines[0].split()
-
-    # BE
-    iCrate = columns.index("crate")
-    iSlot = columns.index("uhtr")
-    iUf = columns.index("uhtr_fib")
-    iFc = columns.index("fib_ch")
-
-    # FE
-    iRbx = columns.index(h_rbx)
-    iRm = columns.index("rm")
-    iRf = columns.index(h_rmFi)
-
-    for iLine, line in enumerate(lines):
-        if not iLine or line[0] == "#":
-            continue
-
-        fields = line.split()
-        if fields[1] == "N/C":
-            print "hacking line %d" % (1 + iLine)
-            fields = fields[:3] + ["8"] + fields[3:]
-
-        if len(fields) != len(columns):
-            print "problem on line %d: %d fields vs. %d columns" % (1 + iLine, len(fields), len(columns))
-            print columns
-            print fields
-            for i in range(min(len(fields), len(columns))):
-                print i, columns[i], fields[i]
-            sys.exit()
-
-        # BE
-        crate = int(fields[iCrate])
-        slot = int(fields[iSlot])
-        uhtr_fib = int(fields[iUf])
-
-        # FE
-        rbx = fields[iRbx]
-        rm = int(fields[iRm])
-        rm_fib = int(fields[iRf])
-
-        if rbx in valid_rbxes:
-            if fields[iFc] == "0":
-                output.writelines("%su%2d %02d %02d: %s %1d %1d\n" % (lineStart, crate, slot, uhtr_fib, rbx, rm, rm_fib))
-
-    output.close()
-
-
-def ngHFMap(iMapfile="", ofile="", oFileOpenMode="w"):
-    valid_rbxes = rbxes()
-
-    output = open(ofile, oFileOpenMode)  #opens & write the file
-
-    lines = open(iMapfile, "r").readlines()
-    columns = lines[0].split()
-
-    # BE
-    iCrate = columns.index("Crate")
-    iSlot = columns.index("uHTR")
-    iUf = columns.index("uHTR_FI")
-    iFc = columns.index("FI_CH")
-
-    # FE
-    iRbx = columns.index("ngRBX")
-    iRm = columns.index("QIE10")
-    iTb = columns.index("QIETB")
-    iQf = columns.index("QIEFI")
-
-    for iLine, line in enumerate(lines):
-        if not iLine or line[0] == "#":
-            continue
-
-        fields = line.split()
-        if len(fields) != 1 + len(columns):
-            print "problem on line %d: %d fields vs. %d columns" % (1 + iLine, len(fields), len(columns))
-            print columns
-            print fields
-            for i in range(min(len(fields), len(columns))):
-                print i, columns[i], fields[i]
-            sys.exit()
-
-        # BE
-        crate = int(fields[iCrate])
-        slot = int(fields[iSlot])
-        uhtr_fib = int(fields[iUf])
-
-        # FE
-        rbx = fields[iRbx]
-        rm = int(fields[iRm])
-        rm_fib = int(fields[iQf]) - 4
-
-        if rbx in valid_rbxes:
-            if fields[iFc] == "0":
-                output.writelines("%su%2d %02d %02d: %s %1d %1d\n" % (lineStart, crate, slot, uhtr_fib, rbx, rm, rm_fib))
-
-    output.close()
-
-
-def plan1():
-    # fileName = "/afs/cern.ch/cms/HCAL/document/Mapping/HBHE/ngHBHE/ngHE/ngHEP17/HBHEP17_template.txt"
-    fileName = "data/HBHEP17_template.txt"
-    oFileName = "data/ref_plan1.txt"
-    ngReformMap(iMapfile=fileName, ofile=oFileName, oFileOpenMode="w", rbx_whitelist=["HBP17", "HEP17"], h_rbx="RBX", h_rmFi="rm_fib")
-
-    sName = "%s_sorted" % oFileName
-    os.system("sort -g %s > %s" % (oFileName, sName))
-    os.system("mv %s %s" % (sName, oFileName))
-    print "sorted reference file saved: %s" % oFileName
-
-
-def ngHF():
-    fileName = "ngHF2017LMap_20170125_pre04.tsv"
-    oFileName = "data/ref_ngHF.txt"
-    ngHFMap(iMapfile=fileName, ofile=oFileName, oFileOpenMode="w")
-
-    sName = "%s_sorted" % oFileName
-    os.system("sort -g %s > %s" % (oFileName, sName))
-    os.system("mv %s %s" % (sName, oFileName))
-    print "sorted reference file saved: %s" % oFileName
-
-
-def calib():
-    fileName = "HCALmapCALIB_H_v2.tsv"
-    oFileName = "data/ref_calib.txt"
-    ngReformMap(iMapfile=fileName, ofile=oFileName, oFileOpenMode="w")
-
-    sName = "%s_sorted" % oFileName
-    os.system("sort -g %s > %s" % (oFileName, sName))
-    os.system("mv %s %s" % (sName, oFileName))
-    print "sorted reference file saved: %s" % oFileName
+from configuration.patterns import lineStart
 
 
 def B904():
@@ -290,27 +22,67 @@ def B904():
                 print("%su%2d %02d %02d: %s %1d %1d" % (lineStart, crate, slot, uhtr_fib, rbx, rm, rm_fib))
 
 
-def ngHE():
-    for filename in ["HB2018LMap_20171128_ppcol-fix_K.txt", "ngHE2018LMap_20171130_K.txt"]:
+def loop(filenames=[], nExpected=None, iCrate=None, iUhtr=None, iUhtrFib=None, iRbx=None, iRm=None, iRmFib=None, vme=False):
+    out = []
+    for filename in filenames:
         f = open(filename)
         for line in f:
-            if line.startswith("#"):
+            if line.startswith("#") or not line:
                 continue
-            fields =line.split()
-            if len(fields) != 26:
-                print fields
+            fields = line.split()
+            if len(fields) != nExpected and nExpected is not None:
+                print len(fields), fields
                 continue
 
-            # HE column headers
-            Side, Eta, Phi, dPhi, Depth, Det, RBX, Wedge, BV, QIE11, QIECH, RM, RM_FI, FI_CH, ppCol, ppRow, ppCpl, ppLC, dodec, Crate, uHTR, uHTR_FI, FEDid, QIE11id, TP_FI, TP_CH = fields
-            print("%su%2d %02d %02d: %s %1d %1d" % (lineStart, int(Crate), int(uHTR), int(uHTR_FI), RBX, int(RM), int(RM_FI)))
+            if vme:
+                be = "%3s %02d %02d" % (int(fields[iCrate]), int(fields[iUhtr]), int(fields[iUhtrFib]))  # fedId spigot fiber
+            else:
+                be = "u%2d %02d %02d" % (int(fields[iCrate]), int(fields[iUhtr]), int(fields[iUhtrFib]))
+
+            fe = "%s %1d %1d" % (fields[iRbx], int(fields[iRm]), int(fields[iRmFib]))
+            if "HF" in filename:
+                fe = "%s %1d %1d" % (fields[iRbx], int(fields[iRm]), int(fields[iRmFib]) - 4)
+            out.append("%s%s: %s" % (lineStart, be, fe))
         f.close()
+    return out
+
+
+def HBHE():
+    return loop(["2018HCALLMap_HB_K_20180131.txt", "2018HCALLMap_ngHE_K_20180214.txt"], nExpected=26,
+                iCrate=19, iUhtr=20, iUhtrFib=21, iRbx=6, iRm=11, iRmFib=12)
+
+
+def HBHEcalib():
+    return loop(["2018HCALLMap_HBCalib_K_20180214.txt", "2018HCALLMap_ngHECalib_K_20180216.txt"], nExpected=29,
+                iCrate=24, iUhtr=25, iUhtrFib=26, iRbx=6, iRm=10, iRmFib=11)
+
+
+def HF():
+    return loop(["2018HCALLMap_ngHF_K_20180131.txt"], nExpected=37,
+                iCrate=27, iUhtr=28, iUhtrFib=30, iRbx=6, iRm=19, iRmFib=22)
+
+
+def HFcalib():
+    return loop(["2018HCALLMap_ngHFCalib_K_20180201.txt"], nExpected=18,
+                iCrate=13, iUhtr=14, iUhtrFib=15, iRbx=6, iRm=8, iRmFib=10)
+
+
+def HO():
+    return loop(["2018HCALLMap_HO_K_20180131.txt"], nExpected=25, vme=True,
+                iCrate=-2, iUhtr=-4, iUhtrFib=19, iRbx=6, iRm=12, iRmFib=13)
+
+
+def HOcalib():
+    return loop(["HO_CU_Lmap_2018_K.txt"], vme=True, # nExpected=40,
+                iCrate=-15, iUhtr=-7, iUhtrFib=-6, iRbx=7, iRm=11, iRmFib=12)  # use negatives to avoid ragged pp assignment
+
+
+def USC():
+    l = HBHE() + HBHEcalib() + HF() + HFcalib() + HO() + HOcalib()
+    for line in sorted(set(l)):
+        print(line)
 
 
 if __name__ == "__main__":
-    # phase0()
-    # plan1()
-    # ngHF()
-    # calib()
     # B904()
-    ngHE()
+    USC()
