@@ -97,7 +97,7 @@ def string2(code=None):
     if ng_looks_broken(code):
         return "0x%022x" % code
     else:
-        return "%s%s%02d %2d %d" % (subdet, side, number, slot, link_num + 3 * (1 - top))
+        return "%s%s%02d %2d %d" % (subdet, side, number, slot, 7 + link_num - 3 * top)
 
 
 def string01(code=None):
