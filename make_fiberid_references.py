@@ -40,8 +40,6 @@ def loop(filenames=[], nExpected=None, iCrate=None, iUhtr=None, iUhtrFib=None, i
                 be = "u%2d %02d %02d" % (int(fields[iCrate]), int(fields[iUhtr]), int(fields[iUhtrFib]))
 
             fe = "%s %1d %1d" % (fields[iRbx], int(fields[iRm]), int(fields[iRmFib]))
-            if "HF" in filename:
-                fe = "%s %1d %1d" % (fields[iRbx], int(fields[iRm]), int(fields[iRmFib]) - 4)
             out.append("%s%s: %s" % (lineStart, be, fe))
         f.close()
     return out
