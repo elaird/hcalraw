@@ -30,6 +30,9 @@ def loop(filenames=[], nExpected=None, iCrate=None, iUhtr=None, iUhtrFib=None, i
             if line.startswith("#") or not line:
                 continue
             fields = line.split()
+            if fields[0] == "side":
+                continue
+
             if len(fields) != nExpected and nExpected is not None:
                 print len(fields), fields
                 continue
@@ -70,9 +73,14 @@ def HO():
                 iCrate=-2, iUhtr=-4, iUhtrFib=19, iRbx=6, iRm=12, iRmFib=13)
 
 
-def HOcalib():
+def HOcalib_v0():
     return loop(["HO_CU_Lmap_2018_K.txt"], vme=True, # nExpected=40,
                 iCrate=-15, iUhtr=-7, iUhtrFib=-6, iRbx=7, iRm=11, iRmFib=12)  # use negatives to avoid ragged pp assignment
+
+
+def HOcalib():
+    return loop(["HO_CU_Lmap_2018_K_nospace.txt"], vme=True, nExpected=38,
+                iCrate=23, iUhtr=31, iUhtrFib=32, iRbx=7, iRm=11, iRmFib=12)
 
 
 def USC():
