@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 
+import collections, sys
 from configuration.patterns import lineStart
 
 
@@ -48,6 +49,17 @@ def loop(filenames=[], nExpected=None, iCrate=None, iUhtr=None, iUhtrFib=None, i
     return out
 
 
+def check_for_duplicates(l):
+    fes = collections.defaultdict(list)
+    for x in sorted(l):
+        be, fe = x.replace(lineStart, "").split(":")
+        fes[be].append(fe)
+
+    for be, lst in sorted(fes.iteritems()):
+        if len(lst) != 1:
+            sys.exit("found duplicates: %s %s" % (be, str(lst)))
+
+
 def HBHE():
     return loop(["2018HCALLMap_HB_K_20180131.txt", "2018HCALLMap_ngHE_K_20180214.txt"], nExpected=26,
                 iCrate=19, iUhtr=20, iUhtrFib=21, iRbx=6, iRm=11, iRmFib=12)
@@ -74,13 +86,15 @@ def HO():
 
 
 def HOcalib():
-    return loop(["HO_CU_Lmap_2018_K.txt"], vme=True, nExpected=39,
+    return loop(["HO_CU_Lmap_2018_K.txt"], nExpected=39, vme=True,
                 iCrate=-15, iUhtr=-7, iUhtrFib=-6, iRbx=7, iRm=11, iRmFib=12)
 
 
 def USC():
     l = HBHE() + HBHEcalib() + HF() + HFcalib() + HO() + HOcalib()
-    for line in sorted(set(l)):
+    l = set(l)
+    check_for_duplicates(l)
+    for line in sorted(l):
         print(line)
 
 
