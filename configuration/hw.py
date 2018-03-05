@@ -25,11 +25,13 @@ def transformed_crate_slot(crate, slot):
     if crate < 20:
         # VME --> uTCA
         crate2 = crate + 20
-
         if 2 <= slot <= 7:
             slot2 = slot - 1
         elif 13 <= slot <= 18:
             slot2 = slot - 6
+        if crate == 7 and slot == 16:  # HO/2018
+            crate2 = 38
+            slot2 = 1
     else:
         # uTCA --> VME
         crate2 = crate - 20
@@ -37,6 +39,10 @@ def transformed_crate_slot(crate, slot):
             slot2 = 1 + slot
         elif 7 <= slot <= 12:
             slot2 = 6 + slot
+        if crate == 38 and slot == 1:  # HO/2018
+            crate2 = 7
+            slot2 = 16
+
     return (crate2, slot2)
 
 
