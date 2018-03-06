@@ -114,30 +114,6 @@ def string01(code=None):
         return "%s%s%02d %2d %d" % (subdet, side, rbx_number, rm, 2*qie_card + link_num - 1)
 
 
-def rbxes():
-    hbe  = range(1, 19)
-    hf   = range(1,  9)
-    ho   = range(1, 13)
-    ho12 = range(2, 14, 2)
-
-    out = []
-    for subdet, lst in [("HBM",  hbe),
-                        ("HBP",  hbe),
-                        ("HEM",  hbe),
-                        ("HEP",  hbe),
-                        ("HFM",  hf ),
-                        ("HFP",  hf ),
-                        ("HO2M", ho12),
-                        ("HO1M", ho12),
-                        ("HO0",  ho  ),
-                        ("HO1P", ho12),
-                        ("HO2P", ho12),
-                        ]:
-        for i in lst:
-            out.append("%s%02d" % (subdet, i))
-    return out
-
-
 def expectedCrate(fedId):
     # http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/Crates/VME_interfaces_newPCs.htm
     return {350:  4,

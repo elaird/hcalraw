@@ -6,6 +6,16 @@ import optparse
 import sys
 
 
+def rbx_list(reference):
+    dets = []
+    boxes = []
+    for rbx, rm, fi in reference.values():
+        dets.append(rbx[:-2])
+        boxes.append(rbx[-2:])
+
+    return sorted(set(dets)), sorted(set(boxes))
+
+
 def mapping(file=None, skip=[]):
     out = {}
     misc = []
@@ -83,16 +93,14 @@ def fiberCount(feCoords=[]):
     return out
 
 
-def printTable(rbxes={}, header="", zero="  ", onlyDet=None, excludeDet=None):
+def printTable(rbxes={}, header="", zero="  ", reference=None, onlyDet=None, excludeDet=None):
     if header:
         header = "| %s |" % header
         print "-"*len(header)
         print header
         print "-"*len(header)
 
-    rbxList = conf.rbxes()
-    boxes = sorted(list(set([rbx[-2:] for rbx in rbxList])))
-    dets  = sorted(list(set([rbx[:-2] for rbx in rbxList])))
+    dets, boxes = rbx_list(reference)
 
     nSpaces = 5
     header = " ".join(["RBX".ljust(nSpaces)] + boxes)
@@ -115,17 +123,19 @@ def printTable(rbxes={}, header="", zero="  ", onlyDet=None, excludeDet=None):
     print
 
 
-def report(extra=None, missing=None, different=None, same=None, options=None):
+def report(extra=None, missing=None, different=None, same=None, reference=None, options=None):
     nMissingMin = options.nMissingMin
     nMissingMax = options.nMissingMax
 
     printTable(fiberCount(same.values()),
                header="Fibers matching reference",
+               reference=reference,
                onlyDet=options.only,
                excludeDet=options.exclude)
     nMissing = fiberCount(missing.values())
     printTable(nMissing,
                header="Fibers in reference, but either not acquired or having FE link errors",
+               reference=reference,
                onlyDet=options.only,
                excludeDet=options.exclude)
 
@@ -178,7 +188,7 @@ def go(fileName="", options=None):
     cabled, misc = mapping(sys.stdin, skip=["Xrd", "TClassTable", "nologin"])
     print "".join(misc)
 
-    report(*diffs(ref, cabled), options=options)
+    report(*diffs(ref, cabled), reference=ref, options=options)
 
 
 def opts():
