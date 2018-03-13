@@ -29,9 +29,9 @@ def global_eos(run, hhmmMin=None, quiet=False):
 
     for d in sw.dirs_global(run):
         shortName = d[d.find(".ch/") + 4:]
-        stat = utils.commandOutputFull("eos stat %s" % shortName)
-        if stat["returncode"]:
-            continue
+        # stat = utils.commandOutputFull("eos stat %s" % shortName)
+        # if stat["returncode"]:
+        #     continue
 
         ll = utils.commandOutputFull("eos ls -l %s" % d)
         listings = filter(lambda x: x, ll["stdout"].split("\n"))

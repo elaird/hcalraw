@@ -41,14 +41,15 @@ def files_eos_local(run):
 
 def dirs_global(run):
     #root://cms-xrd-global.cern.ch/
-    prefix = "root://eoscms.cern.ch/"
+    # prefix = "root://eoscms.cern.ch/"
+    prefix = ""
     midfix = "000/%03d/%03d" % (run/1000, run % 1000)
     minidaq = "%s/eos/cms/store/t0streamer/Minidaq/A/%s/" % (prefix, midfix)
 
     out = []
-    for era in ["Run2017B", "Run2017A", "Commissioning2017"]:
-        for subdir in ["HcalNZS", "MinimumBias"]:
-            out.append("%s/eos/cms/tier0/store/data/%s/%s/RAW/v1/%s/00000/" % (prefix, era, subdir, midfix))
+    for era in ["Commissioning2018"]:
+        for subdir in ["HcalNZS/RAW/v1", "MinimumBias/RAW/v1", "TestEnablesEcalHcal/RAW/Express-v1"]:
+            out.append("%s/eos/cms/store/data/%s/%s/%s/00000/" % (prefix, era, subdir, midfix))
     return out
 
 
