@@ -257,6 +257,11 @@ def htrSummary(blocks=[], book=None, fedId=None,
         if fewerHistos:
             continue
 
+        if block["IsIO"]:
+            nBins = 16
+            book.fill(block["EventType"], "uMNioEventType_%d" % fedId, nBins, -0.5, nBins - 0.5,
+                      title="FED %d;event type;uMNios / bin" % fedId)
+
         for otherData in block["otherData"].values():
             flavor(book, otherData, fedId)
 
