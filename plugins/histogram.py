@@ -1,5 +1,6 @@
 import collections
 from configuration import hw, sw
+from plugins.eventtype import SetupType
 import printer
 
 
@@ -261,6 +262,10 @@ def htrSummary(blocks=[], book=None, fedId=None,
             nBins = 16
             book.fill(block["EventType"], "uMNioEventType_%d" % fedId, nBins, -0.5, nBins - 0.5,
                       title="FED %d;event type;uMNios / bin" % fedId)
+            if block["EventType"] == 14:  # laser
+                nBins = len(SetupType)
+                book.fill(block["UserWords"][16], "uMNioUserValue16_%d" % fedId, nBins, -1.5, nBins - 1.5,
+                          title="FED %d;user value (key=16);uMNios / bin" % fedId, xAxisLabels=SetupType)
 
         for otherData in block["otherData"].values():
             flavor(book, otherData, fedId)
@@ -520,9 +525,12 @@ def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax, errf, eq):
 
         fib = 0
         if block["Slot"] == 12:
-            fib += 12 + channelData["Fiber"] - 1
-            if 13 <= channelData["Fiber"]:
-                fib -= 2
+            if channelData["Fiber"] % 12 == 11:  # CU fibers
+                fib = 32 + channelData["Fiber"] / 12
+            else:
+                fib += 12 + channelData["Fiber"] - 1
+                if 13 <= channelData["Fiber"]:
+                    fib -= 2
         elif block["Slot"] == 11 and 12 <= channelData["Fiber"]:
             fib += channelData["Fiber"] - 12
         else:
@@ -536,11 +544,11 @@ def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax, errf, eq):
                   "ADC_vs_TS_HEP17_%s_fib%d" % (errf, fib),
                   (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
                   title="HEP17 Fib %d;time slice;ADC;Counts / bin" % fib)
-
         book.fill(adc,
                   "HEP17_ADC_TS%d" % i,
                   nAdcMax, -0.5, nAdcMax - 0.5,
                   title="HEP17 TS%d;ADC;Counts / bin" % i)
+
         # nEvN = 20
         # title2 = "%s_vs_EvN_%d" % (title, fedId)
         # book.fill((block["EvN"], adc), title2,
