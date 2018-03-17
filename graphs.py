@@ -1126,7 +1126,8 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
         kargs34.update(kargs)
 
         if "ts" in pages:
-            # pageThree(stem="uMNioEventType_%d", **kargs)
+            # pageThree(stem="uMNioEventType_%d", logY=True, **kargs)
+            # pageThree(stem="uMNioUserValue16_%d", logY=True, **kargs)
             pageThree(stem="ADC_vs_TS_ErrF0_%d", gridX=True, **kargs)
             pageThree(stem="TDCHitTime_%d", gridX=True, **kargs)
             # pageThree(stem="TDC_vs_TS_ErrF0_%d", gridX=True, **kargs)
@@ -1134,7 +1135,7 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
 
             feds1 = kargs["feds1"]  # stash default
 
-            kargs["feds1"] = range(32) # iterate over fibers
+            kargs["feds1"] = range(34) # iterate over fibers
             pageThree(stem="ADC_vs_TS_HEP17_ErrF0_fib%d", gridX=True, **kargs)
 
             kargs["feds1"] = range(10) # iterate over TS
