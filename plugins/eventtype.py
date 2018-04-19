@@ -5,15 +5,25 @@
 SetupType = ["unknown", "null", "pedestal", "hfraddam", "hbhehpd", "ho", "hf", "zdc", "hepmega", "hemmega", "hbpmega", "hbmmega", "", "crf", "calib", "safe", "hfrad*"]
 
 
-def eventtype(raw1={}, fedId=1135, keepType=15, userKey=16, userValue=None, **_):
-    raw = raw1.get(fedId)
+def eventtype(raw1={}, keepType=15, userKey=16, userValue=None, **_):
+    if userValue is not None:
+        raw = raw1.get(1135)
+    else:
+        for fedId, raw in raw1.iteritems():
+            if fedId is None:
+                continue
+            if raw:
+                break
+
     if not raw:
         return True
 
     for iBlock, block in sorted(raw["htrBlocks"].iteritems()):
-        if block["IsIO"] and block["EventType"] == keepType:
+        if block["EventType"] == keepType:
             if userValue is not None and block["UserWords"].get(userKey) != userValue:
                 continue
             return
+
+        return True
 
     return True
