@@ -363,7 +363,10 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
             fields += ["  " + capIdString(data["CapId"], data["SOI"], nTsMax),
                        capIdString(data.get("OK", []), data["SOI"], nTsMax)]
         else:
-            fields.append(" %1d  " % data["CapId"][0])
+            if data["CapId"]:
+                fields.append(" %1d  " % data["CapId"][0])
+            else:
+                fields.append("    ")
 
         fields += [qieString(data["QIE"], data["SOI"], red=red, nMax=nTsMax),
                    qieString(data.get("TDC", []), data["SOI"], nMax=nTsMax)]
