@@ -705,8 +705,8 @@ def histo(d, jWord32, word32):
         d["Crate"]   = (word32 >> 16) & 0xff
         d["Slot"]    = (word32 >> 12) & 0xf
         d["Fiber"]   = (word32 >>  7) & 0x1f
-        d["Chan"]    = (word32 >>  2) & 0x1f
-        d["Cap"]     = (word32 >>  0) & 0x3
+        d["FibCh"]   = (word32 >>  2) & 0x1f
+        d["CapId"]   = (word32 >>  0) & 0x3
         d["Hist"]    = []
     else:
         d["Hist"].append(word32)
