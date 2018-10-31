@@ -28,6 +28,9 @@ def loop_over_feds(raw, book, adcTag="", **other):
             printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
             continue
 
+        if sw.histo_fed(fedId):
+            continue
+
         nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book, nTsMax=nTsMax, **other)
         adcs = adcs.union(adcs1)
         if nBadHtrs:
@@ -67,7 +70,7 @@ def singleFedPlots(fedId=None, d={}, book={}, nTsMax=None, **other):
     fedBcn = h.get("BcN")
 
     if fedEvn is None:
-        printer.error("FED %d lacks EvN.  Keys: %s" % str(h.keys()))
+        printer.error("%s lacks EvN.  Keys: %s" % (msg, str(h.keys())))
         msg = ""
     else:
         msg = msg_coords(fedId, fedEvn, fedOrn, fedBcn)
