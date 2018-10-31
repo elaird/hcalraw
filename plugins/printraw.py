@@ -582,10 +582,15 @@ def oneHistogram(iBlock, p, dump):
         printer.green("  ".join(fields))
 
         nPer = 10
+        iLast = len(p["Hist"]) - 1
         for iBin, n in enumerate(p["Hist"]):
             if (iBin % nPer) == 0:
-                line = "%02d-%02d:" % (iBin, iBin + nPer - 1)
+                iBin1 = min(iLast, iBin + nPer - 1)
+                if iBin != iBin1:
+                    line = "%02d-%02d:" % (iBin, iBin1)
+                else:
+                    line = "%02d   :" %  iBin
 
             line += " %08x" % n
-            if (iBin % nPer) == (nPer - 1) or iBin == len(p["Hist"]) - 1:
+            if (iBin % nPer) == (nPer - 1) or iBin == iLast:
                 print line
