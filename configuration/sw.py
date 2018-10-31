@@ -74,7 +74,8 @@ def set_default_feds1(options):
 
 
 def fedMap():
-    d = {"7xy": range(700, 732),
+    d = {"0xy": range(60, 73),
+         "7xy": range(700, 732),
          "HO": range(724, 732),
          "HBHE": range(1100, 1118),
          "HF": range(1118, 1124),
@@ -106,6 +107,10 @@ def fedList(s=""):
             out += y
 
     return out
+
+
+def histo_fed(fedId):
+    return 60 <= fedId <= 73
 
 
 def format(treeName=""):

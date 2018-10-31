@@ -1,7 +1,7 @@
 import decode
 import printer
 import struct
-
+from configuration.sw import histo_fed
 
 def unpack(raw1={}, raw2={}, chain=None, chainI=None, outer={}, inner={}, **_):
     raw1.update(collected(tree=chain, specs=outer))
@@ -16,9 +16,13 @@ def collected(tree=None, specs={}):
         kargs[item] = specs[item]
 
     for fedId, wargs in sorted(specs["wargs"].iteritems()):
-        raw[fedId] = unpacked(fedData=specs["wfunc"](**wargs),
-                              warn=specs["warnQuality"],
-                              **kargs)
+        if histo_fed(fedId):
+            raw[fedId] = unpacked_histo(fedData=specs["wfunc"](**wargs), fedId=fedId,
+                                        nBytesPer=specs["nBytesPer"], dump=specs["dump"])
+        else:
+            raw[fedId] = unpacked(fedData=specs["wfunc"](**wargs),
+                                  warn=specs["warnQuality"],
+                                  **kargs)
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
     for key in ["label", "dump", "crateslots", "firstNTs", "perTs"]:
@@ -140,3 +144,56 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
             "nBytesSW": 8*nWord64,
             "nWord16Skipped": nWord16Skipped,
             }
+
+
+# for format documentation, see decode.py
+def unpacked_histo(fedData=None, fedId=None, nBytesPer=None, dump=-99):
+    assert fedData
+    assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
+
+    header = {}
+    trailer = {}
+    histograms = {}
+    iPayload0 = 4
+
+    nWord64 = fedData.size() * nBytesPer / 8
+    for iWord64 in range(nWord64):
+        word64 = w64(fedData, iWord64, nBytesPer)
+
+        if 12 <= dump:
+            if not iWord64:
+                print "#iw64 w64"
+            print "%5d" % iWord64, "%016x" % word64
+
+        if iWord64 < 2:
+            decode.header(header, iWord64, word64)
+
+        if iWord64 < iPayload0:
+            for i in range(2):
+                word32 = (word64 >> (32*i)) & 0xffffffff
+                iWord32 = 2 * (iWord64 - 2) + i
+                decode.header_histo(header, iWord32, word32)
+            continue
+
+        if iWord64 == nWord64 - 1:
+            decode.trailer(trailer, iWord64, word64)
+            continue
+
+        nWords32PerChannel = 2 + header["nBins"]
+        for i in range(2):
+            word32 = (word64 >> (32*i)) & 0xffffffff
+            iWord32 = 2 * (iWord64 - iPayload0) + i
+            jWord32 = iWord32 % nWords32PerChannel
+            key = iWord32 / nWords32PerChannel
+            if key not in histograms:
+                histograms[key] = {}
+            d = histograms[key]
+            decode.histo(d, jWord32, word32)
+
+    return {"header": header,
+            "trailer": trailer,
+            "histograms": histograms,
+            "other": {},
+            "nBytesSW": 8 * nWord64,
+            "nWord16Skipped": 0,
+           }
