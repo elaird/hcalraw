@@ -462,7 +462,8 @@ def histogramChannelData(book, block, channelData, fedId,
     elif coords in other.get("matched", []):
         nAdcMatch = 1
 
-    caps[channelData["CapId"][0]] += 1
+    if channelData["CapId"]:
+        caps[channelData["CapId"][0]] += 1
 
     try:
         tsSoi = channelData["SOI"].index(1)
