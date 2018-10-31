@@ -1,4 +1,5 @@
 # uHTR         https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12306
+# uHTR histo   https://gitlab.cern.ch/cmshcos/hcal/blob/integration/hcalUHTR/src/common/uHTRSource.cc
 # uMNio        https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12925
 # HTR          https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=3327&filename=HTR_MainFPGA.pdf
 # TTP          https://cmsdoc.cern.ch/cms/HCAL/document/Aux/HcalTechTriggerProcessor/dataformat.html
@@ -682,3 +683,30 @@ def storeChannelData(dct={}, iWord16=None, word16=None):
             dct["SOI"].append(0)
     elif 7 <= flavor:
         dct["words"].append(word16)
+
+
+def header_histo(d, iWord32, word32):
+    if iWord32 == 0:
+        d["L1A"]     =  word32        & 0xffffff
+        d["version"] = (word32 >> 24) & 0xff
+    if iWord32 == 1:
+        d["OrN"]     =  word32
+    if iWord32 == 2:
+        d["OrN1"]    =  word32
+    if iWord32 == 3:
+        d["perCap"]  =  word32        & 0x1
+        d["nBins"]   = (word32 >>  1) & 0x7fff
+        d["nHist"]   = (word32 >> 16) & 0xffff
+
+
+def histo(d, jWord32, word32):
+    if not jWord32:
+        d["Status"]  = (word32 >> 24) & 0xff
+        d["Crate"]   = (word32 >> 16) & 0xff
+        d["Slot"]    = (word32 >> 12) & 0xf
+        d["Fiber"]   = (word32 >>  7) & 0x1f
+        d["Chan"]    = (word32 >>  2) & 0x1f
+        d["Cap"]     = (word32 >>  0) & 0x3
+        d["Hist"]    = []
+    else:
+        d["Hist"].append(word32)
