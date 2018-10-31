@@ -432,57 +432,94 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
     h = d["header"]
     t = d["trailer"]
     if 1 <= dump:
-        fields = [" FEDid",
-                  "  EvN",
-                  "       OrN",
-                  "    BcN",
-                  "minutes",
-                  "TTS",
-                  "nBytesHW(   SW)",
-                  "type",
-                  #"CRC16",
-                  "nSkip16",
-                  "Blk8",
-                  ]
+        if "htrBlocks" in d:
+            fields = [" FEDid",
+                      "  EvN",
+                      "       OrN",
+                      "    BcN",
+                      "minutes",
+                      "TTS",
+                      "nBytesHW(   SW)",
+                      "type",
+                      #"CRC16",
+                      "nSkip16",
+                      "Blk8",
+                     ]
+        else:
+            fields = [" FEDid",
+                      "  EvN",
+                      "       OrN",
+                      "       OrN1",
+                      "  minutes",
+                      "TTS",
+                      "nBytesHW(   SW)",
+                      "   L1A  ",
+                      "ver",
+                      "perCap",
+                      "nBins",
+                      "nHist",
+                     ]
 
         if printHeaders:
             headers = "  ".join(fields)
             printer.blue("-" * len(headers))
             printer.blue(headers)
 
-        sList = [" %4d" % h["FEDid"],
-                 "0x%07x" % h["EvN"],
-                 "0x%08x" % h["OrN"],
-                 "%4d" % h["BcN"],
-                 "%7.3f" % hw.minutes(h["OrN"], h["BcN"]),
-                 (" %1x" % t["TTS"]) if "TTS" in t else "  - ",
-                 "    %5d(%5d)" % (t["nWord64"]*8 if "nWord64" in t else "  -1", d["nBytesSW"]),
-                 "  %1d " % h["Evt_ty"],
-                 #(" 0x%04x" % t["CRC16"]) if "CRC16" in t else "   - ",
-                 "%7d" % d["nWord16Skipped"],
-                 ]
-        if h["uFoV"]:
-            sList.append("  %2d" % t["Blk_no8"])
+        if "htrBlocks" in d:
+            sList = [" %4d" % h["FEDid"],
+                     "0x%07x" % h["EvN"],
+                     "0x%08x" % h["OrN"],
+                     "%4d" % h["BcN"],
+                     "%7.3f" % hw.minutes(h["OrN"], h["BcN"]),
+                     (" %1x" % t["TTS"]) if "TTS" in t else "  - ",
+                     "    %5d(%5d)" % (t["nWord64"]*8 if "nWord64" in t else "  -1", d["nBytesSW"]),
+                     "  %1d " % h["Evt_ty"],
+                     #(" 0x%04x" % t["CRC16"]) if "CRC16" in t else "   - ",
+                     "%7d" % d["nWord16Skipped"],
+                    ]
+            if h["uFoV"]:
+                sList.append("  %2d" % t["Blk_no8"])
+
+        else:
+            sList = [" %4d" % h["FEDid"],
+                     "0x%07x" % h["EvN"],
+                     "0x%08x" % h["OrN"],
+                     "0x%08x" % h["OrN1"],
+                     "%7.3f" % hw.minutes(h["OrN"], 0),
+                     (" %1x" % t["TTS"]) if "TTS" in t else "  - ",
+                     "    %5d(%5d)" % (t["nWord64"]*8 if "nWord64" in t else "  -1", d["nBytesSW"]),
+                     "0x%07x" % h["L1A"],
+                     "%1d" % h["version"],
+                     "   %1d" % h["perCap"],
+                     "   %3d" % h["nBins"],
+                     "   %3d" % h["nHist"],
+                    ]
 
         printer.blue("  ".join(sList))
-        if 2 <= dump and dump != 4:
+        if 2 <= dump and dump != 4 and "htrBlocks" in d:
             htrOverview(h)
 
     if dump <= 2:
         return
 
-    for iBlock, block in sorted(d["htrBlocks"].iteritems()):
-        if crateslots and (100*block["Crate"] + block["Slot"]) not in crateslots:
-            continue
-        oneHtr(iBlock=iBlock,
-               p=block,
-               dump=dump,
-               utca=h["utca"],
-               nonMatchedQie=nonMatchedQie,
-               nonMatchedTp=nonMatchedTp,
-               nTsMax=nTsMax,
-               perTs=perTs,
-        )
+    if "htrBlocks" in d:
+        for iBlock, block in sorted(d["htrBlocks"].iteritems()):
+            if crateslots and (100*block["Crate"] + block["Slot"]) not in crateslots:
+                continue
+            oneHtr(iBlock=iBlock,
+                   p=block,
+                   dump=dump,
+                   utca=h["utca"],
+                   nonMatchedQie=nonMatchedQie,
+                   nonMatchedTp=nonMatchedTp,
+                   nTsMax=nTsMax,
+                   perTs=perTs,
+                  )
+    else:
+        for iBlock, block in sorted(d["histograms"].iteritems()):
+            if crateslots and (100*block["Crate"] + block["Slot"]) not in crateslots:
+                continue
+            oneHistogram(iBlock, block, dump)
 
 
 def oneFedMol(d):
@@ -509,3 +546,46 @@ def oneFedBu(d):
     printer.blue("--wrapper" + ("-" * len(header)))
     printer.blue(header)
     printer.blue("0x%16x   %7d" % (d["magic"], d["nWord64"]))
+
+
+def oneHistogram(iBlock, p, dump):
+    columns = ["",
+               "Cr",
+               "Sl",
+               "Fi",
+               "Ch",
+               "Cap",
+               "Status",
+              ]
+
+    out = []
+    if (not iBlock) and 4 <= dump:
+        printer.green("  ".join(columns))
+
+    if 4 <= dump:
+        header = False
+        header |=      (dump == 4) and (p["Fiber"] in [2, 14]) and (p["FibCh"] == 1) and (p["CapId"] == 2)
+        header |= (5 <= dump <= 7)                             and (p["FibCh"] == 1) and (p["CapId"] == 2)
+        header |=      (dump == 8)                                                   and (p["CapId"] == 2)
+        header |=      (dump == 9)
+
+        fields = ["  %2d" % p["Crate"],
+                  "%2d" % p["Slot"],
+                  "%2d" % p["Fiber"],
+                  " %1d" % p["FibCh"],
+                  " %1d" % p["CapId"],
+                  " %3d" % p["Status"],
+                  ]
+        if not header:
+            return
+
+        printer.green("  ".join(fields))
+
+        nPer = 10
+        for iBin, n in enumerate(p["Hist"]):
+            if (iBin % nPer) == 0:
+                line = "%02d-%02d:" % (iBin, iBin + nPer - 1)
+
+            line += " %08x" % n
+            if (iBin % nPer) == (nPer - 1) or iBin == len(p["Hist"]) - 1:
+                print line
