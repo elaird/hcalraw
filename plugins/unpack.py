@@ -16,13 +16,9 @@ def collected(tree=None, specs={}):
         kargs[item] = specs[item]
 
     for fedId, wargs in sorted(specs["wargs"].iteritems()):
-        if histo_fed(fedId):
-            raw[fedId] = unpacked_histo(fedData=specs["wfunc"](**wargs), fedId=fedId,
-                                        nBytesPer=specs["nBytesPer"], dump=specs["dump"])
-        else:
-            raw[fedId] = unpacked(fedData=specs["wfunc"](**wargs),
-                                  warn=specs["warnQuality"],
-                                  **kargs)
+        raw[fedId] = unpacked(fedData=specs["wfunc"](**wargs),
+                              warn=specs["warnQuality"],
+                              **kargs)
 
     raw[None] = {"iEntry": tree.GetReadEntry()}
     for key in ["label", "dump", "crateslots", "firstNTs", "perTs"]:
@@ -94,6 +90,8 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
             if header.get("uFoV"):
                 nWord64Trailer = 2  # accommodate block trailer
             iWordTrailer0 = nWord64 - nToSkip - nWord64Trailer
+            if iWord64 == 1 and not header["OrN"]:
+                return unpacked_sw_fed(fedData, header, nBytesPer, dump)
         elif headerOnly:
             break
         elif lastNAmcs and iWord64 < header["iWordPayloadn"]:
@@ -146,8 +144,22 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
             }
 
 
+def unpacked_sw_fed(fedData, header, nBytesPer, dump):
+    fedId = header["FEDid"]
+    if histo_fed(fedId):
+        return unpacked_histo(fedData, fedId, nBytesPer, dump)
+    else:
+        printer.error("Unpacking of software FED %d is not implemented." % fedId)
+        nBytesSW = fedData.size() * nBytesPer
+        return {"header": header,
+                "trailer": {"nWord64": nBytesSW / 8},
+                "other": {},
+                "nBytesSW": nBytesSW,
+               }
+
+
 # for format documentation, see decode.py
-def unpacked_histo(fedData=None, fedId=None, nBytesPer=None, dump=-99):
+def unpacked_histo(fedData, fedId, nBytesPer, dump):
     assert fedData
     assert nBytesPer in [1, 4, 8], "ERROR: invalid nBytes per index (%s)." % str(nBytesPer)
 
