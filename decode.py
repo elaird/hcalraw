@@ -690,7 +690,7 @@ def header_histo(d, iWord32, word32):
         d["L1A"]     =  word32        & 0xffffff
         d["version"] = (word32 >> 24) & 0xff
     if iWord32 == 1:
-        d["OrN"]     =  word32
+        d["OrN0"]    =  word32
     if iWord32 == 2:
         d["OrN1"]    =  word32
     if iWord32 == 3:

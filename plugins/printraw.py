@@ -448,9 +448,8 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
         elif "histograms" in d:
             fields = [" FEDid",
                       "  EvN",
-                      "       OrN",
-                      "       OrN1",
-                      "  minutes",
+                      "     nOrbits",
+                      " minutes",
                       "TTS",
                       "nBytesHW(   SW)",
                       "   L1A  ",
@@ -489,9 +488,8 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
         elif "histograms" in d:
             sList = [" %4d" % h["FEDid"],
                      "0x%07x" % h["EvN"],
-                     "0x%08x" % h["OrN"],
-                     "0x%08x" % h["OrN1"],
-                     "%7.3f" % hw.minutes(h["OrN"], 0),
+                     "0x%08x" % (h["OrN1"] - h["OrN0"]),
+                     "%7.3f" % hw.minutes(h["OrN0"], 0),
                      (" %1x" % t["TTS"]) if "TTS" in t else "  - ",
                      "    %5d(%5d)" % (t["nWord64"]*8 if "nWord64" in t else "  -1", d["nBytesSW"]),
                      "0x%07x" % h["L1A"],
@@ -569,14 +567,15 @@ def oneHistogram(iBlock, p, dump):
                "Ch",
                "Cap",
                "Status",
+               "nEntries",
               ]
 
     out = []
-    if (not iBlock) and 4 <= dump:
+    if (not iBlock) and 3 <= dump:
         printer.green("  ".join(columns))
 
-    if 4 <= dump:
-        header = False
+    if 3 <= dump:
+        header  =       dump == 3
         header |=      (dump == 4) and (p["Fiber"] in [2, 14]) and (p["FibCh"] == 1) and (p["CapId"] == 2)
         header |= (5 <= dump <= 7)                             and (p["FibCh"] == 1) and (p["CapId"] == 2)
         header |=      (dump == 8)                                                   and (p["CapId"] == 2)
@@ -588,11 +587,14 @@ def oneHistogram(iBlock, p, dump):
                   " %1d" % p["FibCh"],
                   " %1d" % p["CapId"],
                   " %3d" % p["Status"],
+                  "   %08x" % sum(p["Hist"]),
                   ]
         if not header:
             return
 
         printer.green("  ".join(fields))
+        if dump == 3:
+            return
 
         nPer = 10
         iLast = len(p["Hist"]) - 1
