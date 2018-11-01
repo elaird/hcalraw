@@ -91,7 +91,10 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
                 nWord64Trailer = 2  # accommodate block trailer
             iWordTrailer0 = nWord64 - nToSkip - nWord64Trailer
             if iWord64 == 1 and not header["OrN"]:
-                return unpacked_sw_fed(fedData, header, nBytesPer, dump)
+                if headerOnly:
+                    break
+                else:
+                    return unpacked_sw_fed(fedData, header, nBytesPer, dump)
         elif headerOnly:
             break
         elif lastNAmcs and iWord64 < header["iWordPayloadn"]:
