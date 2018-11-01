@@ -110,7 +110,7 @@ def fedList(s=""):
 
 
 def histo_fed(fedId):
-    return 60 <= fedId <= 73
+    return 60 <= fedId <= 72
 
 
 def format(treeName=""):
