@@ -526,7 +526,7 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
                    nTsMax=nTsMax,
                    perTs=perTs,
                   )
-    else:
+    elif "histograms" in d:
         for iBlock, block in sorted(d["histograms"].iteritems()):
             if crateslots and (100*block["Crate"] + block["Slot"]) not in crateslots:
                 continue
