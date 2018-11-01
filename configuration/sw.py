@@ -114,11 +114,14 @@ def histo_fed(fedId):
 
 
 def format(treeName=""):
-    def __isVme(fedId=None):
-        return 700 <= fedId <= 731
+    def __branch(fedId):
+        if fedId == 1:
+            return "HCAL_Trigger"
+        if 700 <= fedId <= 731:
+            return "HCAL_DCC%03d" % fedId
+        return "Chunk%03d" % fedId
 
-
-    dct = {"CMSRAW": {"branch": lambda fedId: "%s%03d" % ("HCAL_DCC" if __isVme(fedId) else "Chunk", fedId)}}
+    dct = {"CMSRAW": {"branch": __branch}}
 
     dct["Events"] = {"rawCollections": []}
     for suffix in ["rawDataCollector__LHC", "hltHcalCalibrationRaw__HLT"]:
