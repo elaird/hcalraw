@@ -445,7 +445,7 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
                       "nSkip16",
                       "Blk8",
                      ]
-        else:
+        elif "histograms" in d:
             fields = [" FEDid",
                       "  EvN",
                       "       OrN",
@@ -458,6 +458,12 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
                       "perCap",
                       "nBins",
                       "nHist",
+                     ]
+        else:
+            fields = [" FEDid",
+                      "  EvN",
+                      "   nBytesHW(   SW)",
+                      "type",
                      ]
 
         if printHeaders:
@@ -480,7 +486,7 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
             if h["uFoV"]:
                 sList.append("  %2d" % t["Blk_no8"])
 
-        else:
+        elif "histograms" in d:
             sList = [" %4d" % h["FEDid"],
                      "0x%07x" % h["EvN"],
                      "0x%08x" % h["OrN"],
@@ -493,6 +499,13 @@ def oneFedHcal(d={}, dump=None, crateslots=[],
                      "   %1d" % h["perCap"],
                      "   %3d" % h["nBins"],
                      "   %3d" % h["nHist"],
+                    ]
+        else:
+            sList = [" %4d" % h["FEDid"],
+                     "0x%07x" % h["EvN"],
+                     "   %5d(%5d)" % (t["nWord64"]*8 if "nWord64" in t else "  -1", d["nBytesSW"]),
+                     "  %1d " % h["Evt_ty"],
+                     # "%7d" % d["nWord16Skipped"],
                     ]
 
         printer.blue("  ".join(sList))

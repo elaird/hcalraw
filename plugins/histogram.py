@@ -28,7 +28,7 @@ def loop_over_feds(raw, book, adcTag="", **other):
             printer.error("FED %d has FEDid %d" % (fedId, fedIdHw))
             continue
 
-        if sw.histo_fed(fedId):
+        if "htrBlocks" not in dct:
             continue
 
         nBadHtrs, adcs1 = singleFedPlots(fedId=fedId, d=dct, book=book, nTsMax=nTsMax, **other)
