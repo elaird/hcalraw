@@ -9,10 +9,17 @@ def B904():
     slot = 1
     uhtr_fib = -1
 
-    for iRbx in range(1, 19):
-        rbx = "HE%d" % iRbx
+    for iRbx in range(1, 13):
+        rbx = "HB%02d" % iRbx
         for rm in range(1, 5):
-            for rm_fib in range(1, 9):
+            if rm in [1, 3]:
+                rm_fibs = [3, 2, 1, 8, 7, 6, 5, 4]
+            elif rm in [2, 4]:
+                rm_fibs = [6, 7, 8, 1, 2, 3, 4, 5]
+            else:
+                rm_fibs = [1, 2]
+
+            for rm_fib in rm_fibs:
                 uhtr_fib += 1
                 if 23 < uhtr_fib:
                     uhtr_fib -= 24
