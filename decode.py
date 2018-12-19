@@ -592,6 +592,7 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None, nPreSamples=N
     elif flavor == 3:
         dataKey = "channelData"
         channelHeader["LE"] = (word16 >> 11) & 0x1
+        channelHeader["CE"] = (word16 >> 10) & 0x1   # !document
         channelHeader["ErrF"] = channelHeader["LE"]  # compat
         channelHeader["M&P"] = (word16 >> 8) & 0x1
         channelId = word16 & 0xff
