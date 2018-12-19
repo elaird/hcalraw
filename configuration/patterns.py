@@ -100,18 +100,15 @@ def string2(code=None):
         return "%s%s%02d %2d %d" % (subdet, side, number, slot, 7 + link_num - 3 * top)
 
 
-def string01(code=None):
+def string013(code=None, flavor=None):
     top, link_num = decoded_link(code)
-    if not top:  # work around bug in 2.x and 3.0
-        code = code << 8
-        top, link_num = decoded_link(code)
     qie_card = (code >> ngOffset) & 0xf
     rm = (code >> (ngOffset + 4)) & 0xf
     subdet, side, rbx_number = decoded_rbx(code)
     if ng_looks_broken(code):
         return "0x%022x" % code
     else:
-        return "%s%s%02d %2d %d" % (subdet, side, rbx_number, rm, 2*qie_card + link_num - 1)
+        return "%s%s%02d %2d %d" % (subdet, side, rbx_number, rm, 2 * qie_card - 1 + (top if flavor == 3 else link_num))
 
 
 def expectedCrate(fedId):

@@ -1,8 +1,9 @@
 # QIE  8: https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
 # errata: http://cmsonline.cern.ch/cms-elog/807780
 #
-# QIE 10: https://svnweb.cern.ch/trac/cms-firmwsrc/browser/hcal/HF_RM_igloo2/trunk/docs/HF_RM_DataFormat.txt
-# QIE 11: https://svnweb.cern.ch/trac/cms-firmwsrc/browser/hcal/HE_RM_igloo2/trunk/docs/HE_RM_DataFormat.txt
+# QIE 10 (HF): https://svnweb.cern.ch/trac/cms-firmwsrc/browser/hcal/HF_RM_igloo2/trunk/docs/HF_RM_DataFormat.txt
+# QIE 11 (HE): https://svnweb.cern.ch/trac/cms-firmwsrc/browser/hcal/HE_RM_igloo2/trunk/docs/HE_RM_DataFormat.txt
+# QIE 11 (HB): https://svnweb.cern.ch/trac/cms-firmwsrc/browser/hcal/HB_RM_igloo2/trunk/docs/HB_RM_DataFormat.txt
 
 import configuration.hw
 import configuration.patterns
@@ -86,8 +87,8 @@ def patternString(flavor=None, patterns=[], key=""):
     if not codes:
         return None
 
-    if 0 <= flavor <= 1:
-        return configuration.patterns.string01(codes[0])
+    if flavor in [0, 1, 3]:
+        return configuration.patterns.string013(codes[0], flavor)
     elif flavor == 2:
         return configuration.patterns.string2(codes[0])
     elif 5 <= flavor <= 6:
@@ -110,16 +111,32 @@ def feWord(d, fiber, iTs):
 
         flavor = v["Flavor"]
         if 0 <= flavor <= 1:
-            word = fe_word_qie11(word, v, iTs)
+            word = fe_word_qie11e(word, v, iTs)
         elif flavor == 2:
             word = fe_word_qie10(word, v, iTs)
+        elif flavor == 3:
+            word = fe_word_qie11b(word, v, iTs)
         elif 5 <= flavor <= 6:
             word = fe_word_qie8(word, v, iTs)
 
     return flavor, word
 
 
-def fe_word_qie11(feWord88, dct, iTs):
+def fe_word_qie11b(feWord88, dct, iTs):
+    if feWord88 is None:
+        feWord88 = 0
+
+    # FIXME: add missing bits:
+    # Byte1  = isAnyTDC61, isAnyTDC60, isAnyTDC59, isAnyTDC58, 2-bit consensus_CapID, CapEr, Available (formerly BC0)
+
+    iByteQ = 8 * (1 + dct["FibCh"])
+    feWord88 |= (dct["QIE"][iTs] & 0xff) << iByteQ
+    iByteT = 72 + 2 * dct["FibCh"]
+    feWord88 |= (dct["TDC"][iTs] & 0x3 ) << iByteT
+    return feWord88
+
+
+def fe_word_qie11e(feWord88, dct, iTs):
     if feWord88 is None:
         feWord88 = 0
 
@@ -249,11 +266,9 @@ def storePatternData(d={}, utca=None, nTsMax=None):
             if not flavors:
                 continue
 
-            # for flavors 0-2, all time slices have the same pattern; use TS1
-            elif 0 <= flavors[0] <= 1 and iTs == 1:
-                pd = pattern_data_qie11(feWords)
-            elif flavors[0] == 2 and iTs == 1:
-                pd = pattern_data_qie10(feWords)
+            # for flavors 0-3, all time slices have the same pattern; use TS1
+            if 0 <= flavors[0] <= 3 and iTs == 1:
+                pd = pattern_data_qie1x(feWords)
             elif 5 <= flavors[0] <= 6:
                 pd = pattern_data_qie8(feWords)
 
@@ -264,11 +279,7 @@ def storePatternData(d={}, utca=None, nTsMax=None):
     return out
 
 
-def pattern_data_qie11(feWords):
-    return pattern_data_qie10(feWords)
-
-
-def pattern_data_qie10(feWords):
+def pattern_data_qie1x(feWords):
     assert len(feWords) == 2, len(feWords)
     d = {}
     # print feWords
