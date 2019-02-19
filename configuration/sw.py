@@ -9,6 +9,7 @@ def files_this_machine(run, nCyclesMax=1):
                  "data/FNAL_",
                  "/tmp/USC_",
                  "/hcaldepot1/data/USC_",
+                 "data/B904_Integration_",
                  "data/B904_Integration_0000",
                  "data/B904_Integration_10000",
                  "/localdata/B904_Integration_",
@@ -33,6 +34,8 @@ def files_eos_local(run):
         filename = "%s/archival/20160914_USC_LS1_runs212958-264260/USC_%d.root" % (stem, run)
     elif run < 280486:
         filename = "%s/USC/USC_%d.root" % (stem, run)
+    elif 100000000 < run:
+        filename = "%s/B904/run%d/B904_Integration_%d.root" % (stem, run, run)
     else:
         filename = "%s/USC/run%d/USC_%d.root" % (stem, run, run)
 
