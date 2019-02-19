@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import collections, sys
 from configuration.patterns import lineStart
@@ -42,7 +42,7 @@ def loop(filenames=[], nExpected=None, iCrate=None, iUhtr=None, iUhtrFib=None, i
                 continue
 
             if len(fields) != nExpected and nExpected is not None:
-                print len(fields), fields
+                print(len(fields), fields)
                 continue
 
             if vme:
@@ -62,7 +62,7 @@ def check_for_duplicates(l):
         be, fe = x.replace(lineStart, "").split(":")
         fes[be].append(fe)
 
-    for be, lst in sorted(fes.iteritems()):
+    for be, lst in sorted(fes.items()):
         if len(lst) != 1:
             sys.exit("found duplicates: %s %s" % (be, str(lst)))
 

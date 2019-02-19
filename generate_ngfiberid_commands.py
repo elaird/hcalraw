@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import sys
 from configuration import patterns
@@ -96,6 +96,6 @@ if __name__ == "__main__":
     # print "\n", exercise_bits("HE16-3-1-i")
     # print "\n", mode3_command_string(["HE%d" % i for i in range(20)])
     # print "\n", mode3_command_string(["HFP%02d" % i for i in range(1, 2)])
-    print "\n", mode3_command_string(["HB%d" % i for i in range(20)])
-    print "\n", mode3_command_string(["HBP%02d" % i for i in range(1, 19)])
-    print "\n", mode3_command_string(["HBM%02d" % i for i in range(1, 19)])
+    print("\n", mode3_command_string(["HB%d" % i for i in range(20)]))
+    print("\n", mode3_command_string(["HBP%02d" % i for i in range(1, 19)]))
+    print("\n", mode3_command_string(["HBM%02d" % i for i in range(1, 19)]))
