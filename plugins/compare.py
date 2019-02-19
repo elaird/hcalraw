@@ -17,7 +17,7 @@ def compare(raw1={}, raw2={}, book=None, anyEmap=False,  printEmap=False,
 
 
 def nPerChannel(lst=[], iChannel=None):
-    return len(filter(lambda x: x[-1] == iChannel, lst))
+    return len([x for x in lst if x[-1] == iChannel])
 
 
 def tsLoop(lst1, lst2, book=None, name=None,
@@ -96,7 +96,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, printMismatches=False, iEntry=None, tran
     titleb = "SOI#semicolon %s" % titlea
     titlec = titleb.replace(";ADC;ADC", ";ADC").replace("semicolon ;", "semicolon;TP;")
 
-    for coords1, lst1 in mapF1.iteritems():
+    for coords1, lst1 in mapF1.items():
         coords2 = transf(*coords1)
         if coords2 is None:
             continue
@@ -126,7 +126,7 @@ def adc_vs_adc(mapF1, mapF2, book=None, printMismatches=False, iEntry=None, tran
                     q2 = " ".join(["%2x"] * len(samples2)) % samples2
                     c1 = str(coords1)
                     c2 = str(coords2)
-                    print "iEntry %d: %s  |  %s  :  %s  |  %s" % (iEntry, c1, c2, q1, q2)
+                    print("iEntry %d: %s  |  %s  :  %s  |  %s" % (iEntry, c1, c2, q1, q2))
         else:
             # FIXME: handle missing
             pass
@@ -213,9 +213,10 @@ def compare1(raw1, raw2, book, printMismatches, warnQuality):
 
 
 def histogram_deltas(raw1, raw2, book):
-    fed1 = filter(lambda x: x is not None, sorted(raw1.keys()))[0]
+    fed1s = [x for x in raw1.keys() if x is not None]
+    fed1 = sorted(fed1s)[0]
     d1 = raw1[fed1]
-    for fed2, d2 in raw2.iteritems():
+    for fed2, d2 in raw2.items():
         if fed2 is None:
             continue
 
@@ -237,46 +238,46 @@ def coordString(crate, slot, tb, fiber, channel):
 
 
 def reportMatched(matched={}):
-    print "%d MATCHED channels:" % len(matched)
-    print "uTCA --> VME"
-    print "(cr sl   f ch) --> (cr sl   f ch)"
-    print "---------------------------------"
+    print("%d MATCHED channels:" % len(matched))
+    print("uTCA --> VME")
+    print("(cr sl   f ch) --> (cr sl   f ch)")
+    print("---------------------------------")
     for k in sorted(matched.keys()):
-        print "(%s) --> (%s)" % (coordString(*k), coordString(*matched[k]))
+        print("(%s) --> (%s)" % (coordString(*k), coordString(*matched[k])))
 
-    print
-    print "VME --> uTCA"
-    print "(cr sl   f ch) --> (cr sl   f ch)"
-    print "---------------------------------"
+    print()
+    print("VME --> uTCA")
+    print("(cr sl   f ch) --> (cr sl   f ch)")
+    print("---------------------------------")
     lines = []
-    for k, v in matched.iteritems():
+    for k, v in matched.items():
         lines.append("(%s) --> (%s)" % (coordString(*v), coordString(*k)))
     for l in sorted(lines):
-        print l
-    print
+        print(l)
+    print()
 
 
 def reportFailed(failed=[]):
-    print "FAILED fibers %d:" % len(failed)
+    print("FAILED fibers %d:" % len(failed))
     if failed:
-        print "(fed  h  f ch)"
-        print "--------------"
+        print("(fed  h  f ch)")
+        print("--------------")
         for c in sorted(failed):
-            print "(%s)" % coordString(*c)
+            print("(%s)" % coordString(*c))
 
 
 def matchStatsAnyMap(fIn={}, bIn={}, iStart=None):
     f = {}
-    for coords, dataAll in fIn.iteritems():
+    for coords, dataAll in fIn.items():
         f[coords] = dataAll[iStart:]
 
     b = {}
-    for dataAll, coords in bIn.iteritems():
+    for dataAll, coords in bIn.items():
         b[dataAll[iStart:]] = coords
 
     matched = {}
     failed = []
-    for coords, data in f.iteritems():
+    for coords, data in f.items():
         if data in b:
             matched[coords] = b[data]
         else:
@@ -289,7 +290,7 @@ def dataMap(raw={}, book=None):
     backward = {}
     skipped = []
 
-    for fedId, d in raw.iteritems():
+    for fedId, d in raw.items():
         if fedId is None:
             continue
 
@@ -320,13 +321,13 @@ def tpMap(raw={}, warn=True, book=None):
     backward = {}
     skipped = []
 
-    for fedId, d in raw.iteritems():
+    for fedId, d in raw.items():
         if fedId is None:
             continue
 
         delta = matching.pipelineDelta(d["header"]["utca"])
         for block in d["htrBlocks"].values():
-            for key, triggerData in block["triggerData"].iteritems():
+            for key, triggerData in block["triggerData"].items():
                 coords = (block["Crate"], block["Slot"], block["Top"], key)
                 nSoi = sum(triggerData["SOI"])
                 if warn and nSoi != 1:
