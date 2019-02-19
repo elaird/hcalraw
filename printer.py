@@ -8,7 +8,7 @@ def __line(f, s, p):
         s = '\033['+ f + s + '\033[0m'
 
     if p:
-        print s
+        print(s)
     return s
 
 

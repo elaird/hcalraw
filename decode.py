@@ -157,7 +157,7 @@ def header_ufov0(d={}, iWord64=None, word64=None):
 
 def spigotList(header):
     out = []
-    for key, value in header.iteritems():
+    for key, value in header.items():
         if not key.startswith("HTR"):
             continue
         if not value["nWord16"]:
@@ -204,8 +204,8 @@ def molHeader(d={}, words64=[]):
     iblock = (w1 >> 32) & 0x7ff
     d[iblock] = {}
     d[iblock]["magic"] = words64[0] & 0xffff
-    d[iblock]["isFirstBlock"] = w1 & (1L << 31)
-    d[iblock]["isLastBlock"] = w1 & (1L << 30)
+    d[iblock]["isFirstBlock"] = w1 & (1 << 31)
+    d[iblock]["isLastBlock"] = w1 & (1 << 30)
     d[iblock]["nWord64"] = w1 & 0x3ff
     d[iblock]["FEDid"] = (w2 >> 32) & 0xfff
     d[iblock]["Trigger"] = w2 & 0xffffff
@@ -390,7 +390,7 @@ def payload(d={}, iWord16=None, word16=None, word16Counts=[],
             utca=None, fedId=None, dump=-99):
 
     if 12 <= dump:
-        print "      (%5d 0x%04x)" % (iWord16, word16)
+        print("      (%5d 0x%04x)" % (iWord16, word16))
 
     if "htrIndex" not in d:
         for iHtr in range(len(word16Counts)):
