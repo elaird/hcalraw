@@ -303,7 +303,7 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
             l["TTPAlgo"] = (w >> 8) & 0x7
             # https://svnweb.cern.ch/cern/wsvn/cmshcos/trunk/hcalTrig/src/common/hcalTechTrigProcessor.cc
             # m_id.value()=m_slot*100+m_crateId;
-            l["Slot"] = l["ModuleId"] / 100
+            l["Slot"] = int(l["ModuleId"] / 100)
             l["Crate"] = l["ModuleId"] % 100
             l["Top"] = " "
             del l["UnsupportedFormat"]
@@ -611,7 +611,7 @@ def channelInit(iWord16=None, word16=None, flavor=None, utca=None, nPreSamples=N
         channelHeader["CE"] = (word16 >> 10) & 0x1
         channelHeader["ErrF"] = (word16 >> 10) & 0x3  # compat
         channelId = word16 & 0x7f
-        channelHeader["Fiber"] = channelId / 4
+        channelHeader["Fiber"] = int(channelId / 4)
         channelHeader["FibCh"] = channelId % 4
 
         if flavor == 5:

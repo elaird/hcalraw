@@ -155,7 +155,7 @@ def unpacked_sw_fed(fedData, header, nBytesPer, dump):
         printer.error("Unpacking of software FED %d is not implemented." % fedId)
         nBytesSW = fedData.size() * nBytesPer
         return {"header": header,
-                "trailer": {"nWord64": nBytesSW / 8},
+                "trailer": {"nWord64": int(nBytesSW / 8)},
                 "other": {},
                 "nBytesSW": nBytesSW,
                }
@@ -199,7 +199,7 @@ def unpacked_histo(fedData, fedId, nBytesPer, dump):
             word32 = (word64 >> (32*i)) & 0xffffffff
             iWord32 = 2 * (iWord64 - iPayload0) + i
             jWord32 = iWord32 % nWords32PerChannel
-            key = iWord32 / nWords32PerChannel
+            key = int(iWord32 / nWords32PerChannel)
             if key not in histograms:
                 histograms[key] = {}
             d = histograms[key]

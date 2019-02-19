@@ -47,7 +47,7 @@ def global_eos(run, hhmmMin=None, quiet=False):
         coords.sort()
         if hhmmMin:
             mmMin = hhmmMin % 100
-            hhMin = hhmmMin / 100
+            hhMin = int(hhmmMin / 100)
             coords = [x for x in coords if hhMin < x[2] or (hhMin == x[2] and mmMin <= x[3])]
             if not quiet:
                 for c in coords:
@@ -147,7 +147,7 @@ def go(options, run, nRuns):
     if 2 <= nFiles:
         options.file1 = ",".join(files)
         if options.hhmm is None:
-            options.sparseLoop = max(1, options.nEventsMax / nFiles)
+            options.sparseLoop = max(1, int(options.nEventsMax / nFiles))
         else:
             options.sparseLoop = -1
     else:
