@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 from configuration import patterns as conf
 import configuration.hw
@@ -43,7 +43,7 @@ def diffs(ref={}, cabled={}):
     missing = {}
     different = {}
     same = {}
-    for be, fe in sorted(ref.iteritems()):
+    for be, fe in sorted(ref.items()):
         if be not in cabled:
             missing[be] = fe
             continue
@@ -53,7 +53,7 @@ def diffs(ref={}, cabled={}):
         else:
             same[be] = fe
 
-    for be, fe in cabled.iteritems():
+    for be, fe in cabled.items():
         if be not in ref:
             extra[be] = fe
 
@@ -96,16 +96,16 @@ def fiberCount(feCoords=[]):
 def printTable(rbxes={}, header="", zero="  ", reference=None, onlyDet=None, excludeDet=None):
     if header:
         header = "| %s |" % header
-        print "-"*len(header)
-        print header
-        print "-"*len(header)
+        print("-"*len(header))
+        print(header)
+        print("-"*len(header))
 
     dets, boxes = rbx_list(reference)
 
     nSpaces = 5
     header = " ".join(["RBX".ljust(nSpaces)] + boxes)
-    print header
-    print "-" * len(header)
+    print(header)
+    print("-" * len(header))
     for det in dets:
         if onlyDet and (onlyDet not in det):
             continue
@@ -119,7 +119,7 @@ def printTable(rbxes={}, header="", zero="  ", reference=None, onlyDet=None, exc
                 row.append(zero)
             else:
                 row.append("%2d" % nFibers)
-        print " ".join([det.ljust(nSpaces)] + row)
+        print(" ".join([det.ljust(nSpaces)] + row))
     print
 
 
@@ -140,43 +140,43 @@ def report(extra=None, missing=None, different=None, same=None, reference=None, 
                excludeDet=options.exclude)
 
     header = "| RBXes with (%d <= n missing fibers <= %d) |" % (nMissingMin, nMissingMax)
-    print "-" * len(header)
-    print header
-    print "-" * len(header)
-    print "DCC(CR) SP(HTR) FI: ref. RBX RM FI"
+    print("-" * len(header))
+    print(header)
+    print("-" * len(header))
+    print("DCC(CR) SP(HTR) FI: ref. RBX RM FI")
 
     count = 0
     for iMissing in range(nMissingMin, 1 + nMissingMax):
         count += nMissing.values().count(iMissing)
     if not count:
-        print "None"
+        print("None")
 
-    for be, ref in sorted(missing.iteritems()):
+    for be, ref in sorted(missing.items()):
         rbx = ref[0]
         if nMissingMin <= nMissing[rbx] <= nMissingMax:
-            print pretty(be=be, fe=ref)
+            print(pretty(be=be, fe=ref))
 
-    print
-    print "-----------------------------------"
-    print "| Fibers differing from reference |"
-    print "-----------------------------------"
+    print()
+    print("-----------------------------------")
+    print("| Fibers differing from reference |")
+    print("-----------------------------------")
     if different:
-        print "DCC(CR) SP(HTR) FI: ref. RBX RM FI  |   cabled"
-        for be, (ref, cabled) in sorted(different.iteritems()):
-            print pretty(be=be, fe=ref) + "  | " + pretty(fe=cabled)
+        print("DCC(CR) SP(HTR) FI: ref. RBX RM FI  |   cabled")
+        for be, (ref, cabled) in sorted(different.items()):
+            print(pretty(be=be, fe=ref) + "  | " + pretty(fe=cabled))
     else:
-        print "None"
+        print("None")
 
-    print
-    print "--------------------------------------------------------"
-    print "| Fibers acquired and valid, but absent from reference |"
-    print "--------------------------------------------------------"
+    print()
+    print("--------------------------------------------------------")
+    print("| Fibers acquired and valid, but absent from reference |")
+    print("--------------------------------------------------------")
     if extra:
-        print "DCC(CR) SP(HTR) FI: cabled"
-        for be, fe in sorted(extra.iteritems()):
-            print pretty(be=be, fe=fe)
+        print("DCC(CR) SP(HTR) FI: cabled")
+        for be, fe in sorted(extra.items()):
+            print(pretty(be=be, fe=fe))
     else:
-        print "None"
+        print("None")
 
 
 def go(fileName="", options=None):
@@ -186,7 +186,7 @@ def go(fileName="", options=None):
     assert not refMisc, "refMisc='%s'" % refMisc
 
     cabled, misc = mapping(sys.stdin, skip=["Xrd", "TClassTable", "nologin"])
-    print "".join(misc)
+    print("".join(misc))
 
     report(*diffs(ref, cabled), reference=ref, options=options)
 

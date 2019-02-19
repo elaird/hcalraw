@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 
 import array
@@ -37,7 +37,7 @@ def shiftFlows(histo=None):
 def labelYAxis(h=None, labels={}):
     h.SetStats(False)
     yaxis = h.GetYaxis()
-    for iBin, label in sorted(labels.iteritems()):
+    for iBin, label in sorted(labels.items()):
         yaxis.SetBinLabel(iBin, label)
     yaxis.SetLabelSize(2.0 * 0.035)
 
@@ -121,7 +121,7 @@ def magnify(h, factor=1.0):
 def adjustPad(pad=r.gPad, logX=False, logY=False, logZ=False, gridX=False, gridY=False,
               m={"Left": 0.15, "Bottom": 0.15, "Right": 0.15, "Top": None}):
 
-    for key, value in m.iteritems():
+    for key, value in m.items():
         if value is None:
             continue
         getattr(r.gPad, "Set%sMargin" % key)(value)
@@ -430,7 +430,7 @@ def plotGlobal(f, pad, offset=None, names=[], logY=False, logX=False, logZ=True,
         magnify(h, factor=1.8)
         if denom:
             iGray = 56
-            colors = [19] * (iGray - 51) + range(iGray, 51 + 50)
+            colors = [19] * (iGray - 51) + list(range(iGray, 51 + 50))
             r.gStyle.SetPalette(len(colors), array.array('i', colors))
 
             h.GetZaxis().SetRangeUser(-0.1, 1.1)

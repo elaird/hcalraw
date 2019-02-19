@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import os
 import sys
@@ -61,7 +61,7 @@ def rooted(dats=[], options=None):
         prefixes.append(prefix)
         feds[fed] = (root1, root2)
 
-        print "%s %4d: %s" % (prefix, fed, root1)
+        print("%s %4d: %s" % (prefix, fed, root1))
         # print cmd; continue
         os.system(cmd)
 
@@ -70,7 +70,7 @@ def rooted(dats=[], options=None):
 
 def toCompare(feds, split1, split2):
     if split1 in feds:
-        return filter(lambda x: x in feds, split2)
+        return [x for x in split2 if x in feds]
     else:
         return []
 
@@ -81,13 +81,13 @@ def histogrammed(prefix, feds, split=1118):
     feds2s = []
 
     comp = toCompare(feds, split, [718, 719])
-    for fed, (root1, rootOut) in sorted(feds.iteritems()):
+    for fed, (root1, rootOut) in sorted(feds.items()):
         if fed in comp:
             continue
 
         if comp and fed == split:
             for cfed in comp:
-                print "comparison of %4d to %4d:" % (cfed, fed)
+                print("comparison of %4d to %4d:" % (cfed, fed))
                 options.feds1 = str(cfed)
                 options.file1 = feds[cfed][0]
                 options.outputFile = feds[cfed][1]
@@ -101,7 +101,7 @@ def histogrammed(prefix, feds, split=1118):
                 oneRun.main(options)
 
         else:
-            print "solo %4d:" % fed
+            print("solo %4d:" % fed)
             options.feds1 = str(fed)
             options.file1 = root1
             options.outputFile = rootOut
