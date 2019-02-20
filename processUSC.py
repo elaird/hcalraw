@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import os
 import sys
 import utils
@@ -254,7 +255,6 @@ def go(baseDir="",
             report(d, subject='Run %d: %s (%s)' % (run, suffix, url))
             if not d["returncode"]:
                 with open(doneFlag, "w") as f:
-                    # print >> f, blob(d)
                     print(blob(d), file=f)
 
     if not_found:
