@@ -245,8 +245,7 @@ def reportMatched(matched={}):
     for k in sorted(matched.keys()):
         print("(%s) --> (%s)" % (coordString(*k), coordString(*matched[k])))
 
-    print()
-    print("VME --> uTCA")
+    print("\nVME --> uTCA")
     print("(cr sl   f ch) --> (cr sl   f ch)")
     print("---------------------------------")
     lines = []
@@ -254,7 +253,7 @@ def reportMatched(matched={}):
         lines.append("(%s) --> (%s)" % (coordString(*v), coordString(*k)))
     for l in sorted(lines):
         print(l)
-    print()
+    print("")
 
 
 def reportFailed(failed=[]):

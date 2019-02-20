@@ -68,7 +68,7 @@ def shortlists():
             print("   Input:", inp)
             print("   Expected: ", out)
             print("   Result: ", result)
-            print()
+            print("")
 
     return
 

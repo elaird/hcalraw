@@ -156,7 +156,7 @@ def report(extra=None, missing=None, different=None, same=None, reference=None, 
         if nMissingMin <= nMissing[rbx] <= nMissingMax:
             print(pretty(be=be, fe=ref))
 
-    print()
+    print("")
     print("-----------------------------------")
     print("| Fibers differing from reference |")
     print("-----------------------------------")
@@ -167,7 +167,7 @@ def report(extra=None, missing=None, different=None, same=None, reference=None, 
     else:
         print("None")
 
-    print()
+    print("")
     print("--------------------------------------------------------")
     print("| Fibers acquired and valid, but absent from reference |")
     print("--------------------------------------------------------")

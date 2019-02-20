@@ -41,7 +41,7 @@ def oneEvent(d={}, slim1=False):
                    )
         printHeaders = True
     if not slim1:
-        print()
+        print("")
 
 
 def htrOverview(d={}):
