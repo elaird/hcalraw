@@ -67,38 +67,55 @@ def check_for_duplicates(l):
             sys.exit("found duplicates: %s %s" % (be, str(lst)))
 
 
-def HBHE():
-    return loop(["2018HCALLMap_HB_K_20180501.txt", "2018HCALLMap_ngHE_K_20180501.txt"], nExpected=26,
+
+
+# def HB():
+#     return loop(["Lmap_ngHB_M_20190210.txt"], nExpected=27,
+#                 iCrate=-7, iUhtr=-6, iUhtrFib=-5, iRbx=6, iRm=13, iRmFib=14)
+
+def HB():
+    return loop(["2018HCALLMap_HB_K_20180501.txt"], nExpected=26,
                 iCrate=19, iUhtr=20, iUhtrFib=21, iRbx=6, iRm=11, iRmFib=12)
 
 
-def HBHEcalib():
-    return loop(["2018HCALLMap_HBCalib_K_20180501.txt", "2018HCALLMap_ngHECalib_K_20180501.txt"], nExpected=29,
+def HBcalib():
+    return loop(["2018HCALLMap_HBCalib_K_20180501.txt"], nExpected=29,
+                iCrate=24, iUhtr=25, iUhtrFib=26, iRbx=6, iRm=10, iRmFib=11)
+
+
+def HE():
+    return loop(["Lmap_ngHE_M_20190129.txt"], nExpected=26,
+                iCrate=19, iUhtr=20, iUhtrFib=21, iRbx=6, iRm=11, iRmFib=12)
+
+
+def HEcalib():
+    return loop(["Lmap_ngHEcalib_M_20190129.txt"], nExpected=29,
                 iCrate=24, iUhtr=25, iUhtrFib=26, iRbx=6, iRm=10, iRmFib=11)
 
 
 def HF():
-    return loop(["2018HCALLMap_ngHF_K_20180501.txt"], nExpected=37,
+    return loop(["Lmap_ngHF_M_20190129.txt"], nExpected=37,
                 iCrate=27, iUhtr=28, iUhtrFib=30, iRbx=6, iRm=19, iRmFib=22)
 
 
 def HFcalib():
-    return loop(["2018HCALLMap_ngHFCalib_K_20180501.txt"], nExpected=24,
+    return loop(["Lmap_ngHFcalib_M_20190129.txt"], nExpected=24,
                 iCrate=-7, iUhtr=-6, iUhtrFib=-5, iRbx=6, iRm=8, iRmFib=10)
 
 
 def HO():
-    return loop(["2018HCALLMap_HO_K_20180501.txt"], nExpected=25, vme=True,
+    return loop(["Lmap_HO_M_20190129.txt"], nExpected=25, vme=True,
                 iCrate=-2, iUhtr=-4, iUhtrFib=19, iRbx=6, iRm=12, iRmFib=13)
 
 
 def HOcalib():
-    return loop(["2018HCALLMap_HOCalib_K_20180501.txt"], nExpected=22, vme=True,
-                iCrate=-3, iUhtr=-2, iUhtrFib=-4, iRbx=6, iRm=8, iRmFib=9, fedOffset=700)
+    return loop(["Lmap_HOcalib_M_20190129.txt"], nExpected=26, vme=True,
+                iCrate=-2, iUhtr=-3, iUhtrFib=-5, iRbx=6, iRm=10, iRmFib=11)
 
 
 def USC():
-    l = HBHE() + HBHEcalib() + HF() + HFcalib() + HO() + HOcalib()
+    # see http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-jan-29/Lmap/
+    l = HB() + HBcalib() + HE() + HEcalib() + HF() + HFcalib() + HO() + HOcalib()
     l = set(l)
     check_for_duplicates(l)
     for line in sorted(l):
