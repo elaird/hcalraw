@@ -26,7 +26,7 @@ def check(evn, crate, slot, fiber, patterns, key):
             codes.append(code)
 
     if codes:
-        expected = 1 << int((evn - 1) / 100)  # batches of 100 events
+        expected = 1 << ((evn - 1) // 100)  # batches of 100 events
         pattern = (codes[0] & 0xffffffffffffffffffff)  # 80 bits
         if expected ^ pattern:
             print("%3d %2d %2d %2d 0x%020x" % (evn, crate, slot, fiber, pattern))

@@ -128,4 +128,4 @@ def expectedCrate(fedId):
             362:  3,
             363:  7,
             364:  6,
-            365: 13}.get(int(fedId / 2), -1)
+            365: 13}.get(fedId // 2, -1)

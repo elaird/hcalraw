@@ -46,7 +46,7 @@ def dirs_global(run):
     #root://cms-xrd-global.cern.ch/
     # prefix = "root://eoscms.cern.ch/"
     prefix = ""
-    midfix = "000/%03d/%03d" % (int(run/1000), run % 1000)
+    midfix = "000/%03d/%03d" % (run // 1000, run % 1000)
     minidaq = "%s/eos/cms/store/t0streamer/Minidaq/A/%s/" % (prefix, midfix)
 
     out = []
