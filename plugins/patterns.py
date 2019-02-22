@@ -10,9 +10,9 @@ import configuration.patterns
 
 
 def patterns(raw1={}, **_):
-    for fedId, raw in sorted(raw1.items()):
-        if fedId is None:
-            continue
+    keys = [k for k in raw1.keys() if k is not None]
+    for fedId in sorted(keys):
+        raw = raw1[fedId]
 
         for iBlock, block in sorted(raw["htrBlocks"].items()):
             if block["IsTTP"]:
@@ -244,7 +244,7 @@ def storePatternData(d={}, utca=None, nTsMax=None):
         offset += 1
 
     out = {}
-    for iFiberPair in range(configuration.hw.nFibers(utca) / 2):
+    for iFiberPair in range(configuration.hw.nFibers(utca) // 2):
         fiber1 = 2*iFiberPair + offset
         out[fiber1] = {"flavor": None,
                        "patternData": [],
