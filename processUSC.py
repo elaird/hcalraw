@@ -1,5 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
+from __future__ import print_function
 import os
 import sys
 import utils
@@ -15,7 +16,7 @@ def stdout(cmd="", checkErr=True):
     out = commandOutput(cmd)
     if checkErr:
         assert not out["stderr"], "%s \n\n %s" % (cmd, out["stderr"])
-    return out["stdout"].split("\n")
+    return str(out["stdout"]).split("\n")
 
 
 def blob(d={}, newlines=["&&", "|&", ">&"]):
@@ -26,7 +27,7 @@ def blob(d={}, newlines=["&&", "|&", ">&"]):
         return o
 
     lines = []
-    for key, value in sorted(d.iteritems()):
+    for key, value in sorted(d.items()):
         lines += ["* %s *" % key, "", s(value), "", ""]
 
     return "\n".join(lines)
@@ -35,13 +36,13 @@ def blob(d={}, newlines=["&&", "|&", ">&"]):
 def prepareRunList(dest="", hcalRuns=""):
     dirName = os.path.dirname(dest)
     if not os.path.exists(dirName):
-        print "Creating %s" % dirName
+        print("Creating %s" % dirName)
         os.makedirs(dirName)
 
     if os.path.exists(dest):
         try:
             os.remove(dest)
-        except OSError, e:
+        except OSError as e:
             assert e.errno == 2
 
     stdout("wget -O %s %s" % (dest, hcalRuns), checkErr=False)
@@ -63,13 +64,13 @@ def flags(runDir="", run=0, suffix="", dependsUpon=[]):
     yes = (True, proc(suffix), done(suffix))
     no = (False, "", "")
 
-    notReady = filter(lambda x: not os.path.exists(done(x)), dependsUpon)
+    notReady = [x for x in dependsUpon if not os.path.exists(done(x))]
 
     if os.path.exists(proc(suffix)):
-        print "Run %d (%s) is being processed already." % (run, suffix)
+        print("Run %d (%s) is being processed already." % (run, suffix))
         return no
     elif notReady:
-        print "These dependencies are not ready:", notReady
+        print("These dependencies are not ready:", notReady)
         return no
     elif os.path.exists(done(suffix)):
         return no
@@ -100,7 +101,7 @@ def goodRun(rootFile=""):
     try:
         return int(rootFile[-11:-5])
     except ValueError:
-        print "Could not determine run number from file named '%s'." % rootFile
+        print("Could not determine run number from file named '%s'." % rootFile)
         return
 
 
@@ -184,7 +185,7 @@ def compare(inputFile="", outputDir="", run=0, stem="compare", moreArgs=[]):
 
 
 def report(d={}, subject=""):
-    print subject
+    print(subject)
     if d.get("stderr") or d.get("returncode"):
         if os.path.exists("/bin/mail"):
             cmd = "echo '%s' |& mail -s '%s' %s" % (blob(d),
@@ -192,7 +193,7 @@ def report(d={}, subject=""):
                                                     os.environ["USER"])
             os.system(cmd)
         else:
-            print blob(d)
+            print(blob(d))
 
 
 def runs(runListFile="",
@@ -201,9 +202,9 @@ def runs(runListFile="",
          select=lambda x: False,
          ):
     assert runListFile
-    runs = filter(lambda x: minimumRun <= x, selectedRuns(select, runListFile))
+    runs = [x for x in selectedRuns(select, runListFile) if minimumRun <= x]
     if maximumRun:
-        runs = filter(lambda x: x <= maximumRun, runs)
+        runs = [x for x in runs if x <= maximumRun]
     return runs
 
 
@@ -233,7 +234,7 @@ def go(baseDir="",
                                           dependsUpon=dependsUpon)
 
         if debug:
-            print run, ready, procFlag, doneFlag, process
+            print(run, ready, procFlag, doneFlag, process)
 
         if ready:
             fileName = "/store/group/dpg_hcal/comm_hcal/USC/USC_%d.root" % run
@@ -254,11 +255,11 @@ def go(baseDir="",
             report(d, subject='Run %d: %s (%s)' % (run, suffix, url))
             if not d["returncode"]:
                 with open(doneFlag, "w") as f:
-                    print >> f, blob(d)
+                    print(blob(d), file=f)
 
     if not_found:
-       print "Runs not found in EOS:"
-       print not_found
+       print("Runs not found in EOS:")
+       print(not_found)
 
 
 def extraRuns(fileName=""):
@@ -273,12 +274,12 @@ def extraRuns(fileName=""):
 
         fields = line.split()
         if len(fields) != 1:
-            print "len(fields) %d != 1 in line %d of '%s'" % (len(fields), 1 + iLine, fileName)
+            print("len(fields) %d != 1 in line %d of '%s'" % (len(fields), 1 + iLine, fileName))
             continue
         try:
             out.append(int(fields[0]))
         except ValueError:
-            print "Could not determine run number in line %d of '%s'." % (1 + iLine, fileName)
+            print("Could not determine run number in line %d of '%s'." % (1 + iLine, fileName))
             continue
 
     f.close()

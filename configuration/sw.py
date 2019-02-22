@@ -9,6 +9,7 @@ def files_this_machine(run, nCyclesMax=1):
                  "data/FNAL_",
                  "/tmp/USC_",
                  "/hcaldepot1/data/USC_",
+                 "data/B904_Integration_",
                  "data/B904_Integration_0000",
                  "data/B904_Integration_10000",
                  "/localdata/B904_Integration_",
@@ -33,6 +34,8 @@ def files_eos_local(run):
         filename = "%s/archival/20160914_USC_LS1_runs212958-264260/USC_%d.root" % (stem, run)
     elif run < 280486:
         filename = "%s/USC/USC_%d.root" % (stem, run)
+    elif 100000000 < run:
+        filename = "%s/B904/run%d/B904_Integration_%d.root" % (stem, run, run)
     else:
         filename = "%s/USC/run%d/USC_%d.root" % (stem, run, run)
 
@@ -43,7 +46,7 @@ def dirs_global(run):
     #root://cms-xrd-global.cern.ch/
     # prefix = "root://eoscms.cern.ch/"
     prefix = ""
-    midfix = "000/%03d/%03d" % (run/1000, run % 1000)
+    midfix = "000/%03d/%03d" % (run // 1000, run % 1000)
     minidaq = "%s/eos/cms/store/t0streamer/Minidaq/A/%s/" % (prefix, midfix)
 
     out = []
@@ -55,7 +58,7 @@ def dirs_global(run):
 
 def crateList(usc=True):
     h = []
-    for crate in [3, 6, 7, 13] + range(20, 39): # USC
+    for crate in [3, 6, 7, 13] + list(range(20, 39)): # USC
         if crate in [23, 26, 27, 33] + [28, 36]:  # uHO + do not exist
             continue
         h.append(crate)
@@ -74,13 +77,13 @@ def set_default_feds1(options):
 
 
 def fedMap():
-    d = {"0xy": range(60, 74),
-         "7xy": range(700, 732),
-         "HO": range(724, 732),
-         "HBHE": range(1100, 1118),
-         "HF": range(1118, 1124),
+    d = {"0xy": list(range(60, 74)),
+         "7xy": list(range(700, 732)),
+         "HO": list(range(724, 732)),
+         "HBHE": list(range(1100, 1118)),
+         "HF": list(range(1118, 1124)),
          "HC": [1134, 1135],
-         "B904": range(1180, 1188) + range(1192, 1198),
+         "B904": list(range(1180, 1188)) + list(range(1192, 1198)),
          "WH14": [1776],
          }
     d["HBEF"] = d["HBHE"] + d["HF"]

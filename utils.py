@@ -57,7 +57,7 @@ def delete(thing):
 def bail():
     url = "http://root.cern.ch/drupal/content"
     url += "/how-use-use-python-pyroot-interpreter"
-    sys.exit("Could not find ROOT.py nor CppyyROOT.py.  See "+url)
+    sys.exit("Could not find ROOT.py.  See "+url)
 
 
 def findROOT():
@@ -69,21 +69,6 @@ def findROOT():
 
 
 def ROOT():
-    moduleNames = ["ROOT"]
-    if not cmssw():
-        moduleNames.insert(0, "CppyyROOT")
-
-    for moduleName in moduleNames:
-        try:
-            exec("import %s as r" % moduleName)
-            if moduleName != "ROOT":
-                print "Using " + moduleName
-            r.PyConfig.IgnoreCommandLineOptions = True
-            return r
-        except ImportError:
-            continue
-
-    findROOT()
     try:
         import ROOT as r
         r.PyConfig.IgnoreCommandLineOptions = True

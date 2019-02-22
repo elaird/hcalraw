@@ -15,7 +15,7 @@ def collected(tree=None, specs={}):
     for item in ["dump", "lastNAmcs", "nBytesPer", "skipWords64"]:
         kargs[item] = specs[item]
 
-    for fedId, wargs in sorted(specs["wargs"].iteritems()):
+    for fedId, wargs in sorted(specs["wargs"].items()):
         raw[fedId] = unpacked(fedData=specs["wfunc"](**wargs),
                               warn=specs["warnQuality"],
                               **kargs)
@@ -65,7 +65,7 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
 
     nWord64Trailer = 1
 
-    nWord64 = fedData.size()*nBytesPer/8
+    nWord64 = fedData.size() * nBytesPer // 8
     nWord16Skipped = 0
 
     nToSkip = len(set(skipWords64))
@@ -82,8 +82,8 @@ def unpacked(fedData=None, nBytesPer=None, headerOnly=False,
 
         if 12 <= dump:
             if not iWord64:
-                print "#iw64 w64"
-            print "%5d" % iWord64, "%016x" % word64
+                print("#iw64 w64")
+            print("%5d" % iWord64, "%016x" % word64)
 
         if iWord64 < header["iWordPayload0"]:
             decode.header(header, iWord64, word64, lastNAmcs)
@@ -155,7 +155,7 @@ def unpacked_sw_fed(fedData, header, nBytesPer, dump):
         printer.error("Unpacking of software FED %d is not implemented." % fedId)
         nBytesSW = fedData.size() * nBytesPer
         return {"header": header,
-                "trailer": {"nWord64": nBytesSW / 8},
+                "trailer": {"nWord64": nBytesSW // 8},
                 "other": {},
                 "nBytesSW": nBytesSW,
                }
@@ -171,14 +171,14 @@ def unpacked_histo(fedData, fedId, nBytesPer, dump):
     histograms = {}
     iPayload0 = 4
 
-    nWord64 = fedData.size() * nBytesPer / 8
+    nWord64 = fedData.size() * nBytesPer // 8
     for iWord64 in range(nWord64):
         word64 = w64(fedData, iWord64, nBytesPer)
 
         if 12 <= dump:
             if not iWord64:
-                print "#iw64 w64"
-            print "%5d" % iWord64, "%016x" % word64
+                print("#iw64 w64")
+            print("%5d" % iWord64, "%016x" % word64)
 
         if iWord64 < 2:
             decode.header(header, iWord64, word64)
@@ -199,7 +199,7 @@ def unpacked_histo(fedData, fedId, nBytesPer, dump):
             word32 = (word64 >> (32*i)) & 0xffffffff
             iWord32 = 2 * (iWord64 - iPayload0) + i
             jWord32 = iWord32 % nWords32PerChannel
-            key = iWord32 / nWords32PerChannel
+            key = iWord32 // nWords32PerChannel
             if key not in histograms:
                 histograms[key] = {}
             d = histograms[key]

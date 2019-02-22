@@ -10,11 +10,11 @@ import configuration.patterns
 
 
 def patterns(raw1={}, **_):
-    for fedId, raw in sorted(raw1.iteritems()):
-        if fedId is None:
-            continue
+    keys = [k for k in raw1.keys() if k is not None]
+    for fedId in sorted(keys):
+        raw = raw1[fedId]
 
-        for iBlock, block in sorted(raw["htrBlocks"].iteritems()):
+        for iBlock, block in sorted(raw["htrBlocks"].items()):
             if block["IsTTP"]:
                 continue
 
@@ -24,7 +24,7 @@ def patterns(raw1={}, **_):
             block["patternData"] = storePatternData(block["channelData"], header["utca"], nTsMax)
             if 0 <= raw1[None]["dump"]:
                 # print "Crate=%2d, Slot=%2d" % (block["Crate"], block["Slot"])
-                print "\n".join(lines(header, iBlock, block, nTsMax))
+                print("\n".join(lines(header, iBlock, block, nTsMax)))
 
 
 def lines(h, iBlock, block, nTsMax):
@@ -40,7 +40,7 @@ def lines(h, iBlock, block, nTsMax):
     else:
         out = [""]
 
-    for fiber1, fd in sorted(block["patternData"].iteritems()):
+    for fiber1, fd in sorted(block["patternData"].items()):
         out += lines_fiber_pair(fiber1, fd["flavor"], fd["patternData"], h["utca"], moduleId)
 
     return out
@@ -99,7 +99,7 @@ def feWord(d, fiber, iTs):
     word = None
     flavor = None
 
-    for key, v in d.iteritems():
+    for key, v in d.items():
         if v["Fiber"] != fiber:
             continue
 
@@ -244,7 +244,7 @@ def storePatternData(d={}, utca=None, nTsMax=None):
         offset += 1
 
     out = {}
-    for iFiberPair in range(configuration.hw.nFibers(utca) / 2):
+    for iFiberPair in range(configuration.hw.nFibers(utca) // 2):
         fiber1 = 2*iFiberPair + offset
         out[fiber1] = {"flavor": None,
                        "patternData": [],
@@ -259,8 +259,8 @@ def storePatternData(d={}, utca=None, nTsMax=None):
                 flavors.append(flavor)
                 feWords.append(word)
 
-            flavors = filter(lambda x: x is not None, set(flavors))
-            assert (len(flavors) <= 1) or set(flavors) == set([0L, 1L]) or set(flavors) == set([5L, 6L]), flavors
+            flavors = [x for x in set(flavors) if x is not None]
+            assert (len(flavors) <= 1) or set(flavors) == set([0, 1]) or set(flavors) == set([5, 6]), flavors
 
             pd = None
             if not flavors:

@@ -109,7 +109,7 @@ def pruneFeds(chain, s):
         elif not raw.size():
             remove[fedId] = "read zero bytes"
 
-    for fedId, msg in sorted(remove.iteritems()):
+    for fedId, msg in sorted(remove.items()):
         del wargs[fedId]
         # printer.warning("removing FED %4d from spec (%s)." % (fedId, msg))
     if remove:

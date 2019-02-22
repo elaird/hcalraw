@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import collections, optparse, os
 import graphs, oneRun, printer, utils
@@ -35,7 +35,7 @@ def global_eos(run, hhmmMin=None, quiet=False):
         #     continue
 
         ll = utils.commandOutputFull("eos ls -l %s" % d)
-        listings = filter(lambda x: x, ll["stdout"].split("\n"))
+        listings = [x for x in ll["stdout"].split("\n") if x]
 
         coords = []
         for listing in listings:
@@ -47,11 +47,11 @@ def global_eos(run, hhmmMin=None, quiet=False):
         coords.sort()
         if hhmmMin:
             mmMin = hhmmMin % 100
-            hhMin = hhmmMin / 100
-            coords = filter(lambda x: hhMin < x[2] or (hhMin == x[2] and mmMin <= x[3]), coords)
+            hhMin = hhmmMin // 100
+            coords = [x for x in coords if hhMin < x[2] or (hhMin == x[2] and mmMin <= x[3])]
             if not quiet:
                 for c in coords:
-                    print c
+                    print(c)
 
         files = []
         for c in coords:
@@ -126,7 +126,7 @@ def pruned(files):
         pieces[filename].append(f)
 
     out = []
-    for filename, bases in sorted(pieces.iteritems()):
+    for filename, bases in sorted(pieces.items()):
         out.append(sorted(bases)[0])
 
     return out
@@ -147,7 +147,7 @@ def go(options, run, nRuns):
     if 2 <= nFiles:
         options.file1 = ",".join(files)
         if options.hhmm is None:
-            options.sparseLoop = max(1, options.nEventsMax / nFiles)
+            options.sparseLoop = max(1, options.nEventsMax // nFiles)
         else:
             options.sparseLoop = -1
     else:
