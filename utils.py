@@ -55,8 +55,7 @@ def delete(thing):
 
 
 def bail():
-    url = "http://root.cern.ch/drupal/content"
-    url += "/how-use-use-python-pyroot-interpreter"
+    url = "https://root.cern.ch/how/how-use-pyroot-root-python-bindings"
     sys.exit("Could not find ROOT.py.  See "+url)
 
 
