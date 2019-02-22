@@ -147,7 +147,7 @@ def report(extra=None, missing=None, different=None, same=None, reference=None, 
 
     count = 0
     for iMissing in range(nMissingMin, 1 + nMissingMax):
-        count += nMissing.values().count(iMissing)
+        count += list(nMissing.values()).count(iMissing)
     if not count:
         print("None")
 
