@@ -96,6 +96,7 @@ def fiberCount(feCoords=[]):
 def printTable(rbxes={}, header="", zero="  ", reference=None, onlyDet=None, excludeDet=None):
     if header:
         header = "| %s |" % header
+        print("")
         print("-"*len(header))
         print(header)
         print("-"*len(header))
@@ -140,6 +141,7 @@ def report(extra=None, missing=None, different=None, same=None, reference=None, 
                excludeDet=options.exclude)
 
     header = "| RBXes with (%d <= n missing fibers <= %d) |" % (nMissingMin, nMissingMax)
+    print("")
     print("-" * len(header))
     print(header)
     print("-" * len(header))
@@ -186,7 +188,8 @@ def go(fileName="", options=None):
     assert not refMisc, "refMisc='%s'" % refMisc
 
     cabled, misc = mapping(sys.stdin, skip=["Xrd", "TClassTable", "nologin"])
-    print("".join(misc))
+    if misc:
+        print("".join(misc))
 
     report(*diffs(ref, cabled), reference=ref, options=options)
 
