@@ -129,10 +129,10 @@ def fe_word_qie11b(feWord88, dct, iTs):
     # FIXME: add missing bits:
     # Byte1  = isAnyTDC61, isAnyTDC60, isAnyTDC59, isAnyTDC58, 2-bit consensus_CapID, CapEr, Available (formerly BC0)
 
-    iByteQ = 8 * (1 + dct["FibCh"])
-    feWord88 |= (dct["QIE"][iTs] & 0xff) << iByteQ
-    iByteT = 72 + 2 * dct["FibCh"]
-    feWord88 |= (dct["TDC"][iTs] & 0x3 ) << iByteT
+    iBitQ = 8 * (1 + dct["FibCh"])
+    feWord88 |= (dct["QIE"][iTs] & 0xff) << iBitQ
+    iBitT = 72 + 2 * dct["FibCh"]
+    feWord88 |= (dct["TDC"][iTs] & 0x3 ) << iBitT
     return feWord88
 
 
