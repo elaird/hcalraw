@@ -268,7 +268,7 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
             l["Top"] = " "
             l["ModuleId"] = -1  # removed below
         else:
-            # https://svnweb.cern.ch/cern/wsvn/cmshcos/trunk/hcalHW/src/common/hcalHTR.cc
+            # https://gitlab.cern.ch/cmshcos/hcal/blob/integration/hcalHW/src/common/hcalHTR.cc
             # int id=(m_crate<<6)+((m_slot&0x1F)<<1)+((true_for_top)?(1):(0));
             # fpga->dev->write("HTRsubmodN",id);
             l["Crate"] = moduleId >> 6
@@ -301,7 +301,7 @@ def htrHeaderV0(l={}, w=None, i=None, utca=None):
         l["PipelineLength"] = w & 0xff
         if l["IsTTP"]:
             l["TTPAlgo"] = (w >> 8) & 0x7
-            # https://svnweb.cern.ch/cern/wsvn/cmshcos/trunk/hcalTrig/src/common/hcalTechTrigProcessor.cc
+            # https://gitlab.cern.ch/cmshcos/hcal/blob/integration/hcalTrig/src/common/hcalTechTrigProcessor.cc
             # m_id.value()=m_slot*100+m_crateId;
             l["Slot"] = l["ModuleId"] // 100
             l["Crate"] = l["ModuleId"] % 100
