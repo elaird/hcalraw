@@ -2,8 +2,8 @@
 # uHTR histo   https://gitlab.cern.ch/cmshcos/hcal/blob/integration/hcalUHTR/src/common/uHTRSource.cc
 # uMNio        https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=12925
 # HTR          https://cms-docdb.cern.ch/cgi-bin/DocDB/RetrieveFile?docid=3327&filename=HTR_MainFPGA.pdf
-# TTP          https://cmsdoc.cern.ch/cms/HCAL/document/Aux/HcalTechTriggerProcessor/dataformat.html
-# DCC2         https://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/DCC/FormatGuide.pdf
+# TTP          https://cmsdoc.cern.ch/cms/HCALdocs/document/Aux/HcalTechTriggerProcessor/dataformat.html
+# DCC2         https://cmsdoc.cern.ch/cms/HCALdocs/document/CountingHouse/DCC/FormatGuide.pdf
 # MOL/FEROL    https://twiki.cern.ch/twiki/bin/viewauth/CMS/CMD_FEROL_DOC
 # AMC13        https://ohm.bu.edu/~hazen/CMS/AMC13/UpdatedDAQPath_2014-05-01.pdf
 # thru 2014-04 https://ohm.bu.edu/~hazen/CMS/SLHC/HcalUpgradeDataFormat_v1_2_3.pdf

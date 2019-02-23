@@ -124,7 +124,7 @@ def string013(code=None, flavor=None):
 
 
 def expectedCrate(fedId):
-    # http://cmsdoc.cern.ch/cms/HCAL/document/CountingHouse/Crates/VME_interfaces_newPCs.htm
+    # http://cmsdoc.cern.ch/cms/HCALdocs/document/CountingHouse/Crates/VME_interfaces_newPCs.htm
     return {350:  4,
             351:  0,
             352:  1,
