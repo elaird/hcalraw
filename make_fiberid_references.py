@@ -5,21 +5,14 @@ from configuration.patterns import lineStart
 
 
 def B904():
+    # RM
     crate = 61
     slot = 1
     uhtr_fib = -1
-
-    for iRbx in range(1, 13):
+    for iRbx in range(1, 14):
         rbx = "HB%02d" % iRbx
         for rm in range(1, 5):
-            if rm in [1, 3]:
-                rm_fibs = [3, 2, 1, 8, 7, 6, 5, 4]
-            elif rm in [2, 4]:
-                rm_fibs = [6, 7, 8, 1, 2, 3, 4, 5]
-            else:
-                rm_fibs = [1, 2]
-
-            for rm_fib in rm_fibs:
+            for rm_fib in range(1, 9):
                 uhtr_fib += 1
                 if 23 < uhtr_fib:
                     uhtr_fib -= 24
@@ -28,6 +21,20 @@ def B904():
                     slot -= 12
                     crate += 1
                 print("%su%2d %02d %02d: %s %1d %1d" % (lineStart, crate, slot, uhtr_fib, rbx, rm, rm_fib))
+
+    # CU
+    crate = 63
+    slot = 9
+    uhtr_fib = -1
+    for iRbx in range(1, 14):
+        rbx = "HB%02d" % iRbx
+        rm = 5
+        for rm_fib in range(1, 3):
+            uhtr_fib += 1
+            if 23 < uhtr_fib:
+                uhtr_fib -= 12
+                slot -= 1
+            print("%su%2d %02d %02d: %s %1d %1d" % (lineStart, crate, slot, uhtr_fib, rbx, rm, rm_fib))
 
 
 def loop(filenames=[], nExpected=None, iCrate=None, iUhtr=None, iUhtrFib=None, iRbx=None, iRm=None, iRmFib=None, vme=False, fedOffset=0):
