@@ -108,13 +108,14 @@ def string013(code=None, flavor=None):
     if ng_looks_broken(code):
         return "0x%022x" % code
 
-    if flavor == 3:  # FIXME
+    if flavor == 3:
+        # see 10-jul-2018 entry in http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/HBHE/ngHBHE/ngHB/ngHB_2018_mapping_design.txt
         if rm in [1, 3]:
             rm_fibs = [3, 2, 1, 8, 7, 6, 5, 4]
         elif rm in [2, 4]:
             rm_fibs = [4, 5, 6, 7, 8, 1, 2, 3]
         else:
-            rm_fibs = [2, 1]
+            rm_fibs = [2, 1]  # FIXME: check
         rm_fib = rm_fibs[2 * (qie_card - 1) + top]
     else:
         rm_fib = 2 * qie_card - 1 + link_num
