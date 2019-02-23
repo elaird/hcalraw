@@ -67,24 +67,18 @@ def check_for_duplicates(l):
             sys.exit("found duplicates: %s %s" % (be, str(lst)))
 
 
-
-
-# def HB():
-#     return loop(["Lmap_ngHB_M_20190210.txt"], nExpected=27,
-#                 iCrate=-7, iUhtr=-6, iUhtrFib=-5, iRbx=6, iRm=13, iRmFib=14)
-
 def HB():
-    return loop(["2018HCALLMap_HB_K_20180501.txt"], nExpected=26,
-                iCrate=19, iUhtr=20, iUhtrFib=21, iRbx=6, iRm=11, iRmFib=12)
+    return loop(["Lmap_ngHB_M_20190223.txt"], nExpected=27,
+                iCrate=-7, iUhtr=-6, iUhtrFib=-5, iRbx=6, iRm=12, iRmFib=13)
 
 
 def HBcalib():
-    return loop(["2018HCALLMap_HBCalib_K_20180501.txt"], nExpected=29,
+    return loop(["Lmap_ngHBcalib_20190223.txt"], nExpected=29,
                 iCrate=24, iUhtr=25, iUhtrFib=26, iRbx=6, iRm=10, iRmFib=11)
 
 
 def HE():
-    return loop(["Lmap_ngHE_M_20190129.txt"], nExpected=26,
+    return loop(["Lmap_ngHE_M_20190223.txt"], nExpected=26,
                 iCrate=19, iUhtr=20, iUhtrFib=21, iRbx=6, iRm=11, iRmFib=12)
 
 
