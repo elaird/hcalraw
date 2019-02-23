@@ -107,8 +107,19 @@ def string013(code=None, flavor=None):
     subdet, side, rbx_number = decoded_rbx(code)
     if ng_looks_broken(code):
         return "0x%022x" % code
+
+    if flavor == 3:  # FIXME
+        if rm in [1, 3]:
+            rm_fibs = [3, 2, 1, 8, 7, 6, 5, 4]
+        elif rm in [2, 4]:
+            rm_fibs = [4, 5, 6, 7, 8, 1, 2, 3]
+        else:
+            rm_fibs = [2, 1]
+        rm_fib = rm_fibs[2 * (qie_card - 1) + top]
     else:
-        return "%s%s%02d %2d %d" % (subdet, side, rbx_number, rm, 2 * qie_card - 1 + (top if flavor == 3 else link_num))
+        rm_fib = 2 * qie_card - 1 + link_num
+
+    return "%s%s%02d %2d %d" % (subdet, side, rbx_number, rm, rm_fib)
 
 
 def expectedCrate(fedId):
