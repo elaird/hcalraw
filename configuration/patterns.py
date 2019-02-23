@@ -115,7 +115,7 @@ def string013(code=None, flavor=None):
         elif rm in [2, 4]:
             rm_fibs = [4, 5, 6, 7, 8, 1, 2, 3]
         else:
-            rm_fibs = [2, 1]  # FIXME: check
+            rm_fibs = [1, 2]  # see 20-jan-2019 entry in http://cmsdoc.cern.ch/cms/HCALdocs/document/904/log/logbook_2019.txt
         rm_fib = rm_fibs[2 * (qie_card - 1) + top]
     else:
         rm_fib = 2 * qie_card - 1 + link_num
