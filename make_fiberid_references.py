@@ -29,7 +29,7 @@ def B904():
     for iRbx in range(1, 14):
         rbx = "HB%02d" % iRbx
         rm = 5
-        for rm_fib in [2, 1]:
+        for rm_fib in [1, 2]:
             uhtr_fib += 1
             if 23 < uhtr_fib:
                 uhtr_fib -= 12
