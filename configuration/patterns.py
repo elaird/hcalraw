@@ -114,8 +114,10 @@ def string013(code=None, flavor=None):
             rm_fibs = [3, 2, 1, 8, 7, 6, 5, 4]
         elif rm in [2, 4]:
             rm_fibs = [4, 5, 6, 7, 8, 1, 2, 3]
-        else:
+        elif rm == 5:
             rm_fibs = [2, 1]  # http://cmsonline.cern.ch/cms-elog/1079632
+        else:
+            rm_fibs = [0] * 8
         rm_fib = rm_fibs[2 * (qie_card - 1) + top]
     else:
         rm_fib = 2 * qie_card - 1 + link_num
