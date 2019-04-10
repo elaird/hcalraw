@@ -1,9 +1,9 @@
 # QIE  8: https://cms-docdb.cern.ch/cgi-bin/PublicDocDB/RetrieveFile?docid=3327&version=14&filename=HTR_MainFPGA.pdf
 # errata: http://cmsonline.cern.ch/cms-elog/807780
 #
-# QIE 10 (HF): https://svnweb.cern.ch/trac/cms-firmwsrc/browser/hcal/HF_RM_igloo2/trunk/docs/HF_RM_DataFormat.txt
-# QIE 11 (HE): https://svnweb.cern.ch/trac/cms-firmwsrc/browser/hcal/HE_RM_igloo2/trunk/docs/HE_RM_DataFormat.txt
-# QIE 11 (HB): https://svnweb.cern.ch/trac/cms-firmwsrc/browser/hcal/HB_RM_igloo2/trunk/docs/HB_RM_DataFormat.txt
+# QIE 10 (HF): https://gitlab.cern.ch/cms-hcal-fpga/hf_rm_igloo2/blob/master/docs/HF_RM_DataFormat.txt
+# QIE 11 (HE): https://gitlab.cern.ch/cms-hcal-fpga/he_rm_igloo2/blob/master/docs/HE_RM_DataFormat.txt
+# QIE 11 (HB): https://gitlab.cern.ch/cms-hcal-fpga/hb_rm_igloo2/blob/master/docs/HB_RM_DataFormat.txt
 
 import configuration.hw
 import configuration.patterns
