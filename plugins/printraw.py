@@ -312,7 +312,7 @@ def uhtrTriggerData(d={}, dump=None, crate=None, slot=None, top="", nonMatched=[
 def htrChannelData(lst=[], crate=0, slot=0, top="",
                    skipFibers=[], skipFibChs=[], errorsReq=None,
                    nonMatched=[], latency={}, zs={},
-                   te_tdc=False, nTsMax=None, perTs=None):
+                   nTsMax=None, perTs=None):
     out = []
     columns = ["  Cr", "Sl", "Fi", "Ch", "Fl", "LE", "CE"]
     if perTs:
@@ -323,6 +323,8 @@ def htrChannelData(lst=[], crate=0, slot=0, top="",
 
     columns += ["0xA0 " + " ".join(["A%1d" % i for i in range(1, nTsMax)]),
                 "0xL0 " + " ".join(["L%1d" % i for i in range(1, nTsMax)])]
+
+    te_tdc = lst and lst[0].get("Flavor") == 2
 
     if te_tdc:
         columns += ["0xT0 " + " ".join(["T%1d" % i for i in range(1, nTsMax)])]
