@@ -80,8 +80,8 @@ def HB():
 
 
 def HBcalib():
-    return loop(["Lmap_ngHBcalib_20190223.txt"], nExpected=29,
-                iCrate=24, iUhtr=25, iUhtrFib=26, iRbx=6, iRm=10, iRmFib=11)
+    return loop(["Lmap_ngHBcalib_M_20190416.txt"], nExpected=31,
+                iCrate=-5, iUhtr=-4, iUhtrFib=-3, iRbx=6, iRm=11, iRmFib=12)
 
 
 def HE():
@@ -116,6 +116,7 @@ def HOcalib():
 
 def USC():
     # see http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-jan-29/Lmap/
+    # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-apr-16/Lmap/
     l = HB() + HBcalib() + HE() + HEcalib() + HF() + HFcalib() + HO() + HOcalib()
     l = set(l)
     check_for_duplicates(l)
