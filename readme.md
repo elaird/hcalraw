@@ -3,7 +3,6 @@
 ssh lxplus.cern.ch
 git clone https://github.com/elaird/hcalraw.git
 cd hcalraw
-source env/lxplus6.sh
 cd cpp; make -j 5; cd -
 
 ./look.py 284928
