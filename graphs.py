@@ -1136,10 +1136,10 @@ def makeSummaryPdfMulti(inputFiles=[], feds1s=[], feds2s=[], pdf="summary.pdf", 
             feds1 = kargs["feds1"]  # stash default
 
             kargs["feds1"] = range(34) # iterate over fibers
-            pageThree(stem="ADC_vs_TS_HEP17_ErrF0_fib%d", gridX=True, **kargs)
+            pageThree(stem="ADC_vs_TS_HBP16_ErrF0_fib%d", gridX=False, **kargs)
 
             kargs["feds1"] = range(10) # iterate over TS
-            pageThree(stem="HEP17_ADC_TS%d", gopts="hist", logY=True, **kargs)
+            pageThree(stem="HBP16_ADC_TS%d", gopts="hist", logY=True, **kargs)
 
             kargs["feds1"] = feds1  # restore default
 

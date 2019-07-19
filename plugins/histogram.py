@@ -523,35 +523,43 @@ def histogramAdcs(book, fedId, block, channelData, adcs, nTsMax, errf, eq):
                   (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
                   title="FED %d (ErrF %s 0);time slice;ADC;Counts / bin" % (fedId, eq))
 
-        # the 32 fibers of HEP17 carrying SiPM data
-        if block["Crate"] != 34:
+        if block["Crate"] != 34: # sectors 16/17
             continue
 
+        label = ""
         fib = 0
-        if block["Slot"] == 12:
+        if block["Slot"] == 7:  # HBP16
+            label = "HBP16"
+            fib = channelData["Fiber"]
+        elif block["Slot"] == 8 and 2 <= channelData["Fiber"] <= 11:  # HBP16
+            label = "HBP16"
+            fib = 24 + channelData["Fiber"] - 2
+        elif block["Slot"] == 12:  # HEP17
+            label = "HEP17"
             if channelData["Fiber"] % 12 == 11:  # CU fibers
                 fib = 32 + channelData["Fiber"] / 12
             else:
                 fib += 12 + channelData["Fiber"] - 1
                 if 13 <= channelData["Fiber"]:
                     fib -= 2
-        elif block["Slot"] == 11 and 12 <= channelData["Fiber"]:
+        elif block["Slot"] == 11 and 12 <= channelData["Fiber"]:  # HEP17
+            label = "HEP17"
             fib += channelData["Fiber"] - 12
         else:
             continue
 
-        if (2 <= channelData["Flavor"]) and (not channelData["ErrF"]):
-            printer.warning("Crate %d Slot %d Fib %d Channel %d has flavor %d" % \
-                            (block["Crate"], block["Slot"], channelData["Fiber"], channelData["FibCh"], channelData["Flavor"]))
+        # if (2 <= channelData["Flavor"]) and (not channelData["ErrF"]):
+        #     printer.warning("Crate %d Slot %d Fib %d Channel %d has flavor %d" % \
+        #                     (block["Crate"], block["Slot"], channelData["Fiber"], channelData["FibCh"], channelData["Flavor"]))
 
         book.fill((i, adc),
-                  "ADC_vs_TS_HEP17_%s_fib%d" % (errf, fib),
+                  "ADC_vs_TS_%s_%s_fib%d" % (label, errf, fib),
                   (nTsMax, nAdcMax), (-0.5, -0.5), (nTsMax - 0.5, nAdcMax - 0.5),
-                  title="HEP17 Fib %d;time slice;ADC;Counts / bin" % fib)
+                  title="%s Fib %d;time slice;ADC;Counts / bin" % (label, fib))
         book.fill(adc,
-                  "HEP17_ADC_TS%d" % i,
+                  "%s_ADC_TS%d" % (label, i),
                   nAdcMax, -0.5, nAdcMax - 0.5,
-                  title="HEP17 TS%d;ADC;Counts / bin" % i)
+                  title="%s TS%d;ADC;Counts / bin" % (label, i))
 
         # nEvN = 20
         # title2 = "%s_vs_EvN_%d" % (title, fedId)
