@@ -11,7 +11,7 @@ def main(directory):
         if not dat.endswith(".dat"):
             continue
 
-        s = '"file://%s/%s"' % (directory, dat)
+        s = '"file://%s/%s"' % (os.path.abspath(directory), dat)
         py = "%s/%s" % (directory, dat.replace(".dat", ".py"))
         root = "%s/%s" % (directory, dat.replace(".dat", ".root"))
         roots.append(root)
