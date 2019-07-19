@@ -14,7 +14,7 @@ def this_machine(run):
     return out
 
 
-def local_eos(run, check=False):
+def local_eos(run, check=True):
     out = []
     for filename in sw.files_eos_local(run):
         shortName = filename[filename.find("/store"):]
