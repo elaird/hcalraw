@@ -75,7 +75,7 @@ def oparser(arg=""):
                     help="Consider only the final N AMCs per FED (0 means all).")
     less.add_option("--first-n-ts",
                     dest="firstNTs",
-                    default=10,
+                    default=8,
                     metavar="N",
                     type="int",
                     help="Consider only the first N time slices (default is 10).")
