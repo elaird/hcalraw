@@ -45,6 +45,9 @@ def loop(filenames=[], nExpected=None, iCrate=None, iUhtr=None, iUhtrFib=None, i
             if line.startswith("#") or not line:
                 continue
             fields = line.split()
+            if not fields:
+                continue
+
             if fields[0] == "side" or fields[0].startswith("#"):
                 continue
 
@@ -105,8 +108,8 @@ def HFcalib():
 
 
 def HO():
-    return loop(["Lmap_HO_M_20190129.txt"], nExpected=25, vme=True,
-                iCrate=-2, iUhtr=-4, iUhtrFib=19, iRbx=6, iRm=12, iRmFib=13)
+    return loop(["Lmap_c38_aligned.txt"], nExpected=22,
+                iCrate=16, iUhtr=17, iUhtrFib=19, iRbx=6, iRm=12, iRmFib=13)
 
 
 def HOcalib():
@@ -117,7 +120,8 @@ def HOcalib():
 def USC():
     # see http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-jan-29/Lmap/
     # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-apr-16/Lmap/
-    l = HB() + HBcalib() + HE() + HEcalib() + HF() + HFcalib() + HO() + HOcalib()
+    # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/HO/ngHO/v1/Lmap_c38_aligned.txt
+    l = HB() + HBcalib() + HE() + HEcalib() + HF() + HO() # + HFcalib() + HOcalib()
     l = set(l)
     check_for_duplicates(l)
     for line in sorted(l):
