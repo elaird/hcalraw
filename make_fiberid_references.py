@@ -108,7 +108,7 @@ def HFcalib():
 
 
 def HO():
-    return loop(["Lmap_c38_aligned.txt"], nExpected=22,
+    return loop(["All_crates_aligned.txt"], nExpected=22,
                 iCrate=16, iUhtr=17, iUhtrFib=19, iRbx=6, iRm=12, iRmFib=13)
 
 
@@ -120,7 +120,7 @@ def HOcalib():
 def USC():
     # see http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-jan-29/Lmap/
     # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-apr-16/Lmap/
-    # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/HO/ngHO/v1/Lmap_c38_aligned.txt
+    # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/HO/ngHO/All_crates_aligned.txt
     l = HB() + HBcalib() + HE() + HEcalib() + HF() + HO() # + HFcalib() + HOcalib()
     l = set(l)
     check_for_duplicates(l)
