@@ -112,17 +112,11 @@ def HO():
                 iCrate=16, iUhtr=17, iUhtrFib=19, iRbx=6, iRm=12, iRmFib=13)
 
 
-def HOcalib():
-    return loop(["Lmap_ngHOCalib_aligned.txt"], nExpected=22,
-                iCrate=17, iUhtr=18, iUhtrFib=20, iRbx=6, iRm=12, iRmFib=13)
-
-
 def USC():
     # see http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-jan-29/Lmap/
     # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-apr-16/Lmap/
-    # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/HO/ngHO/V6/text_aligned/ngHO_Lmap_allCates_alligned.txt (removing lines 2296 onward)
-    # and https://cms-docs.web.cern.ch/cms-docs/hcaldocs//document/Mapping/HO/ngHO/V6/text_aligned/Lmap_ngHOCalib_aligned.txt (assing space between "uHTR_fib" and "FEDid")
-    l = HB() + HBcalib() + HE() + HEcalib() + HF() + HO() + HOcalib() # + HFcalib()
+    # and https://desycloud.desy.de/index.php/s/mCg4JeYp6XpisCo
+    l = HB() + HBcalib() + HE() + HEcalib() + HF() + HO() # + HFcalib()
     l = set(l)
     check_for_duplicates(l)
     for line in sorted(l):
