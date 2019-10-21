@@ -108,19 +108,19 @@ def HFcalib():
 
 
 def HO():
-    return loop(["All_crates_aligned.txt"], nExpected=22,
+    return loop(["Lmap_allCrates_aligned.txt"], nExpected=22,
                 iCrate=16, iUhtr=17, iUhtrFib=19, iRbx=6, iRm=12, iRmFib=13)
 
 
 def HOcalib():
-    return loop(["Lmap_HOcalib_M_20190129.txt"], nExpected=26, vme=True,
+    return loop(["ngHO_Lmap_allCates_alligned.txt"], nExpected=26, vme=True,
                 iCrate=-2, iUhtr=-3, iUhtrFib=-5, iRbx=6, iRm=10, iRmFib=11)
 
 
 def USC():
     # see http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-jan-29/Lmap/
     # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-apr-16/Lmap/
-    # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/HO/ngHO/All_crates_aligned.txt
+    # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/HO/ngHO/V6/text_aligned/ngHO_Lmap_allCates_alligned.txt
     l = HB() + HBcalib() + HE() + HEcalib() + HF() + HO() # + HFcalib() + HOcalib()
     l = set(l)
     check_for_duplicates(l)
