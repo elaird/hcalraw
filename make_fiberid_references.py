@@ -48,7 +48,7 @@ def loop(filenames=[], nExpected=None, iCrate=None, iUhtr=None, iUhtrFib=None, i
             if not fields:
                 continue
 
-            if fields[0] == "side" or fields[0].startswith("#"):
+            if fields[0][1:] == "ide" or fields[0].startswith("#"):
                 continue
 
             if len(fields) != nExpected and nExpected is not None:
@@ -108,20 +108,21 @@ def HFcalib():
 
 
 def HO():
-    return loop(["Lmap_allCrates_aligned.txt"], nExpected=22,
+    return loop(["ngHO_Lmap_allCates_alligned.txt"], nExpected=22,
                 iCrate=16, iUhtr=17, iUhtrFib=19, iRbx=6, iRm=12, iRmFib=13)
 
 
 def HOcalib():
-    return loop(["ngHO_Lmap_allCates_alligned.txt"], nExpected=26, vme=True,
-                iCrate=-2, iUhtr=-3, iUhtrFib=-5, iRbx=6, iRm=10, iRmFib=11)
+    return loop(["Lmap_ngHOCalib_aligned.txt"], nExpected=22,
+                iCrate=17, iUhtr=18, iUhtrFib=20, iRbx=6, iRm=12, iRmFib=13)
 
 
 def USC():
     # see http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-jan-29/Lmap/
     # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/Yuan/2019-apr-16/Lmap/
-    # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/HO/ngHO/V6/text_aligned/ngHO_Lmap_allCates_alligned.txt
-    l = HB() + HBcalib() + HE() + HEcalib() + HF() + HO() # + HFcalib() + HOcalib()
+    # and http://cmsdoc.cern.ch/cms/HCALdocs/document/Mapping/HO/ngHO/V6/text_aligned/ngHO_Lmap_allCates_alligned.txt (removing lines 2296 onward)
+    # and https://cms-docs.web.cern.ch/cms-docs/hcaldocs//document/Mapping/HO/ngHO/V6/text_aligned/Lmap_ngHOCalib_aligned.txt (assing space between "uHTR_fib" and "FEDid")
+    l = HB() + HBcalib() + HE() + HEcalib() + HF() + HO() + HOcalib() # + HFcalib()
     l = set(l)
     check_for_duplicates(l)
     for line in sorted(l):
