@@ -162,7 +162,7 @@ def oneHtr(iBlock=None, p={}, dump=None, utca=None,
     if p["IsIO"]:
         cd = ioData(p)
     else:
-        cd = htrChannelData(p["channelData"].values(),
+        cd = htrChannelData(list(p["channelData"].values()),
                             crate=p["Crate"],
                             slot=p["Slot"],
                             top=p["Top"],
