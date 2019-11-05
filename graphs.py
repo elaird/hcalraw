@@ -291,7 +291,10 @@ def graphLoop(f, lst, sFunc):
         if not g.GetN():
             continue
 
-        title, xTitle, yTitle = g.GetTitle().split(";")
+        title = g.GetTitle()
+        xTitle = g.GetXaxis().GetTitle()
+        yTitle = g.GetYaxis().GetTitle()
+
         if not h0:
             h0 = r.TH2D("h0_%s" % g.GetName(), ";%s;%s" % (xTitle, yTitle), 1, min(mins), max(maxs), 1, -0.1, 1.1)
             h0.SetStats(False)
