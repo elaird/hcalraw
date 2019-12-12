@@ -4066,3 +4066,11 @@ pattern on u38 08 20: HO2P10 3 4
 pattern on u38 08 21: HO2P10 3 5
 pattern on u38 08 22: HO010 4 7
 pattern on u38 08 23: HO2P10 3 7
+pattern on u38 09 00: HFP01 1 4
+pattern on u38 09 01: HFP03 1 4
+pattern on u38 09 02: HFP05 1 4
+pattern on u38 09 03: HFP07 1 4
+pattern on u38 09 04: HFM01 1 4
+pattern on u38 09 05: HFM03 1 4
+pattern on u38 09 06: HFM05 1 4
+pattern on u38 09 07: HFM07 1 4
