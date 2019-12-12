@@ -57,13 +57,9 @@ def dirs_global(run):
 
 
 def crateList(usc=True):
-    h = []
-    for crate in [3, 6, 7, 13] + list(range(20, 39)): # USC
-        if crate in [23, 26, 27, 33] + [28, 36]:  # uHO + do not exist
-            continue
-        h.append(crate)
+    h = set(range(20, 39)) - set([28, 33, 36])
     if usc:
-        return h
+        return list(h)
     else:  # B904
         return [50, 51, 52, 53, 61, 62, 63]
 
@@ -79,15 +75,13 @@ def set_default_feds1(options):
 def fedMap():
     d = {"0xy": list(range(60, 74)),
          "7xy": list(range(700, 732)),
-         "HO": list(range(1124, 1132)),
+         "HO": [1124, 1125, 1126, 1126, 1128, 1129, 1134, 1135],
          "HBHE": list(range(1100, 1118)),
          "HF": list(range(1118, 1124)),
-         "HC": [1134, 1135],
          "B904": list(range(1180, 1188)) + list(range(1192, 1198)),
          "WH14": [1776],
          }
-    d["HBEF"] = d["HBHE"] + d["HF"]
-    d["HCAL"] = d["HBHE"] + d["HF"] + d["HO"] + d["HC"]
+    d["HCAL"] = d["HBHE"] + d["HF"] + d["HO"]
     return d
 
 
