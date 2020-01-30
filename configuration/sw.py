@@ -75,7 +75,7 @@ def set_default_feds1(options):
 def fedMap():
     d = {"0xy": list(range(60, 74)),
          "7xy": list(range(700, 732)),
-         "HO": [1124, 1125, 1126, 1126, 1128, 1129, 1134, 1135],
+         "HO": [1124, 1125, 1126, 1127, 1128, 1129, 1134, 1135],
          "HBHE": list(range(1100, 1118)),
          "HF": list(range(1118, 1124)),
          "B904": list(range(1180, 1188)) + list(range(1192, 1198)),
