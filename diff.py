@@ -60,13 +60,16 @@ def diffs(ref={}, cabled={}):
     return extra, missing, different, same
 
 
-def pretty(be=None, fe=None):
+def pretty(be=None, fe=None, vme=False):
     if be:
         dcc, sp, fi = be
         if dcc.startswith("u"):
             crate = dcc[1:]
             slot = sp
-            s = "    %2s     %2s   %2s:  " % (crate, slot, fi)
+            if vme:
+                s = "    %2s     %2s   %2s:  " % (crate, slot, fi)
+            else:
+                s = "%2s %2s %2s:  " % (crate, slot, fi)
         else:
             crate = conf.expectedCrate(int(dcc))
             exp = configuration.hw.expectedVmeHtr(int(dcc), int(sp))
@@ -145,7 +148,11 @@ def report(extra=None, missing=None, different=None, same=None, reference=None, 
     print("-" * len(header))
     print(header)
     print("-" * len(header))
-    print("DCC(CR) SP(HTR) FI: ref. RBX RM FI")
+
+    if options.vme:
+        print("DCC(CR) SP(HTR) FI: ref. RBX RM FI")
+    else:
+        print("CR SL FI: ref. RBX RM FI")
 
     count = 0
     for iMissing in range(nMissingMin, 1 + nMissingMax):
@@ -156,16 +163,19 @@ def report(extra=None, missing=None, different=None, same=None, reference=None, 
     for be, ref in sorted(missing.items()):
         rbx = ref[0]
         if nMissingMin <= nMissing[rbx] <= nMissingMax:
-            print(pretty(be=be, fe=ref))
+            print(pretty(be=be, fe=ref, vme=options.vme))
 
     print("")
     print("-----------------------------------")
     print("| Fibers differing from reference |")
     print("-----------------------------------")
     if different:
-        print("DCC(CR) SP(HTR) FI: ref. RBX RM FI  |   cabled")
+        if options.vme:
+            print("DCC(CR) SP(HTR) FI: ref. RBX RM FI  |   cabled")
+        else:
+            print("CR SL FI: ref. RBX RM FI  |   cabled")
         for be, (ref, cabled) in sorted(different.items()):
-            print(pretty(be=be, fe=ref) + "  | " + pretty(fe=cabled))
+            print(pretty(be=be, fe=ref, vme=options.vme) + "  | " + pretty(fe=cabled, vme=options.vme))
     else:
         print("None")
 
@@ -174,9 +184,12 @@ def report(extra=None, missing=None, different=None, same=None, reference=None, 
     print("| Fibers acquired and valid, but absent from reference |")
     print("--------------------------------------------------------")
     if extra:
-        print("DCC(CR) SP(HTR) FI: cabled")
+        if options.vme:
+            print("DCC(CR) SP(HTR) FI: cabled")
+        else:
+            print("CR SL FI: cabled")
         for be, fe in sorted(extra.items()):
-            print(pretty(be=be, fe=fe))
+            print(pretty(be=be, fe=fe, vme=options.vme))
     else:
         print("None")
 
@@ -208,6 +221,11 @@ def opts():
                       metavar="n",
                       type="int",
                       help="maximum number of missing fibers per RBX to print in detailed table (default is 2)")
+    parser.add_option("--vme",
+                      dest="vme",
+                      default=False,
+                      action="store_true",
+                      help="support VME (DCC/spigot)")
     parser.add_option("--only",
                       dest="only",
                       default=None,
