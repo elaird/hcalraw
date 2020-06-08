@@ -62,7 +62,7 @@ export EOS=root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/archival/201609
 
 
 #### Dependencies
-* python (>=2.6)
+* python (>=2.7)
 * [ROOT](https://root.cern.ch/) (>=5.32)
 
 
