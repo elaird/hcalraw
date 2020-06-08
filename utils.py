@@ -41,7 +41,9 @@ def commandOutput(cmd=""):
 
 
 def commandOutputFull(cmd=""):
-    p = subprocess.Popen(cmd, shell=True,
+    p = subprocess.Popen(cmd,
+                         shell=True,
+                         universal_newlines=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE,
                          )
