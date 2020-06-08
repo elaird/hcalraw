@@ -49,11 +49,11 @@ def command(dat):
     return prefix, fed, root1, root2, cmd
 
 
-def rooted(dats=[], options=None):
+def rooted(options):
     feds = {}
 
     prefixes = []
-    for dat in dats:
+    for dat in options.dat_files:
         if not os.path.exists(dat):
             sys.exit("file %s does not exist." % dat)
 
@@ -135,9 +135,11 @@ def plot(prefix, roots, feds1s, feds2s):
 
 
 if __name__ == "__main__":
-    options, args = oparser(arg=".dat [.dat ...]").parse_args()
+    parser = oparser(file1=False)
+    parser.add_argument("dat_files",
+                        metavar="file.dat",
+                        nargs="+",
+                        help=".dat file(s)")
 
-    if not args:
-        sys.exit("Please provide at least one .dat file as an argument")
-
-    plot(*histogrammed(*rooted(args, options)))
+    options = parser.parse_args()
+    plot(*histogrammed(*rooted(options)))

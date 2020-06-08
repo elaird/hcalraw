@@ -28,4 +28,4 @@ def main(options):
 
 
 if __name__ == "__main__":
-    main(oparser().parse_args()[0])
+    main(oparser().parse_args())

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import collections, optparse, os
+import collections, os
 import graphs, oneRun, printer, utils
 from options import oparser
 from configuration import sw
@@ -69,46 +69,36 @@ def report(fileNames):
         printer.info("found %4d file(s) in %s/" % (len(fileNames), "/".join(bases)))
 
 
-def override(options, run, nRuns):
+def override(options, run):
     options.outputFile = "output/%d.root" % run
     if not options.nEventsMax:
         options.nEventsMax = 4
 
-    if (not options.quiet) and (nRuns == 1):
+    if (not options.quiet) and len(options.run_numbers) == 1:
         options.progress = True
         if options.dump == -1:
             options.dump = 0
 
 
 def opts():
-    parser = oparser(arg="RUN_NUMBER [RUN_NUMBER2 ...]")
+    parser = oparser(file1=False)
+    parser.add_argument("run_numbers",
+                        metavar="RUN_NUMBER",
+                        type=int,
+                        nargs="+",
+                        help="run number(s)")
 
-    look = optparse.OptionGroup(parser, "Options solely for use with look.py")
-    look.add_option("--quiet",
-                    dest="quiet",
-                    default=False,
-                    action="store_true",
-                    help="Print less to stdout")
-    look.add_option("--hhmm",
-                    dest="hhmm",
-                    default=None,
-                    type="int",
-                    help="minimum hhmm")
-    parser.add_option_group(look)
+    look = parser.add_argument_group("Options solely for use with look.py")
+    look.add_argument("--quiet",
+                      default=False,
+                      action="store_true",
+                      help="Print less to stdout")
+    look.add_argument("--hhmm",
+                      default=None,
+                      type=int,
+                      help="minimum hhmm")
 
-    options, args = parser.parse_args()
-
-    runs = []
-    for arg in args:
-        try:
-            runs.append(int(arg))
-        except ValueError:
-            printer.warning("Could not convert '%s' to an integer." % arg)
-
-    if not runs:
-        printer.error("Please provide a run number as the argument.")
-
-    return options, runs
+    return parser.parse_args()
 
 
 def search(run):
@@ -132,8 +122,8 @@ def pruned(files):
     return out
 
 
-def go(options, run, nRuns):
-    override(options, run, nRuns)
+def go(options, run):
+    override(options, run)
 
     files = ["dummy"] if options.noLoop else search(run)
 
@@ -161,13 +151,13 @@ def go(options, run, nRuns):
 
 
 def main():
-    options, runs = opts()
+    options = opts()
 
     roots = []
     feds1s = []
     feds2s = []
-    for run in runs:
-        retCode, feds1, feds2 = go(options, run, len(runs))
+    for run in options.run_numbers:
+        retCode, feds1, feds2 = go(options, run)
         if not retCode:
             roots.append(options.outputFile)
             feds1s.append(feds1)
