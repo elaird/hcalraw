@@ -254,7 +254,7 @@ def htrSummary(blocks=[], book=None, fedId=None,
         book.fill(len(block["triggerData"]), "nTpTowers_%d" % fedId, nTpTowerBins, -0.5, nTpTowerBins - 0.5,
                   title="FED %d;number of TP towers;HTRs / bin" % fedId)
 
-        nChannelBins = 75
+        nChannelBins = 101
         book.fill(len(block["channelData"]), "nChannels_%d" % fedId, nChannelBins, -0.5, 2*nChannelBins - 0.5,
                   title="FED %d;number of channels;HTRs / bin" % fedId)
 
