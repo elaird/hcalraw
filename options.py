@@ -8,7 +8,12 @@ def oparser(file1=True):
     if file1:
         common.add_argument("--file1",
                             required=True,
-                            help=".root file over which to run")
+                            help=".root file over which to run (REQUIRED!)")
+        common.add_argument("--output-file",
+                            dest="outputFile",
+                            default="output/latest.root",
+                            metavar="f",
+                            help="Store histograms in this .root file (default %(default)s)")
 
     common.add_argument("--feds1",
                         default="HCAL",
@@ -25,11 +30,6 @@ def oparser(file1=True):
                         metavar="M",
                         type=int,
                         help="Skip the first M events.")
-    common.add_argument("--output-file",
-                        dest="outputFile",
-                        default="output/latest.root",
-                        metavar="f",
-                        help="Store histograms in this .root file.")
     common.add_argument("--sparse-loop",
                         dest="sparseLoop",
                         default=-1,
@@ -97,7 +97,6 @@ then the function histogram from plugins/histogram.py
                           action="store_true",
                           help="suppress warnings about problems with data quality")
     printing.add_argument("--crateslots",
-                          default="",
                           metavar="D",
                           help="list of (100*crate)+slot to dump, e.g. 2911,3201")
     printing.add_argument("--per-ts",
@@ -129,10 +128,8 @@ then the function histogram from plugins/histogram.py
 
     match = parser.add_argument_group("Options for matching events across files")
     match.add_argument("--file2",
-                       default="",
                        help=".root file to compare with file1")
     match.add_argument("--feds2",
-                       default="",
                        help="FEDs to use in file2, e.g. 931")
     match.add_argument("--identity-map",
                        dest="identityMap",
