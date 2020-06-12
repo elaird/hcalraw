@@ -85,8 +85,11 @@ def fedMap():
     return d
 
 
-def fedList(s=""):
+def fedList(s):
     out = []
+
+    if not s:
+        return out
 
     d = fedMap()
     for x in s.split(","):
