@@ -2,8 +2,7 @@
 
 from configuration import patterns as conf
 import configuration.hw
-import optparse
-import sys
+import argparse, sys
 
 
 def rbx_list(reference):
@@ -194,9 +193,8 @@ def report(extra=None, missing=None, different=None, same=None, reference=None, 
         print("None")
 
 
-def go(fileName="", options=None):
-    assert fileName
-    with open(fileName) as f:
+def go(options):
+    with open(options.reference_file) as f:
         ref, refMisc = mapping(f)
     assert not refMisc, "refMisc='%s'" % refMisc
 
@@ -208,40 +206,34 @@ def go(fileName="", options=None):
 
 
 def opts():
-    parser = optparse.OptionParser(usage="usage: %prog [options] reference_file.txt")
-    parser.add_option("--n-missing-min",
-                      dest="nMissingMin",
-                      default="1",
-                      metavar="n",
-                      type="int",
-                      help="maximum number of missing fibers per RBX to print in detailed table (default is 1)")
-    parser.add_option("--n-missing-max",
-                      dest="nMissingMax",
-                      default="2",
-                      metavar="n",
-                      type="int",
-                      help="maximum number of missing fibers per RBX to print in detailed table (default is 2)")
-    parser.add_option("--vme",
-                      dest="vme",
-                      default=False,
-                      action="store_true",
-                      help="support VME (DCC/spigot)")
-    parser.add_option("--only",
-                      dest="only",
-                      default=None,
-                      help="suppress row in table if this string is absent from RBX name")
-    parser.add_option("--exclude",
-                      dest="exclude",
-                      default=None,
-                      help="suppress row in table if this string is present in RBX name")
+    parser = argparse.ArgumentParser()
 
-    options, args = parser.parse_args()
-    if not args:
-        parser.print_help()
-        sys.exit(1)
-    return options, args[0]
+    parser.add_argument("reference_file",
+                        metavar="FILE",
+                        help="reference file to compare against")
+    parser.add_argument("--n-missing-min",
+                        dest="nMissingMin",
+                        default=1,
+                        metavar="n",
+                        type=int,
+                        help="maximum number of missing fibers per RBX to print in detailed table (default is %(default)s)")
+    parser.add_argument("--n-missing-max",
+                        dest="nMissingMax",
+                        default=2,
+                        metavar="n",
+                        type=int,
+                        help="maximum number of missing fibers per RBX to print in detailed table (default is %(default)s)")
+    parser.add_argument("--vme",
+                        default=False,
+                        action="store_true",
+                        help="support VME (DCC/spigot)")
+    parser.add_argument("--only",
+                        help="suppress row in table if this string is absent from RBX name")
+    parser.add_argument("--exclude",
+                        help="suppress row in table if this string is present in RBX name")
+
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    options, ref = opts()
-    go(ref, options)
+    go(opts())
